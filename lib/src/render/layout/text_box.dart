@@ -128,7 +128,7 @@ class RenderWholeWords extends RenderProxyBox {
   static RenderBox? _paragraphOf(RenderBox box) {
     RenderObject? o = box;
     while (o != null && o is! RenderParagraph) {
-      o = o is RenderObjectWithChildMixin ? o.child as RenderObject? : null;
+      o = o is RenderObjectWithChildMixin ? o.child : null;
     }
     return o as RenderBox?;
   }

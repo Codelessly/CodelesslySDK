@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Actions",
-  "doc": "The footer band of a dialog (its last line): a rule above it and the band's fill from edge to edge of the dialog, its buttons at the end. A destructive button written first stays at the start (write Spacer after it).",
+  "doc": "The footer band of a dialog (its last line): a rule above it and the band's fill from edge to edge of the dialog, its buttons at the end. A destructive button written first stays at the start (write Spacer after it). On a phone the buttons go onto a second line where one has no room for them.",
   "children": "list"
  },
  "previews": [
@@ -89,6 +89,17 @@
     "mainAxisAlignment": "end",
     "crossAxisAlignment": "center"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ],
    "children": [
     "actionsContent"
    ]

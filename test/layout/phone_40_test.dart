@@ -73,5 +73,11 @@ void main() {
     expect((s.height, s.fontSize, s.paddingX), (40, 14, 16));
     expect(tokens.scaleFor(36).fontSize, 13);
     expect(tokens.scaleFor(44).fontSize, 15);
+    // A design system with a scale of its own keeps the steps it names.
+    final own = ControlTokens.resolve(api.ThemeTokens.fromJson(const {
+      'sizes': {'medium': 34, 'large': 40},
+    }), dark: false);
+    expect(own.scaleFor(40).name, 'large');
+    expect(own.scaleFor(34).name, 'medium');
   });
 }

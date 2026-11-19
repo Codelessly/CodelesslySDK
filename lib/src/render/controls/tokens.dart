@@ -66,7 +66,13 @@ class ControlScale {
 /// The tokens one control draws with.
 @immutable
 class ControlTokens {
-  ControlTokens._(this.theme, {required this.dark, this.backdrop, this.buttonRadius, this.ownColors = const {}});
+  ControlTokens._(this.theme, {required this.dark, this.backdrop, this.buttonRadius, this.ownColors = const {}, this.ownScale = false});
+
+  /// Whether the document's own theme sets the control scale's steps
+  /// (`sizes.medium` or `sizes.large`, a design system's) without naming
+  /// `sizes.regular`: it has the steps it names, and the 40 step is not put
+  /// between them.
+  final bool ownScale;
 
   /// The color names the document's own theme gives (a site's, a design
   /// system's), not SSUI's defaults: what [neutral] takes as written.
@@ -88,7 +94,12 @@ class ControlTokens {
       // A theme with its own surface is dark where that surface is.
       if (own.surface != null && s != null) dark = s.flutter.computeLuminance() < .18;
     }
-    return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius, ownColors: {...own.colors.keys});
+    return ControlTokens._(merged,
+        dark: dark,
+        backdrop: backdrop,
+        buttonRadius: theme.buttonRadius,
+        ownColors: {...own.colors.keys},
+        ownScale: own.sizes['regular'] == null && (own.sizes['medium'] != null || own.sizes['large'] != null));
   }
 
   /// [t] with no `onSurface`, so the ink is chosen for the surface.
@@ -243,6 +254,7 @@ class ControlTokens {
     ControlScale best = ControlScale.compact;
     var d = double.infinity;
     for (final s in ControlScale.steps) {
+      if (ownScale && s.name == 'regular') continue;
       final h = theme.sizes[s.name] ?? s.height;
       final e = (h - height).abs();
       if (e < d - .01) {

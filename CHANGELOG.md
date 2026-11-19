@@ -16,7 +16,11 @@ first section before upgrading.
 **Controls**
 
 - **A control 40 high is a step of its own**: a label of 14 with 16 at its sides (it took the 36 step's 13 and
-  12), an icon button's glyph 18, a menu row 36. The 44 step's side padding is 18 (14 before).
+  12), an icon button's glyph 18, a menu row 36. The 44 step's side padding is 18 (14 before). A theme with a scale of its own
+  (`sizes.medium` or `sizes.large`, as Desk's) keeps the steps it names unless it names `sizes.regular` too.
+- **A field or a select held to a height and as wide as its content** measures its sides at that height's step
+  (they were the default step's, so a select 40 high was a few pixels narrower than its own value, which was
+  cut).
 - **A field, a select or a picker on a ground of another brightness than the theme's `surface`** (a light card in
   a theme whose `surface` is dark) is drawn for that ground: its fill and ink are made from it. It took the dark
   surface as its fill, with dark ink.

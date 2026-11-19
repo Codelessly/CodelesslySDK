@@ -44,6 +44,17 @@
     "column1",
     "column3",
     "column6"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 0
+      }
+     }
+    }
    ]
   },
   "column1": {
@@ -486,6 +497,12 @@
       "layout": {
        "width": {
         "fill": 0
+       },
+       "basis": 699,
+       "flex": 1,
+       "height": {
+        "fill": null,
+        "hug": 0
        }
       },
       "bind": {
@@ -927,13 +944,19 @@
     {
      "maxWidth": 699,
      "patch": {
-      "bind": {
-       "visible": "${reading}"
-      },
       "layout": {
        "width": {
         "fill": 0
+       },
+       "basis": 699,
+       "flex": 1,
+       "height": {
+        "fill": null,
+        "hug": 0
        }
+      },
+      "bind": {
+       "visible": "${reading}"
       }
      }
     }
@@ -1156,6 +1179,7 @@
     "constraints": {
      "maxWidth": 820
     },
+    "align": "topCenter",
     "width": {
      "fill": 0
     },

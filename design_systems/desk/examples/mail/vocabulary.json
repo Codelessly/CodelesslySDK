@@ -1,0 +1,5491 @@
+{
+ "record": "codelessly notation vocabulary record",
+ "version": 1,
+ "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
+ "first": "2026-11-19T22:14:49Z",
+ "last": "2026-11-19T23:54:37Z",
+ "expands": [
+  {
+   "at": "2026-11-19T22:14:49Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T22:19:43Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:11:15Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:14:34Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:32:15Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:35:11Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:50:42Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-19T23:54:37Z",
+   "vocabulary": "closed",
+   "files": 1
+  }
+ ],
+ "summary": {
+  "status": {
+   "used": 149
+  },
+  "used": {
+   "type": {
+    "component": 14,
+    "core": 18
+   },
+   "text": {
+    "component": 14,
+    "core": 7
+   },
+   "parameter": {
+    "component": 17,
+    "core": 21
+   },
+   "event": {
+    "component": 3,
+    "core": 2
+   },
+   "flag": {
+    "core": 32
+   },
+   "variant": {
+    "core": 8
+   },
+   "verb": {
+    "core": 4
+   },
+   "function": {
+    "core": 6
+   },
+   "statement": {
+    "core": 3
+   }
+  }
+ },
+ "placeholders": [],
+ "files": {
+  "pages/mailbox.txt": {
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "expands": 8
+  }
+ },
+ "words": [
+  {
+   "kind": "type",
+   "word": "Account",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Account \"text\" \"text\"",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      25
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Account \"text\" \"text\"": 1
+     }
+    }
+   },
+   "seen": {
+    "Account \"text\" \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Actions",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Actions ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Actions",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      74
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Actions ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Actions ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Brand",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Brand \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Brand \"Postbox\" icon=\"mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Brand \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "Brand \"text\" icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Dialog",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Dialog \"text\" w= ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Dialog#compose \"New message\" w=640",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      70
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Dialog \"text\" w= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Dialog \"text\" w= ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Empty",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Empty \"text\" \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Empty \"text\" \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "Empty \"text\" \"text\" icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "FileTile",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "FileTile \"text\" \"text\"",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "FileTile \"text\" \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      65,
+      66
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "FileTile \"text\" \"text\"": 1,
+      "FileTile \"text\" \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "FileTile \"text\" \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "FileTile \"text\" \"text\" icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "ListGroup",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "ListGroup \"text\"",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "ListGroup \"{m.day}\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      37
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "ListGroup \"text\"": 1
+     }
+    }
+   },
+   "seen": {
+    "ListGroup \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "ListRow",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "ListRow \"text\" \"text\" attachment= meta= preview= selected= starred= unread= onTap",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "ListRow \"text\" \"text\" attachment= meta= preview= selected= starred= unread= onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "ListRow \"text\" \"text\" attachment= meta= preview= selected= starred= unread= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "NavItem",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "signatures": [
+    {
+     "signature": "NavItem \"text\" icon= selected= onTap",
+     "uses": 4,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "NavItem \"text\" badge= icon= selected= onTap",
+     "uses": 2,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "NavItem \"text\" badge= icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "NavItem \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      22,
+      23
+     ],
+     "how": {
+      "component": 8
+     },
+     "signatures": {
+      "NavItem \"text\" badge= icon= selected= onTap": 2,
+      "NavItem \"text\" icon= selected= onTap": 4,
+      "NavItem \"text\" badge= icon=": 1,
+      "NavItem \"text\" icon=": 1
+     }
+    }
+   },
+   "seen": {
+    "NavItem \"text\" badge= icon= selected= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "NavItem \"text\" icon= selected= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "NavItem \"text\" badge= icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "NavItem \"text\" icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "NavSection",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "NavSection \"text\"",
+     "uses": 2,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "NavSection \"Mailbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      14,
+      21
+     ],
+     "how": {
+      "component": 2
+     },
+     "signatures": {
+      "NavSection \"text\"": 2
+     }
+    }
+   },
+   "seen": {
+    "NavSection \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SearchField",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SearchField @ hint=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "SearchField @q hint=\"Search mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "SearchField @ hint=": 1
+     }
+    }
+   },
+   "seen": {
+    "SearchField @ hint=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Separator",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Separator",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Separator",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      47
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Separator": 1
+     }
+    }
+   },
+   "seen": {
+    "Separator": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SideButton",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SideButton \"text\" icon= shortcut= onTap",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "SideButton \"text\" icon= shortcut= onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "SideButton \"text\" icon= shortcut= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Toolbar",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Toolbar ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Toolbar",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      42
+     ],
+     "how": {
+      "component": 1
+     },
+     "signatures": {
+      "Toolbar ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Toolbar ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      25
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Account",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      25
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Brand",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Postbox\" icon=\"mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Dialog",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#compose \"New message\" w=640",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      70
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Empty",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Empty",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "FileTile",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      65,
+      66
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "FileTile",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      65,
+      66
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "ListGroup",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListGroup \"{m.day}\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      37
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "ListRow",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "ListRow",
+   "word": "text2",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "NavItem",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      22,
+      23
+     ],
+     "how": {
+      "component": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "NavSection",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 2
+   },
+   "uses": 2,
+   "example": "NavSection \"Mailbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      14,
+      21
+     ],
+     "how": {
+      "component": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "SideButton",
+   "word": "text1",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Brand",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Brand \"Postbox\" icon=\"mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      12
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Dialog",
+   "word": "w",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Dialog#compose \"New message\" w=640",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      70
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Empty",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      40
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "FileTile",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "FileTile \"Studio visit agenda.pdf\" \"1.2 MB\" icon=\"picture_as_pdf\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      66
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "attachment",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "meta",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "preview",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "selected",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "starred",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "ListRow",
+   "word": "unread",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "badge",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 3
+   },
+   "uses": 3,
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      18,
+      22
+     ],
+     "how": {
+      "component": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 8
+   },
+   "uses": 8,
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      22,
+      23
+     ],
+     "how": {
+      "component": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "NavItem",
+   "word": "selected",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 6
+   },
+   "uses": 6,
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+     ],
+     "how": {
+      "component": 6
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "@",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SearchField",
+   "word": "hint",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SearchField @q hint=\"Search mail\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      33
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SideButton",
+   "word": "icon",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SideButton",
+   "word": "shortcut",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "ListRow",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      38
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "NavItem",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 6
+   },
+   "uses": 6,
+   "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20
+     ],
+     "how": {
+      "component": 6
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "SideButton",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "component",
+   "how": {
+    "component": 1
+   },
+   "uses": 1,
+   "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "component": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13
+     ],
+     "how": {
+      "component": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "type",
+   "word": "App",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "App ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "App",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      10
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "App ...": 1
+     }
+    }
+   },
+   "seen": {
+    "App ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Avatar",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Avatar \"text\" size=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Avatar \"{cur.from}\" size=36",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Avatar \"text\" size=": 1
+     }
+    }
+   },
+   "seen": {
+    "Avatar \"text\" size=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Button",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "Button \"text\" icon= onTap",
+     "uses": 2,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Button \"text\" icon=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Button \"text\" onTap",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      68,
+      69,
+      75,
+      76
+     ],
+     "how": {
+      "core": 4
+     },
+     "signatures": {
+      "Button \"text\" icon= onTap": 2,
+      "Button \"text\" icon=": 1,
+      "Button \"text\" onTap": 1
+     }
+    }
+   },
+   "seen": {
+    "Button \"text\" icon= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Button \"text\" icon=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Button \"text\" onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Column",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "signatures": [
+    {
+     "signature": "Column ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Column border-bottom= gap= pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Column gap= maxw= pad= phone.pad= tablet.pad= ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Column grow ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Column",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      28,
+      32,
+      53,
+      57
+     ],
+     "how": {
+      "core": 4
+     },
+     "signatures": {
+      "Column ...": 1,
+      "Column border-bottom= gap= pad= ...": 1,
+      "Column gap= maxw= pad= phone.pad= tablet.pad= ...": 1,
+      "Column grow ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Column ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Column border-bottom= gap= pad= ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Column gap= maxw= pad= phone.pad= tablet.pad= ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Column grow ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Divider",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Divider",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Divider",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      61
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Divider": 1
+     }
+    }
+   },
+   "seen": {
+    "Divider": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Footer",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Footer ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Footer",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      24
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Footer ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Footer ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Grid",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Grid cols= gap= ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Grid cols=2 gap=8",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Grid cols= gap= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Grid cols= gap= ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "IconButton",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "signatures": [
+    {
+     "signature": "IconButton \"text\" tooltip=",
+     "uses": 6,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "IconButton \"text\" tooltip= onTap",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "IconButton \"text\" show= tooltip= onTap",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      31,
+      43,
+      44,
+      45,
+      46,
+      48,
+      51,
+      52
+     ],
+     "how": {
+      "core": 8
+     },
+     "signatures": {
+      "IconButton \"text\" tooltip= onTap": 1,
+      "IconButton \"text\" show= tooltip= onTap": 1,
+      "IconButton \"text\" tooltip=": 6
+     }
+    }
+   },
+   "seen": {
+    "IconButton \"text\" tooltip= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "IconButton \"text\" show= tooltip= onTap": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "IconButton \"text\" tooltip=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Input",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "signatures": [
+    {
+     "signature": "Input \"text\" \"text\"",
+     "uses": 2,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Input \"text\" \"text\" multiline",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Input \"To\" \"name@example.com\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      71,
+      72,
+      73
+     ],
+     "how": {
+      "core": 3
+     },
+     "signatures": {
+      "Input \"text\" \"text\"": 2,
+      "Input \"text\" \"text\" multiline": 1
+     }
+    }
+   },
+   "seen": {
+    "Input \"text\" \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Input \"text\" \"text\" multiline": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Main",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Main phone.visible= w= phone.w=fill tablet.w=320 ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Main phone.visible= w= phone.w=fill tablet.w=320 ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Main phone.visible= w= phone.w=fill tablet.w=320 ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Nav",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Nav ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Nav",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      27
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Nav ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Nav ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Pane",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Pane phone.visible= phone.w=fill ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Pane phone.w=fill phone.visible={reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      41
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Pane phone.visible= phone.w=fill ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Pane phone.visible= phone.w=fill ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Row",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "signatures": [
+    {
+     "signature": "Row gap= middle ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Row gap= ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      55,
+      67
+     ],
+     "how": {
+      "core": 2
+     },
+     "signatures": {
+      "Row gap= middle ...": 1,
+      "Row gap= ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Row gap= middle ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Row gap= ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "SegmentedButton",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "SegmentedButton @ items=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      34
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "SegmentedButton @ items=": 1
+     }
+    }
+   },
+   "seen": {
+    "SegmentedButton @ items=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Sidebar",
+   "status": "used",
+   "resolved": "core",
+   "origin": "code",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Sidebar hide= tablet.w=64 ...",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Sidebar hide= tablet.w=64 ...": 1
+     }
+    }
+   },
+   "seen": {
+    "Sidebar hide= tablet.w=64 ...": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Spacer",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "Spacer",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Spacer",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      49
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "Spacer": 1
+     }
+    }
+   },
+   "seen": {
+    "Spacer": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "Text",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 9
+   },
+   "uses": 9,
+   "signatures": [
+    {
+     "signature": "Text \"text\"",
+     "uses": 7,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Text \"text\" hide=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    {
+     "signature": "Text \"text\" phone.size=20",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "Text.barTitle \"Inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      29,
+      30,
+      50,
+      54,
+      58,
+      59,
+      60,
+      62,
+      63
+     ],
+     "how": {
+      "core": 9
+     },
+     "signatures": {
+      "Text \"text\"": 7,
+      "Text \"text\" hide=": 1,
+      "Text \"text\" phone.size=20": 1
+     }
+    }
+   },
+   "seen": {
+    "Text \"text\"": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Text \"text\" hide=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    },
+    "Text \"text\" phone.size=20": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "type",
+   "word": "canvas",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "signatures": [
+    {
+     "signature": "canvas \"text\" path=",
+     "uses": 1,
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   ],
+   "example": "canvas \"Mailbox\" path=\"mailbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      9
+     ],
+     "how": {
+      "core": 1
+     },
+     "signatures": {
+      "canvas \"text\" path=": 1
+     }
+    }
+   },
+   "seen": {
+    "canvas \"text\" path=": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   }
+  },
+  {
+   "kind": "text",
+   "on": "Avatar",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Avatar \"{cur.from}\" size=36",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Button",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      68,
+      69,
+      75,
+      76
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "IconButton",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      31,
+      43,
+      44,
+      45,
+      46,
+      48,
+      51,
+      52
+     ],
+     "how": {
+      "core": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Input \"To\" \"name@example.com\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      71,
+      72,
+      73
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Input",
+   "word": "text2",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Input \"To\" \"name@example.com\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      71,
+      72,
+      73
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "Text",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 9
+   },
+   "uses": 9,
+   "example": "Text.barTitle \"Inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      29,
+      30,
+      50,
+      54,
+      58,
+      59,
+      60,
+      62,
+      63
+     ],
+     "how": {
+      "core": 9
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "text",
+   "on": "canvas",
+   "word": "text1",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Mailbox\" path=\"mailbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      9
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Avatar",
+   "word": "size",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Avatar \"{cur.from}\" size=36",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      56
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Button",
+   "word": "icon",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      68,
+      69,
+      76
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "border-bottom",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      32
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      32,
+      53
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "maxw",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      53
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      32,
+      53
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "phone.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      53
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Column",
+   "word": "tablet.pad",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      53
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Grid",
+   "word": "cols",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Grid cols=2 gap=8",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Grid",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Grid cols=2 gap=8",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      64
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "IconButton",
+   "word": "show",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "IconButton \"arrow_back\" tooltip=\"Back to the list\" show=phone onTap={reading=false}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      43
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "IconButton",
+   "word": "tooltip",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      31,
+      43,
+      44,
+      45,
+      46,
+      48,
+      51,
+      52
+     ],
+     "how": {
+      "core": 8
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Main",
+   "word": "phone.visible",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Main",
+   "word": "w",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Pane",
+   "word": "phone.visible",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Pane phone.w=fill phone.visible={reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      41
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Row",
+   "word": "gap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      55,
+      67
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SegmentedButton",
+   "word": "@",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      34
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "SegmentedButton",
+   "word": "items",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      34
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Sidebar",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "Text",
+   "word": "hide",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.caption \"1 of {length(mail)}\" hide=phone",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      50
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "parameter",
+   "on": "canvas",
+   "word": "path",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "canvas \"Mailbox\" path=\"mailbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      9
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Column",
+   "word": "grow",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Column grow",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      57
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Input",
+   "word": "multiline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Input \"Message\" \"Write your message…\" multiline",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      73
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Main",
+   "word": "phone.w=fill",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Main",
+   "word": "tablet.w=320",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      26
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Pane",
+   "word": "phone.w=fill",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Pane phone.w=fill phone.visible={reading}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      41
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Row",
+   "word": "middle",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Row gap=12 middle",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      55
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Sidebar",
+   "word": "tablet.w=64",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Sidebar tablet.w=64 hide=phone",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      11
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "Text",
+   "word": "phone.size=20",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.heading2 \"{cur.subject}\" phone.size=20",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      54
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "&&",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'All",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'Starred'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'Unread'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "'id',",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "(view",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "+",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "==",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "=>",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "coalesce(m.starred,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "coalesce(m.unread,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "contains(lower(m.from",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "cur:map={coalesce(find(mail,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "false))",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "false)))",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "first(mail))}",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "lower(q)))}",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "m.subject),",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "mail'",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "openId),",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "shown:list={filter(mail,",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "flag",
+   "on": "state",
+   "word": "||",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "Button",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      68,
+      75,
+      76
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "event",
+   "on": "IconButton",
+   "word": "onTap",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      31,
+      43
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "ghost",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Button.ghost \"Discard\" onTap={close}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      75
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Button",
+   "word": "outline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      68,
+      69
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "barTitle",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.barTitle \"Inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      29
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "caption",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 4
+   },
+   "uses": 4,
+   "example": "Text.caption \"{length(mail)} messages, 4 unread\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      30,
+      50,
+      59,
+      60
+     ],
+     "how": {
+      "core": 4
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "heading2",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.heading2 \"{cur.subject}\" phone.size=20",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      54
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "overline",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.overline \"2 ATTACHMENTS\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      63
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "reading",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.reading \"{cur.snippet} If the door is locked, give me a ring and I'll come down.\\n\\nI've attached the current notes and a short agenda. The two things I'd like to settle in person are the trac...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      62
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "variant",
+   "on": "Text",
+   "word": "strong",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "Text.strong \"{cur.from}\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      58
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "close",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "close",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      75,
+      76
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "open",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 3
+   },
+   "uses": 3,
+   "example": "open compose",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      13,
+      31,
+      68
+     ],
+     "how": {
+      "core": 3
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "set",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 9
+   },
+   "uses": 9,
+   "example": "folder=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      38,
+      43
+     ],
+     "how": {
+      "core": 9
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "verb",
+   "word": "toast",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "toast \"Sent\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      76
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "coalesce",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 6
+   },
+   "uses": 6,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7,
+      8,
+      38
+     ],
+     "how": {
+      "core": 6
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "contains",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "filter",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "find",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "first",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      8
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "function",
+   "word": "lower",
+   "status": "used",
+   "resolved": "core",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      7
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "each",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 1
+   },
+   "uses": 1,
+   "example": "each m in shown",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      35
+     ],
+     "how": {
+      "core": 1
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "if",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 2
+   },
+   "uses": 2,
+   "example": "if index == 0 || at(shown, index - 1).day != m.day",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      36,
+      39
+     ],
+     "how": {
+      "core": 2
+     }
+    }
+   },
+   "seen": {}
+  },
+  {
+   "kind": "statement",
+   "word": "state",
+   "status": "used",
+   "resolved": "core",
+   "origin": "base",
+   "how": {
+    "core": 8
+   },
+   "uses": 8,
+   "example": "state folder=\"inbox\"",
+   "first": "2026-11-19T22:14:49Z",
+   "last": "2026-11-19T23:54:37Z",
+   "history": {
+    "core": {
+     "first": "2026-11-19T22:14:49Z",
+     "last": "2026-11-19T23:54:37Z"
+    }
+   },
+   "files": {
+    "pages/mailbox.txt": {
+     "lines": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+     ],
+     "how": {
+      "core": 8
+     }
+    }
+   },
+   "seen": {}
+  }
+ ]
+}

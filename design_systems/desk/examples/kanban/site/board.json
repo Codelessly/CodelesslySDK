@@ -352,6 +352,17 @@
     "FilterButton3",
     "spacer1",
     "text1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
    ]
   },
   "SearchField1": {
@@ -371,7 +382,9 @@
       "layout": {
        "width": {
         "fill": 0
-       }
+       },
+       "basis": 699,
+       "flex": 1
       }
      }
     }
