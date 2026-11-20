@@ -5,12 +5,14 @@
 // a tap outside it through, a drawn shape's blurRadius softens its edge, and a
 // linear gradient's angle runs as CSS's does.
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart' show FontLoader;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/screen.dart' as harness;
@@ -212,4 +214,190 @@ void main() {
       expect(_red(d, dw, (w / 2).round(), (h / 2).round()), inInclusiveRange(118, 138), reason: '$w×$h: the middle is halfway');
     }
   });
+
+  int alpha(ByteData d, int w, int x, int y) => d.getUint8((y * w + x) * 4 + 3);
+  int blue(ByteData d, int w, int x, int y) => d.getUint8((y * w + x) * 4 + 2);
+
+  const notches = [
+    {'center': 'centerLeft', 'radius': 12},
+    {'center': 'centerRight', 'radius': 12},
+  ];
+  Map<String, Json> ticket(double w, double h, {Json extra = const {}, Json? reactions}) => {
+        't': {
+          'type': 'stack',
+          'layout': {'width': w, 'height': h},
+          'decoration': {
+            'fills': [{'color': '#FF0000FF'}],
+            'radius': 8,
+            'clipCuts': notches,
+            ...extra,
+          },
+          if (reactions != null) 'actions': [reactions],
+        },
+      };
+
+  testWidgets('clipCuts are in pixels: a ticket\'s notches stay round 12 px circles at two aspects', (tester) async {
+    for (final (w, h) in [(160.0, 80.0), (320.0, 200.0)]) {
+      final (d, dw) = await _pixels(tester, ticket(w, h), 't');
+      final mid = (h / 2).round();
+      for (final x in [1, 6, 10]) {
+        expect(alpha(d, dw, x, mid), 0, reason: '$w×$h: x $x on the middle line is in the left notch');
+        expect(alpha(d, dw, dw - 1 - x, mid), 0, reason: '$w×$h: and in the right one');
+      }
+      expect(alpha(d, dw, 14, mid), 255, reason: '$w×$h: 14 px in is past the 12 px notch');
+      expect(alpha(d, dw, 3, mid - 14), 255, reason: '$w×$h: 14 px above the middle is past it');
+      expect(alpha(d, dw, 3, mid - 9), 0, reason: '$w×$h: 9 px above the middle, 3 in, is inside the circle');
+    }
+  });
+
+  testWidgets('a border follows the clip shape, inside it, and the shadow takes its shape', (tester) async {
+    final (d, w) = await _pixels(
+        tester,
+        ticket(200, 100, extra: {
+          'strokes': [{'color': '#FFFF0000'}],
+          'strokeWidth': 3,
+        }),
+        't');
+    expect(_red(d, w, 13, 50), 255, reason: 'just past the notch: the border');
+    expect(blue(d, w, 13, 50), 0);
+    expect(_red(d, w, 20, 50), 0, reason: 'further in: the fill');
+    expect(blue(d, w, 20, 50), 255);
+    expect(_red(d, w, 100, 1), 255, reason: 'the top edge is bordered too');
+    // A shadow with no fill over it shows the shape: the notch stays empty.
+    final (s, sw) = await _pixels(tester, {
+      'c': {'type': 'stack', 'children': ['t'], 'layout': {'width': 220, 'height': 120}},
+      't': {
+        'type': 'box',
+        'layout': {'width': 200, 'height': 100},
+        'decoration': {
+          'clipCuts': notches,
+          'effects': [
+            {'type': 'dropShadow', 'color': '#FF000000', 'offset': [0, 0], 'blurRadius': 0},
+          ],
+        },
+      },
+    }, 'c');
+    expect(alpha(s, sw, 100, 50), 255, reason: 'the shadow under the body');
+    expect(alpha(s, sw, 5, 50), 0, reason: 'none in the notch');
+  });
+
+  testWidgets('a tap in a notch passes through', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {'type': 'column', 'children': ['t'], 'layout': {'width': 200, 'height': {'hug': 100}}},
+      ...ticket(200, 100, reactions: harness.reaction('click', [harness.add('taps')])),
+    }, variables: [harness.v('taps', 0, VariableType.integer)]);
+    await tester.pump();
+    final origin = s.tree.boxOf('t')!.localToGlobal(Offset.zero);
+    await tester.tapAt(origin + const Offset(4, 50));
+    await tester.pumpAndSettle();
+    expect(s['taps'], 0, reason: 'in the notch');
+    await tester.tapAt(origin + const Offset(100, 50));
+    await tester.pumpAndSettle();
+    expect(s['taps'], 1, reason: 'on the body');
+  });
+
+  const leftHalf = 'M0 0 H0.5 V1 H0 Z';
+
+  testWidgets('every node takes a clip: a text, an icon and a picture cut to their left half', (tester) async {
+    await tester.runAsync(_loadIconFont);
+    final url = await _framePng(tester);
+    Json at(double x, Json node) => {...node, 'layout': {...node['layout'] as Map, 'x': x, 'y': 0}};
+    final (d, w) = await _pixels(tester, {
+      's': {'type': 'stack', 'children': ['tx', 'ic', 'im'], 'layout': {'width': 300, 'height': 60}},
+      'tx': at(0, {
+        'type': 'text',
+        'layout': {'width': 100, 'height': 60},
+        'props': {'text': 'MMMM', 'style': {'fontSize': 40, 'color': '#FF000000'}},
+        'decoration': {'clipPath': leftHalf},
+      }),
+      'ic': at(120, {
+        'type': 'icon',
+        'layout': {'width': 60, 'height': 60},
+        'props': {'icon': {'type': 'MATERIAL_ICON', 'name': 'circle', 'render': 'glyph'}, 'color': '#FF000000'},
+        'decoration': {'clipPath': leftHalf},
+      }),
+      'im': at(200, {
+        'type': 'box',
+        'layout': {'width': 60, 'height': 60},
+        'decoration': {
+          'fills': [{'type': 'image', 'image': {'url': url, 'fit': 'fill'}}],
+          'clipPath': leftHalf,
+        },
+      }),
+    }, 's');
+    bool any(int x0, int x1) {
+      for (var x = x0; x < x1; x++) {
+        for (var y = 0; y < 60; y++) {
+          if (alpha(d, w, x, y) > 0) return true;
+        }
+      }
+      return false;
+    }
+
+    expect(any(0, 49), isTrue, reason: 'the text\'s left half is drawn');
+    expect(any(51, 100), isFalse, reason: 'its right half is cut');
+    expect(any(120, 149), isTrue, reason: 'the icon\'s left half');
+    expect(any(151, 180), isFalse, reason: 'its right half is cut');
+    expect(any(200, 229), isTrue, reason: 'the picture\'s left half');
+    expect(any(231, 260), isFalse, reason: 'its right half is cut');
+  });
+
+  testWidgets('a button cut to its left half takes a tap there only', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {'type': 'column', 'children': ['b'], 'layout': {'width': 200, 'height': {'hug': 48}}},
+      'b': {
+        'type': 'button',
+        'layout': {'width': 160, 'height': 48},
+        'props': {'label': 'Tap'},
+        'decoration': {'clipPath': leftHalf},
+        'actions': [harness.reaction('click', [harness.add('taps')])],
+      },
+    }, variables: [harness.v('taps', 0, VariableType.integer)]);
+    await tester.pump();
+    final origin = s.tree.boxOf('b')!.localToGlobal(Offset.zero);
+    await tester.tapAt(origin + const Offset(140, 24));
+    await tester.pumpAndSettle();
+    expect(s['taps'], 0, reason: 'the cut half');
+    await tester.tapAt(origin + const Offset(20, 24));
+    await tester.pumpAndSettle();
+    expect(s['taps'], 1, reason: 'the kept half');
+  });
+
+  testWidgets('clipFit none without a view box: the path is in the box\'s pixels', (tester) async {
+    final (d, w) = await _pixels(tester, {
+      'b': {
+        'type': 'box',
+        'layout': {'width': 200, 'height': 100},
+        'decoration': {
+          'fills': [{'color': '#FF0000FF'}],
+          'clipPath': 'M0 0 H50 V50 H0 Z',
+          'clipFit': 'none',
+        },
+      },
+    }, 'b');
+    expect(alpha(d, w, 40, 40), 255);
+    expect(alpha(d, w, 60, 40), 0, reason: '50 px, not half the box');
+    // A view box stretched: [100,100] over 200×100, so x 50 is 100 px.
+    final (v, vw) = await _pixels(tester, {
+      'b': {
+        'type': 'box',
+        'layout': {'width': 200, 'height': 100},
+        'decoration': {
+          'fills': [{'color': '#FF0000FF'}],
+          'clipPath': 'M0 0 H50 V50 H0 Z',
+          'clipViewBox': [100, 100],
+        },
+      },
+    }, 'b');
+    expect(alpha(v, vw, 95, 40), 255);
+    expect(alpha(v, vw, 105, 40), 0);
+  });
+}
+
+/// The MaterialIcons font, which an icon drawn as a glyph uses.
+Future<void> _loadIconFont() async {
+  final dir = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}/bin/cache/artifacts/material_fonts';
+  await (FontLoader('MaterialIcons')
+        ..addFont(Future.value(ByteData.sublistView(File('$dir/MaterialIcons-Regular.otf').readAsBytesSync()))))
+      .load();
 }

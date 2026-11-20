@@ -42,7 +42,7 @@ import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
 import 'shortcut_hint.dart';
 import 'paint/node_paint.dart';
-import 'paint/path_paint.dart' show parseSvgPath;
+import 'paint/clip_shape.dart';
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
@@ -1821,6 +1821,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     playLayers(this, n, chain, animates: tree.animates);
     motionLayers(this, n, chain, animates: tree.animates);
     heroLayer(this, n, chain, animates: tree.animates);
+    // The clip: outside the reactions, so a pointer in what it cuts passes
+    // through; inside the motion, so it moves with the node.
+    _clipLayers(n, chain);
     // Drag and drop around the reactions (gestures/drag_and_drop.dart).
     tree.gestures?.addDragAndDropLayers(this, n, chain);
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
@@ -1922,6 +1925,48 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     });
   }
 
+  /// The node's clip, for every type alike (a text, an icon, a picture, a
+  /// control, a list, a component, a widget its recipe draws): what it paints
+  /// and its children are cut, and a pointer outside the cut passes through.
+  /// A shape of its own (`clipPath`, `clipCuts`): its drop shadows drawn in
+  /// that shape under the cut, its border along it, inside, over the
+  /// content. `clip=` (to its corners or its circle) on a node the shell
+  /// draws is the shell's, which keeps its shadow outside the cut.
+  void _clipLayers(Node n, List<RenderBox> chain) {
+    final d = n.decoration;
+    if (d.hasClipShape) {
+      if (d.effects.any((e) => e.visible && e.type == api.EffectType.dropShadow)) {
+        chain.add(_obtain<RenderCustomPaint>('clipShadow', RenderCustomPaint.new)..painter = ClipShadowPainter(d));
+      }
+      chain.add(_obtain<RenderClipPath>('clipShape', () => RenderClipPath(clipBehavior: Clip.antiAlias))
+        ..clipper = ShapeClipper(d)
+        ..clipBehavior = Clip.antiAlias);
+      if (d.visibleStrokes.isNotEmpty) {
+        chain.add(_obtain<RenderCustomPaint>('clipBorder', RenderCustomPaint.new)..foregroundPainter = ClipBorderPainter(d));
+      }
+      return;
+    }
+    final behavior = clip(d.clip);
+    if (behavior == Clip.none || _drawsShell(n)) return;
+    if (d.shape == api.DecorationShape.circle) {
+      chain.add(_obtain<RenderClipOval>('nodeClipOval', () => RenderClipOval(clipper: const _CircleClipper(), clipBehavior: behavior))
+        ..clipBehavior = behavior);
+    } else if (!d.radius.isZero) {
+      chain.add(_obtain<RenderClipRRect>('nodeClipRRect', () => RenderClipRRect(clipBehavior: behavior))
+        ..borderRadius = d.radius.flutter
+        ..clipBehavior = behavior);
+    } else {
+      chain.add(_obtain<RenderClipRect>('nodeClipRect', () => RenderClipRect(clipBehavior: behavior))..clipBehavior = behavior);
+    }
+  }
+
+  /// Whether [_content] draws [n] in a shell (which clips it by its `clip`).
+  bool _drawsShell(Node n) => switch (n.type) {
+        'row' || 'column' || 'flex' || 'stack' || 'box' || 'canvas' => true,
+        'spacer' || 'variance' || 'text' || 'icon' => false,
+        _ => (tree.recipes[n.type] ?? tree.catalog.recipes[n.type]) != null && _inputInShell(tree.catalog, n),
+      };
+
   // --- content per type -------------------------------------------------------
 
   void _content(Node n, List<RenderBox> chain) {
@@ -2009,14 +2054,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       ..widthFactor = n.layout.widthFactor
       ..heightFactor = n.layout.heightFactor);
 
-    final d = n.decoration;
-    // A path the node is cut to (CSS clip-path): around everything the
-    // shell draws, its shadows and border too, and its hit test.
-    if (d.clipPath case final String data) {
-      chain.add(_obtain<RenderClipPath>('clipPath', () => RenderClipPath(clipBehavior: Clip.antiAlias))
-        ..clipper = UnitPathClipper(data)
-        ..clipBehavior = Clip.antiAlias);
-    }
+    // A node cut to a shape of its own has its shadow and border drawn along
+    // the shape, around the shell (_clipLayers): the shell draws neither.
+    final d = _shellDecoration(n.decoration);
     // A circle (BoxShape.circle) takes no corner radius.
     final circle = d.shape == api.DecorationShape.circle;
     final radius = circle || d.radius.isZero ? null : d.radius.flutter;
@@ -2031,6 +2071,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         ..painter = SpreadShadowPainter(shadows: spread, borderRadius: radius!));
     }
     final plan = _PaintPlan.of(n);
+    // A node cut to a shape clips its content there (_clipLayers); its
+    // `clip` would cut it again, to the box.
     // A border inside the box of a node that holds content is drawn over that
     // content, as a design tool draws a frame's stroke (and as CSS keeps the
     // content inside the border): a child's own fill (a table's rows, a field
@@ -2062,7 +2104,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // does: its children are placed, and drew past it (round 11b: clip-editor's
     // timeline ran past its frame, story-reader's next card over the footer).
     final stackClip = n.type == 'stack' && !n.scrolls && n.props.has(ScrollProps.clipBehavior) ? clip(n.prop(ScrollProps.clipBehavior)) : Clip.none;
-    final clipBehavior = clip(d.clip) == Clip.none ? stackClip : clip(d.clip);
+    final clipBehavior = d.hasClipShape ? Clip.none : clip(d.clip) == Clip.none ? stackClip : clip(d.clip);
     if (clipBehavior != Clip.none) {
       if (circle) {
         chain.add(_obtain<RenderClipOval>('clipOval', () => RenderClipOval(clipper: const _CircleClipper(), clipBehavior: clipBehavior))
@@ -3356,23 +3398,11 @@ class _CircleClipper extends CustomClipper<Rect> {
   bool shouldReclip(_CircleClipper oldClipper) => false;
 }
 
-/// A decoration's `clipPath`: SVG path data in the box's unit square,
-/// scaled to the box (CSS `clip-path: path(…)` with the path's units the
-/// box's own size). Unreadable data clips nothing.
-class UnitPathClipper extends CustomClipper<Path> {
-  const UnitPathClipper(this.data);
-  final String data;
-
-  @override
-  Path getClip(Size size) {
-    final unit = parseSvgPath(data);
-    if (unit == null) return Path()..addRect(Offset.zero & size);
-    return unit.transform(Matrix4.diagonal3Values(size.width, size.height, 1).storage);
-  }
-
-  @override
-  bool shouldReclip(UnitPathClipper oldClipper) => oldClipper.data != data;
-}
+/// What a shell draws of [d]: all of it, but for a node cut to a shape of
+/// its own, whose border and drop shadows follow the shape (_clipLayers).
+api.Decoration _shellDecoration(api.Decoration d) => !d.hasClipShape
+    ? d
+    : d.copyWith(strokes: const [], effects: [for (final e in d.effects) if (e.type != api.EffectType.dropShadow) e]);
 
 class _PaintPlan {
   _PaintPlan(this.native, this.fill, this.border, this.foreground);
@@ -3383,7 +3413,7 @@ class _PaintPlan {
   final bool foreground;
 
   static _PaintPlan of(Node n) {
-    final d = n.decoration;
+    final d = _shellDecoration(n.decoration);
     final foreground = d.foregroundFills.any((f) => f.visible);
     // Paints bound per paint id are resolved at runtime by the paint layer.
     if (n.bind.keys.any((k) => k.startsWith('fill-') || k.startsWith('stroke-paint-'))) {
