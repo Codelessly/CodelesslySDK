@@ -50,8 +50,6 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
     (ChartProps.axisLabelColor, _muted),
     (ChartProps.selectionColor, _alpha(_primary, .10)),
     (ChartProps.trackColor, _hairline),
-    (ChartProps.tooltipColor, _onSurface),
-    (ChartProps.tooltipTextColor, _surface),
   ],
   PlotChartProps.spec.type: [
     (PlotChartProps.lineColor, _primary),
@@ -83,7 +81,6 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
     (LineChartProps.tagBackground, _onSurface),
     (LineChartProps.cursorColor, _onSurface),
     (LineChartProps.cursorRingFill, _surface),
-    (LineChartProps.tooltipBackground, _onSurface),
   ],
   BarcodeProps.spec.type: [(BarcodeProps.color, _onSurface)],
   SignatureProps.spec.type: [
@@ -95,12 +92,65 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
   ],
 };
 
+/// The theme's series colors: the ones it names (`colors.chart1`,
+/// `chart2`...), else its primary as a filled shape on the surface followed
+/// by colors of other hues as light and as strong as it
+/// (`chartPaletteOf`), so series are told apart and belong to the theme.
+///
+/// A theme with no primary starts from the blue a page with no theme
+/// draws its controls in.
+///
+/// A theme that names fewer than eight is followed by the hues its first
+/// color gives that are not near one it names, so a seventh slice is not
+/// the first one's color again beside it.
+List<api.Color> chartColors(api.ThemeTokens theme, SurfaceRoles roles) {
+  if (theme.colors['chart1'] == null) {
+    return [
+      for (final c in api.chartPaletteOf(theme.resolvedRoles().primary == null ? _accent : roles.fill.toARGB32()))
+        api.Color(c),
+    ];
+  }
+  final out = [for (var i = 1; theme.colors['chart$i'] != null; i++) theme.colors['chart$i']!];
+  int apart(int a, int b) =>
+      ((a >> 16 & 0xFF) - (b >> 16 & 0xFF)).abs() + ((a >> 8 & 0xFF) - (b >> 8 & 0xFF)).abs() + ((a & 0xFF) - (b & 0xFF)).abs();
+  for (final c in api.chartPaletteOf(out.first.value).skip(1)) {
+    if (out.length >= 8) break;
+    if (out.every((o) => apart(o.value, c) > 80)) out.add(api.Color(c));
+  }
+  return out;
+}
+
+/// The accent of a page with no theme (the notation's own): where a chart's
+/// colors start from when the theme has no primary.
+const _accent = 0xFF2563EB;
+
+String _hex(Color c) => '#${c.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+
+/// What a graph's style leaves out, from the theme, for what the graph is
+/// drawn on: the grid and the labels in its quiet colors, a tag as an
+/// inverted surface, a tooltip as the surface itself with a hairline round
+/// it and the surface's ink, a large figure in that ink, and the marks in
+/// its series colors.
+Map<String, Object?> graphThemeStyle(api.ThemeTokens theme, SurfaceRoles roles) => {
+      'grid': _hex(roles.hairline),
+      'text': _hex(roles.muted),
+      'crosshair': _hex(roles.outline),
+      'tag': _hex(roles.onSurface),
+      'tagText': _hex(roles.surface),
+      'separator': _hex(roles.hairline),
+      'ink': _hex(roles.onSurface),
+      'tooltip': _hex(roles.surface),
+      'tooltipText': _hex(roles.onSurface),
+      'tooltipBorder': _hex(roles.hairline),
+      'palette': [for (final c in chartColors(theme, roles)) _hex(Color(c.value))],
+    };
+
 /// A series chart's series that set no color of their own, in the theme's
-/// series colors when it names them (`colors.chart1`, `chart2`...: one per
-/// series, in turn), else as they are (the series' own default).
-Node withChartPalette(Node n, api.ThemeTokens theme) {
-  if (n.type != ChartProps.spec.type || theme.colors['chart1'] == null) return n;
-  final palette = [for (var i = 1; theme.colors['chart$i'] != null; i++) theme.colors['chart$i']!];
+/// series colors ([chartColors]): one per series, in turn. A donut's one
+/// series is left as it is: its slices take those colors, row by row.
+Node withChartPalette(Node n, api.ThemeTokens theme, SurfaceRoles roles) {
+  if (n.type != ChartProps.spec.type || n.prop(ChartProps.chartType) == api.ChartType.donut) return n;
+  final palette = chartColors(theme, roles);
   final series = n.prop(ChartProps.series);
   var changed = false, i = 0;
   final out = [

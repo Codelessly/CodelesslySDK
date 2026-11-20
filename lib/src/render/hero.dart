@@ -20,10 +20,12 @@ import 'recipe.dart';
 /// starts where the node is drawn). A design canvas has none.
 void heroLayer(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final hero = n.behaviors.hero;
-  if (!animates || hero == null || hero.flies != api.HeroFlies.betweenScreens) return;
+  if (!animates || hero == null || hero.flies == api.HeroFlies.inPlace) return;
   chain.add(
     b.obtain<RenderHeroMark>('hero', RenderHeroMark.new)
       ..tree = b.tree
+      ..flies = hero.flies
+      ..flight = hero.flight
       // A hidden node stays to keep its state; it doesn't fly.
       ..tag = n.visible ? hero.tag.trim() : ''
       ..flightShuttle = hero.flightShuttle
@@ -68,12 +70,42 @@ abstract final class HeroMarks {
   static Iterable<RenderHeroMark> of(RenderTree tree) =>
       (_byTree[tree] ?? const {}).where((m) => m.attached && m.tag.isNotEmpty);
 
-  static void _add(RenderHeroMark m) => (_byTree[m.tree!] ??= {}).add(m);
+  /// Every attached lifted mark ([api.HeroFlies.lift]) with [tag], oldest
+  /// first.
+  static List<RenderHeroMark> lifted(String tag) => [
+        for (final set in _byTree.values)
+          for (final m in set)
+            if (m.attached && m.flies == api.HeroFlies.lift && m.tag == tag) m,
+      ]..sort((a, b) => a._seq.compareTo(b._seq));
+
+  /// Every attached lifted mark with a tag.
+  static Iterable<RenderHeroMark> get allLifted => [
+        for (final set in _byTree.values)
+          for (final m in set)
+            if (m.attached && m.flies == api.HeroFlies.lift && m.tag.isNotEmpty) m,
+      ];
+
+  /// Whether a tree's screen is on its way out (its route closing): a
+  /// lifted node there is going. Set by the runtime that knows the routes.
+  static bool Function(RenderTree tree) leaving = _never;
+  static bool _never(RenderTree tree) => false;
+
+  /// Called when a lifted mark comes, goes or changes its tag: the app
+  /// shell's lifts (app/ui/hero_flights.dart) look again.
+  static void Function()? onLiftChange;
+
+  static int _counter = 0;
+
+  static void _add(RenderHeroMark m) {
+    (_byTree[m.tree!] ??= {}).add(m);
+    if (m.flies == api.HeroFlies.lift) onLiftChange?.call();
+  }
 
   static void _remove(RenderHeroMark m) {
     final set = _byTree[m.tree];
     set?.remove(m);
     if (set != null && set.isEmpty) _byTree.remove(m.tree);
+    if (m.flies == api.HeroFlies.lift) onLiftChange?.call();
   }
 }
 
@@ -88,8 +120,73 @@ class RenderHeroMark extends RenderProxyBox {
     if (attached && v != null) HeroMarks._add(this);
   }
 
+  String _tag = '';
+
   /// The tag it flies with now (bound); empty: it doesn't fly.
-  String tag = '';
+  String get tag => _tag;
+  set tag(String v) {
+    if (v == _tag) return;
+    _tag = v;
+    if (flies == api.HeroFlies.lift) {
+      // A new tag is a new arrival: it lifts out of a node with that tag.
+      _seq = ++HeroMarks._counter;
+      liftFront = false;
+      markNeedsPaint();
+      if (attached) HeroMarks.onLiftChange?.call();
+    }
+  }
+
+  /// When it flies: between screens, or lifted ([api.HeroFlies.lift]; an
+  /// in-place hero has no mark).
+  api.HeroFlies flies = api.HeroFlies.betweenScreens;
+
+  /// How a lift flies (its duration and curve).
+  api.Flight? flight;
+
+  /// When it came (attached, or took its tag): the newest lifted mark of a
+  /// tag is the one shown.
+  int _seq = 0;
+
+  /// Its order of arrival among the lifted marks of its tag.
+  int get arrival => _seq;
+
+  bool _liftFront = false;
+
+  /// A lifted mark: the one of its tag shown now (the app shell's lifts set
+  /// it). While no mark of the tag is, the newest shows.
+  bool get liftFront => _liftFront;
+  set liftFront(bool v) {
+    if (v == _liftFront) return;
+    _liftFront = v;
+    if (attached) markNeedsPaint();
+  }
+
+  /// A lifted mark is drawn where it is laid out: it is the one of its tag
+  /// shown and not flying. Another keeps its place, hidden (a gap).
+  bool get liftShown {
+    if (flies != api.HeroFlies.lift || _tag.isEmpty) return true;
+    if (_flying) return false;
+    if (_liftFront) return true;
+    final all = HeroMarks.lifted(_tag);
+    if (all.any((m) => m._liftFront)) return false;
+    final shown = all.where((m) => m.tree == null || !HeroMarks.leaving(m.tree!));
+    return identical(shown.lastOrNull ?? all.lastOrNull, this);
+  }
+
+  /// Where it was on screen (global) at the end of the last frame it was
+  /// attached in ([notePlace]), for a flight back from a node that has gone.
+  /// Not read for a node still on screen: a scroll can move it without a
+  /// paint, so its place is read where it is ([rectIn]).
+  Rect? lastRect;
+
+  /// Records where it is on screen now in [lastRect]: called once a frame is
+  /// laid out and drawn (app/ui/hero_flights.dart's lifts).
+  void notePlace() {
+    if (!attached || !hasSize) return;
+    final r = rectIn(null);
+    if (r != null) lastRect = r;
+  }
+
   /// What its flight draws (`Hero.flightShuttleBuilder`).
   api.HeroFlightShuttle flightShuttle = api.HeroFlightShuttle.standard;
   api.HeroPlaceholder placeholder = api.HeroPlaceholder.none;
@@ -107,7 +204,7 @@ class RenderHeroMark extends RenderProxyBox {
   set flying(bool v) {
     if (v == _flying) return;
     _flying = v;
-    markNeedsPaint();
+    if (attached) markNeedsPaint();
   }
 
   RenderHeroMark? _source;
@@ -133,6 +230,8 @@ class RenderHeroMark extends RenderProxyBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    _seq = ++HeroMarks._counter;
+    _liftFront = false;
     if (_tree != null) HeroMarks._add(this);
   }
 
@@ -144,7 +243,7 @@ class RenderHeroMark extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_flying) return;
+    if (_flying || !liftShown) return;
     final source = _source;
     final c = child;
     if (source != null && c != null) {
@@ -158,7 +257,8 @@ class RenderHeroMark extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) => !_flying && super.hitTest(result, position: position);
+  bool hitTest(BoxHitTestResult result, {required Offset position}) =>
+      !_flying && liftShown && super.hitTest(result, position: position);
 }
 
 /// Paints [mark]'s drawing (its child, at its own size) stretched over

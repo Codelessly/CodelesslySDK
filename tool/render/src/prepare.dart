@@ -99,7 +99,9 @@ Prepared prepare(Json doc, {required String dir, String? docDir, required String
 /// with the default family when absent.
 void _labelStyles(WidgetSpec spec, Json props, String family) {
   for (final def in spec.props) {
-    if (props.containsKey(def.key)) continue;
+    // A family written empty is none of the node's own: the default too.
+    final unnamed = def.key.endsWith('FontFamily') && props[def.key] == '';
+    if (props.containsKey(def.key) && !unnamed) continue;
     if (def.type.name == 'ButtonStyle') {
       props[def.key] = {'textStyle': {'fontFamily': family}};
     } else if (def.type.name == 'TextStyle' && spec.type != TextProps.spec.type && def.key != 'style') {
@@ -107,9 +109,20 @@ void _labelStyles(WidgetSpec spec, Json props, String family) {
     } else if (def.key.endsWith('FontFamily') && def.type.kind == PropKind.string) {
       // A chart's axis labels, a gauge's label: a family of their own.
       props[def.key] = family;
+    } else if (_hasFamily(def.type)) {
+      // A record that names the family of what it draws (a graph's style).
+      props[def.key] = {'fontFamily': family};
     }
   }
 }
+
+/// Whether [type] is a record with a family of its own for the text it
+/// draws (a graph's style), apart from the text and button styles.
+bool _hasFamily(PropType type) =>
+    type.kind == PropKind.object &&
+    type.name != 'TextStyle' &&
+    type.name != 'ButtonStyle' &&
+    type.fields.any((f) => f.key == 'fontFamily' && f.type.kind == PropKind.string);
 
 /// [json] of [type] with default families and icon codepoints filled in.
 Object? _typed(PropType type, Object? json, String family, Map<String, int> codepoints) {
@@ -128,6 +141,7 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
       // theme's styles get the default: [prepareTheme]).
       if (type.name == 'TextStyle' && next['fontFamily'] == null && next['from'] == null) next['fontFamily'] = family;
       if (type.name == 'ButtonStyle' && readMap(next['textStyle']) == null) next['textStyle'] = {'fontFamily': family};
+      if (_hasFamily(type) && next['fontFamily'] == null) next['fontFamily'] = family;
       return next;
     case PropKind.list:
       return json is List ? [for (final v in json) _typed(type.item!, v, family, codepoints)] : json;

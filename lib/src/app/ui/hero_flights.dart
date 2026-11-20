@@ -7,7 +7,8 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:codelessly_api/core.dart' show HeroFlightShuttle, HeroPlaceholder;
+import 'package:codelessly_api/core.dart' show AnimationCurve, HeroFlies, HeroFlightShuttle, HeroPlaceholder;
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../render/control_theme.dart' show ThemeTokensScope, kPaper, kPaperDark, rolesOf;
@@ -24,7 +25,12 @@ abstract final class HeroRoutes {
   static void bind(RenderTree tree, ModalRoute<Object?>? route) {
     _routeOf[tree] = route;
     FlightRegistry.leaving = leaving;
+    HeroMarks.leaving = leaving;
+    HeroLifts._install();
   }
+
+  /// The navigator [tree]'s screen shows in, when it is known.
+  static NavigatorState? navigatorOf(RenderTree tree) => _routeOf[tree]?.navigator;
 
   /// Whether [tree]'s route is closing (popped, its exit still playing) or
   /// gone: what it shows is on its way out.
@@ -40,6 +46,8 @@ abstract final class HeroRoutes {
     for (final entry in HeroMarks.trees) {
       if (!identical(_routeOf[entry], route)) continue;
       for (final m in HeroMarks.of(entry)) {
+        // A lifted hero flies on its own (HeroLifts), not with a navigation.
+        if (m.flies != HeroFlies.betweenScreens) continue;
         out.putIfAbsent(m.tag, () => m);
       }
     }
@@ -458,4 +466,219 @@ class HeroMarkPaint extends LeafRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderHeroMarkPaint renderObject) => renderObject
     ..mark = mark
     ..repaint = repaint;
+}
+
+// --- lifted shared elements (`hero` with `flies: lift`) ----------------------------
+
+/// Lifted shared elements ([HeroFlies.lift]): of the marks with one tag on
+/// screen, the newest is the one shown; when it changes (a node with the
+/// tag comes while another is shown, or the one shown goes), the node is
+/// flown from the one it leaves to the one it goes to, drawn in the
+/// navigator's overlay above every route (an overlay's backdrop too), both
+/// ends followed every frame. The mark it left keeps its place, hidden
+/// ([RenderHeroMark.liftShown]).
+abstract final class HeroLifts {
+  static bool _installed = false;
+  static bool _scheduled = false;
+
+  /// The mark of each tag shown now.
+  static final Map<String, RenderHeroMark> _front = {};
+  static final List<_Lift> _lifts = [];
+
+  /// Whether a lift is in the air (tests).
+  static bool get flying => _lifts.isNotEmpty;
+
+  /// Where the lift of [tag] is drawn now (global), null when none flies
+  /// (tests).
+  static Rect? rectOf(String tag) => _lifts.where((l) => l.tag == tag).firstOrNull?.rect;
+
+  static void _install() {
+    if (_installed) return;
+    _installed = true;
+    HeroMarks.onLiftChange = _schedule;
+    // A screen that starts closing changes no mark: while lifted marks are
+    // on screen, each frame looks again (after it is drawn).
+    // Runs after the frame is laid out and drawn (the renderer's callback is
+    // added first): each lifted node's place is recorded for a flight back
+    // from it once it has gone, however it got there (a scroll moves a row
+    // without painting it again).
+    SchedulerBinding.instance.addPersistentFrameCallback((_) {
+      for (final m in HeroMarks.allLifted) {
+        m.notePlace();
+      }
+      if (_front.isNotEmpty || _lifts.isNotEmpty) _schedule(frame: false);
+    });
+  }
+
+  static void _schedule({bool frame = true}) {
+    if (_scheduled) return;
+    _scheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) => _check());
+    if (frame) SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  static bool _going(RenderHeroMark m) => !m.attached || (m.tree != null && HeroMarks.leaving(m.tree!));
+
+  static void _check() {
+    _scheduled = false;
+    final tags = {for (final m in HeroMarks.allLifted) m.tag, ..._front.keys};
+    for (final tag in tags) {
+      final shown = [for (final m in HeroMarks.lifted(tag)) if (!_going(m) && m.hasSize) m];
+      final newest = shown.lastOrNull;
+      var front = _front[tag];
+      // A screen closed and gone: nothing flies from it.
+      if (front != null && (front.tree == null || front.tree!.isDisposed)) {
+        _front.remove(tag);
+        front = null;
+      }
+      if (identical(newest, front)) continue;
+      if (newest == null) {
+        // Nothing to go to: the last one shown stays while it is on screen.
+        if (front != null && !front.attached) _front.remove(tag);
+        continue;
+      }
+      _front[tag] = newest;
+      newest.liftFront = true;
+      if (front == null) continue;
+      front.liftFront = false;
+      _fly(tag, front, newest);
+    }
+  }
+
+  static void _fly(String tag, RenderHeroMark from, RenderHeroMark to) {
+    // A lift of the tag in the air turns round from where it is drawn.
+    Rect? start;
+    for (final l in [..._lifts]) {
+      if (l.tag == tag) {
+        start = l.rect;
+        l.end();
+      }
+    }
+    final navigator = (to.tree == null ? null : HeroRoutes.navigatorOf(to.tree!)) ??
+        (from.tree == null ? null : HeroRoutes.navigatorOf(from.tree!));
+    final overlay = navigator?.overlay;
+    if (overlay == null || !overlay.mounted) return;
+    if (MediaQuery.maybeDisableAnimationsOf(overlay.context) ?? false) return;
+    // Out (the newer one comes) on the lifted node's flight; back on the
+    // same flight's curve played backward.
+    final out = to.arrival > from.arrival;
+    final lifted = out ? to : from;
+    final f = lifted.flight;
+    final lift = _Lift(
+      tag: tag,
+      from: from,
+      to: to,
+      // Only a turn-round has a fixed start: else the node it leaves is read
+      // where it is on screen, every frame ([_Lift._at]).
+      start: start,
+      duration: Duration(milliseconds: f != null && f.duration > 0 ? f.duration : 300),
+      curve: f?.curve ?? AnimationCurve.easeInOut,
+      back: !out,
+    );
+    if (lift.begin(overlay)) _lifts.add(lift);
+  }
+}
+
+class _Lift {
+  _Lift({
+    required this.tag,
+    required this.from,
+    required this.to,
+    required this.start,
+    required this.duration,
+    required this.curve,
+    required this.back,
+  });
+
+  final String tag;
+  final RenderHeroMark from, to;
+
+  /// Where it starts (global) when it turns round from a lift in the air.
+  final Rect? start;
+  final Duration duration;
+  final AnimationCurve curve;
+
+  /// The way back: the curve played backward.
+  final bool back;
+
+  final ValueNotifier<double> _t = ValueNotifier(0);
+  Ticker? _ticker;
+  OverlayEntry? _entry;
+  RenderBox? _space;
+  bool _ended = false;
+
+  /// Where it is drawn now (global).
+  Rect? rect;
+
+  /// The share of the way flown at [t] (0–1 of the time).
+  double _progress(double t) => back ? 1 - curve.transform(1 - t) : curve.transform(t);
+
+  Rect? _live(RenderHeroMark m) {
+    if (!m.attached || !m.hasSize) return null;
+    try {
+      return MatrixUtils.transformRect(m.getTransformTo(null), Offset.zero & m.size);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Where it is at the clock's [t], both ends where they are now.
+  Rect? _at(double t) {
+    // A turn-round starts where it was drawn; else the place it leaves is
+    // followed where it is now (a list scrolling under it), and once that
+    // node has gone, where it was at the end of its last frame.
+    final begin = start ?? _live(from) ?? from.lastRect;
+    final e = _live(to);
+    if (begin == null || e == null) return null;
+    return Rect.lerp(begin, e, _progress(t));
+  }
+
+  bool begin(OverlayState overlay) {
+    final first = _at(0);
+    if (first == null) return false;
+    rect = first;
+    final box = overlay.context.findRenderObject();
+    _space = box is RenderBox ? box : null;
+    to.flying = true;
+    _entry = OverlayEntry(builder: _build);
+    overlay.insert(_entry!);
+    _ticker = Ticker((elapsed) {
+      final t = duration.inMicroseconds == 0 ? 1.0 : (elapsed.inMicroseconds / duration.inMicroseconds).clamp(0.0, 1.0);
+      if (!to.attached) {
+        // The place it went to is gone (its row removed): nothing to land on.
+        end();
+        return;
+      }
+      _t.value = t;
+      rect = _at(t) ?? rect;
+      _entry?.markNeedsBuild();
+      if (t >= 1) end();
+    })
+      ..start();
+    return true;
+  }
+
+  void end() {
+    if (_ended) return;
+    _ended = true;
+    HeroLifts._lifts.remove(this);
+    _ticker?.dispose();
+    _ticker = null;
+    _entry?.remove();
+    _entry?.dispose();
+    _entry = null;
+    to.flying = false;
+    SchedulerBinding.instance.addPostFrameCallback((_) => _t.dispose());
+    SchedulerBinding.instance.ensureVisualUpdate();
+  }
+
+  Widget _build(BuildContext context) {
+    final r = rect;
+    if (r == null || _ended) return const SizedBox.shrink();
+    final space = _space;
+    final local = space != null && space.attached
+        ? Rect.fromPoints(space.globalToLocal(r.topLeft), space.globalToLocal(r.bottomRight))
+        : r;
+    return Positioned.fromRect(rect: local, child: IgnorePointer(child: HeroMarkPaint(mark: to, repaint: _t)));
+  }
 }

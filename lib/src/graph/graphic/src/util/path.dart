@@ -122,6 +122,41 @@ List<List<Offset>> getCubicControls(
   return rst;
 }
 
+/// Produces a cubic spline through [points] that never passes above or
+/// below the values it joins (a monotone cubic, after Fritsch and Carlson):
+/// between two points the curve stays between them, so a smooth line shows
+/// no peak or dip its data does not have. The points run along x, in either
+/// direction.
+List<List<Offset>> getMonotoneControls(List<Offset> points) {
+  final n = points.length;
+  final rst = <List<Offset>>[];
+  if (n < 2) return rst;
+  final dx = [for (var i = 0; i < n - 1; i++) points[i + 1].dx - points[i].dx];
+  final slope = [
+    for (var i = 0; i < n - 1; i++) dx[i] == 0 ? 0.0 : (points[i + 1].dy - points[i].dy) / dx[i],
+  ];
+  final tangent = List<double>.filled(n, 0);
+  tangent[0] = slope[0];
+  tangent[n - 1] = slope[n - 2];
+  for (var i = 1; i < n - 1; i++) {
+    final a = slope[i - 1], b = slope[i];
+    if (a * b <= 0) continue;
+    final h0 = dx[i - 1].abs(), h1 = dx[i].abs();
+    final mean = h0 + h1 == 0 ? 0.0 : (a * h1 + b * h0) / (h0 + h1);
+    final least = [a.abs(), b.abs(), 0.5 * mean.abs()].reduce((p, q) => p < q ? p : q);
+    tangent[i] = (a.sign + b.sign) * least;
+  }
+  for (var i = 0; i < n - 1; i++) {
+    final third = dx[i] / 3;
+    rst.add([
+      Offset(points[i].dx + third, points[i].dy + tangent[i] * third),
+      Offset(points[i + 1].dx - third, points[i + 1].dy - tangent[i + 1] * third),
+      points[i + 1],
+    ]);
+  }
+  return rst;
+}
+
 /// Produces a stepped polyline.
 List<Offset> getSteppedPoints(
   List<Offset> points,

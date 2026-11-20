@@ -42,22 +42,34 @@ Json graphSpecOf(Node n) {
     // A node's crosshair is off unless it says so (the engine's is on).
     'crosshair': {...crosshair.toJson(), 'enabled': crosshair.get(GraphCrosshair.enabledDef)},
     'interactions': n.prop(GraphProps.interactions).toJson(),
+    'legend': n.prop(GraphProps.legend).toJson(),
     'style': {'background': '#00000000', ...n.prop(GraphProps.style).toJson()},
   };
 }
 
+/// [spec] with what its style leaves out taken from [theme] (the theme's
+/// colors for where the graph is drawn): a style's own word wins.
+Json _styled(Json spec, Json? theme) => {
+      ...spec,
+      'style': {
+        'background': '#00000000',
+        ...?theme,
+        for (final e in (_map(spec['style']) ?? const <String, Object?>{}).entries)
+          if (e.value != null && !(e.value is List && (e.value! as List).isEmpty)) e.key: e.value,
+      },
+    };
+
 Json? _map(Object? v) => v is Map ? v.cast<String, Object?>() : null;
 
 /// Adds the graph's render object for node [n] to [chain].
-void addGraph(NodeBuilder b, Node n, List<RenderBox> chain) => _add(b, chain, graphSpecOf(n), n.prop(GraphProps.data),
-    view: _map(n.prop(GraphProps.view)), selected: _map(n.prop(GraphProps.selected)));
+void addGraph(NodeBuilder b, Node n, List<RenderBox> chain, {Json? theme}) =>
+    _add(b, chain, _styled(graphSpecOf(n), theme), n.prop(GraphProps.data),
+        view: _map(n.prop(GraphProps.view)), selected: _map(n.prop(GraphProps.selected)));
 
 /// Adds the graph a chart type's node [n] says (chart_words.dart) to [chain].
-void addChartGraph(NodeBuilder b, Node n, List<RenderBox> chain) {
+void addChartGraph(NodeBuilder b, Node n, List<RenderBox> chain, {Json? theme}) {
   final chart = chartGraphOf(n)!;
-  final style = chart.spec['style'];
-  _add(b, chain, {...chart.spec, 'style': {'background': '#00000000', ...?_map(style)}}, chart.data,
-      selected: chart.selected);
+  _add(b, chain, _styled(chart.spec, theme), chart.data, selected: chart.selected);
 }
 
 void _add(NodeBuilder b, List<RenderBox> chain, Json spec, List<Json> data, {Json? view, Json? selected}) {

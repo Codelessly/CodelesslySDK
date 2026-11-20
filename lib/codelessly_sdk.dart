@@ -184,7 +184,7 @@ export 'src/app/ui/confirm_dialog.dart'
 export 'src/app/ui/feedback_theme.dart'
     show FeedbackTheme, FeedbackThemeScope, ResolvedFeedbackTheme;
 export 'src/app/ui/hero_flights.dart'
-    show CodelesslyHeroRoute, HeroArcRectTween, HeroFlights, HeroRoutes;
+    show CodelesslyHeroRoute, HeroArcRectTween, HeroFlights, HeroLifts, HeroRoutes;
 export 'src/app/ui/presentation_route.dart' show PresentationRoute;
 export 'src/app/ui/presentation_scope.dart';
 export 'src/app/ui/route_transition.dart'

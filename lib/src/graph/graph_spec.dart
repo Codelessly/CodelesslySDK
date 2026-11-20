@@ -76,7 +76,13 @@ class GraphXSpec {
     this.ticks = 'step',
     this.morph = 0,
     this.bands = const [],
+    this.inset = 0,
   });
+
+  /// Pixels kept clear at each end of a fitted view ([fit]): the first and
+  /// the last row stand this far inside the plot, so a dot or a line's end
+  /// there is whole.
+  final double inset;
 
   /// The row field of the label (an ISO time, epoch milliseconds or a text).
   final String label;
@@ -184,6 +190,7 @@ class GraphXSpec {
         ticks: _s(j['ticks'], 'step'),
         morph: _d(j['morph'], 0),
         bands: [for (final b in _l(j['bands'])) GraphBandSpec.fromJson(_m(b))],
+        inset: _d(j['inset'], 0),
       );
 
   Json toJson() => {
@@ -213,6 +220,7 @@ class GraphXSpec {
         'ticks': ticks,
         'morph': morph,
         if (bands.isNotEmpty) 'bands': [for (final b in bands) b.toJson()],
+        if (inset != 0) 'inset': inset,
       };
 }
 
@@ -234,7 +242,12 @@ class GraphYSpec {
     this.suffix = '',
     this.ticks = 5,
     this.tickValues = const [],
+    this.nice = false,
   });
+
+  /// A fitted domain is rounded out to the ticks it is given, so the plot
+  /// starts and ends on a labeled line (the margins are then not added).
+  final bool nice;
 
   /// `right` or `left`: where the axis gutter is (one side for the graph:
   /// left when any pane says so).
@@ -289,6 +302,7 @@ class GraphYSpec {
       suffix: _s(j['suffix'], ''),
       ticks: j['ticks'] is int ? j['ticks']! as int : 5,
       tickValues: GraphTick.list(j['tickValues']),
+      nice: _b(j['nice'], false),
     );
   }
 
@@ -307,6 +321,7 @@ class GraphYSpec {
         if (suffix.isNotEmpty) 'suffix': suffix,
         if (ticks != 5) 'ticks': ticks,
         if (tickValues.isNotEmpty) 'tickValues': [for (final t in tickValues) t.toJson()],
+        if (nice) 'nice': nice,
       };
 }
 
@@ -429,7 +444,24 @@ class GraphMarkSpec {
     this.startAngle = 0,
     this.labels = false,
     this.fillTo,
+    this.colored = true,
+    this.dots = 0,
+    this.center = '',
+    this.centerLabel = '',
   });
+
+  /// Whether the mark's color was written; one that writes none takes the
+  /// next of the style's palette (GraphStyleSpec.palette).
+  final bool colored;
+
+  /// A line: a dot of this radius on every row (0: none).
+  final double dots;
+
+  /// An arc with a hole: what is written in it. `total`: the sum of its
+  /// values, and while a slice is selected that slice's value. Empty:
+  /// nothing. [centerLabel] is written small under the figure (while a
+  /// slice is selected, its label).
+  final String center, centerLabel;
 
   /// A bar's value is written over it.
   final bool labels;
@@ -497,14 +529,25 @@ class GraphMarkSpec {
   /// The field of the mark's value (a candle's close).
   String get valueField => type == 'candle' ? close : y;
 
-  factory GraphMarkSpec.fromJson(Json j) => GraphMarkSpec(
-        type: _s(j['type'], 'line'),
+  /// [colorOf] gives the color of a mark that writes none (by the mark's
+  /// field, so an area and the line along its top share one), and
+  /// [palette] an arc's colors row by row when it writes none.
+  factory GraphMarkSpec.fromJson(Json j, {Color? Function(String field)? colorOf, List<Color> palette = const []}) {
+    final type = _s(j['type'], 'line');
+    final written = j['color'] != null;
+    final own = written || type == 'candle' || type == 'arc' ? null : colorOf?.call(_s(j['y'], ''));
+    return GraphMarkSpec(
+        type: type,
         y: _s(j['y'], ''),
         open: _s(j['open'], ''),
         high: _s(j['high'], ''),
         low: _s(j['low'], ''),
         close: _s(j['close'], ''),
-        color: graphColor(j['color'], const Color(0xFF2962FF)),
+        color: graphColor(j['color'], own ?? const Color(0xFF2962FF)),
+        colored: written,
+        dots: _d(j['dots'], 0),
+        center: _s(j['center'], ''),
+        centerLabel: _s(j['centerLabel'], ''),
         upColor: graphColor(j['upColor'], const Color(0xFF26A69A)),
         downColor: graphColor(j['downColor'], const Color(0xFFEF5350)),
         width: _d(j['width'], 1.5),
@@ -521,13 +564,16 @@ class GraphMarkSpec {
         stack: j['stack'] is String ? j['stack']! as String : null,
         radius: _d(j['radius'], 0),
         colorField: _s(j['colorField'], ''),
-        colors: [for (final c in _l(j['colors'])) graphColor(c, const Color(0xFF2962FF))],
+        colors: type == 'arc' && _l(j['colors']).isEmpty && !written
+            ? palette
+            : [for (final c in _l(j['colors'])) graphColor(c, const Color(0xFF2962FF))],
         inner: _d(j['inner'], 0),
         gap: _d(j['gap'], 0),
         startAngle: _d(j['startAngle'], 0),
         labels: _b(j['labels'], false),
         fillTo: j['fillTo'] == null ? null : graphColor(j['fillTo'], const Color(0x00000000)),
       );
+  }
 
   Json toJson() => {
         'type': type,
@@ -559,6 +605,9 @@ class GraphMarkSpec {
         if (startAngle != 0) 'startAngle': startAngle,
         if (labels) 'labels': labels,
         if (fillTo != null) 'fillTo': _hex(fillTo!),
+        if (dots != 0) 'dots': dots,
+        if (center.isNotEmpty) 'center': center,
+        if (centerLabel.isNotEmpty) 'centerLabel': centerLabel,
       };
 }
 
@@ -660,10 +709,11 @@ class GraphPaneSpec {
   final List<GraphPriceLineSpec> priceLines;
   final List<GraphMarkerSpec> markers;
 
-  factory GraphPaneSpec.fromJson(Json j) => GraphPaneSpec(
+  factory GraphPaneSpec.fromJson(Json j, {Color? Function(String field)? colorOf, List<Color> palette = const []}) =>
+      GraphPaneSpec(
         grow: _d(j['grow'], 1),
         y: GraphYSpec.fromJson(_m(j['y'])),
-        marks: [for (final m in _l(j['marks'])) GraphMarkSpec.fromJson(_m(m))],
+        marks: [for (final m in _l(j['marks'])) GraphMarkSpec.fromJson(_m(m), colorOf: colorOf, palette: palette)],
         priceLines: [for (final m in _l(j['priceLines'])) GraphPriceLineSpec.fromJson(_m(m))],
         markers: [for (final m in _l(j['markers'])) GraphMarkerSpec.fromJson(_m(m))],
         coord: _s(j['coord'], 'rect'),
@@ -835,7 +885,23 @@ class GraphStyleSpec {
     this.fontSize = 11,
     this.fontFamily,
     this.topInset = 0,
+    this.ink = const Color(0xFF111827),
+    this.palette = graphPalette,
+    this.tooltip = const Color(0xFFFFFFFF),
+    this.tooltipText = const Color(0xFF111827),
+    this.tooltipBorder = const Color(0x1F000000),
   });
+
+  /// A tooltip: its ground (a surface over the graph), its text and the
+  /// line round it.
+  final Color tooltip, tooltipText, tooltipBorder;
+
+  /// A figure written large (the one in a donut's hole).
+  final Color ink;
+
+  /// The colors of the marks that write none, in turn (and of an arc's
+  /// slices and a legend's keys).
+  final List<Color> palette;
 
   final Color background, grid, text, crosshair, tag, tagText, separator;
   final double fontSize;
@@ -855,6 +921,13 @@ class GraphStyleSpec {
         fontSize: _d(j['fontSize'], 11),
         fontFamily: j['fontFamily'] is String ? j['fontFamily']! as String : null,
         topInset: _d(j['topInset'], 0),
+        ink: graphColor(j['ink'], const Color(0xFF111827)),
+        tooltip: graphColor(j['tooltip'], const Color(0xFFFFFFFF)),
+        tooltipText: graphColor(j['tooltipText'], const Color(0xFF111827)),
+        tooltipBorder: graphColor(j['tooltipBorder'], const Color(0x1F000000)),
+        palette: _l(j['palette']).isEmpty
+            ? graphPalette
+            : [for (final c in _l(j['palette'])) graphColor(c, const Color(0xFF2962FF))],
       );
 
   Json toJson() => {
@@ -868,7 +941,60 @@ class GraphStyleSpec {
         'fontSize': fontSize,
         if (fontFamily != null) 'fontFamily': fontFamily,
         'topInset': topInset,
+        'ink': _hex(ink),
+        'tooltip': _hex(tooltip),
+        'tooltipText': _hex(tooltipText),
+        'tooltipBorder': _hex(tooltipBorder),
+        if (!identical(palette, graphPalette)) 'palette': [for (final c in palette) _hex(c)],
       };
+}
+
+/// The colors marks take in turn when neither they nor the style say: a
+/// blue, then hues that stand apart from it and from one another.
+const graphPalette = [
+  Color(0xFF2962FF),
+  Color(0xFF0C8275),
+  Color(0xFFCD8700),
+  Color(0xFFC9435D),
+  Color(0xFF8551C0),
+  Color(0xFF3DA23A),
+  Color(0xFFDE6227),
+  Color(0xFF087D9B),
+];
+
+/// The legend: a key for each named mark (its color and its name), or in a
+/// polar pane for each slice (its color, its label and its share).
+class GraphLegendSpec {
+  const GraphLegendSpec({this.show = 'none', this.position = 'auto', this.values = true});
+
+  /// `none` (a graph has no legend unless it asks). `auto`: drawn when
+  /// there is more than one thing to tell apart and there is room: under a
+  /// plot with two or more named marks; beside labeled slices in a graph
+  /// wide enough that the ring keeps at least three quarters of its height
+  /// (slices in a narrower graph have none). `always`: whenever there is a
+  /// key to draw (slices in a narrower graph: under them).
+  final String show;
+
+  /// `bottom`, `top` (a line of keys, wrapped, in the middle) or `right` (a
+  /// list). `auto`: under a plot; beside slices where the list fits there,
+  /// else under them.
+  final String position;
+
+  /// Each slice's share is written after its label.
+  final bool values;
+
+  factory GraphLegendSpec.fromJson(Object? v) {
+    if (v is bool) return GraphLegendSpec(show: v ? 'always' : 'none');
+    final j = _m(v);
+    final show = j['show'];
+    return GraphLegendSpec(
+      show: show is bool ? (show ? 'always' : 'none') : _s(show, 'none'),
+      position: _s(j['position'], 'auto'),
+      values: _b(j['values'], true),
+    );
+  }
+
+  Json toJson() => {'show': show, 'position': position, 'values': values};
 }
 
 /// The selection: the row (or the one bar or slice) under the pointer, or
@@ -884,8 +1010,8 @@ class GraphSelectionSpec {
     this.dot = 4,
     this.tooltip = true,
     this.title = '',
-    this.tooltipFill = const Color(0xFF111827),
-    this.tooltipText = const Color(0xFFFFFFFF),
+    this.tooltipFill,
+    this.tooltipText,
     this.total = false,
   });
 
@@ -911,10 +1037,11 @@ class GraphSelectionSpec {
   final double dot;
 
   /// Whether a tooltip is drawn, its first line ([title]: a row field,
-  /// empty for the x label) and its colors.
+  /// empty for the x label) and its colors (null: the style's tooltip and
+  /// its text).
   final bool tooltip;
   final String title;
-  final Color tooltipFill, tooltipText;
+  final Color? tooltipFill, tooltipText;
 
   /// A last tooltip row with the sum of the row's marks.
   final bool total;
@@ -931,8 +1058,8 @@ class GraphSelectionSpec {
         dot: _d(j['dot'], 4),
         tooltip: _b(j['tooltip'], true),
         title: _s(j['title'], ''),
-        tooltipFill: graphColor(j['tooltipFill'], const Color(0xFF111827)),
-        tooltipText: graphColor(j['tooltipText'], const Color(0xFFFFFFFF)),
+        tooltipFill: j['tooltipFill'] == null ? null : graphColor(j['tooltipFill'], const Color(0xFF111827)),
+        tooltipText: j['tooltipText'] == null ? null : graphColor(j['tooltipText'], const Color(0xFFFFFFFF)),
         total: _b(j['total'], false),
       );
 
@@ -945,8 +1072,8 @@ class GraphSelectionSpec {
         'dot': dot,
         'tooltip': tooltip,
         if (title.isNotEmpty) 'title': title,
-        'tooltipFill': _hex(tooltipFill),
-        'tooltipText': _hex(tooltipText),
+        if (tooltipFill != null) 'tooltipFill': _hex(tooltipFill!),
+        if (tooltipText != null) 'tooltipText': _hex(tooltipText!),
         'total': total,
       };
 }
@@ -964,7 +1091,10 @@ class GraphSpec {
     this.selection = const GraphSelectionSpec(),
     this.animate = 0,
     this.animateIn = false,
+    this.legend = const GraphLegendSpec(),
   });
+
+  final GraphLegendSpec legend;
 
   /// How long (ms) the marks take to move to new values when the rows
   /// change (0: at once), and whether they grow from zero when the graph
@@ -983,18 +1113,27 @@ class GraphSpec {
   final GraphStyleSpec style;
   final GraphSelectionSpec selection;
 
-  factory GraphSpec.fromJson(Json j) => GraphSpec(
-        key: _s(j['key'], 't'),
-        x: GraphXSpec.fromJson(_m(j['x'])),
-        panes: [for (final p in _l(j['panes'])) GraphPaneSpec.fromJson(_m(p))],
-        transforms: [for (final t in _l(j['transforms'])) GraphTransformSpec.fromJson(_m(t))],
-        crosshair: GraphCrosshairSpec.fromJson(_m(j['crosshair'])),
-        interactions: GraphInteractionsSpec.fromJson(_m(j['interactions'])),
-        style: GraphStyleSpec.fromJson(_m(j['style'])),
-        selection: GraphSelectionSpec.fromJson(_m(j['selection'])),
-        animate: _d(j['animate'], 0),
-        animateIn: _b(j['animateIn'], false),
-      );
+  factory GraphSpec.fromJson(Json j) {
+    final style = GraphStyleSpec.fromJson(_m(j['style']));
+    // A mark that writes no color takes the palette's next: the first
+    // such field the first color, and every mark of that field the same.
+    final byField = <String, Color>{};
+    Color? colorOf(String field) =>
+        style.palette.isEmpty ? null : byField[field] ??= style.palette[byField.length % style.palette.length];
+    return GraphSpec(
+      key: _s(j['key'], 't'),
+      x: GraphXSpec.fromJson(_m(j['x'])),
+      panes: [for (final p in _l(j['panes'])) GraphPaneSpec.fromJson(_m(p), colorOf: colorOf, palette: style.palette)],
+      transforms: [for (final t in _l(j['transforms'])) GraphTransformSpec.fromJson(_m(t))],
+      crosshair: GraphCrosshairSpec.fromJson(_m(j['crosshair'])),
+      interactions: GraphInteractionsSpec.fromJson(_m(j['interactions'])),
+      style: style,
+      selection: GraphSelectionSpec.fromJson(_m(j['selection'])),
+      animate: _d(j['animate'], 0),
+      animateIn: _b(j['animateIn'], false),
+      legend: GraphLegendSpec.fromJson(j['legend']),
+    );
+  }
 
   Json toJson() => {
         'type': 'graph',
@@ -1008,5 +1147,6 @@ class GraphSpec {
         if (selection.on != 'none') 'selection': selection.toJson(),
         if (animate > 0) 'animate': animate,
         if (animateIn) 'animateIn': animateIn,
+        'legend': legend.toJson(),
       };
 }
