@@ -1,3 +1,71 @@
+## 41.0.0
+
+A major version: several things draw or behave differently, most of them fixes to what was drawn wrong. Read
+"Draws and behaves differently" before upgrading. New: links in a text's runs, pictures that stretch from a centre
+slice, a clip shape on any node, banners over everything, lists that hold their place, snapping lists and wheels,
+lifted elements, and the device's edges (codelessly_api 41.0.0, which this needs).
+
+### Draws and behaves differently
+
+- **A full-screen page with the keyboard open** lays out above it and keeps the focused control in view; it kept
+  its full height under the keyboard. `screen.keyboard` reads what still covers the page (0 there) and
+  `screen.insets.bottom` is 0 under an open keyboard, so a bar a page lifts itself is never lifted twice.
+- **A running list over data keeps what is in view in place** when items are put before it (a reversed chat moved
+  by a message's height on each new one). Not grids, sections or page-at-a-time lists. `scrollTo node= item=`
+  matches an item's key before a copy's index, and a reversed list's padding is on its right sides.
+- **A run's `link` takes the tap** (`onLinkTap`, else the link opens); a tap ran the text's `onTap`. In markdown,
+  bare domains are link runs that carry their address, and no link is made inside an email.
+- **`presentation=banner`** is a banner over everything, queued, closed after `closeAfterMs`; it was a centred
+  dialog.
+- **Toggles.** A checkbox's, radio's or switch's label longer than its width wraps, and the control grows; it was
+  one line cut short. A checkbox under 40 or a radio under 32 draws its mark never less than the node up to 18.
+- **A control off by its `enabled`** is in its disabled state for its own state styles, and an off button with
+  its own disabled fill is drawn as written; it was faded to half and never entered the state.
+- **Sizes that are written are kept**: a fixed-size child of a stretching row or column, a sized
+  `circularProgressIndicator` in any parent. A button narrower than its padding and label gives up its side
+  padding before its label is cut. A hugging row that scrolls in a narrower row takes that room and scrolls.
+- **Fields.** A multi-line field with `maxLines` N in a taller box shows N lines. Tab into a multi-line field
+  taller than its scroll view keeps its top and caret in view. A code field's slots are each the field's own box,
+  at its height, with its fill, border and radius, and `focused.border` is the look of the slot typed into next
+  alone. Input formatters `email` and `phone` are applied. A field focused as its page opens is focused once.
+- **Repaints.** A bound border colour repaints on a node with content and along a clip shape; a text's
+  `style.foreground` gradient is painted.
+- **Clips.** `clip=` clips a node of any type; a node cut to a shape has its border and drop shadow along the
+  shape, and a tap in a cut part passes through.
+- A slider fires `changeStart` before `changed`. `concat` of texts gives a text; `.length` reads a record's own
+  `length` field first. A node shown again by a condition has new screen-reader node ids under it.
+
+### New
+
+- **Links in a text**: the `linkTap` trigger, `regexMatches` and `??` in formulas.
+- **Pictures that stretch and shapes that clip**: `centerSlice` on a picture; `clipPath`, `clipViewBox`,
+  `clipFit` and `clipCuts` on any node; `angle` on a linear gradient; `blurRadius` on a drawing's paint.
+- **Shown over everything, and in sequence**: banners; `after=<id>` on an animation; transitions of a node's
+  width and height (`property=layout`) and of a text field's decoration; `enterScale` on an anchored popover.
+- **Lifted elements**: `hero.flies=lift` lifts a node over a new page from where it is on the screen and back,
+  and a long press takes `holdMs`, `commitMs` and `haptic`.
+- **Lists**: `stickToStart`, `jumpToLatest`, `refreshStyle`; `snapPhysics` (a fling carries its momentum to the
+  row it settles on, past rows not yet built); a PageView's `perspective` with `motion.translateZ`; and
+  `pageOffset`, a row's distance from where its list snaps, for wheels and drums. `pageOffset` is read from
+  Flutter's list for now and may change when the SDK draws its own.
+- **The device's edges**: `screen.insets`, `screen.keyboard` and `screen.textScale` in formulas.
+- **Keys**: `Trigger.focused` on a key trigger, a switch's `thumbWidth`, `fontFamilyFallback`,
+  `enableSuggestions`, `overscroll` in a scroll's result, `result.cancelled` on `dragEnd`.
+
+### `tool/codelessly`
+
+- **`states` runs warm**: several states share one render server the run starts (`--cold` starts Flutter for each
+  state, as before). A state whose runs write no picture fails (`no_capture`); `--only <name>` picks that state
+  alone.
+- **Frames**: `--frames` first or after `--reload` films the load, and after a step what the step started;
+  `--long-press <id>=<ms>,hold` holds a press; `--drag …,press=<ms>`.
+- **Steps and targets**: `--stage <name>=<json>`, `--clock <ISO time>`, `--insets`, `--text-scale`, `--keyboard
+  <px>`, `<field>@suffix` and `@prefix`, `--tap <text>@link:<label|n>`, a toast's label and its action. A step
+  naming a point (`--tap 150,345`) is an error that says to name a node.
+- **Diagnostics**: `font_missing` once for a site (it was `font_fallback` on every page), `image_failed` for a
+  computed path that names no file, `set_overwritten`, `zero_size`, `control_heights_differ`,
+  `icon_smaller_than_size`. A replay's files are named after the page shown at the capture.
+
 ## 40.2.0
 
 Charts drawn right whatever they are written with: labels that never touch, a smooth line that keeps to its values,
