@@ -374,7 +374,7 @@ class TextFieldConfig {
     c.formatters = [
       if (n.prop(TextFieldProps.textCapitalization) == api.TextCapitalization.characters) const _UpperCaseFormatter(),
       if (c.otpLength > 0 && c.otpDigitsOnly) FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-      ?_formatter(n.prop(TextFieldProps.inputFormatter)),
+      ?fieldInputFormatter(n.prop(TextFieldProps.inputFormatter)),
     ];
     c.hugWidth = hFit == SizeFit.hug && n.layout.width.value > 0 ? n.layout.width.value : kFieldHugWidth;
     return c;
@@ -392,8 +392,16 @@ extension on String {
   String get characters1 => runes.isEmpty ? this : String.fromCharCode(runes.first);
 }
 
-/// The input formatter [f] describes: a regex filter.
-TextInputFormatter? _formatter(api.Json f) {
+/// The input formatter [f] describes: a regex filter, or one of the named
+/// ones its property documents: `email` (no spaces in an address), `phone`
+/// (digits and what a number is written with: `+`, spaces, `()`, `-`, `.`).
+TextInputFormatter? fieldInputFormatter(api.Json f) {
+  switch (f['type']) {
+    case 'email':
+      return FilteringTextInputFormatter.deny(RegExp(r'\s'));
+    case 'phone':
+      return FilteringTextInputFormatter.allow(RegExp(r'[0-9+()\-. ]'));
+  }
   final pattern = api.readString(f['pattern']);
   if (f['type'] != 'regex' || pattern == null || pattern.isEmpty) return null;
   final RegExp re;

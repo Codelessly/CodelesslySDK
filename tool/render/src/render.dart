@@ -38,6 +38,8 @@ import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSe
 import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/paint/image_fill.dart' show imageUrlOf;
+import 'package:codelessly_sdk/src/render/paint/node_paint.dart' show RenderNodePaint;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
@@ -3593,6 +3595,30 @@ List<RuntimeIssue> _check(
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
     return out;
+  }
+  // An image whose path is worked out as the page runs (`Image
+  // url={folder + name}`): the files the run inlines are checked as it
+  // prepares them, this one only here, where it did not draw.
+  final unloaded = <String>{};
+  void images(RenderObject o) {
+    if (o is RenderNodePaint) {
+      for (final f in o.decoration.fills) {
+        final url = imageUrlOf(f)?.trim();
+        if (url == null || url.isEmpty || !f.visible || (Uri.tryParse(url)?.hasScheme ?? true) || o.imageFor(url) != null || !unloaded.add(url)) continue;
+        NodeBox? owner;
+        for (RenderObject? p = o.parent; p != null && owner == null; p = p.parent) {
+          if (p is NodeBox) owner = p;
+        }
+        out.add(RuntimeIssue('image_failed', 'error',
+            'Image "$url" (its path worked out as the page runs) did not draw: ${o.imageFailed(url) ? 'there is no such file in the site\'s folder (paths are relative to the folder with site.json)' : 'it was still loading when the capture was taken'}.',
+            nodeId: owner?.id, screen: screen, size: size));
+      }
+    }
+    o.visitChildren(images);
+  }
+
+  for (final v in binding.renderViews) {
+    images(v);
   }
   final layouts = published.bundle.layouts;
   api.Node? nodeOf(String id) {
