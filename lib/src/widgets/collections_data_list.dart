@@ -215,6 +215,8 @@ class DataListViewState extends State<DataListView> implements LazyItems {
       'viewport': m.viewportDimension,
       'fraction': max > 0 ? (m.pixels / max).clamp(0.0, 1.0) : 0.0,
       'progress': max > 0 ? (m.pixels / max).clamp(0.0, 1.0) : 0.0,
+      // How far it is pulled past an end: below 0 past the start, above 0 past the end.
+      'overscroll': m.pixels < m.minScrollExtent ? m.pixels - m.minScrollExtent : (m.pixels > max ? m.pixels - max : 0.0),
       'axis': m.axis.name,
       'index': index,
       'count': count,

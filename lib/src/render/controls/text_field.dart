@@ -225,7 +225,7 @@ class TextFieldConfig {
   late final String semanticLabel;
   late final TextInputAction? inputAction;
   late final TextCapitalization capitalization;
-  late final bool autocorrect, autofocus, enableInteractiveSelection, enabled, obscureText, readOnly, selectAllOnFocus;
+  late final bool autocorrect, enableSuggestions, autofocus, enableInteractiveSelection, enabled, obscureText, readOnly, selectAllOnFocus;
   late final String obscuringCharacter;
   late final bool? showCursor;
   late final Color cursorColor;
@@ -349,6 +349,7 @@ class TextFieldConfig {
     };
     c.capitalization = TextCapitalization.values.byName(n.prop(TextFieldProps.textCapitalization).name);
     c.autocorrect = n.prop(TextFieldProps.autocorrect);
+    c.enableSuggestions = n.prop(TextFieldProps.enableSuggestions);
     c.autofocus = n.prop(TextFieldProps.autofocus);
     c.enableInteractiveSelection = n.prop(TextFieldProps.enableInteractiveSelection);
     c.enabled = n.prop(TextFieldProps.enabled) && c.decoration.enabled;
@@ -607,7 +608,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       readOnly: c.readOnly,
       obscureText: c.obscureText,
       autocorrect: c.obscureText ? false : c.autocorrect,
-      enableSuggestions: !c.obscureText,
+      enableSuggestions: !c.obscureText && c.enableSuggestions,
       enableInteractiveSelection: c.enableInteractiveSelection,
       inputAction: c.inputAction ?? (c.oneLine ? TextInputAction.done : TextInputAction.newline),
       textCapitalization: c.capitalization,

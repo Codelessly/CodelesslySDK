@@ -230,7 +230,7 @@ void main() {
           ..circle(x: 100, y: 14, radius: 6.5, style: PaintingStyle.stroke, color: const Color(0xFFD1D5DB)));
   });
 
-  testWidgets('a drag moves the value with the pointer, snapping to divisions; changed then changeEnd', (tester) async {
+  testWidgets('a drag moves the value with the pointer, snapping to divisions; changeStart, changed, then changeEnd', (tester) async {
     final (tree, recorded) = await _show(tester, {'s': _node({'value': 0, 'max': 10, 'divisions': 10})});
     final s = _slider(tree);
     final start = s.localToGlobal(s.thumbCenter);
@@ -238,13 +238,16 @@ void main() {
     await tester.dragFrom(start, const Offset(60, 0));
     await tester.pump();
     expect(s.value, 3);
-    expect(recorded.fired.first, 's changed');
+    // (changeStart, Flutter's onChangeStart: a NOCD part held a value while
+    // the slider was taken, and the slider had no such event.)
+    expect(recorded.fired.first, 's changeStart');
+    expect(recorded.fired[1], 's changed');
     expect(recorded.fired.last, 's changeEnd');
     recorded.fired.clear();
     await tester.tapAt(s.localToGlobal(Offset(7 + 186 * .8, 14)));
     await tester.pump();
     expect(s.value, 8);
-    expect(recorded.fired, ['s changed', 's changeEnd']);
+    expect(recorded.fired, ['s changeStart', 's changed', 's changeEnd']);
   });
 
   testWidgets('keys: arrows a step, Page Up / Down ten, Home / End the ends; each reports changed', (tester) async {
@@ -341,7 +344,7 @@ void main() {
     tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(s.debugSemantics!.id, SemanticsAction.increase);
     await tester.pump();
     expect(s.value, 51);
-    expect(recorded.fired, ['s changed', 's changeEnd']);
+    expect(recorded.fired, ['s changeStart', 's changed', 's changeEnd']);
     handle.dispose();
   });
 

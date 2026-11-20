@@ -59,6 +59,7 @@ void sliderRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..customPaint = paint
     ..onChanged = interactive ? (v) => fireTrigger(b, 'changed', event: {'value': v}) : null
     ..onRangeChanged = interactive ? (low, high) => fireTrigger(b, 'changed', event: {'result': {'low': low, 'high': high}}) : null
+    ..onChangeStart = interactive ? (v) => fireTrigger(b, 'changeStart', event: {'value': v}) : null
     ..onChangeEnd = interactive ? (v) => fireTrigger(b, 'changeEnd', event: {'value': v}) : null
     ..onStateChanged = interactive && patched.isNotEmpty
         ? (s, on) {
@@ -168,8 +169,9 @@ class RenderSlider extends RenderControl {
   /// The node's custom paint, drawn between its parts.
   RenderCustomPaintLayer? customPaint;
 
-  /// Reports a new value (`changed`) and the end of a change (`changeEnd`).
-  void Function(double value)? onChanged, onChangeEnd;
+  /// Reports the start of a change (`changeStart`, with the value before
+  /// it), a new value (`changed`) and the end of a change (`changeEnd`).
+  void Function(double value)? onChangeStart, onChanged, onChangeEnd;
   void Function(double low, double high)? onRangeChanged;
 
   double? _bound;
@@ -217,6 +219,8 @@ class RenderSlider extends RenderControl {
   double get highFraction => max <= min ? 0 : ((rangeEnd - min) / (max - min)).clamp(0.0, 1.0);
 
   void _set(double v, {bool end = false}) {
+    // A change in one step (a key): it starts here too.
+    if (end && !_dragging) onChangeStart?.call(isRange && _highActive ? rangeEnd : value);
     if (isRange) {
       final kept = _selectable(_snap(v)).clamp(_highActive ? value : min, _highActive ? max : rangeEnd);
       if (_highActive ? kept != _highValue : kept != _value) {
@@ -268,6 +272,7 @@ class RenderSlider extends RenderControl {
       markNeedsSemanticsUpdate();
     }
     _dragging = true;
+    onChangeStart?.call(isRange && _highActive ? rangeEnd : value);
     _set(_valueAt(local));
     markNeedsPaint();
     _syncIndicator();

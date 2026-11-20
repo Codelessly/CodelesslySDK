@@ -61,6 +61,12 @@ String _relOrAbs(String base, String p) => p == 'system' ? p : absolute(p, base)
 Future<int> statesMain(List<String> argv) async {
   final a = Args(argv, valued: {'--out', '--only', '--sizes'});
   if (a.help || a.positional.isEmpty) return usage(_doc, asked: a.help);
+  // `states <site> states.json`: one manifest only; the site's pages are its "documents". A second argument was
+  // taken silently (the first was read as the manifest).
+  if (a.positional.length > 1) {
+    throw UsageError('states takes one argument, the manifest: tool/codelessly states <states.json> (given ${a.positional.length}: '
+        '${a.positional.join(' ')}). The pages it renders are the manifest\'s "documents", relative to it.');
+  }
   final manifestFile = File(a.positional.first).absolute;
   final m = (jsonDecode(manifestFile.readAsStringSync()) as Map).cast<String, Object?>();
   final base = manifestFile.parent.path;

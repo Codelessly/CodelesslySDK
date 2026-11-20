@@ -101,6 +101,8 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
         : 0.0,
     'fraction': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
     'progress': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
+    // How far it is pulled past an end: below 0 past the start, above 0 past the end.
+    'overscroll': _pixels < 0 ? _pixels : (_pixels > maxScrollExtent ? _pixels - maxScrollExtent : 0.0),
     'axis': _axis.name,
     ..._itemMetrics(),
   };
