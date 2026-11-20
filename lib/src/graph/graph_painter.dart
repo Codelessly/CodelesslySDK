@@ -1,7 +1,7 @@
 // Draws a graph from its engine: each pane's grid, bars and slices (drawn
 // here), its lines, areas, candles and axis labels (drawn by the graphic
-// fork), and over them the price lines, markers, the selection with its
-// tooltip, and the crosshair with its tags.
+// fork), and over them the price lines, markers, the legend, the selection
+// with its tooltip, and the crosshair with its tags.
 //
 // It reads the engine and holds nothing of its own, so the graph's hosts
 // (a render object, a widget) draw the same picture.
@@ -50,8 +50,9 @@ class GraphPainter {
         canvas.restore();
       }
       if (i > 0) {
-        canvas.drawLine(plot.topLeft, Offset(size.width, plot.top), Paint()..color = _style.separator);
+        canvas.drawLine(plot.topLeft, Offset(engine.bodyRight, plot.top), Paint()..color = _style.separator);
       }
+      _dots(canvas, i, plot);
       for (final line in pane.priceLines) {
         _priceLine(canvas, i, plot, line);
       }
@@ -72,6 +73,7 @@ class GraphPainter {
       _selectionDots(canvas, i, plot);
     }
     _axisLabels(canvas, size);
+    _legend(canvas);
     final cursor = engine.cursor;
     if (cursor != null) _crosshair(canvas, cursor);
     _tooltip(canvas, size);
@@ -115,18 +117,48 @@ class GraphPainter {
     }
     final axis = engine.xAxisRect;
     if (!_spec.x.labels || axis.height <= 0 || _spec.panes.every((p) => p.polar)) return;
-    var taken = double.negativeInfinity;
-    for (final t in engine.xTicks) {
-      final x = engine.xOf(t);
-      if (x < engine.plotLeft - 0.5 || x > engine.plotRight + 0.5) continue;
-      final label = engine.xTickText(t);
-      if (label.isEmpty) continue;
+    // The labels that stand apart (GraphEngine.xLabels): the first and the
+    // last, and as many between as fit.
+    for (final (_, label, left) in engine.xLabels) {
       final tp = _text(label, _style.text, _style.fontSize);
-      final left = (x - tp.width / 2).clamp(0.0, math.max(0.0, size.width - tp.width)).toDouble();
-      // A label that would run into the one before it is left out.
-      if (left < taken + 4) continue;
-      taken = left + tp.width;
       tp.paint(canvas, Offset(left, axis.top + math.max(2.0, math.min(6.0, axis.height - tp.height))));
+    }
+  }
+
+  /// The legend's keys: a dot in the key's color, its name, and a slice's
+  /// share against the key's right edge.
+  void _legend(Canvas canvas) {
+    final legend = engine.legend;
+    if (legend == null) return;
+    final font = _style.fontSize + 1;
+    const mark = GraphLegendLayout.dot + GraphLegendLayout.dotGap;
+    for (final k in legend.keys) {
+      final box = k.box;
+      canvas.drawCircle(Offset(box.left + GraphLegendLayout.dot / 2, box.center.dy), GraphLegendLayout.dot / 2, Paint()..color = k.color);
+      final value = k.value.isEmpty ? null : _text(k.value, _style.ink, font, weight: FontWeight.w600);
+      final room = math.max(0.0, box.width - mark - (value == null ? 0 : value.width + 6));
+      final label = _text(k.label, _style.text, font, maxWidth: room);
+      label.paint(canvas, Offset(box.left + mark, box.center.dy - label.height / 2));
+      value?.paint(canvas, Offset(box.right - value.width, box.center.dy - value.height / 2));
+    }
+  }
+
+  /// A dot on every row of a line that asks for them (GraphMarkSpec.dots).
+  void _dots(Canvas canvas, int pane, Rect plot) {
+    final marks = _spec.panes[pane].marks;
+    if (!marks.any((m) => m.dots > 0) || engine.count == 0) return;
+    final (first, last) = engine.visible;
+    for (var k = 0; k < marks.length; k++) {
+      final m = marks[k];
+      if (m.dots <= 0 || m.type != 'line' || m.overlay != null) continue;
+      final paint = Paint()..color = m.color;
+      for (var i = math.max(0, first); i <= math.min(engine.count - 1, last); i++) {
+        if (engine.rows[i][m.y] case final num v when v.isFinite) {
+          final x = engine.xOfRow(i);
+          if (x < plot.left - 1 || x > plot.right + 1) continue;
+          canvas.drawCircle(Offset(x, engine.yOf(pane, v.toDouble())), m.dots, paint);
+        }
+      }
     }
   }
 
@@ -184,7 +216,52 @@ class GraphPainter {
         final color = s.color.withValues(alpha: s.color.a * engine.emphasis(pane, k, s.index));
         _slice(canvas, center, outer + (on ? _spec.selection.grow : 0), inner, s.start, s.sweep, color);
       }
+      if (m.center == 'total' && inner >= 20) _center(canvas, pane, k, m, center, inner);
     }
+  }
+
+  /// What is written in an arc's hole: the sum of its values with the
+  /// mark's label under it, or the selected slice's value and its label.
+  void _center(Canvas canvas, int pane, int k, GraphMarkSpec m, Offset center, double inner) {
+    final sel = engine.selection;
+    final on = sel != null && sel.pane == pane && sel.index < engine.count && (sel.mark == null || sel.mark == k);
+    var value = 0.0;
+    if (on) {
+      if (engine.rows[sel.index][m.y] case final num v when v.isFinite) value = v.toDouble();
+    } else {
+      for (final r in engine.rows) {
+        if (r[m.y] case final num v when v.isFinite && v > 0) value += v;
+      }
+    }
+    final y = _spec.panes[pane].y;
+    final label = on ? engine.xLabel(sel.index) : m.centerLabel;
+    final room = inner * 1.6;
+    var size = (inner * 0.44).clamp(12.0, 34.0).toDouble();
+    var figure = _text('${y.prefix}${_compact(value)}${y.suffix}', _style.ink, size, weight: FontWeight.w600);
+    if (figure.width > room) {
+      size = math.max(9.0, size * room / figure.width);
+      figure = _text('${y.prefix}${_compact(value)}${y.suffix}', _style.ink, size, weight: FontWeight.w600);
+    }
+    final under = label.isEmpty || inner < 34 ? null : _text(label, _style.text, _style.fontSize + 1, maxWidth: room);
+    final height = figure.height + (under == null ? 0 : under.height);
+    figure.paint(canvas, Offset(center.dx - figure.width / 2, center.dy - height / 2));
+    under?.paint(canvas, Offset(center.dx - under.width / 2, center.dy - height / 2 + figure.height));
+  }
+
+  /// A figure in few characters: 1,234 as it is, 12,400 as 12.4K.
+  String _compact(double v) {
+    final a = v.abs();
+    String short(double n, String unit) {
+      final s = n.abs() >= 100 ? n.toStringAsFixed(0) : n.toStringAsFixed(1);
+      return '${s.endsWith('.0') ? s.substring(0, s.length - 2) : s}$unit';
+    }
+
+    if (a >= 1e9) return short(v / 1e9, 'B');
+    if (a >= 1e6) return short(v / 1e6, 'M');
+    if (a >= 1e4) return short(v / 1e3, 'K');
+    final r = v.roundToDouble();
+    if ((v - r).abs() < 1e-9) return r.toInt().toString();
+    return v.toStringAsFixed(a < 10 ? 2 : 1);
   }
 
   /// A slice from [start] turning [sweep] (radians, clockwise from the top).
@@ -306,31 +383,35 @@ class GraphPainter {
     final row = engine.rows[sel.index];
     final title = s.title.isEmpty ? engine.xLabel(sel.index) : '${row[s.title] ?? ''}';
     final font = _style.fontSize + 1;
-    final titleText = title.isEmpty ? null : _text(title, s.tooltipText.withValues(alpha: 0.72), font - 1);
+    final tooltipText = s.tooltipText ?? _style.tagText, tooltipFill = s.tooltipFill ?? _style.tag;
+    final titleText = title.isEmpty ? null : _text(title, tooltipText.withValues(alpha: 0.72), font - 1);
     final polar = _spec.panes[sel.pane].polar;
     final total = rows.fold(0.0, (a, r) => a + r.$3);
     final lines = <(Color?, TextPainter, TextPainter)>[
       for (final (color, name, value) in rows)
         (
           color,
-          _text(name, s.tooltipText, font),
+          _text(name, tooltipText, font),
           _text(polar ? '${engine.yLabel(sel.pane, value)}  ${_share(sel, value)}' : engine.yLabel(sel.pane, value),
-              s.tooltipText, font, weight: FontWeight.w600),
+              tooltipText, font, weight: FontWeight.w600),
         ),
       if (s.total && rows.length > 1 && !polar)
-        (null, _text('Total', s.tooltipText, font), _text(engine.yLabel(sel.pane, total), s.tooltipText, font, weight: FontWeight.w600)),
+        (null, _text('Total', tooltipText, font), _text(engine.yLabel(sel.pane, total), tooltipText, font, weight: FontWeight.w600)),
     ];
     if (titleText == null && lines.isEmpty) return;
     const pad = 10.0, dot = 8.0, gap = 16.0, lineGap = 4.0;
     var w = titleText?.width ?? 0;
     var h = titleText == null ? 0.0 : titleText.height + (lines.isEmpty ? 0 : 6);
     for (final (color, name, value) in lines) {
-      w = math.max(w, (color == null ? 0 : dot + 6) + name.width + gap + value.width);
+      w = math.max(w, (color == null ? 0 : dot + 6) + name.width + (name.width > 0 ? gap : 0) + value.width);
       h += math.max(name.height, value.height) + lineGap;
     }
     if (lines.isNotEmpty) h -= lineGap;
     w += pad * 2;
     h += pad * 2;
+    // A graph too small to hold it (a sparkline) has no tooltip: it would
+    // cover what it is about.
+    if (w > size.width || h > size.height) return;
     final pointer = engine.pointer;
     final anchor = pointer ?? engine.selectionAnchor;
     if (anchor == null) return;
@@ -345,7 +426,7 @@ class GraphPainter {
         Paint()
           ..color = const Color(0x33000000)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
-    canvas.drawRRect(box, Paint()..color = s.tooltipFill);
+    canvas.drawRRect(box, Paint()..color = tooltipFill);
     var y = top + pad;
     if (titleText != null) {
       titleText.paint(canvas, Offset(left + pad, y));
@@ -483,12 +564,15 @@ class GraphPainter {
     time.paint(canvas, Offset(left + 6, axis.top + (axis.height - time.height) / 2));
   }
 
-  TextPainter _text(String text, Color color, double size, {FontWeight? weight}) => TextPainter(
+  /// With a [maxWidth], a text too long for it ends in an ellipsis.
+  TextPainter _text(String text, Color color, double size, {FontWeight? weight, double? maxWidth}) => TextPainter(
         text: TextSpan(
             text: text,
             style: TextStyle(color: color, fontSize: size, fontFamily: _style.fontFamily, fontWeight: weight)),
         textDirection: TextDirection.ltr,
-      )..layout();
+        maxLines: maxWidth == null ? null : 1,
+        ellipsis: maxWidth == null ? null : '\u2026',
+      )..layout(maxWidth: maxWidth ?? double.infinity);
 
   /// A value's tag on the price axis, its middle at [at].
   /// With a [note], a second line under the value (the tag grows down).

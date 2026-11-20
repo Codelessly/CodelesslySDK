@@ -80,8 +80,9 @@ void main() {
       expect(e.markColor(mark, 0), const Color(0xFFFF0000));
       expect(e.markColor(mark, 1), const Color(0xFF00FF00));
       expect(e.markColor(mark, 2), const Color(0xFFFF0000));
-      // It is drawn, not offered: pointers select nothing.
-      expect(e.spec.selection.on, 'none');
+      // The bar under the pointer says its value.
+      expect(e.spec.selection.on, 'hover');
+      expect(e.spec.selection.tooltip, isTrue);
     });
 
     test('a missing value is no bar', () {
@@ -122,8 +123,11 @@ void main() {
     });
 
     test('selectOnHover offers the selection, with the chart\'s tooltip and dimming', () {
+      // Unless the chart says otherwise the pointer selects, with a tooltip.
       final plain = engineOf(node('chart', stacked()));
-      expect(plain.spec.selection.on, 'none');
+      expect((plain.spec.selection.on, plain.spec.selection.tooltip), ('both', true));
+      final off = engineOf(node('chart', stacked({'selectOnHover': false, 'tooltip': false})));
+      expect((off.spec.selection.on, off.spec.selection.tooltip), ('none', false));
       final e = engineOf(node('chart', stacked({'selectOnHover': true, 'dimUnselected': true, 'tooltip': true})));
       expect(e.spec.selection.on, 'both');
       expect(e.spec.selection.tooltip, isTrue);
@@ -138,7 +142,7 @@ void main() {
       expect(engineOf(node('chart', stacked())).selection, isNull);
     });
 
-    test('a line chart draws every series as a line, edge to edge, from zero unless it fits its least', () {
+    test('a line chart draws every series as a line, its ends just inside the plot, from zero unless it fits its least', () {
       Map<String, Object?> lines([Map<String, Object?> extra = const {}]) => {
             'chartType': 'line',
             'data': [
@@ -154,8 +158,8 @@ void main() {
       final e = engineOf(node('chart', lines()));
       final mark = e.spec.panes.single.marks.single;
       expect((mark.type, mark.curved, mark.width), ('line', true, 3.0));
-      expect(e.xOfRow(0), closeTo(e.plotLeft, 0.001));
-      expect(e.xOfRow(2), closeTo(e.plotRight, 0.001));
+      expect(e.xOfRow(0), closeTo(e.plotLeft + 6, 0.001));
+      expect(e.xOfRow(2), closeTo(e.plotRight - 6, 0.001));
       expect(e.yDomain(0).$1, 0);
       expect(engineOf(node('chart', lines({'fitMinY': true}))).yDomain(0).$1, 40);
       expect(engineOf(node('chart', lines({'minY': 30, 'maxY': 90}))).yDomain(0), (30.0, 90.0));
@@ -302,7 +306,11 @@ void main() {
       e.hover(Offset(e.xOf(30), 50));
       expect(e.selection?.index, 2);
       expect(engineOf(node('lineChart', props({'selectedX': 10}))).selection?.index, 1);
-      final off = engineOf(node('lineChart', props()));
+      // On unless the chart says not.
+      final plain = engineOf(node('lineChart', props()));
+      plain.hover(Offset(plain.xOf(12), 50));
+      expect(plain.selection?.index, 1);
+      final off = engineOf(node('lineChart', props({'scrubEnabled': false})));
       off.hover(const Offset(100, 50));
       expect(off.selection, isNull);
     });

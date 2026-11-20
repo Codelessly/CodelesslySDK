@@ -16,6 +16,7 @@ import 'package:codelessly_api/core.dart'
         SignatureProps;
 import 'dart:ui' show Color;
 
+import '../graph/graph_spec.dart' show graphPalette;
 import '../render/surface_roles.dart';
 
 typedef _Role = Color Function(SurfaceRoles s);
@@ -95,12 +96,42 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
   ],
 };
 
+/// The theme's series colors: the ones it names (`colors.chart1`,
+/// `chart2`...), else its primary as a filled shape on the surface followed
+/// by colors of other hues as light and as strong as it
+/// (`chartPaletteOf`), so series are told apart and belong to the theme.
+///
+/// A theme with no primary has no accent to start from: the graph's own
+/// colors (`graphPalette`), a blue first.
+List<api.Color> chartColors(api.ThemeTokens theme, SurfaceRoles roles) => theme.colors['chart1'] != null
+    ? [for (var i = 1; theme.colors['chart$i'] != null; i++) theme.colors['chart$i']!]
+    : theme.resolvedRoles().primary == null
+        ? [for (final c in graphPalette) api.Color(c.toARGB32())]
+        : [for (final c in api.chartPaletteOf(roles.fill.toARGB32())) api.Color(c)];
+
+String _hex(Color c) => '#${c.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
+
+/// What a graph's style leaves out, from the theme, for what the graph is
+/// drawn on: the grid and the labels in its quiet colors, a tag and a
+/// tooltip as an inverted surface, a large figure in its ink, and the marks
+/// in its series colors.
+Map<String, Object?> graphThemeStyle(api.ThemeTokens theme, SurfaceRoles roles) => {
+      'grid': _hex(roles.hairline),
+      'text': _hex(roles.muted),
+      'crosshair': _hex(roles.outline),
+      'tag': _hex(roles.onSurface),
+      'tagText': _hex(roles.surface),
+      'separator': _hex(roles.hairline),
+      'ink': _hex(roles.onSurface),
+      'palette': [for (final c in chartColors(theme, roles)) _hex(Color(c.value))],
+    };
+
 /// A series chart's series that set no color of their own, in the theme's
-/// series colors when it names them (`colors.chart1`, `chart2`...: one per
-/// series, in turn), else as they are (the series' own default).
-Node withChartPalette(Node n, api.ThemeTokens theme) {
-  if (n.type != ChartProps.spec.type || theme.colors['chart1'] == null) return n;
-  final palette = [for (var i = 1; theme.colors['chart$i'] != null; i++) theme.colors['chart$i']!];
+/// series colors ([chartColors]): one per series, in turn. A donut's one
+/// series is left as it is: its slices take those colors, row by row.
+Node withChartPalette(Node n, api.ThemeTokens theme, SurfaceRoles roles) {
+  if (n.type != ChartProps.spec.type || n.prop(ChartProps.chartType) == api.ChartType.donut) return n;
+  final palette = chartColors(theme, roles);
   final series = n.prop(ChartProps.series);
   var changed = false, i = 0;
   final out = [

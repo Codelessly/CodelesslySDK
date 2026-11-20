@@ -6,9 +6,10 @@
 // What the user does is published as JSON ([state]): `view` and `cursor`,
 // for a page's variables to hold, as any control's value is.
 import 'dart:math' as math;
-import 'dart:ui' show Color, Offset, Rect, Size;
+import 'dart:ui' show Color, Offset, Rect, Size, TextDirection;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart' show FontWeight, TextPainter, TextSpan, TextStyle;
 import 'package:intl/intl.dart' show DateFormat;
 
 import 'graph_spec.dart';
@@ -74,6 +75,34 @@ class GraphSlice {
   final Color color;
 }
 
+/// One key of a legend: a color, what it is called and (a slice's) its
+/// share, and where it is drawn.
+class GraphLegendKey {
+  const GraphLegendKey(this.color, this.label, this.value, [this.box = Rect.zero]);
+  final Color color;
+  final String label, value;
+
+  /// The key's box in the graph's own pixels: its dot at the left, its
+  /// label after it, its value against the right edge.
+  final Rect box;
+}
+
+/// A legend laid out: where it is, its keys, and the room it takes from
+/// the panes.
+class GraphLegendLayout {
+  const GraphLegendLayout(this.position, this.keys, {this.top = 0, this.bottom = 0, this.right = 0});
+
+  /// `top`, `bottom` or `right`.
+  final String position;
+  final List<GraphLegendKey> keys;
+
+  /// The room taken above, under and right of the panes and their axes.
+  final double top, bottom, right;
+
+  /// A key's dot, and the room between it and the label.
+  static const dot = 8.0, dotGap = 6.0;
+}
+
 class GraphEngine extends ChangeNotifier {
   GraphEngine(GraphSpec spec, {List<Json> data = const [], Json? view}) : _spec = spec {
     viewport = GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset);
@@ -123,9 +152,151 @@ class GraphEngine extends ChangeNotifier {
   // --- layout ----------------------------------------------------------------
 
   double get yAxisWidth => spec.panes.fold(0.0, (w, p) => math.max(w, p.y.width));
-  double get plotWidth => math.max(0, size.width - yAxisWidth);
-  double get _top => spec.style.topInset;
-  double get _panesHeight => math.max(0, size.height - spec.x.axisHeight - _top);
+  double get plotWidth => math.max(0, bodyRight - yAxisWidth);
+  double get _top => spec.style.topInset + (legend?.top ?? 0);
+  double get _panesHeight => math.max(0, size.height - spec.x.axisHeight - _top - (legend?.bottom ?? 0));
+
+  /// The right edge of the panes and their axes: the graph's, less a
+  /// legend beside them.
+  double get bodyRight => math.max(0, size.width - (legend?.right ?? 0));
+
+  // --- the legend ------------------------------------------------------------
+
+  /// What a legend would list: each slice of a polar pane (its color, its
+  /// label and its share), else each named mark (an area and the line
+  /// along its top once).
+  List<GraphLegendKey> get legendKeys {
+    final out = <GraphLegendKey>[];
+    for (final p in spec.panes) {
+      if (!p.polar) continue;
+      final m = p.marks.where((m) => m.type == 'arc').firstOrNull;
+      if (m == null) return out;
+      final rows = _tweenTo ?? _target ?? this.rows;
+      var total = 0.0;
+      for (final r in rows) {
+        if (r[m.y] case final num v when v.isFinite && v > 0) total += v;
+      }
+      for (var i = 0; i < rows.length; i++) {
+        final label = rows[i][spec.x.label]?.toString() ?? '';
+        if (label.isEmpty) continue;
+        final v = rows[i][m.y];
+        final share = v is num && v.isFinite && v > 0 && total > 0 ? '${(v / total * 100).round()}%' : '';
+        out.add(GraphLegendKey(markColor(m, i), label, spec.legend.values ? share : ''));
+      }
+      return out;
+    }
+    final seen = <String>{};
+    for (final p in spec.panes) {
+      for (final m in p.marks) {
+        if (m.name.isEmpty || m.overlay != null || m.type == 'candle' || m.byDirection) continue;
+        if (seen.add(m.valueField)) out.add(GraphLegendKey(m.color, m.name, ''));
+      }
+    }
+    return out;
+  }
+
+  /// The legend as drawn; null when the spec has none, there is nothing
+  /// to tell apart, or it has no room.
+  GraphLegendLayout? get legend {
+    if (!_legendDone) {
+      _legendDone = true;
+      _legend = _layoutLegend();
+    }
+    return _legend;
+  }
+
+  GraphLegendLayout? _legend;
+  bool _legendDone = false;
+
+  double textWidth(String text, double fontSize, {FontWeight? weight}) => (TextPainter(
+        text: TextSpan(
+            text: text, style: TextStyle(fontSize: fontSize, fontFamily: spec.style.fontFamily, fontWeight: weight)),
+        textDirection: TextDirection.ltr,
+      )..layout())
+          .width;
+
+  GraphLegendLayout? _layoutLegend() {
+    final l = spec.legend;
+    if (l.show == 'none' || size.isEmpty) return null;
+    final keys = legendKeys;
+    final polar = spec.panes.any((p) => p.polar);
+    final auto = l.show != 'always';
+    if (keys.isEmpty || (auto && !polar && keys.length < 2)) return null;
+    final font = spec.style.fontSize + 1;
+    final rowHeight = (font * 1.5).ceilToDouble();
+    const mark = GraphLegendLayout.dot + GraphLegendLayout.dotGap, between = 16.0, rowGap = 4.0, room = 12.0;
+    // A whole pixel more than each text measures: the painter lays the
+    // texts out again, and none is to end in an ellipsis for a fraction.
+    final labels = [for (final k in keys) textWidth(k.label, font).ceilToDouble() + 1];
+    final values = [
+      for (final k in keys) k.value.isEmpty ? 0.0 : textWidth(k.value, font, weight: FontWeight.w600).ceilToDouble() + 1,
+    ];
+    final widest = labels.fold(0.0, math.max), widestValue = values.fold(0.0, math.max);
+    final listWidth = mark + widest + (widestValue > 0 ? 12 + widestValue : 0);
+    final listHeight = keys.length * rowHeight + (keys.length - 1) * rowGap;
+    final w = size.width, h = size.height;
+
+    var position = l.position;
+    if (position == 'auto') {
+      // Beside slices while they keep at least three quarters of the
+      // graph's height: slices in a narrower box keep all of it, and have
+      // no legend unless the spec says one.
+      final beside = polar && w - listWidth - 24 >= h * 0.75 && listHeight <= h;
+      if (polar && !beside && auto) return null;
+      position = beside ? 'right' : 'bottom';
+    }
+    if (position == 'right' || position == 'left') {
+      // Slices keep a square at the left, the list right beside it; a
+      // plot gives the list its width at the right edge.
+      final double left, width;
+      if (polar) {
+        final side = math.min(h, math.max(0.0, w - listWidth - 24));
+        left = side + 24;
+        width = math.min(w - left, math.max(listWidth, math.min(240.0, listWidth + 40)));
+      } else {
+        width = math.min(listWidth, w * 0.4);
+        left = w - width;
+      }
+      if (auto && (width < listWidth - 0.5 || listHeight > h)) return null;
+      var y = polar ? math.max(0.0, (h - listHeight) / 2) : spec.style.topInset;
+      final out = <GraphLegendKey>[];
+      for (final k in keys) {
+        out.add(GraphLegendKey(k.color, k.label, k.value, Rect.fromLTWH(left, y, width, rowHeight)));
+        y += rowHeight + rowGap;
+      }
+      return GraphLegendLayout('right', out, right: w - left + (polar ? 24 : room));
+    }
+    // A line of keys in the middle, wrapped.
+    final widths = [for (var i = 0; i < keys.length; i++) mark + labels[i] + (values[i] > 0 ? 6 + values[i] : 0)];
+    final lines = <List<int>>[[]];
+    var used = 0.0;
+    for (var i = 0; i < keys.length; i++) {
+      final next = used == 0 ? widths[i] : used + between + widths[i];
+      if (next > w && lines.last.isNotEmpty) {
+        lines.add([i]);
+        used = widths[i];
+      } else {
+        lines.last.add(i);
+        used = next;
+      }
+    }
+    final height = lines.length * rowHeight + (lines.length - 1) * rowGap;
+    // No room: the legend would take more of the graph than what it names.
+    if (auto && height + room > h * (polar ? 0.45 : 0.35)) return null;
+    final top = position == 'top';
+    var y = top ? 0.0 : h - height;
+    final out = <GraphLegendKey>[];
+    for (final line in lines) {
+      final total = line.fold(0.0, (a, i) => a + widths[i]) + between * (line.length - 1);
+      var x = math.max(0.0, (w - total) / 2);
+      for (final i in line) {
+        out.add(GraphLegendKey(keys[i].color, keys[i].label, keys[i].value, Rect.fromLTWH(x, y, widths[i], rowHeight)));
+        x += widths[i] + between;
+      }
+      y += rowHeight + rowGap;
+    }
+    return GraphLegendLayout(top ? 'top' : 'bottom', out, top: top ? height + room : 0, bottom: top ? 0 : height + room);
+  }
   double get _panesBottom => _top + _panesHeight;
 
   /// A pane's plot.
@@ -150,9 +321,10 @@ class GraphEngine extends ChangeNotifier {
     return Rect.fromLTWH(axisLeft ? 0 : plot.right, plot.top, yAxisWidth, plot.height);
   }
 
-  Rect get xAxisRect => Rect.fromLTWH(0, _panesBottom, size.width, spec.x.axisHeight);
+  Rect get xAxisRect => Rect.fromLTWH(0, _panesBottom, bodyRight, spec.x.axisHeight);
 
   GraphZone zoneAt(Offset p) {
+    if (p.dx > bodyRight || p.dy > _panesBottom + spec.x.axisHeight) return const GraphZone(GraphZoneKind.none);
     if (p.dy >= _panesBottom) return const GraphZone(GraphZoneKind.xAxis);
     for (var i = 0; i < spec.panes.length; i++) {
       final plot = plotRect(i);
@@ -276,6 +448,16 @@ class GraphEngine extends ChangeNotifier {
   /// A candle's or bar's width.
   double get barWidth => math.max(1, math.min(spec.x.maxBarWidth ?? double.infinity, (slotWidth * 0.72).floorToDouble()));
 
+  /// The width of a row's bars standing side by side ([groups] of them,
+  /// [gap] apart): each at most the widest a bar is drawn, all of them in
+  /// their share of the row's place.
+  double _groupWidth(int groups, double gap) => groups < 2
+      ? barWidth
+      : math.max(
+          1,
+          math.min((spec.x.maxBarWidth ?? double.infinity) * groups + gap * (groups - 1), (slotWidth * 0.72).floorToDouble()),
+        );
+
   /// The room a row has: a place, or on a linear scale the least stretch
   /// between two rows next to one another.
   double get slotWidth {
@@ -385,6 +567,12 @@ class GraphEngine extends ChangeNotifier {
       return [for (var k = (from / step - 1e-9).ceil(); k * step <= to + step * 1e-9; k++) k * step];
     }
     if (spec.x.ticks == 'calendar') return _calendarTicks();
+    // A fitted view that names no step: the rows whose labels stand apart,
+    // the first and the last among them.
+    if (spec.x.fit != 'none' && spec.x.tickEvery == null) {
+      final end = math.max(count, spec.x.slots ?? count) - 1;
+      return [for (final l in _thin([for (var i = 0; i <= end; i++) i])) l.$1];
+    }
     var step = spec.x.tickEvery ?? 1;
     if (spec.x.tickEvery == null) {
       for (final s in const [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
@@ -395,11 +583,83 @@ class GraphEngine extends ChangeNotifier {
     // A fitted view labels the positions its rows have not reached yet.
     final end = spec.x.fit == 'none' ? count - 1 : math.max(count, spec.x.slots ?? count) - 1;
     final first = math.max(0, from.ceil()), last = math.min(end, to.floor());
-    // A label hard against the left edge would be cut: it is left out.
+    // A label hard against the left edge would be cut: it is left out. A
+    // fitted view keeps it where it is whole (an axis left of the plot gives
+    // it room) or the view keeps room at its ends (GraphXSpec.inset: the
+    // painter then keeps the label inside the graph).
+    bool whole(int i) {
+      if (xOf(i) - plotLeft >= 16) return true;
+      if (spec.x.fit == 'none') return false;
+      return spec.x.inset > 0 || xOf(i) - textWidth(xTickLabel(i), spec.style.fontSize) / 2 >= 0;
+    }
+
     return [
       for (var i = (first / step).ceil() * step; i <= last; i += step)
-        if (xOf(i) - plotLeft >= 16) i,
+        if (whole(i)) i,
     ];
+  }
+
+  /// The x ticks whose labels are written, each with its text and where it
+  /// starts: all of them where they stand apart, else every second, third…
+  /// from the first, whichever is the most that do, and the last, which
+  /// takes the place of one before it that it would run into. The first and
+  /// the last are always written, and no two touch.
+  List<(num, String, double)> get xLabels => _labels ??= _thin(xTicks);
+  List<(num, String, double)>? _labels;
+
+  /// Those of [ticks] whose labels are written (see [xLabels]).
+  List<(num, String, double)> _thin(List<num> ticks) {
+    const apart = 8.0;
+    final size = spec.style.fontSize;
+    final all = <(num, String, double, double)>[];
+    for (final t in ticks) {
+      final x = xOf(t);
+      if (x < plotLeft - 0.5 || x > plotRight + 0.5) continue;
+      final label = xTickText(t);
+      if (label.isEmpty) continue;
+      final w = textWidth(label, size);
+      final left = (x - w / 2).clamp(0.0, math.max(0.0, bodyRight - w)).toDouble();
+      all.add((t, label, left, left + w));
+    }
+    final n = all.length;
+    List<(num, String, double)> pick(Iterable<int> at) => [for (final i in at) (all[i].$1, all[i].$2, all[i].$3)];
+    bool fits(List<int> at) {
+      for (var i = 1; i < at.length; i++) {
+        if (all[at[i]].$3 < all[at[i - 1]].$4 + apart) return false;
+      }
+      return true;
+    }
+
+    if (n < 2) return pick([for (var i = 0; i < n; i++) i]);
+    for (var step = 1; step < n; step++) {
+      final at = [for (var i = 0; i < n; i += step) i];
+      if (!fits(at)) continue;
+      if (at.last == n - 1) return pick(at);
+      // The last, in place of those before it that it would run into.
+      while (at.length > 1 && all[n - 1].$3 < all[at.last].$4 + apart) {
+        at.removeLast();
+      }
+      at.add(n - 1);
+      if (fits(at)) return pick(at);
+    }
+    return pick(fits([0, n - 1]) ? [0, n - 1] : [0]);
+  }
+
+  /// The round step (1, 2 or 5 times a power of ten) that cuts [span] into
+  /// the number of parts nearest [parts]; of two as near, the larger.
+  double _evenStep(double span, int parts) {
+    if (!(span > 0) || !span.isFinite || parts <= 0) return 1;
+    final mag = math.pow(10, (math.log(span / parts) / math.ln10).floor()).toDouble();
+    var best = mag, off = double.infinity;
+    for (final m in const [1, 2, 5, 10]) {
+      final step = m * mag;
+      final d = ((span / step - 1e-9).ceil() - parts).abs().toDouble();
+      if (d <= off) {
+        off = d;
+        best = step;
+      }
+    }
+    return best;
   }
 
   /// A round step no smaller than [raw]: 1, 2 or 5 times a power of ten.
@@ -485,8 +745,23 @@ class GraphEngine extends ChangeNotifier {
     y.include.forEach(take);
     if (!lo.isFinite || !hi.isFinite) return (0, 1);
     if (hi == lo) {
+      // Bars with nothing to show yet stand on zero all the same.
+      if (y.nice && fromZero && lo == 0) return (0, 1);
       final pad = lo == 0 ? 1.0 : lo.abs() * 0.01;
       return (lo - pad, hi + pad);
+    }
+    if (y.nice && y.tickValues.isEmpty && y.ticks > 0) {
+      // Out to the ticks: the step is chosen again for the wider stretch
+      // until it holds.
+      var a = lo, b = hi;
+      for (var k = 0; k < 4; k++) {
+        final step = _evenStep(b - a, y.ticks);
+        final na = (lo / step + 1e-9).floor() * step, nb = (hi / step - 1e-9).ceil() * step;
+        if (na == a && nb == b) break;
+        a = na;
+        b = nb;
+      }
+      return (a, b > a ? b : a + 1);
     }
     final span = hi - lo;
     // Bars stand on zero: no room under it.
@@ -572,7 +847,7 @@ class GraphEngine extends ChangeNotifier {
     if (base == null) {
       final span = hi - lo;
       if (!(span > 0) || !span.isFinite || y.ticks <= 0) return const [];
-      final step = _niceStep(span / y.ticks);
+      final step = y.nice ? _evenStep(span, y.ticks) : _niceStep(span / y.ticks);
       // Whole steps, so a tick is 0.3 and never 0.30000000000000004.
       return [for (var k = (lo / step - 1e-9).ceil(); k * step <= hi + step * 1e-9; k++) k * step];
     }
@@ -600,11 +875,33 @@ class GraphEngine extends ChangeNotifier {
       }
     }
     final a = value.abs();
+    // On a scale rounded out to its ticks, a large value in few
+    // characters: 20K, 1.5M.
+    if (y.nice && a >= 1e4) {
+      String short(num n, String unit) {
+        final s = n.toStringAsFixed(n.abs() >= 100 ? 0 : (n.abs() >= 10 ? 1 : 2));
+        return '${s.contains('.') ? s.replaceFirst(RegExp(r'\.?0+$'), '') : s}$unit';
+      }
+
+      return a >= 1e9 ? short(value / 1e9, 'B') : (a >= 1e6 ? short(value / 1e6, 'M') : short(value / 1e3, 'K'));
+    }
     if (a >= 1e9) return '${(value / 1e9).toStringAsFixed(2)}B';
     if (a >= 1e6) return '${(value / 1e6).toStringAsFixed(2)}M';
     if (a >= 1e5) return '${(value / 1e3).toStringAsFixed(0)}K';
-    return value.toStringAsFixed(y.decimals);
+    // On a scale rounded out to its ticks, as many decimals as its step
+    // has: ticks of 0.5 are never written 0, 1, 1, 2.
+    var decimals = y.decimals;
+    if (y.nice && y.tickValues.isEmpty) {
+      final (lo, hi) = yDomain(pane);
+      final step = _evenStep(hi - lo, y.ticks);
+      while (decimals < 6 && (step * math.pow(10, decimals)).roundToDouble() != _trim(step * math.pow(10, decimals))) {
+        decimals++;
+      }
+    }
+    return value.toStringAsFixed(decimals);
   }
+
+  double _trim(double v) => (v * 1e6).roundToDouble() / 1e6;
 
   Map<Object?, int>? _keys;
 
@@ -916,9 +1213,17 @@ class GraphEngine extends ChangeNotifier {
     } else if (fit != 'none' && plotWidth > 0 && count > 0) {
       // Every position across the plot: the view is not the user's.
       final slots = math.max(2, math.max(spec.x.slots ?? count, count));
-      viewport = fit == 'points'
-          ? GraphViewport(barSpacing: plotWidth / (slots - 1), rightOffset: slots - count - 0.5)
-          : GraphViewport(barSpacing: plotWidth / slots, rightOffset: (slots - count).toDouble());
+      // The room kept clear at each end, never more than a quarter of the
+      // plot.
+      final inset = spec.x.inset.clamp(0.0, plotWidth / 4).toDouble();
+      final across = plotWidth - inset * 2;
+      if (fit == 'points') {
+        final spacing = across / (slots - 1);
+        viewport = GraphViewport(barSpacing: spacing, rightOffset: slots - count - 0.5 + inset / spacing);
+      } else {
+        final spacing = across / slots;
+        viewport = GraphViewport(barSpacing: spacing, rightOffset: slots - count + inset / spacing);
+      }
     } else if (!spec.x.overscroll && plotWidth > 0 && count > 0) {
       // The view never shows a stretch with no rows: zooming out stops when
       // the rows there are fill the plot, and panning stops at the first
@@ -939,6 +1244,8 @@ class GraphEngine extends ChangeNotifier {
 
   void _changed() {
     _domains.clear();
+    _legendDone = false;
+    _labels = null;
     _ticks = null;
     _keys = null;
     _linearDomain = null;
@@ -994,10 +1301,11 @@ class GraphEngine extends ChangeNotifier {
     final groups = barGroups(pane);
     if (groups.isEmpty) return out;
     final gap = groups.length > 1 ? math.min(2.0, barWidth / (groups.length * 4)) : 0.0;
-    final w = (barWidth - gap * (groups.length - 1)) / groups.length;
+    final all = _groupWidth(groups.length, gap);
+    final w = (all - gap * (groups.length - 1)) / groups.length;
     final zero = yOf(pane, 0);
     for (var g = 0; g < groups.length; g++) {
-      final left = center - barWidth / 2 + g * (w + gap);
+      final left = center - all / 2 + g * (w + gap);
       var up = 0.0, down = 0.0;
       for (final i in groups[g]) {
         if (row[marks[i].y] case final num v when v.isFinite && v != 0) {
@@ -1154,6 +1462,7 @@ class GraphEngine extends ChangeNotifier {
     if (sel == null || sel.index >= count) return const [];
     final row = rows[sel.index];
     final out = <(Color, String, double)>[];
+    var named = false;
     final seen = <(int, String)>{};
     for (var p = 0; p < spec.panes.length; p++) {
       final marks = spec.panes[p].marks;
@@ -1165,9 +1474,13 @@ class GraphEngine extends ChangeNotifier {
         if (sel.mark == null && !seen.add((p, m.valueField))) continue;
         if (row[m.valueField] case final num v when v.isFinite) {
           out.add((markColor(m, sel.index), m.label, v.toDouble()));
+          named = named || m.name.isNotEmpty;
         }
       }
     }
+    // One mark with no name: its value needs no name beside it (its field
+    // is no word to read).
+    if (out.length == 1 && !named) return [(out.single.$1, '', out.single.$3)];
     return out;
   }
 

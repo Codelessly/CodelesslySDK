@@ -123,7 +123,7 @@ class BasicLineShape extends LineShape {
       } else if (smooth) {
         primitives.add(SplineElement(
             start: contour.first,
-            cubics: getCubicControls(contour, false, true),
+            cubics: loop ? getCubicControls(contour, false, true) : getMonotoneControls(contour),
             style: style));
       } else {
         primitives.add(PolylineElement(

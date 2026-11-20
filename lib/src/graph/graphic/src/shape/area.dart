@@ -105,7 +105,7 @@ class BasicAreaShape extends AreaShape {
       final segments = <Segment>[];
       segments.add(MoveSegment(end: ends.first));
       if (smooth) {
-        final controlsList = getCubicControls(ends, false, true);
+        final controlsList = loop ? getCubicControls(ends, false, true) : getMonotoneControls(ends);
         for (var c in controlsList) {
           segments.add(CubicSegment(control1: c[0], control2: c[1], end: c[2]));
         }
@@ -118,7 +118,7 @@ class BasicAreaShape extends AreaShape {
       segments.add(LineSegment(end: starts.last));
       final reversedStarts = starts.reversed.toList();
       if (smooth) {
-        final controlsList = getCubicControls(reversedStarts, false, true);
+        final controlsList = loop ? getCubicControls(reversedStarts, false, true) : getMonotoneControls(reversedStarts);
         for (var c in controlsList) {
           segments.add(CubicSegment(control1: c[0], control2: c[1], end: c[2]));
         }

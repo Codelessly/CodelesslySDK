@@ -1,7 +1,9 @@
-// What an indicator leaves unset, from a theme that names it: a series
-// chart's series colors (`colors.chart1`...), a signature pad's corner
-// (`radii.controlLarge`); a theme that names neither (SSUI) changes nothing.
+// What an indicator leaves unset, from the theme: a series chart's series
+// colors (`colors.chart1`... where it names them, else its primary and hues
+// apart from it), a signature pad's corner (`radii.controlLarge`).
 import 'package:codelessly_api/core.dart' as api;
+import 'package:codelessly_sdk/graph.dart' show graphPalette;
+import 'package:codelessly_sdk/src/render/surface_roles.dart';
 import 'package:codelessly_sdk/src/widgets/indicator_theme.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -21,14 +23,18 @@ void main() {
     final theme = api.ThemeTokens.fromJson({
       'colors': {'chart1': '#FF2563EB', 'chart2': '#FF0891B2'},
     });
-    final s = withChartPalette(chart(), theme).prop(api.ChartProps.series);
+    final s = withChartPalette(chart(), theme, surfaceRoles(theme)).prop(api.ChartProps.series);
     expect([for (final x in s) x.color.value], [0xFF2563EB, 0xFF123456, 0xFF0891B2]);
   });
 
-  test('a theme that names no series colors leaves the series as they are (SSUI: the series default)', () {
-    final n = chart();
-    expect(identical(withChartPalette(n, api.ThemeTokens.none), n), isTrue);
-    expect(withChartPalette(n, api.ThemeTokens.fromJson({'colors': {'primary': '#FF2563EB'}})).prop(api.ChartProps.series).first.color.value, 0xFF2ED17A);
+  test('a theme that names no series colors: its primary, then hues apart from it; no primary, the graph\'s own', () {
+    List<int> colors(api.ThemeTokens theme) =>
+        [for (final x in withChartPalette(chart(), theme, surfaceRoles(theme)).prop(api.ChartProps.series)) x.color.value];
+    final palette = api.chartPaletteOf(0xFF7C3AED);
+    expect(colors(api.ThemeTokens.fromJson({'primary': '#FF7C3AED'})), [palette[0], 0xFF123456, palette[1]]);
+    expect(colors(api.ThemeTokens.none), [graphPalette[0].toARGB32(), 0xFF123456, graphPalette[1].toARGB32()]);
+    // Never the one color every series had when none was written.
+    expect(colors(api.ThemeTokens.none).toSet(), hasLength(3));
   });
 
   test('a signature pad without a corner takes radii.controlLarge; its own corner, or a theme without one, stays', () {
