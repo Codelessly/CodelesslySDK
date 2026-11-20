@@ -611,6 +611,14 @@ class GraphEngine extends ChangeNotifier {
   List<(num, String, double)> _thin(List<num> ticks) {
     const apart = 8.0;
     final size = spec.style.fontSize;
+    // No more are measured than could ever stand apart (a label and its
+    // room take 12 px at the least): of thousands of rows every n-th, and
+    // the last.
+    final most = math.max(2, (bodyRight / 12).floor());
+    if (ticks.length > most) {
+      final stride = (ticks.length / most).ceil();
+      ticks = [for (var i = 0; i < ticks.length - 1; i += stride) ticks[i], ticks.last];
+    }
     final all = <(num, String, double, double)>[];
     for (final t in ticks) {
       final x = xOf(t);

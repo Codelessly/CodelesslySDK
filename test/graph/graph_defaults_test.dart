@@ -105,6 +105,16 @@ void main() {
       expect(labels.last.$3 + e.textWidth(labels.last.$2, e.spec.style.fontSize), lessThanOrEqualTo(400));
     });
 
+    test('thousands of rows: the first and the last are still written, and few are measured', () {
+      final e = engine(plot(x: {'fit': 'points'}, marks: [{'type': 'line', 'y': 'a'}]), rowsOf(5000));
+      final watch = Stopwatch()..start();
+      final labels = e.xLabels;
+      expect(watch.elapsedMilliseconds, lessThan(500));
+      expect(labels.first.$2, 'row 1');
+      expect(labels.last.$2, 'row 5000');
+      expect(labels.length, inInclusiveRange(2, 12));
+    });
+
     test('a fitted view with a step of its own keeps its first label where it is whole, or where the view keeps room at its ends', () {
       // An axis left of the plot gives the first label room.
       final left = engine(plot(x: {'fit': 'points', 'tickEvery': 1}, marks: [{'type': 'line', 'y': 'a'}]), rowsOf(4));

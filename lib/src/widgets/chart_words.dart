@@ -215,8 +215,8 @@ ChartGraph seriesChartGraph(Node n) {
         ],
         'selection': {...selection, 'by': 'mark', 'grow': 4},
         'crosshair': _noCrosshair,
-        // Its slices' labels with their shares: beside it where it is wider
-        // than high, else under it.
+        // Its slices' labels with their shares, beside it where its box has
+        // the room.
         'legend': _legend(p(ChartProps.legend)),
         'style': style,
       },
