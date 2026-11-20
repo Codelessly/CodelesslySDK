@@ -7,7 +7,7 @@ final class Step {
   const Step(this.kind, this.target, [this.value]);
 
   /// tap, double-tap, long-press, right-click, hover, focus, unfocus, key,
-  /// type, set, scroll, drag, wheel, pinch, navigate, reload or wait.
+  /// type, set, stage, scroll, drag, wheel, pinch, navigate, reload or wait.
   final String kind;
   final String target;
   final String? value;
@@ -184,10 +184,18 @@ Options:
                           it (a button, a row with a tap reaction, a handle).
   --type <nodeId>=<text>  Focus a text field and type text into it, as a user
                           would (its changed reactions run; a field bound to a
-                          variable through props.initialValue sets it).
+                          variable through props.initialValue sets it). A
+                          newline in the text is typed (a multiline field gets
+                          every line): --type note=\$'one\\ntwo' in bash,
+                          {"type": "note=one\\ntwo"} in a states.json step.
   --set <name>=<json>     Set a variable of the screen in view (value as JSON: 1,
-                          true, "a"). It holds: a timer or load reaction that
-                          writes it later does not change the capture.
+                          true, "a"). It holds: when only --wait and --set
+                          steps follow it, a timer or load reaction that writes
+                          it later does not change the capture (set_overwritten).
+  --stage <name>=<json>   Set a variable once, as --set does, and let the page
+                          move it after: a timer, a reaction or a --wait that
+                          follows starts from it (an initial index an auto timer
+                          advances, a state a delay replaces). Never held.
   --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
                           and countdowns are the same in every run.
   --screen-timeout <seconds>   The most real time one screen at one size may
@@ -266,8 +274,21 @@ the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
 the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait, --frames) run in the order given.
+A node written inside a defined word (a site's components/*.txt, a
+dictionary word) is reached by the id written there: --tap editorBack for
+IconButton#editorBack in EditorBar (expanded as editorBack_editorBar1), or
+editorBar1/editorBack for one call's when several are on screen.
+Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --stage, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait, --frames) run in the order given.
 ''';
+
+/// The arguments in the file render.sh writes for the harness: each ended by
+/// a NUL, so an argument keeps a newline it holds (`--type note=one⏎two`
+/// types both lines). A file without a NUL is read one argument per line.
+List<String> argsFromFile(String text) {
+  final parts = text.contains('\u0000') ? text.split('\u0000') : text.split(RegExp(r'\r?\n'));
+  if (parts.isNotEmpty && parts.last.isEmpty) parts.removeLast();
+  return parts;
+}
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
 RenderArgs parseArgs(List<String> argv) {
@@ -362,7 +383,7 @@ RenderArgs parseArgs(List<String> argv) {
         steps.add(const Step('reload', ''));
       case '--tap' || '--double-tap' || '--long-press' || '--right-click' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key' || '--frames':
         steps.add(Step(a.substring(2), next(i++, a)));
-      case '--set' || '--scroll' || '--type' || '--drag' || '--wheel' || '--pinch':
+      case '--set' || '--stage' || '--scroll' || '--type' || '--drag' || '--wheel' || '--pinch':
         final v = next(i++, a);
         final eq = v.indexOf('=');
         if (eq < 0) throw FormatException('$a takes <target>=<value>, got "$v".');

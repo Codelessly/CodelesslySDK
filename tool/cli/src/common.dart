@@ -66,10 +66,33 @@ final Directory sdkRoot = () {
 String get renderScript => '${sdkRoot.path}/tool/render/render.sh';
 String get serveScript => '${sdkRoot.path}/tool/render/serve.sh';
 
+/// The environment a shell script is started with on Windows: Git Bash's runtime expands the arguments it is given
+/// as globs unless told not to (`MSYS=noglob`), so an argument such as `items=[]` crashed bash before the script
+/// ran (no output, no capture) and `*.png` would have been a list of files. Arguments reach the script as written.
+Map<String, String>? scriptEnvironment(bool script) {
+  if (!script) return null;
+  final msys = Platform.environment['MSYS'] ?? '';
+  return {'MSYS': msys.split(RegExp(r'\s+')).contains('noglob') ? msys : '$msys noglob'.trim()};
+}
+
+/// How a shell script is started on Windows with [args]: bash with the script and the arguments, and the
+/// environment [scriptEnvironment] gives. A Windows command line cannot carry a newline inside an argument (Git
+/// Bash splits it there: `--type note=one⏎two` typed "one" and took "two" for a document), so arguments holding one
+/// go in a file instead, each ended by a NUL, named by CODELESSLY_ARGS_FILE (render.sh reads it in place of its
+/// command line).
+(List<String>, Map<String, String>) _scriptStart(String exe, List<String> args) {
+  final env = scriptEnvironment(true)!;
+  if (!args.any((a) => a.contains('\n') || a.contains('\r'))) return ([exe, ...args], env);
+  final file = File('${Directory.systemTemp.path}/codelessly_args_${pid}_${DateTime.now().microsecondsSinceEpoch}');
+  file.writeAsStringSync(args.map((a) => '$a\u0000').join());
+  return ([exe], {...env, 'CODELESSLY_ARGS_FILE': file.path.replaceAll(r'\', '/')});
+}
+
 /// Runs a command; returns its exit status and its stdout and stderr together, as the person would read them.
 Future<(int, String)> runCaptured(String exe, List<String> args, {String? cwd, Duration? timeout}) async {
   final script = Platform.isWindows && exe.endsWith('.sh');
-  final p = await Process.start(script ? 'bash' : exe, script ? [exe, ...args] : args, workingDirectory: cwd);
+  final (scriptArgs, env) = script ? _scriptStart(exe, args) : (args, null);
+  final p = await Process.start(script ? 'bash' : exe, scriptArgs, workingDirectory: cwd, environment: env);
   final out = StringBuffer();
   final done = Future.wait([
     p.stdout.transform(utf8.decoder).forEach(out.write),
@@ -87,7 +110,8 @@ Future<(int, String)> runCaptured(String exe, List<String> args, {String? cwd, D
 Future<int> runInherited(String exe, List<String> args, {String? cwd}) async {
   // Windows cannot start a shell script: bash runs it.
   final script = Platform.isWindows && exe.endsWith('.sh');
-  final p = await Process.start(script ? 'bash' : exe, script ? [exe, ...args] : args, workingDirectory: cwd, mode: ProcessStartMode.inheritStdio);
+  final (scriptArgs, env) = script ? _scriptStart(exe, args) : (args, null);
+  final p = await Process.start(script ? 'bash' : exe, scriptArgs, workingDirectory: cwd, environment: env, mode: ProcessStartMode.inheritStdio);
   return p.exitCode;
 }
 

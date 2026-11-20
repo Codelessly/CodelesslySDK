@@ -1,6 +1,7 @@
 // The render command's entry point, run by render.sh under `flutter test`
 // (headless: no device, real fonts loaded from files). Reads its arguments
-// from the file CODELESSLY_RENDER_ARGS names (one per line) and writes the
+// from the file CODELESSLY_RENDER_ARGS names (each ended by a NUL, so one may
+// hold a newline: [argsFromFile]) and writes the
 // report next to the PNGs; render.sh prints it and exits with its status.
 //
 // With CODELESSLY_RENDER_SERVE=<dir> it is the render server instead
@@ -34,7 +35,7 @@ void main() {
 
 /// One run: the arguments in [argsFile]; its report and exit status beside it.
 Future<void> _renderOne(WidgetTester tester, String argsFile) async {
-  final lines = File(argsFile).readAsLinesSync();
+  final lines = argsFromFile(File(argsFile).readAsStringSync());
   final status = File('$argsFile.status');
   if (lines.contains('--sheet')) return _sheetOne(tester, lines, argsFile);
   // `--state <label> <steps…>`, again for each state: one run (one start of
