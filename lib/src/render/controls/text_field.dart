@@ -99,6 +99,10 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
     ..services = interactive ? services : null
     ..interactive = interactive
     ..config = TextFieldConfig.of(n, tokens, inherited: b.slot.textDefault, interactive: interactive)
+    // `transition property=decoration duration=167 curve=easeOut`: its
+    // frame's border and fill ease between their focused, hovered, error and
+    // disabled looks (a `*` transition doesn't).
+    ..frameTransition = interactive ? fieldFrameTransition(n) : null
     ..autofillGroup = interactive ? FieldAutofillGroup.of(b) : null
     ..validation = interactive ? _validation(b, n) : null
     ..onStateChanged = interactive && (patched.isNotEmpty || around.isNotEmpty)

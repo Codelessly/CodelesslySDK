@@ -25,9 +25,12 @@ import 'dart:ui' as ui show BoxHeightStyle;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, readInt, readString;
 import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/physics.dart' show SpringSimulation;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
 
 import '../convert.dart';
+import '../physics.dart' show describeSpring;
 import '../layout/control_line.dart';
 import '../paint/icon_glyph.dart';
 import '../paint/icon_names.dart';
@@ -524,8 +527,91 @@ enum FieldFramePart { label, box, prefixIcon, suffixIcon, below, none }
 /// or error below) around content its subclass lays out and paints
 /// ([layoutContent], [paintContent]). The content is one line centered in the
 /// box, or several from its top ([contentMultiline]).
+/// The transition a field's frame eases its state looks with: the node's
+/// `transition property=decoration` (or a path under it), not `*`.
+api.Transition? fieldFrameTransition(api.Node n) {
+  final t = api.Transition.of(n.behaviors.transitions, 'decoration');
+  return t == null || t.property == '*' ? null : t;
+}
+
 abstract class RenderFieldFrame extends RenderControl implements LabeledControl, ControlLineField {
   RenderFieldFrame();
+
+  // --- its look easing between states ------------------------------------------------
+
+  /// How its frame's border and fill ease when its state changes it (focus,
+  /// hover, an error, disabled): the node's `transition property=decoration`
+  /// ([fieldFrameTransition]). Null: at once.
+  api.Transition? frameTransition;
+
+  /// What the border and fill ease from, and what they were last drawn as.
+  FieldBorder? _borderFrom, _borderDrawn, _borderTarget;
+  Color? _fillFrom, _fillDrawn, _fillTarget;
+  Ticker? _frameTicker;
+  double _frameEase = 1;
+
+  /// Whether its border or fill is easing (tests).
+  bool get frameEasing => _frameTicker?.isActive ?? false;
+
+  /// [border] and [fill] as drawn now: on the way from where they were when
+  /// the state last changed, [frameTransition] permitting.
+  (FieldBorder, Color?) _eased(FieldBorder border, Color? fill) {
+    final t = frameTransition;
+    if (t == null || (t.duration <= 0 && t.spring == null) || RendererBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      _borderDrawn = _borderTarget = border;
+      _fillDrawn = _fillTarget = fill;
+      return (border, fill);
+    }
+    if (_borderTarget == null) {
+      _borderDrawn = _borderTarget = border;
+      _fillDrawn = _fillTarget = fill;
+    } else if (border != _borderTarget || fill != _fillTarget) {
+      // A new look: from what is drawn now.
+      _borderFrom = _borderDrawn;
+      _fillFrom = _fillDrawn;
+      _borderTarget = border;
+      _fillTarget = fill;
+      _frameEase = 0;
+      final ticker = _frameTicker ??= Ticker(_frameTick, debugLabel: 'field frame');
+      ticker
+        ..stop()
+        ..start();
+    }
+    if (_frameEase >= 1 || _borderFrom == null) {
+      _borderDrawn = border;
+      _fillDrawn = fill;
+      return (border, fill);
+    }
+    final p = _frameEase;
+    final from = _borderFrom!;
+    final fromSide = from.kind == FieldBorderKind.none ? border.side.copyWith(color: border.side.color.withValues(alpha: 0)) : from.side;
+    final side = BorderSide.lerp(fromSide, border.side, p);
+    _borderDrawn = FieldBorder(border.kind == FieldBorderKind.none ? from.kind : border.kind, side, border.radius ?? from.radius);
+    _fillDrawn = Color.lerp(_fillFrom ?? fill?.withValues(alpha: 0), fill ?? _fillFrom?.withValues(alpha: 0), p);
+    return (_borderDrawn!, _fillDrawn);
+  }
+
+  void _frameTick(Duration elapsed) {
+    final t = frameTransition;
+    if (t == null) {
+      _frameEase = 1;
+      _frameTicker?.stop();
+      markNeedsPaint();
+      return;
+    }
+    final ms = elapsed.inMicroseconds / 1000 - t.delay;
+    if (t.spring != null) {
+      final s = SpringSimulation(describeSpring(t.spring!), 0, 1, 0);
+      final run = ms <= 0 ? 0.0 : ms / 1000;
+      final done = run > 0 && s.isDone(run);
+      _frameEase = done ? 1 : s.x(run);
+    } else {
+      final u = (ms / math.max(1, t.duration)).clamp(0.0, 1.0);
+      _frameEase = u >= 1 ? 1 : t.curve.transform(u);
+    }
+    if (_frameEase >= 1) _frameTicker?.stop();
+    if (attached) markNeedsPaint();
+  }
 
   FieldDecoration? _decoration;
   FieldDecoration get decoration => _decoration!;
@@ -1259,7 +1345,8 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     final canvas = context.canvas;
     if (d.label.isNotEmpty) _label.paint(canvas, offset + Offset(_rtl ? size.width - _label.width : 0, _labelTop));
     final shape = boxShape.shift(offset);
-    if (fillNow case final Color fill when fill.a > 0) canvas.drawRRect(shape, Paint()..color = fill);
+    final (b, fillShown) = _eased(currentBorder, fillNow);
+    if (fillShown case final Color fill when fill.a > 0) canvas.drawRRect(shape, Paint()..color = fill);
     // The affixes.
     for (final (a, prefix) in [(d.prefix, true), (d.suffix, false)]) {
       if (a == null || !a.hasText || !(a.alwaysVisible || affixTextsShown)) continue;
@@ -1306,7 +1393,6 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     // The clip may have pushed a layer: draw on the canvas after it.
     final over = context.canvas;
     // The border over the content (it never moves it).
-    final b = currentBorder;
     if (b.kind != FieldBorderKind.none && b.side.width > 0 && b.side.color.a > 0) {
       final paint = Paint()
         ..style = PaintingStyle.stroke
@@ -1375,6 +1461,8 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     for (final p in [_label, _hint, _below, _counter, _prefixText, _suffixText]) {
       p.dispose();
     }
+    _frameTicker?.dispose();
+    _frameTicker = null;
     _opacity.layer = null;
     _clip.layer = null;
     super.dispose();

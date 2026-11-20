@@ -50,6 +50,8 @@ Future<T?> showShellDialog<T>({
   Color? barrierColor,
   bool useSafeArea = true,
   RouteSettings? routeSettings,
+  double? enterScale,
+  Offset? scaleOrigin,
 }) {
   final navigator = Navigator.of(context);
   final themes = InheritedTheme.capture(from: context, to: navigator.context);
@@ -64,10 +66,18 @@ Future<T?> showShellDialog<T>({
     traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
     transitionBuilder: (context, animation, _, child) {
       final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-      return FadeTransition(
-        opacity: curved,
-        child: ScaleTransition(scale: Tween<double>(begin: 0.96, end: 1).animate(curved), child: child),
-      );
+      final scale = Tween<double>(begin: enterScale ?? 0.96, end: 1).animate(curved);
+      // From [enterScale] about [scaleOrigin] (an anchored popover grows
+      // out of the node that opened it), else from 96% about the middle.
+      final grown = scaleOrigin == null
+          ? ScaleTransition(scale: scale, child: child)
+          : AnimatedBuilder(
+              animation: scale,
+              child: child,
+              builder: (context, child) =>
+                  Transform.scale(scale: scale.value, origin: scaleOrigin, alignment: Alignment.topLeft, child: child),
+            );
+      return FadeTransition(opacity: curved, child: grown);
     },
     pageBuilder: (routeContext, _, _) {
       Widget dialog = themes.wrap(Builder(builder: builder));
