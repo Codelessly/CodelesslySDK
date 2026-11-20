@@ -776,7 +776,11 @@ class RenderTree {
     var n = _patched(id, instance);
     if (n == null) return null;
     final binder = _bindings;
-    if (binder == null) return _withAnimated(id, instance, BoundNode(n));
+    if (binder == null) {
+      final off = _offState(n, n, const {});
+      if (off.isNotEmpty && _syncBoundStates(id, instance, off)) n = _patched(id, instance)!;
+      return _withAnimated(id, instance, BoundNode(n));
+    }
     final bound = _resolveBound(id, instance, n, binder);
     if (bound.collapsed || bound.node.visible) return bound;
     // Hidden by a media rule or an interaction state's patch, as by a
@@ -792,13 +796,36 @@ class RenderTree {
   BoundNode _resolveBound(String id, Object? instance, Node n, TreeBindings binder) {
     final source = sourceOf(instance);
     var bound = binder.bind(source, n, instance);
+    final states = _offState(n, bound.node, bound.states);
     // States driven by data (`selected`, `disabled`): held like hover, so
     // the node's state styles patch it (bind it again) and its targets.
-    if (bound.states.isNotEmpty && _syncBoundStates(id, instance, bound.states)) {
+    if (states.isNotEmpty && _syncBoundStates(id, instance, states)) {
       n = _patched(id, instance)!;
       bound = binder.bind(source, n, instance);
     }
     return _withAnimated(id, instance, _withBoundThemeNames(id, instance, n, bound));
+  }
+
+  /// [states] (a node's bound states), with a control written off
+  /// (`enabled=false`, or bound to false: [shown]'s) in its disabled state
+  /// for its own state styles (`disabled.fill=…`), unless a binding says
+  /// otherwise. (They were never drawn: the button showed its enabled fill
+  /// faded.)
+  static Map<api.WidgetState, bool> _offState(Node n, Node shown, Map<api.WidgetState, bool> states) {
+    if (states.containsKey(api.WidgetState.disabled) || !n.behaviors.states.patches.containsKey(api.WidgetState.disabled)) return states;
+    if (_enabledOf(shown) case final bool on) return {...states, api.WidgetState.disabled: !on};
+    return states;
+  }
+
+  /// Whether a control is on (its `enabled` or `isEnabled`), or null for a
+  /// node that has no such key.
+  static bool? _enabledOf(Node n) {
+    for (final p in n.spec?.props ?? const <api.PropDef<Object?>>[]) {
+      if ((p.key == 'enabled' || p.key == 'isEnabled') && p.defaultValue is bool) {
+        if (n.props.get(p) case final bool on) return on;
+      }
+    }
+    return null;
   }
 
   /// Turns node [id]'s bound [states] on or off without re-applying it
