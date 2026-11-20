@@ -786,6 +786,9 @@ class _LayoutViewState extends State<_LayoutView> {
     if (mq == null) return;
     final screen = {
       ...screenValues(mq.size.width, mq.size.height, dark: _dark, breakpoints: _breakpoints),
+      // What the device covers: the safe area, the keyboard, and the text
+      // scale the layout's text is drawn at.
+      ...deviceEdgesOf(mq, maxTextScale: _codelessly.config.maxTextScaleFactor),
       // How the screen is shown: as a modal (dialog or sheet), and as a
       // bottom sheet, whose drag handle sits over its top edge.
       'modal': widget.sizing != CanvasSizing.fill,

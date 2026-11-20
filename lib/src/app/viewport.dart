@@ -7,6 +7,29 @@ import 'package:codelessly_api/core.dart' show CanvasProps, Node, ScaleMode, Siz
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../runtime/expressions/scopes.dart' show deviceEdgeValues;
+
+/// The device's edges as [mq] gives them, for the `screen` value
+/// ([deviceEdgeValues]): the safe area (`padding`), the keyboard
+/// (`viewInsets.bottom`) and the text scale, at most [maxTextScale] (the
+/// largest the screen's text follows, `CodelesslyConfig.maxTextScaleFactor`).
+///
+/// The host supplies them as Flutter does: the platform's view metrics, or
+/// a `MediaQuery` the app puts above the layout (a `SafeArea` around it
+/// consumes the insets, so the layout reads none).
+Map<String, Object?> deviceEdgesOf(MediaQueryData mq, {double? maxTextScale}) {
+  final scaler = maxTextScale == null ? mq.textScaler : mq.textScaler.clamp(maxScaleFactor: maxTextScale);
+  return deviceEdgeValues(
+    top: mq.padding.top,
+    right: mq.padding.right,
+    bottom: mq.padding.bottom,
+    left: mq.padding.left,
+    keyboard: mq.viewInsets.bottom,
+    // A factor (a nonlinear scaler, Android 14's, scales body text by this).
+    textScale: (scaler.scale(100) / 100 * 100).roundToDouble() / 100,
+  );
+}
+
 /// How a canvas sizes itself in its host.
 enum CanvasSizing {
   /// The canvas is the screen: it fills the width and height it's given.

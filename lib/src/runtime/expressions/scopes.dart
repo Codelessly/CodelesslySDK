@@ -785,6 +785,27 @@ Map<String, Object?> screenValues(double width, double height,
   };
 }
 
+/// What the device covers of a screen, read under `screen` beside its size
+/// ([screenValues]), in logical pixels:
+///
+/// * `insets`: `{top, right, bottom, left}`, the safe area: a status bar, a
+///   notch, a home indicator. As Flutter's `MediaQuery.padding`, a side the
+///   keyboard covers has none (the home indicator is under it).
+/// * `keyboard`: how much of the screen's bottom the soft keyboard covers (0
+///   while it is closed), as `MediaQuery.viewInsets.bottom`.
+/// * `textScale`: the scale the screen's text is drawn at (1: as designed).
+///
+/// A bar pinned to the bottom rides above the keyboard and clears the home
+/// indicator with one gap: `${= screen.keyboard + screen.insets.bottom}`.
+Map<String, Object?> deviceEdgeValues(
+    {double top = 0, double right = 0, double bottom = 0, double left = 0, double keyboard = 0, double textScale = 1}) {
+  return {
+    'insets': {'top': top, 'right': right, 'bottom': bottom, 'left': left},
+    'keyboard': keyboard,
+    'textScale': textScale,
+  };
+}
+
 /// The project breakpoints a `screen` value ([screenValues]) was made with.
 Breakpoints breakpointsOfScreen(Object? screen) {
   final list = screen is Map ? screen['breakpoints'] : null;

@@ -577,6 +577,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     _errorLog.clear();
   }
   tester.view.reset();
+  tester.platformDispatcher.clearTextScaleFactorTestValue();
   return _finish(report, args);
 }
 
@@ -721,7 +722,9 @@ Future<void> _renderAll(
             components: components,
             fonts: fetcher,
             config: CodelesslyConfig(
-                services: Services(analytics: recorder, exports: exporter, storage: storage, filePicker: picker), fontTimeout: const Duration(seconds: 5)),
+                services: Services(analytics: recorder, exports: exporter, storage: storage, filePicker: picker), fontTimeout: const Duration(seconds: 5),
+                // `--text-scale`: a host that lets layouts' text scale up to it.
+                maxTextScaleFactor: math.max(1, args.textScale ?? 1)),
           );
       // `--clock`: now() starts at that time on each screen at each size and
       // moves with the test's clock (every --wait, settle and animation).
@@ -738,6 +741,14 @@ Future<void> _renderAll(
       if (args.theme != null) codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = ui.Size(size.width, size.height);
+      // `--insets`, `--text-scale`: the device's safe area and text size
+      // (screen.insets, screen.textScale), and its keyboard closed until a
+      // --keyboard step opens it (screen.keyboard).
+      final [top, right, bottom, left] = args.insets;
+      tester.view.padding = FakeViewPadding(top: top, right: right, bottom: bottom, left: left);
+      tester.view.viewPadding = FakeViewPadding(top: top, right: right, bottom: bottom, left: left);
+      tester.view.viewInsets = FakeViewPadding.zero;
+      if (args.textScale case final double scale) tester.platformDispatcher.textScaleFactorTestValue = scale;
       // The harness runs on a desktop even when it captures a phone. Give
       // desktop captures a connected mouse and narrower captures touch
       // capability, so a page reading device.hover sees the simulated device.
@@ -816,7 +827,18 @@ Future<void> _renderAll(
             // their font without one is the platform's (Roboto, as on Android
             // and the web), given to the published theme ([prepareTheme]).
             theme: ThemeData(fontFamily: 'Roboto'),
-            builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
+            builder: (context, child) {
+              final page = DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!);
+              // `--keyboard`: a plain block where the soft keyboard covers
+              // the screen, as a device draws its keyboard over the app (it
+              // takes the touches there, as a keyboard does). Always the same
+              // tree, so the page is not built again as the keyboard opens.
+              final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+              return Stack(fit: StackFit.expand, children: [
+                page,
+                Positioned(left: 0, right: 0, bottom: 0, height: keyboard, child: const ColoredBox(color: Color(0xFFD1D5DB))),
+              ]);
+            },
             onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
             home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
           ),
@@ -3512,6 +3534,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'wait':
       final ms = int.tryParse(step.target) ?? 0;
       await tester.pump(Duration(milliseconds: ms));
+      return null;
+    case 'keyboard':
+      // The soft keyboard opens to this height (0 closes it): the view's
+      // bottom inset, as a device reports it (screen.keyboard), with the
+      // safe area's bottom (the home indicator) under it, as on a phone.
+      final px = double.tryParse(step.target) ?? 0;
+      final safe = tester.view.viewPadding;
+      tester.view.viewInsets = FakeViewPadding(bottom: px);
+      tester.view.padding = FakeViewPadding(left: safe.left, top: safe.top, right: safe.right, bottom: math.max(0, safe.bottom - px));
+      await tester.pump();
       return null;
     case 'unfocus':
       final field = RenderTextField.focused;

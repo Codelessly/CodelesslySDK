@@ -2,7 +2,7 @@
 # Render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
 #       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text]
-#       [--set name=json] [--stage name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--long-press id] [--right-click id] [--reload] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time] [--clock time] [--screen-timeout seconds]
+#       [--set name=json] [--stage name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--long-press id] [--right-click id] [--reload] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time] [--clock time] [--insets top,bottom] [--text-scale f] [--keyboard px] [--screen-timeout seconds]
 #       [--label text] [--state label steps... (repeatable)] [--compare png|dir] [--compare-map screen=name]
 #       [--component Type [--props json] [--slots file]]
 #       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
@@ -68,7 +68,7 @@ for a in "$@"; do
         # A table (a .json file) is a path too.
         case "$key" in *.json) key="$(abs "$key")" ;; esac
         args+=("$key=$dir")
-      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|stage|scroll|drag|navigate|wait|frames|now|clock|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|stage|scroll|drag|navigate|wait|frames|now|clock|insets|text-scale|keyboard|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"
