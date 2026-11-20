@@ -34,6 +34,8 @@ import 'package:flutter/scheduler.dart';
 
 import 'behaviors.dart' show RenderMotion, RenderPose, RenderShimmer;
 import 'contracts.dart';
+import 'hero.dart' show RenderHeroMark;
+import 'layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'node_tree.dart' show NodeBox;
 import 'physics.dart' show describeSpring;
 import 'recipe.dart';
@@ -80,6 +82,28 @@ void animationLayers(NodeBuilder b, Node n, List<RenderBox> chain,
     b.obtain<RenderAnimations>('animations', RenderAnimations.new)
       ..configure(box, n, animates: animates, motion: motion, shimmer: shimmer),
   );
+}
+
+/// Whether what [root] draws has settled: no animation player in it (but
+/// [except]) is playing, waiting to start or easing, and no lifted hero in
+/// it is flying or waiting to be landed on.
+bool settledBox(RenderObject root, {RenderObject? except}) {
+  var settled = true;
+  void visit(RenderObject o) {
+    if (!settled) return;
+    if (o is RenderAnimations && !identical(o, except) && o.moving) {
+      settled = false;
+      return;
+    }
+    if (o is RenderHeroMark && o.flies == api.HeroFlies.lift && o.tag.isNotEmpty && !o.liftShown) {
+      settled = false;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(root);
+  return settled;
 }
 
 // --- the controller ------------------------------------------------------------
@@ -484,13 +508,15 @@ class RenderAnimations extends RenderPose {
     }
     final cues = <String>[];
     final restart = <String>[];
+    _sizeTransitions(n);
     for (final a in specs) {
       final old = _specs.where((s) => s.id == a.id).firstOrNull;
       final clock = _clocks[a.id] ??= AnimationClock(a);
       clock.spec = a;
       if (old != null) {
         final before = _playKeys[a.id];
-        if (a.playKey != before && _cues(a.playKey)) cues.add(a.id);
+        final key = _playKeyOf(a);
+        if (key != before && _cues(key)) cues.add(a.id);
         if (old.enabled != a.enabled || old.paused != a.paused || old.repeat != a.repeat || old.durationMs != a.durationMs) {
           restart.add(a.id);
         } else if (old.phase != a.phase && a.repeats && !old.paused) {
@@ -498,8 +524,8 @@ class RenderAnimations extends RenderPose {
         }
       }
     }
-    _playKeys = {for (final a in specs) a.id: a.playKey};
     _specs = specs;
+    _playKeys = {for (final a in specs) a.id: _playKeyOf(a)};
     _watchProgress();
     if (_animates != wasAnimating) _appeared = false;
     if (attached && _animates) {
@@ -523,15 +549,43 @@ class RenderAnimations extends RenderPose {
   final Map<String, Listenable> _progressWatches = {};
 
   void _onProgress() {
-    if (attached) _show();
+    if (!attached) return;
+    _cueChangedKeys();
+    _show();
+  }
+
+  /// [a]'s play key as it reads now: an expression (`playKey={step}` on an
+  /// animation line) worked out, else as written.
+  String? _playKeyOf(api.NodeAnimation a) {
+    final key = a.playKey;
+    if (key == null || !key.contains(r'${')) return key;
+    final values = _animates ? _values : null;
+    if (values == null) return null;
+    return values.interpolate(key).toString();
+  }
+
+  /// Plays the animations whose worked-out play key changed (a value it
+  /// reads changed, the node itself not rebuilt).
+  void _cueChangedKeys() {
+    if (!_animates) return;
+    for (final a in _specs) {
+      if (a.playKey == null || !a.playKey!.contains(r'${')) continue;
+      final key = _playKeyOf(a);
+      final before = _playKeys[a.id];
+      if (key == before) continue;
+      _playKeys[a.id] = key;
+      if (_cues(key)) unawaited(play(a.id));
+    }
   }
 
   void _watchProgress() {
     final values = _animates ? _values : null;
     final names = <String>{
       if (values is ExpressionValues)
-        for (final a in _specs)
+        for (final a in _specs) ...[
           if (a.enabled && a.progress != null) ...values.namesRead(a.progress!),
+          if (a.enabled && a.playKey != null && a.playKey!.contains(r'${')) ...values.namesRead(a.playKey!),
+        ],
     };
     for (final name in _progressWatches.keys.toList()) {
       if (!names.contains(name)) _progressWatches.remove(name)!.removeListener(_onProgress);
@@ -574,6 +628,8 @@ class RenderAnimations extends RenderPose {
       _seedPhase(clock);
       if (a.autoplays && a.visibleFraction != null) {
         _waitingInView.add(a.id);
+      } else if (a.autoplays && !a.paused && (a.after ?? '').isNotEmpty && a.progress == null) {
+        _waitingAfter.add(a.id);
       } else if (a.autoplays && !a.paused) {
         _autoplay(clock);
       }
@@ -582,6 +638,72 @@ class RenderAnimations extends RenderPose {
       _watchInView();
       SchedulerBinding.instance.scheduleFrame();
     }
+    if (_waitingAfter.isNotEmpty) {
+      _watchAfter();
+      SchedulerBinding.instance.scheduleFrame();
+    }
+  }
+
+  // --- after: this starts when that ends ------------------------------------------
+
+  /// Animations waiting for another node to settle ([api.NodeAnimation.after]).
+  final Set<String> _waitingAfter = {};
+  bool _afterScheduled = false;
+
+  /// Whether an animation waits for another node to settle.
+  bool get waitsForAnother => _waitingAfter.isNotEmpty;
+
+  /// Checks after each frame, while some wait, whether the node each waits
+  /// for has settled. The first check is a frame after it appears: what it
+  /// waits for (an overlay's lifted node) starts moving then.
+  void _watchAfter() {
+    if (_afterScheduled || _waitingAfter.isEmpty) return;
+    _afterScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _afterScheduled = false;
+      if (!attached || !_animates) return;
+      _checkAfter();
+      if (_waitingAfter.isNotEmpty) {
+        _watchAfter();
+        SchedulerBinding.instance.scheduleFrame();
+      }
+    });
+  }
+
+  /// The settled frames counted for each waiting animation: what it waits
+  /// for must be still for two frames in a row (a flight starts a frame
+  /// after the overlay that asks for it shows).
+  final Map<String, int> _stillFrames = {};
+
+  void _checkAfter() {
+    for (final id in _waitingAfter.toList()) {
+      final clock = _clocks[id];
+      final a = clock?.spec;
+      if (clock == null || a == null || !a.enabled || a.after == null) {
+        _waitingAfter.remove(id);
+        continue;
+      }
+      final target = _afterBox(a.after!);
+      final still = target == null || settledBox(target, except: this);
+      final frames = still ? (_stillFrames[id] ?? 0) + 1 : 0;
+      _stillFrames[id] = frames;
+      if (frames < 2) continue;
+      _waitingAfter.remove(id);
+      _stillFrames.remove(id);
+      if (!a.paused) _autoplay(clock);
+    }
+    _show();
+    _sync();
+  }
+
+  /// The box of node [id] an animation waits for: in this node's component
+  /// instance, else the screen's, else any copy on screen.
+  RenderBox? _afterBox(String id) {
+    final box = _box;
+    if (box == null) return null;
+    final tree = box.tree;
+    final found = tree.boxOf(id, instance: box.instance) ?? tree.boxOf(id) ?? tree.boxesOf(id).where((b) => b.attached).firstOrNull;
+    return found != null && found.attached ? found : null;
   }
 
   /// Animations waiting for the node to be in view.
@@ -720,9 +842,168 @@ class RenderAnimations extends RenderPose {
     return done;
   }
 
+  /// Whether something it draws is still moving: a clock playing, an
+  /// animation waiting to start, a transition easing or its size easing.
+  bool get moving =>
+      _clocks.values.any((c) => c.isAnimating) ||
+      _waitingInView.isNotEmpty ||
+      _waitingAfter.isNotEmpty ||
+      _tweens.isNotEmpty ||
+      _sizeTo != null;
+
+  // --- its own size ----------------------------------------------------------------
+
+  /// The transitions that ease its laid-out width and height (`transition
+  /// property=layout`, or `layout.width` / `layout.height` for one axis):
+  /// when what it holds changes its size, its box grows or shrinks to the new
+  /// one (Flutter's `AnimatedSize`), its content laid out at the new size
+  /// and clipped to the box, from its top start. Null: that axis follows at
+  /// once. A `*` transition doesn't ease the size.
+  api.Transition? _widthEase, _heightEase;
+
+  void _sizeTransitions(Node n) {
+    api.Transition? of(String axis) {
+      final t = api.Transition.of(n.behaviors.transitions, 'layout.$axis');
+      if (t == null || t.property == '*') return null;
+      // A fixed number eased as a value (`transition property=layout.width`
+      // over a bound width) is that value's transition, not the box's.
+      if (t.property == 'layout.$axis' && api.readDouble(_ownValue(n.id, 'layout.$axis', node: n)) != null) return null;
+      return t;
+    }
+
+    final w = of('width'), h = of('height');
+    if (w == _widthEase && h == _heightEase) return;
+    _widthEase = w;
+    _heightEase = h;
+    if (w == null && h == null) {
+      _sizeSince = null;
+      _sizeFrom = _sizeTo = null;
+    }
+    markNeedsLayout();
+  }
+
+  /// The size it eases from and to, and the ticker time it started at (null:
+  /// not easing).
+  Size? _sizeFrom, _sizeTo;
+  Duration? _sizeSince;
+  int _sizeStartTick = 0;
+
+  /// The size its box is drawn at now.
+  Size? _sizeNow;
+
+  /// Whether its content is larger than its box now (it is clipped).
+  bool _clipsContent = false;
+
+  bool get _easesSize => _widthEase != null || _heightEase != null;
+
+  /// How far along [t] is at [ms] into its run (eased, 0–1), and whether
+  /// it is done.
+  static (double, bool) _sizeProgress(api.Transition t, double ms) {
+    final run = math.max(0.0, ms - t.delay);
+    if (t.spring != null) {
+      final s = SpringSimulation(describeSpring(t.spring!), 0, 1, 0);
+      final done = run > 0 && s.isDone(run / 1000);
+      return (done ? 1 : s.x(run / 1000), done);
+    }
+    final u = (run / math.max(1, t.duration)).clamp(0.0, 1.0);
+    final done = run >= t.duration;
+    return (done ? 1 : t.curve.transform(u), done);
+  }
+
+  @override
+  void performLayout() {
+    final child = this.child;
+    if (child == null || !_easesSize) {
+      super.performLayout();
+      _sizeNow = size;
+      _clipsContent = false;
+      return;
+    }
+    child.layout(constraints, parentUsesSize: true);
+    final target = child.size;
+    final now = _sizeNow;
+    if (now == null || !_animates || RenderAnimations.reducedMotion) {
+      // First laid out (or a canvas that doesn't animate): its size at once.
+      _sizeNow = target;
+      _sizeSince = null;
+    } else if (target != _sizeTo && target != now) {
+      // A new size: from what is drawn now, on the tick after this one.
+      _sizeFrom = now;
+      _sizeTo = target;
+      _sizeSince = null;
+      _sizeStartTick = 1;
+      _sync();
+    } else if (_sizeTo == null || target == now) {
+      _sizeTo = null;
+      _sizeSince = null;
+    }
+    if (_sizeTo case final Size to) {
+      final from = _sizeFrom!;
+      final ms = _sizeSince == null ? 0.0 : (_now - _sizeSince!).inMicroseconds / 1000;
+      var w = to.width, h = to.height;
+      var done = true;
+      if (_widthEase case final api.Transition t) {
+        final (p, d) = _sizeProgress(t, ms);
+        w = from.width + (to.width - from.width) * p;
+        done &= d;
+      }
+      if (_heightEase case final api.Transition t) {
+        final (p, d) = _sizeProgress(t, ms);
+        h = from.height + (to.height - from.height) * p;
+        done &= d;
+      }
+      _sizeNow = Size(w, h);
+      if (done) {
+        _sizeTo = null;
+        _sizeSince = null;
+        _sizeNow = to;
+      }
+    }
+    size = constraints.constrain(_sizeNow!);
+    // Laid out again at the size drawn now, so its own fill, border and
+    // corners follow the box (as a height eased in CSS); what doesn't fit
+    // yet is clipped.
+    final easing = (size.width - target.width).abs() > 0.01 || (size.height - target.height).abs() > 0.01;
+    if (easing) child.layout(BoxConstraints.tight(size), parentUsesSize: true);
+    _clipsContent = easing;
+  }
+
+  /// Moves its size on the ticker: a new layout each tick while it eases.
+  void _advanceSize() {
+    if (_sizeTo == null) return;
+    if (_sizeStartTick > 0) {
+      _sizeStartTick = 0;
+      _sizeSince = _now;
+    }
+    markNeedsLayout();
+  }
+
+  final LayerHandle<ClipRectLayer> _sizeClip = LayerHandle();
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (!_clipsContent) {
+      _sizeClip.layer = null;
+      super.paint(context, offset);
+      return;
+    }
+    RenderCodelesslyFlex.easingSize++;
+    try {
+      _sizeClip.layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint, oldLayer: _sizeClip.layer);
+    } finally {
+      RenderCodelesslyFlex.easingSize--;
+    }
+  }
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (_clipsContent && !size.contains(position)) return false;
+    return super.hitTest(result, position: position);
+  }
+
   // --- ticking ------------------------------------------------------------------
 
-  bool get _ticking => attached && _animates && (_clocks.values.any((c) => c.isAnimating) || _tweens.isNotEmpty);
+  bool get _ticking => attached && _animates && (_clocks.values.any((c) => c.isAnimating) || _tweens.isNotEmpty || _sizeTo != null);
 
   void _sync() {
     if (_ticking) {
@@ -754,7 +1035,8 @@ class RenderAnimations extends RenderPose {
     for (final c in _clocks.values) {
       c.moved = false;
     }
-    if (!_clocks.values.any((c) => c.isAnimating) && _tweens.isEmpty) {
+    _advanceSize();
+    if (!_clocks.values.any((c) => c.isAnimating) && _tweens.isEmpty && _sizeTo == null) {
       _ticker?.stop();
     }
   }
@@ -902,6 +1184,7 @@ class RenderAnimations extends RenderPose {
       w.removeListener(_onProgress);
     }
     _progressWatches.clear();
+    _sizeClip.layer = null;
     _ticker?.dispose();
     _ticker = null;
     for (final c in _clocks.values) {

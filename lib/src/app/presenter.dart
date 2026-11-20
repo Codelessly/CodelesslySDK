@@ -4,13 +4,13 @@
 // banner, one at a time in priority order, on the app's Navigator, found
 // through a CodelesslyPresenterHost the host puts around its app.
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart'
     show ActionDef, Json, ModalAnchor, ModalPresentation, NavigateAction, OpenModalAction, PopoverPlacement;
 import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
 
+import 'ui/banner.dart' show CodelesslyBanner, CodelesslyBannerState;
 import 'ui/presentation_scope.dart';
 import '../runtime/actions/ui.dart';
 import 'navigator_ui.dart';
@@ -284,7 +284,7 @@ class CodelesslyPresenter {
     final overlay = navigator.overlay;
     if (overlay == null) throw StateError('No Overlay to show a banner on');
     final done = Completer<Object?>();
-    final key = GlobalKey<_BannerState>();
+    final key = GlobalKey<CodelesslyBannerState>();
     late final OverlayEntry entry;
     void finish(Object? result) {
       if (done.isCompleted) return;
@@ -301,11 +301,14 @@ class CodelesslyPresenter {
 
     p.dismiss = () => close(null);
     entry = OverlayEntry(
-      builder: (_) => _Banner(
+      builder: (_) => CodelesslyBanner(
         key: key,
         bottom: p.action.alignment[1] > 0,
         dismissible: p.action.barrierDismissible,
+        transition: p.action.routeTransition,
+        closeAfterMs: p.action.closeAfterMs,
         onDismissed: () => finish(null),
+        onTimeout: () => close(null),
         child: screen(close),
       ),
     );
@@ -507,65 +510,5 @@ class _CodelesslyPresenterHostState extends State<CodelesslyPresenterHost> {
     if (c != null && widget.backdrops) child = CodelesslyBackdropHost(codelessly: c, onActionError: widget.onActionError, child: child);
     if (widget.capture) child = CodelesslyCaptureScope(child: child);
     return c == null ? child : CodelesslyScope(codelessly: c, child: child);
-  }
-}
-
-/// A presented banner: slides in along the top (or bottom) edge, inside the
-/// safe area and above the keyboard; a swipe away dismisses it.
-class _Banner extends StatefulWidget {
-  const _Banner({super.key, required this.bottom, required this.dismissible, required this.onDismissed, required this.child});
-
-  final bool bottom, dismissible;
-  final VoidCallback onDismissed;
-  final Widget child;
-
-  @override
-  State<_Banner> createState() => _BannerState();
-}
-
-class _BannerState extends State<_Banner> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 280), reverseDuration: const Duration(milliseconds: 200))
-        ..forward();
-
-  Future<void> hide() => _controller.reverse();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final media = MediaQuery.of(context);
-    final curved = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    Widget banner = widget.child;
-    if (widget.dismissible) {
-      banner = Dismissible(
-        key: const ValueKey('Codelessly banner'),
-        direction: widget.bottom ? DismissDirection.down : DismissDirection.up,
-        onDismissed: (_) => widget.onDismissed(),
-        child: banner,
-      );
-    }
-    banner = SlideTransition(
-      position: Tween<Offset>(begin: Offset(0, widget.bottom ? 1 : -1), end: Offset.zero).animate(curved),
-      child: FadeTransition(opacity: curved, child: banner),
-    );
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: widget.bottom ? null : 0,
-      bottom: widget.bottom ? media.viewInsets.bottom : null,
-      child: SafeArea(
-        top: !widget.bottom,
-        bottom: widget.bottom,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxHeight: math.max(0, media.size.height - media.viewInsets.bottom)),
-          child: Semantics(container: true, liveRegion: true, child: banner),
-        ),
-      ),
-    );
   }
 }

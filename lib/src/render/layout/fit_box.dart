@@ -415,9 +415,16 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
   /// a problem of its own.
   static bool debugPaintOverflowStripes = true;
 
+  /// Above zero while a box whose size is easing paints what it holds
+  /// (render/animations.dart, `transition property=layout`): its content is
+  /// laid out at the size drawn now, and what doesn't fit yet is the easing,
+  /// clipped by that box, not an overflow to stripe or report.
+  static int easingSize = 0;
+
   @override
   void paintOverflowIndicator(PaintingContext context, Offset offset, Rect containerRect, Rect childRect,
       {List<DiagnosticsNode>? overflowHints}) {
+    if (easingSize > 0) return;
     if (debugPaintOverflowStripes) {
       super.paintOverflowIndicator(context, offset, containerRect, childRect, overflowHints: overflowHints);
       return;

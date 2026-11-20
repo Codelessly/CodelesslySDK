@@ -23,6 +23,7 @@ import 'package:codelessly_api/core.dart' show NavigationMode;
 import 'codelessly_widget.dart' show CodelesslyPageRoute;
 import 'page_transitions.dart' show CodelesslyPageTransitionsScope;
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
+import 'ui/banner.dart' show ModalTimeout, showBanner;
 import 'ui/confirm_dialog.dart';
 import 'ui/feedback_theme.dart';
 import 'ui/presentation_route.dart';
@@ -140,12 +141,32 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   Future<Object?> _open(OpenModalAction action, Json params, SheetStop? stop) async {
     final c = _context;
     if (c == null) return null;
+    // A banner: over everything, no barrier, one at a time (ui/banner.dart).
+    if (action.presentation == ModalPresentation.banner) {
+      final content = (sheetModal ?? modal)?.call(action.to, params);
+      final overlay = ToastOverlayScope.maybeOf(c) ?? Overlay.maybeOf(c, rootOverlay: true);
+      if (content == null || overlay == null) return null;
+      final inherited = InheritedTheme.captureAll(
+          c, Localizations.override(context: c, child: PageLocationScope(location: pageLocationOf(c), child: content)));
+      final media = MediaQuery.maybeOf(c);
+      return showBanner(
+        overlay,
+        (close) {
+          Widget shown = CodelesslyPresentation(presentation: ModalPresentation.banner, close: close, child: inherited);
+          if (media != null) shown = MediaQuery(data: media, child: shown);
+          return shown;
+        },
+        action: action,
+      );
+    }
     final sheetBelowWidth = action.sheetBelowWidthIn(_breakpoints);
     final width = MediaQuery.maybeSizeOf(c)?.width;
     final sheet = action.presentation == ModalPresentation.bottomSheet ||
         (action.presentation == ModalPresentation.adaptive && (width == null || width < sheetBelowWidth));
-    final content = ((sheet ? sheetModal : null) ?? modal)?.call(action.to, params);
+    var content = ((sheet ? sheetModal : null) ?? modal)?.call(action.to, params);
     if (content == null) return null;
+    // It closes itself after a while (held while pressed).
+    if (action.closeAfterMs > 0) content = ModalTimeout(ms: action.closeAfterMs, child: content);
     // Preserve inherited localizations and themes across both modal routes;
     // the modal is at its page's location (`screen.url`).
     final inherited = InheritedTheme.captureAll(
@@ -188,7 +209,8 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
           arrow: action.popoverArrow,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor,
-          popover: action.presentation == ModalPresentation.popover);
+          popover: action.presentation == ModalPresentation.popover,
+          enterScale: action.enterScale);
     }
     return showScreenModal(c, modalContent,
 
@@ -549,6 +571,7 @@ Future<Object?> showAnchoredModal(
   bool barrierDismissible = true,
   api.Color? barrierColor,
   bool popover = false,
+  double enterScale = 1,
 }) {
   final navigator = Navigator.of(context);
   final overlay = navigator.overlay?.context.findRenderObject();
@@ -558,12 +581,16 @@ Future<Object?> showAnchoredModal(
   final layout = PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset,
       reserve: reserve, textDirection: Directionality.of(context));
   final shown = arrow ? _arrowContent(context, content, layout) : content;
+  // With an enter scale it grows out of the middle of what opened it.
+  final grows = enterScale != 1 && enterScale.isFinite && enterScale >= 0;
   return showShellDialog<Object?>(
     context: context,
     barrierDismissible: barrierDismissible,
     barrierColor: barrierColor == null ? ShellColors.transparent : Color(barrierColor.value),
     useSafeArea: false,
     routeSettings: popover ? const RouteSettings(name: popoverRouteName) : null,
+    enterScale: grows ? enterScale : null,
+    scaleOrigin: grows ? local.center : null,
     builder: (_) => CustomSingleChildLayout(
       delegate: layout,
       child: ModalFocus(dismissible: barrierDismissible, popover: true, child: shown),

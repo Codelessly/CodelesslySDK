@@ -1124,7 +1124,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
             : null)
         ..onEnd = (d) {
           final v = d.velocity.pixelsPerSecond;
-          if (_has(TriggerType.dragEnd)) _fire(TriggerType.dragEnd, {'result': {'vx': v.dx, 'vy': v.dy}});
+          // `${result.cancelled}`: the drag was taken away (the system
+          // cancelled the pointer), not let go.
+          final pan = _pan;
+          final cancelled = pan is _OneFingerPanGestureRecognizer && pan.lastCancelled;
+          if (_has(TriggerType.dragEnd)) _fire(TriggerType.dragEnd, {'result': {'vx': v.dx, 'vy': v.dy, 'cancelled': cancelled}});
           if (v.distance < kMinFlingVelocity) return;
           final TriggerType swipe = v.dx.abs() > v.dy.abs()
               ? (v.dx < 0 ? TriggerType.swipeLeft : TriggerType.swipeRight)
@@ -1496,6 +1500,17 @@ class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
 
   int _tracked = 0;
   bool _accepted = false;
+
+  /// Whether the pointer the drag ended with was cancelled (taken away by
+  /// the system), not lifted.
+  bool lastCancelled = false;
+
+  @override
+  void handleEvent(PointerEvent event) {
+    if (event is PointerUpEvent) lastCancelled = false;
+    if (event is PointerCancelEvent) lastCancelled = true;
+    super.handleEvent(event);
+  }
 
   @override
   void addAllowedPointer(PointerDownEvent event) {

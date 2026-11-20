@@ -270,6 +270,68 @@ void main() {
     expect(markOf(p).liftShown, isTrue);
   });
 
+  testWidgets('a line of the overlay with after= starts when the lift lands (codelessly_api docs/design/26)', (tester) async {
+    final (p, _, nav) = await pump(tester);
+    // The overlay: the lifted node and a menu under it that grows in once
+    // the node has landed, with no delay= repeating the flight's time.
+    final o = NodeTree(DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
+      'roots': ['r'],
+      'nodes': {
+        'r': {
+          'type': 'stack',
+          'children': ['h', 'menu'],
+          'layout': {'width': 400, 'height': 800},
+        },
+        'h': box(at(100, 370, 200, 60)),
+        'menu': {
+          'type': 'box',
+          'layout': at(100, 440, 200, 90),
+          'animations': [
+            {'id': 'a', 'preset': 'enter', 'params': {'from': {'opacity': 0, 'scale': 0.6}}, 'duration': 200, 'after': 'h'},
+          ],
+        },
+      },
+    })));
+    addTearDown(o.dispose);
+    nav.currentState!.push(over(o));
+    await tester.pump();
+    RenderAnimations player() {
+      RenderAnimations? found;
+      void visit(RenderObject r) {
+        if (found != null) return;
+        if (r is RenderAnimations) {
+          found = r;
+          return;
+        }
+        r.visitChildren(visit);
+      }
+
+      visit(o.boxOf('menu')!);
+      return found!;
+    }
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
+    // Mid-flight: the menu waits at its start.
+    expect(HeroLifts.flying, isTrue);
+    expect(player().waitsForAnother, isTrue);
+    expect(player().opacity, 0);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(HeroLifts.flying, isFalse);
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    await tester.pump(const Duration(milliseconds: 16));
+    // Landed: it grows in.
+    expect(player().waitsForAnother, isFalse);
+    expect(player().clockOf('a')!.isAnimating, isTrue);
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(player().opacity, 1);
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+    expect(markOf(p).liftShown, isTrue);
+  });
+
   testWidgets('with reduced motion nothing flies: the overlay shows it at once', (tester) async {
     final (p, o, nav) = await pump(tester, reducedMotion: true);
     nav.currentState!.push(over(o));
