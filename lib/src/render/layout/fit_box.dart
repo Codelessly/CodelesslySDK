@@ -308,6 +308,12 @@ class CodelesslyFlexParentData extends FlexParentData {
   /// it stays in the row.
   bool squeezable = false;
 
+  /// A child that flexes: the least main extent it was written to have
+  /// (`grow minWidth=48`). When the children that do not flex leave it less,
+  /// they are squeezed to make that room, as CSS keeps a flex item's
+  /// `min-width` (it was given what was left, 0 beside a long text).
+  double minMain = 0;
+
   @override
   String toString() => '${super.toString()}; collapsed=$collapsed${basis == null ? '' : '; basis=$basis grow=$grow'}';
 }
@@ -683,11 +689,17 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
     while (child != null) {
       final FlexParentData data = child.parentData! as FlexParentData;
       final double natural = _mainExtent(child.size);
-      used += natural;
       if ((data.flex ?? 0) <= 0) {
+        used += natural;
         final double floor = math.min(natural, _minContent(child));
         extents[child] = (natural, floor);
         capacity += natural - floor;
+      } else {
+        final double least = data is CodelesslyFlexParentData ? data.minMain : 0;
+        // A flex child counts what it took, or the least it was written to
+        // have (its minWidth) where it took less: the others are squeezed to
+        // leave it that.
+        used += math.max(natural, least);
       }
       child = data.nextSibling;
     }
@@ -717,8 +729,14 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
     // are integers, so the target sizes become weights in 1/[_resolution] px.
     _withFlex((child, data) {
       // A flex child already got no room; it keeps a token weight so it is
-      // still laid out with a bounded main axis.
-      if ((data.flex ?? 0) > 0) return (1, FlexFit.tight);
+      // still laid out with a bounded main axis, or the least it was written
+      // to have.
+      if ((data.flex ?? 0) > 0) {
+        final double least = data is CodelesslyFlexParentData ? data.minMain : 0;
+        final double natural = _mainExtent(child.size);
+        final double keep = math.max(natural, least);
+        return (keep > 0 ? math.max(1, (keep * _resolution).round()) : 1, FlexFit.tight);
+      }
       final (double natural, double floor) = extents[child]!;
       final double target = natural - (natural - floor) * overflow / capacity;
       final int weight = (target * _resolution).round();

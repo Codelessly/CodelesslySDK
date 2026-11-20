@@ -2779,8 +2779,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final grow = basis != null && mainFit == SizeFit.fill ? flexValue : 0;
       // Laid out at its own size and squeezed by the row (see above).
       final squeezed = mainFit == SizeFit.hug && n.layout.squeezable && flex == null;
-      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed || pd.basis != basis || pd.grow != grow || pd.squeezable != squeezed) {
+      // A flex child's least main extent (`grow minWidth=48`), with its
+      // margins: the row squeezes the others to leave it that.
+      final mainMin = isRow ? c.minWidth : c.minHeight;
+      final minMain = flex != null && mainMin != null && mainMin > 0
+          ? mainMin + (isRow ? n.layout.margin.horizontal : n.layout.margin.vertical)
+          : 0.0;
+      if (pd.flex != flex || pd.fit != fit || pd.collapsed != _collapsed || pd.basis != basis || pd.grow != grow || pd.squeezable != squeezed || pd.minMain != minMain) {
         pd
+          ..minMain = minMain
           ..squeezable = squeezed
           ..flex = flex
           ..fit = fit
@@ -2876,6 +2883,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
             expands: expands,
             preserveDesignOverflow: fit != SizeFit.fill,
             growsWithContent: grows,
+            // A fill with no design number (`w=fill`) in a container sized
+            // from its children: its content's size there (it was 0).
+            fillsByContent: mode == FreeformAxisMode.fill && (horizontal ? n.layout.width.value : n.layout.height.value) <= 0,
           );
       if (pos.align case final double a) return at(FreeformAxisMode.align, alignment: a);
       final relative = pos.relative;

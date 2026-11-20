@@ -81,7 +81,9 @@ Object? applyWrite(Object? current, VariableType type, ValueWrite write, Express
           if (i == null || i < 0 || i > list.length) return current;
           i == list.length ? list.add(item()) : list[i] = item();
         case WriteOp.set || WriteOp.toggle || WriteOp.subtract:
-          return _list(value()) ?? const <Object?>[];
+          // `x=null` clears it, as a list declared with no value starts.
+          final v = value();
+          return v == null ? null : _list(v) ?? const <Object?>[];
       }
       return list;
     case VariableType.map:
@@ -94,7 +96,10 @@ Object? applyWrite(Object? current, VariableType type, ValueWrite write, Express
         case WriteOp.update:
           map[key()] = item();
         default:
-          return _map(value()) ?? const <String, Object?>{};
+          // `x=null` clears it (`x != null` is then false), as a map
+          // declared with no value starts; it was kept as {}.
+          final v = value();
+          return v == null ? null : _map(v) ?? const <String, Object?>{};
       }
       return map;
     case VariableType.text || VariableType.image || VariableType.choice || VariableType.color:

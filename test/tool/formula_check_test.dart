@@ -38,6 +38,34 @@ void main() {
     expect(formulaNotes(r.document, {'pages/board.txt': _board}, said: {'pages/board.txt:7'}), [startsWith('pages/board.txt:9:')]);
   });
 
+  // The NOCD chat: `"replyTo": null` in site.json is a text variable; the map
+  // set into it was kept as its JSON text and {replyTo.first_name} drew
+  // nothing, with no word.
+  test('a variable null with no type read by a field is said, with the type to write', () {
+    const page = '''
+state pick=null
+state note=null
+state typed:map=null
+Column
+  Text#a "{pick.name}"
+  Text#b "{note}"
+  Text#c "{replyTo.first_name} {typed.name}"
+  Button#d "Set" onTap={pick={name: 'x'}}
+''';
+    final site = {
+      'replyTo': {'type': 'text'},
+      'shown': {'type': 'text', 'value': ''},
+    };
+    final r = api.Catalog.run(api.standardCatalog, () => parseNotation(page, options: NotationOptions(projectVariables: site)));
+    expect(r.issues, isEmpty);
+    expect(nullTextVariableNotes(r.document, site: site), [
+      'state pick=null has no type, so it is a text variable, and node a reads pick.name from it: a field of text is nothing, '
+          'and a map or list set into it is kept as its JSON text. Say its type: state pick:map=null (or :list).',
+      'the site\'s variable "replyTo" (null in site.json) has no type, so it is a text variable, and node c reads replyTo.first_name from it: '
+          'a field of text is nothing, and a map or list set into it is kept as its JSON text. Say its type: "replyTo": {"type": "map", "value": null} (or "list").',
+    ]);
+  });
+
   testWidgets('render: formula_invalid on the node, with the field and the expression', (tester) async {
     final out = Directory.systemTemp.createTempSync('formula_check_test');
     addTearDown(() => out.deleteSync(recursive: true));

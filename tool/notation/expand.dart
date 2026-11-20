@@ -81,6 +81,12 @@ const _usage = 'usage: expand.dart <file.txt> [--design-system <folder>] [--name
     '[--site <site.json or folder>] [--no-site] [--out <file.json>] [--open] [--vocabulary <file.json> | --no-record] [--aliases <file.json>]\n'
     '       expand.dart <site folder or site.json> [--width <page width>] [--no-reflow] [--design-system <folder>] [--named] [--nearest-colors] [--open] [--vocabulary <file.json> | --no-record]';
 
+/// Said when a site (or one of its pages) is expanded at the default width.
+const _defaultWidthNote = 'note: the site is expanded 1440 wide (the default for a site; no --width given), so every page and component is read as '
+    'a desktop design and reflow gives it rules for a tablet (tablet.…, up to 1023 px wide) and a phone (phone.…, up to 699), which hold on a '
+    'phone-sized render too (a Row whose children may wrap gets tablet.wrap=true). For a site designed for a phone, expand with --width 390; '
+    '--no-reflow keeps 1440 without those rules.';
+
 Future<void> main(List<String> args) async {
   String? opt(String name) {
     final i = args.indexOf(name);
@@ -171,6 +177,10 @@ Future<void> main(List<String> args) async {
         aliases: words,
       );
 
+  // A site has no width of its own: with no --width it is read as a
+  // desktop's, and reflow's tablet rules (up to 1023) hold on a phone too
+  // (the NOCD chat's quote bars wrapped at 390). Said, not guessed.
+  if (whole && opt('--width') == null && !args.contains('--no-reflow')) stderr.writeln(_defaultWidthNote);
   if (whole) {
     exit(_expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440),
         skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped));
@@ -184,6 +194,7 @@ Future<void> main(List<String> args) async {
   final page = site == null ? null : site.pageSources.where((p) => canonical(p) == canonical(file)).firstOrNull;
   final pageName = page == null ? null : File(page).uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
   final width = double.tryParse(opt('--width') ?? '') ?? (pageName != null ? 1440 : 390);
+  if (pageName != null && opt('--width') == null && !args.contains('--no-reflow')) stderr.writeln(_defaultWidthNote);
   final expander = NotationExpander(site: site, designSystem: ds, settings: settings(width));
   final result = expander.expand(File(file).readAsStringSync(), path: file, screen: opt('--id') ?? pageName ?? 'screen');
   // A page's overlays as the whole site's expansion gives them: one two
@@ -207,6 +218,8 @@ Future<void> main(List<String> args) async {
   // written (formula_check.dart), unless an issue of its line said it.
   more.addAll(formulaNotes(document, {file: text, for (final e in site?.definitionFiles.entries ?? const <MapEntry<String, String>>[]) e.key: e.value},
       said: {for (final i in result.issues) '$file:${i.line}'}));
+  // A variable null with no type (text) read by a field: it reads nothing.
+  more.addAll(nullTextVariableNotes(document, site: site?.variables ?? const {}));
   for (final i in result.issues) {
     stderr.writeln('$file: line ${i.line}:${i.column}: ${site?.placeDefinitionLine(i.message, text) ?? i.message}');
   }
@@ -297,6 +310,8 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
       ...more,
       ...formulaNotes(document, {rel(source): text, for (final e in site.definitionFiles.entries) rel(e.key): e.value},
           said: {for (final i in r.issues) '${rel(source)}:${i.line}'}),
+      // A variable null with no type (text) read by a field: it reads nothing.
+      ...nullTextVariableNotes(document, site: site.variables),
     ];
     final notes = [...vocabularyNotes(r, site: site), if (componentTypeOf(text) == null) ?pageHeadingsNote(text)];
     final type = componentTypeOf(text);
