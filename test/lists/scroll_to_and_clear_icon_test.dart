@@ -3,6 +3,7 @@
 // (the guide's clear "×") clears the field.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'support.dart';
 import '../support/fields.dart';
@@ -41,6 +42,68 @@ void main() {
     await tester.tapAt(s.center('bad'));
     await tester.pumpAndSettle();
     expect('${recorder.errors.single}', contains('no node "col-12" is on screen'));
+  });
+
+  group('scrollTo of a copy by its item, in a list that builds the items near its view only', () {
+    // A chat: a list that opens at its end, 60 messages of 40 px in 400, and
+    // a pinned bar that goes to the second message, which is not built.
+    Map<String, Json> chat() => {
+          'col': {'type': 'column', 'children': ['bar', 'list'], 'layout': {'width': 300, 'height': 460}},
+          'bar': {'type': 'box', 'layout': {'width': 300, 'height': 40},
+            'actions': [reaction('click', [{'type': 'scrollTo', 'node': 'msg', 'item': r'${pinId}', 'durationMs': 0}])]},
+          'list': {'type': 'listView', 'children': ['msg'], 'layout': {'width': 300, 'height': 400},
+            'bind': {'data': r'${messages}'}, 'props': {'stickToEnd': true}},
+          'msg': {'type': 'text', 'layout': {'width': 300, 'height': 40}, 'props': {'text': r'${item.text}'}},
+        };
+    List<Object?> messages() => [for (var i = 1; i <= 60; i++) {'id': 'm$i', 'text': 'M$i'}];
+    double topOf(Screen s) => s.tree.boxOf('list')!.localToGlobal(Offset.zero).dy;
+    // Where message [text] is drawn (null: not built).
+    double? yOf(WidgetTester tester, String text) {
+      double? at;
+      void visit(RenderObject o) {
+        if (o is RenderParagraph && o.attached && o.hasSize && o.text.toPlainText() == text) at = o.localToGlobal(Offset.zero).dy;
+        o.visitChildren(visit);
+      }
+
+      visit(tester.binding.renderViews.first);
+      return at;
+    }
+
+    testWidgets('the copy is built and scrolled to the start of the view', (tester) async {
+      final recorder = _Recorder();
+      final s = await show(tester, chat(), variables: [v('messages', messages(), VariableType.list), v('pinId', 'm2')], services: Services(analytics: recorder));
+      await tester.pumpAndSettle();
+      expect(yOf(tester, 'M2'), isNull, reason: 'not built: the list opened at its end');
+      await tester.tapAt(s.center('bar'));
+      await tester.pumpAndSettle();
+      expect(recorder.errors, isEmpty);
+      expect(yOf(tester, 'M2'), moreOrLessEquals(topOf(s), epsilon: 1));
+    });
+
+    testWidgets('an item no copy is of is said, and nothing else is revealed in its place', (tester) async {
+      final recorder = _Recorder();
+      final s = await show(tester, chat(), variables: [v('messages', messages(), VariableType.list), v('pinId', 'gone')], services: Services(analytics: recorder));
+      await tester.pumpAndSettle();
+      await tester.tapAt(s.center('bar'));
+      await tester.pumpAndSettle();
+      expect('${recorder.errors.single}', contains('no node "msg" (item gone)'));
+      expect(yOf(tester, 'M60'), moreOrLessEquals(topOf(s) + 360, epsilon: 1), reason: 'still at its end');
+    });
+
+    testWidgets('an item\'s key named as the node is said with the way to reach it', (tester) async {
+      final recorder = _Recorder();
+      final doc = chat()
+        ..['bar'] = {
+          'type': 'box',
+          'layout': {'width': 300, 'height': 40},
+          'actions': [reaction('click', [{'type': 'scrollTo', 'node': r'${pinId}', 'durationMs': 0}])],
+        };
+      final s = await show(tester, doc, variables: [v('messages', messages(), VariableType.list), v('pinId', 'm2')], services: Services(analytics: recorder));
+      await tester.pumpAndSettle();
+      await tester.tapAt(s.center('bar'));
+      await tester.pumpAndSettle();
+      expect('${recorder.errors.single}', allOf(contains('no node "m2"'), contains('"node": "msg", "item": "m2"')));
+    });
   });
 
   testWidgets('a suffix icon with a tap reaction clears the field; bound to no name it hides', (tester) async {

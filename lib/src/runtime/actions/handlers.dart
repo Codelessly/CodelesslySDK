@@ -16,6 +16,7 @@ import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition,
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/components.dart' show componentInstanceOf;
 import '../../render/node_tree.dart' show NodeBox, RenderTree;
+import '../lists/built_items.dart' show LazyItemLists;
 import '../../render/drag_track.dart' show DragTracks;
 import '../../render/layout/design_scroll.dart';
 import '../gestures/drag_motion.dart' show DragMotionControl;
@@ -687,7 +688,22 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
           // No node has that id: the one on screen with that name (a
           // responsive screen's layouts have their own ids, the same names).
           tree.boxesNamed(id).lastOrNull);
-  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
+  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance));
+  if (tree != null && item.isNotEmpty && box == null) {
+    // The copy of an item a list has not built (a long list builds the
+    // items near its view only: a chat's first message, seen from its
+    // end): the list scrolls until it is built, then it is revealed.
+    final lists = LazyItemLists.repeating(tree, id);
+    for (final list in lists) {
+      final index = list.indexOfItem(item);
+      if (index < 0 || !await list.buildItem(index)) continue;
+      box = repeatOf(tree, id, item, instance: run.instance);
+      if (box != null) break;
+    }
+    // A node a list repeats, and no item of that key: said below, not the
+    // first copy revealed in its place.
+    if (lists.isEmpty) box = named();
+  }
   // Not on this screen: from an overlay (a menu's item, a dialog's button),
   // the node is the page's under it (support desk, test 11: a Menu's
   // `scrollTo node=threadEnd` found nothing; round 10, R48).
@@ -704,8 +720,13 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).
     if (tree != null) {
+      // An item's key named as a node: a copy is reached by its item.
+      final template = item.isEmpty ? LazyItemLists.templateOfKey(tree, id) : null;
       run.host.reportError(
-          ActionFailed(a.type, 'no node "$id"${item.isEmpty ? '' : ' (item $item)'} is on screen to scroll to${a.node.contains(r'${') ? ' ("${a.node}" gave "$id")' : ''}',
+          ActionFailed(
+              a.type,
+              'no node "$id"${item.isEmpty ? '' : ' (item $item)'} is on screen to scroll to${a.node.contains(r'${') ? ' ("${a.node}" gave "$id")' : ''}'
+              '${template == null ? '' : '; "$id" is the key of an item of a list: its copy is scrolled to by its item, {"type": "scrollTo", "node": "$template", "item": "$id"} (scrollTo node=$template item={…})'}',
               nodeId: run.node?.id),
           StackTrace.current,
           action: a.type);

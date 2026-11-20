@@ -20,9 +20,11 @@ import '../render/controls/focus.dart';
 import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf, rolesOf;
 import '../render/controls/buttons.dart' show ButtonKind;
 import '../render/controls/root.dart';
+import '../render/node_tree.dart' show RenderTree;
 import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
+import '../runtime/lists/built_items.dart';
 import '../runtime/lists/pagination.dart';
 import 'collections_data_list_model.dart';
 import 'collections_list_runtime.dart';
@@ -133,7 +135,7 @@ class DataListView extends StatefulWidget {
   State<DataListView> createState() => DataListViewState();
 }
 
-class DataListViewState extends State<DataListView> {
+class DataListViewState extends State<DataListView> implements LazyItems {
   final ScrollController scrollController = ScrollController();
   final GlobalKey _latestKey = GlobalKey();
   ControlFocusNode? _latestFocus;
@@ -280,7 +282,74 @@ class DataListViewState extends State<DataListView> {
   @override
   void initState() {
     super.initState();
+    LazyItemLists.add(this);
     _m;
+  }
+
+  // --- a scrollTo of an item: copies not built yet (LazyItems) -------------------
+
+  @override
+  RenderTree get tree => _r.tree;
+
+  @override
+  String get itemId => widget.itemId;
+
+  @override
+  bool repeats(String id) {
+    final source = _r.tree.source;
+    var guard = 0;
+    for (String? n = id; n != null && guard++ < 64; n = source.parentOf(n)) {
+      if (n == widget.itemId) return true;
+      if (n == _node.id) return false;
+    }
+    return false;
+  }
+
+  /// The index of the item [item] names: the item whose key (its `id`, or
+  /// the list's key path) reads [item], else [item] as an index; -1: none.
+  @override
+  int indexOfItem(String item) {
+    final items = _items;
+    for (var i = 0; i < items.length; i++) {
+      final v = items[i];
+      final key = v is Map ? (v['id'] ?? v['key'] ?? _keyOf(v)) : _keyOf(v);
+      if (key != null && '$key' == item) return i;
+    }
+    final index = int.tryParse(item);
+    return index != null && index >= 0 && index < items.length ? index : -1;
+  }
+
+  /// Builds item [index] when the list has not (a list builds only the
+  /// items near its view): scrolls toward it, from the items built where it
+  /// is and their extents, a frame at a time, until it is laid out. Whether
+  /// it is.
+  @override
+  Future<bool> buildItem(int index) async {
+    bool built() {
+      final ro = _built[index]?.findRenderObject();
+      return ro is RenderBox && ro.attached && ro.hasSize;
+    }
+
+    for (var step = 0; step < 16 && !built(); step++) {
+      if (!mounted || !scrollController.hasClients) return false;
+      final p = scrollController.position;
+      final starts = _itemStarts();
+      double to;
+      if (starts.isEmpty) {
+        final count = _items.length;
+        to = count <= 1 ? p.minScrollExtent : p.minScrollExtent + (p.maxScrollExtent - p.minScrollExtent) * index / (count - 1);
+      } else {
+        final indexes = starts.keys.toList()..sort();
+        final lo = indexes.first, hi = indexes.last;
+        final each = hi > lo ? (starts[hi]! - starts[lo]!) / (hi - lo) : p.viewportDimension;
+        final from = index < lo ? lo : hi;
+        to = starts[from]! + (index - from) * each;
+      }
+      p.jumpTo(to.clamp(p.minScrollExtent, p.maxScrollExtent).toDouble());
+      SchedulerBinding.instance.scheduleFrame();
+      await SchedulerBinding.instance.endOfFrame;
+    }
+    return mounted && built();
   }
 
   @override
@@ -355,6 +424,7 @@ class DataListViewState extends State<DataListView> {
 
   @override
   void dispose() {
+    LazyItemLists.remove(this);
     _latestFocus?.leave();
     _m
       ..removeListener(_changed)
