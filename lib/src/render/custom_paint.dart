@@ -338,6 +338,7 @@ class _Compiler {
     final mode = blendMode(p.blendMode);
     final shader = p.shader;
     final dashes = p.dashPattern;
+    final blur = number(p.blurRadius, 0);
     return (s, bounds) {
       final out = shader != null ? RenderNodePaint.paintFor(shader, bounds) : Paint();
       if (shader == null) out.color = color(s);
@@ -349,6 +350,9 @@ class _Compiler {
         ..strokeMiterLimit = p.strokeMiterLimit
         ..blendMode = mode
         ..isAntiAlias = p.isAntiAlias;
+      // A soft edge (a glow), its sigma as a box shadow's blur radius gives it.
+      final r = blur(s);
+      if (r > 0) out.maskFilter = MaskFilter.blur(BlurStyle.normal, Shadow.convertRadiusToSigma(r));
       return _Ink(out, p.scaleStroke, dashes);
     };
   }

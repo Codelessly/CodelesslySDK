@@ -41,6 +41,7 @@ import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
 import 'shortcut_hint.dart';
 import 'paint/node_paint.dart';
+import 'paint/path_paint.dart' show parseSvgPath;
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
 import 'recipe.dart';
@@ -1975,6 +1976,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       ..heightFactor = n.layout.heightFactor);
 
     final d = n.decoration;
+    // A path the node is cut to (CSS clip-path): around everything the
+    // shell draws, its shadows and border too, and its hit test.
+    if (d.clipPath case final String data) {
+      chain.add(_obtain<RenderClipPath>('clipPath', () => RenderClipPath(clipBehavior: Clip.antiAlias))
+        ..clipper = UnitPathClipper(data)
+        ..clipBehavior = Clip.antiAlias);
+    }
     // A circle (BoxShape.circle) takes no corner radius.
     final circle = d.shape == api.DecorationShape.circle;
     final radius = circle || d.radius.isZero ? null : d.radius.flutter;
@@ -3268,6 +3276,24 @@ class _CircleClipper extends CustomClipper<Rect> {
   Rect getClip(Size size) => Rect.fromCircle(center: size.center(Offset.zero), radius: size.shortestSide / 2);
   @override
   bool shouldReclip(_CircleClipper oldClipper) => false;
+}
+
+/// A decoration's `clipPath`: SVG path data in the box's unit square,
+/// scaled to the box (CSS `clip-path: path(…)` with the path's units the
+/// box's own size). Unreadable data clips nothing.
+class UnitPathClipper extends CustomClipper<Path> {
+  const UnitPathClipper(this.data);
+  final String data;
+
+  @override
+  Path getClip(Size size) {
+    final unit = parseSvgPath(data);
+    if (unit == null) return Path()..addRect(Offset.zero & size);
+    return unit.transform(Matrix4.diagonal3Values(size.width, size.height, 1).storage);
+  }
+
+  @override
+  bool shouldReclip(UnitPathClipper oldClipper) => oldClipper.data != data;
 }
 
 class _PaintPlan {

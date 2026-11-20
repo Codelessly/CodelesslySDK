@@ -251,17 +251,29 @@ class RenderNodePaint extends RenderBox with ImageClient {
     }
 
     final tile = TileMode.values.byName(p.tileMode.name);
+    // A CSS angle: a line through the middle at that angle (0 up, 90 right),
+    // as long as reaches the farthest corners: |w sin a| + |h cos a|.
+    (Offset, Offset)? angled() {
+      final deg = p.angle;
+      if (deg == null) return null;
+      final a = deg * math.pi / 180;
+      final dir = Offset(math.sin(a), -math.cos(a));
+      final half = (rect.width * dir.dx.abs() + rect.height * dir.dy.abs()) / 2;
+      return (rect.center - dir * half, rect.center + dir * half);
+    }
+
+    final axis = angled();
     // A length in pixels: the axis from its start, in its direction, that
     // long (a repeating pattern's period, whatever the box's size).
     Offset linearEnd() {
-      final a = at(0, 0.5), b = at(1, 0.5), d = b - a;
+      final a = axis?.$1 ?? at(0, 0.5), b = axis?.$2 ?? at(1, 0.5), d = b - a;
       final length = p.length;
       if (length == null || d.distance == 0) return b;
       return a + d / d.distance * length;
     }
 
     paint.shader = switch (p.type) {
-      api.PaintType.linear => ui.Gradient.linear(at(0, 0.5), linearEnd(), colors, stops, tile),
+      api.PaintType.linear => ui.Gradient.linear(axis?.$1 ?? at(0, 0.5), linearEnd(), colors, stops, tile),
       api.PaintType.radial when p.length != null => ui.Gradient.radial(at(0.5, 0.5), p.length!, colors, stops, tile),
       // A radius given as a share of the shortest side (Flutter's
       // RadialGradient), centered where the transform puts the center (the
