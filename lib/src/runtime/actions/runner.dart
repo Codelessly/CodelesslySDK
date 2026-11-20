@@ -346,6 +346,8 @@ class CoreActions implements ActionRunner {
     final value = event['result'] is Map ? event['result'] as Map : event;
     // A held key's repeats run only the reactions that ask for them.
     if (value['repeat'] == true && !t.repeat) return false;
+    // A key of a control of one's own, only while the focus is in it.
+    if (t.focused && value['focused'] != true) return false;
     return runtimeKeyEventMatches(t.keyCombo, '${value['key'] ?? ''}',
         character: value['character'] as String?,
         meta: value['meta'] == true, shift: value['shift'] == true,

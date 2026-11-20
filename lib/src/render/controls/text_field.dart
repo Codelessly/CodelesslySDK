@@ -1024,35 +1024,59 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   /// One editor and one semantics node, painted as a row of slots. The
   /// editor still handles IME, paste, deletion and cursor movement.
-  void _paintOtp(Canvas canvas, Offset offset) {
-    final c = config;
-    final count = c.otpLength;
+  /// A one-time code's slots, in typing order, in the field's coordinates:
+  /// each as tall as the field (32 at least) and at most that wide, in a row
+  /// at the field's start, so a code field reads as one control. A field
+  /// written taller has taller slots (`h=60 w=300`, five: 53.6 × 60).
+  List<Rect> get otpSlots {
+    final count = config.otpLength;
+    if (count <= 0) return const [];
     final gap = count > 8 ? 4.0 : 8.0;
-    // Each slot as tall as the field (48 at most) and at most that wide, the
-    // row of slots at the field's start: a code field reads as one control.
-    final height = math.min(48.0, math.max(boxRect.height, 32.0));
+    final height = math.max(boxRect.height, 32.0);
     final slot = ((boxRect.width - gap * (count - 1)) / count).clamp(0.0, height).toDouble();
     final used = slot * count + gap * (count - 1);
     final left = boxRect.left + (textDirection == TextDirection.rtl ? boxRect.width - used : 0);
     final top = boxRect.top + (boxRect.height - height) / 2;
+    return [
+      for (var i = 0; i < count; i++)
+        Rect.fromLTWH(left + (textDirection == TextDirection.rtl ? count - 1 - i : i) * (slot + gap), top, slot, height),
+    ];
+  }
+
+  void _paintOtp(Canvas canvas, Offset offset) {
+    final c = config;
+    final count = c.otpLength;
+    final slots = otpSlots;
     final chars = editor.text.runes.map(String.fromCharCode).toList();
     final active = editor.selection.isValid ? editor.selection.extentOffset.clamp(0, count - 1) : chars.length.clamp(0, count - 1);
+    // Each slot is drawn as the field's own box: its fill, corners and
+    // border (`fill=`, `radius=`, `border=`, in its state: `focused.border=`
+    // while it is typed in), the slot typed into next in its focused border
+    // (`decoration.focusedBorder`, else 2 px in the accent).
+    final d = c.decoration;
+    final own = FieldBorder.of(d.border);
+    final ownSide = own == null || own.side == const BorderSide() ? null : own.side;
+    final focusedSide = FieldBorder.of(d.focusedBorder)?.side;
+    final fill = d.filled == false ? null : (d.fillColor?.flutter ?? c.tokens.surface);
+    final corners = own?.radius ?? BorderRadius.circular(c.tokens.radius('control', 7));
+    final typedIn = focusNode.hasFocus && (focusNode.showsHighlight || focusedSide != null || ownSide != null);
     for (var i = 0; i < count; i++) {
-      final visual = textDirection == TextDirection.rtl ? count - 1 - i : i;
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(left + visual * (slot + gap), top, slot, height).shift(offset),
-        Radius.circular(c.tokens.radius('control', 7)),
-      );
-      canvas.drawRRect(rect, Paint()..color = c.tokens.surface);
-      canvas.drawRRect(rect, Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = focusNode.showsHighlight && i == active ? 2 : 1
-        ..color = focusNode.showsHighlight && i == active ? c.tokens.primary : c.tokens.primaryBorder);
+      final rect = corners.toRRect(slots[i].shift(offset));
+      if (fill != null) canvas.drawRRect(rect, Paint()..color = fill);
+      final side = typedIn && i == active
+          ? (focusedSide ?? BorderSide(color: ownSide?.color ?? c.tokens.primary, width: 2))
+          : (ownSide ?? BorderSide(color: c.tokens.primaryBorder));
+      if (side.style != BorderStyle.none && side.width > 0) {
+        canvas.drawRRect(rect, Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = side.width
+          ..color = side.color);
+      }
       if (i >= chars.length) continue;
       final glyph = TextPainter(
         text: TextSpan(text: c.obscureText ? c.obscuringCharacter : chars[i], style: c.valueStyle),
         textDirection: textDirection,
-      )..layout(maxWidth: slot);
+      )..layout(maxWidth: slots[i].width);
       glyph.paint(canvas, Offset(rect.outerRect.center.dx - glyph.width / 2, rect.outerRect.center.dy - glyph.height / 2));
       glyph.dispose();
     }

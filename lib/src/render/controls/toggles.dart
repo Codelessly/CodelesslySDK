@@ -432,8 +432,20 @@ class RenderToggle extends RenderControl implements LabeledControl {
     final track = markRect;
     final inset = node.prop(SwitchProps.thumbInset) ?? track.height / 10;
     final d = math.max(0.0, track.height - 2 * inset);
-    final start = track.left + inset + d / 2, end = track.right - inset - d / 2;
+    final half = thumbLength / 2;
+    final start = track.left + inset + half, end = track.right - inset - half;
     return (center: Offset(start + (end - start) * position, track.center.dy), radius: d / 2);
+  }
+
+  /// A switch's thumb length along its track: its height (round), or the
+  /// node's `thumbWidth` (a pill), kept inside the track.
+  double get thumbLength {
+    final track = markRect;
+    final inset = node.prop(SwitchProps.thumbInset) ?? track.height / 10;
+    final d = math.max(0.0, track.height - 2 * inset);
+    final own = node.prop(SwitchProps.thumbWidth);
+    if (own == null) return d;
+    return own.clamp(d, math.max(d, track.width - 2 * inset)).toDouble();
   }
 
   /// A checkbox's or radio's fill now.
@@ -591,10 +603,14 @@ class RenderToggle extends RenderControl implements LabeledControl {
     final inset = n.prop(SwitchProps.thumbInset) ?? track.height / 10;
     // A thumb radius makes it a rounded square; none keeps it round.
     final corner = n.prop(SwitchProps.thumbRadius);
-    void drawThumb(Offset c, double r, Paint paint) => corner == null
+    // A pill thumb (`thumbWidth`) is longer than tall by this much.
+    final longer = n.prop(SwitchProps.thumbWidth) == null ? 0.0 : math.max(0.0, thumbLength - radius * 2);
+    void drawThumb(Offset c, double r, Paint paint) => corner == null && longer == 0
         ? canvas.drawCircle(c, r, paint)
         : canvas.drawRRect(
-            RRect.fromRectAndRadius(Rect.fromCircle(center: c, radius: r), Radius.circular(corner.clamp(0, r))), paint);
+            RRect.fromRectAndRadius(Rect.fromCenter(center: c, width: r * 2 + longer, height: r * 2),
+                Radius.circular((corner ?? r).clamp(0, r))),
+            paint);
     final hover = n.prop(SwitchProps.hoverColor), focus = n.prop(SwitchProps.focusColor);
     final halo = focusHighlight && focus != null
         ? focus.flutter
