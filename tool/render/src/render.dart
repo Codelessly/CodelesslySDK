@@ -27,6 +27,8 @@ import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButt
 import 'package:codelessly_sdk/src/render/layout/text_box.dart' show RenderWholeWords;
 import 'package:codelessly_sdk/src/render/controls/calendar.dart' show RenderCalendar;
 import 'package:codelessly_sdk/src/render/controls/dropdown.dart' show RenderDropdown;
+import 'package:codelessly_sdk/src/render/controls/field_frame.dart' show RenderFieldFrame;
+import 'package:codelessly_sdk/src/render/controls/pickers.dart' show RenderPickerField;
 import 'package:codelessly_sdk/src/render/controls/menu.dart' show RenderMenu, RenderMenuRow;
 import 'package:codelessly_sdk/src/render/controls/slider.dart' show RenderSlider;
 import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable;
@@ -118,7 +120,10 @@ const runtimeCodes = <(String, String, String)>[
   ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
   ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
-  ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
+  ('zero_size', 'warning', 'A node that draws something (a fill, a border, a shadow) is laid out 0 wide or 0 high, so it does not show. The message names the cause and what to write: a box that hugs with nothing in it, a fill under a parent that hugs, or a node the others beside it left no room (its minWidth not kept).'),
+  ('icon_smaller_than_size', 'warning', 'An icon\'s size is larger than its box: the glyph is held to the box (at most the box), so it is drawn smaller than its size. Give the box the size, or leave its width and height unset.'),
+  ('control_heights_differ', 'warning', 'Two or more controls side by side in one Row (fields, selects, date and time fields, buttons, icon buttons, segmented buttons) are drawn at different heights. Controls in a row share a height: leave the heights off (each hugs to the same step of the control scale), or give every control in the row the same height. The message names each control, its height and whether that height was written or hugged. A field that has grown past one line, a field drawn with no box (collapsed, bare), a wrapping Row and a field\'s label above its box are left out.'),
+  ('component_missing', 'error','A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
 
 /// The result of a run.
@@ -3711,6 +3716,39 @@ List<RuntimeIssue> _check(
             'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
+      // A size larger than the box: the glyph is held to the box (an icon's
+      // glyph is at most its box), so it is drawn smaller than written.
+      final written = node.prop(api.IconProps.size);
+      if (glyph != null && glyph.hasSize && written != null && written > 0) {
+        final drawnAt = glyph.glyphRect.shortestSide;
+        if (drawnAt < written - 0.5) {
+          final narrow = glyph.size.width <= glyph.size.height;
+          final dim = narrow ? 'wide' : 'high';
+          final key = narrow ? 'w' : 'h';
+          out.add(RuntimeIssue('icon_smaller_than_size', 'warning',
+              'Icon "${nameOf(b)}" has size=${_num(written)} but its box is ${_num(narrow ? glyph.size.width : glyph.size.height)} $dim: '
+              'the glyph is drawn at ${_num(drawnAt)}, as an icon\'s glyph is at most its box. '
+              'Give the box at least the size ($key=${_num(written)}), or leave $key unset (an icon that hugs is its size). '
+              '(A Material glyph has room around it in its square: a smaller mark is a larger size, not a narrower box.)',
+              nodeId: nameOf(b), screen: screen, size: size, file: file));
+        }
+      }
+    }
+    // A node that draws something (a fill, a border, a shadow) laid out 0
+    // wide or 0 high: nothing of it shows, and nothing said why.
+    // (A hairline written as such, `h=0.4`, is not 0; a size written as a
+    // number is the writer's.)
+    if (b.drawn && (r.width < 0.05) != (r.height < 0.05) && node.visible) {
+      final d = node.decoration;
+      final paints = d.fills.any((f) => f.visible) || d.strokes.any((s) => s.visible) || d.effects.any((e) => e.visible);
+      final horizontal = r.width < 0.05;
+      final written = (horizontal ? node.layout.width : node.layout.height).fit == api.SizeFit.fixed;
+      if (paints && !written) {
+        final message = _zeroSizeMessage(b, horizontal, nameOf);
+        if (message != null) {
+          out.add(RuntimeIssue('zero_size', 'warning', message, nodeId: nameOf(b), screen: screen, size: size, file: file));
+        }
+      }
     }
     // The icons of a control (an IconButton's, a Button's, a field's) that
     // name no glyph: the control is drawn without them, and nothing said so.
@@ -3820,13 +3858,16 @@ List<RuntimeIssue> _check(
       }
       // A text whose longest word is wider than its box is drawn smaller,
       // then cut at the box's edge (RenderWholeWords): said as what it is.
+      // In a box 0 wide: why it is (the box that hugs, the fill under it).
+      final why = b.size.width < 0.05 ? _zeroSizeMessage(b, true, nameOf, painted: false) : null;
+      final because = why == null ? '' : ' $why';
       final whole = _descendants(b).whereType<RenderWholeWords>().firstOrNull;
       if (whole != null && (whole.scale < 1 || whole.clips)) {
         final word = p.getMinIntrinsicWidth(double.infinity);
         out.add(RuntimeIssue('text_clipped', 'warning',
             'Text "${nameOf(b)}" ("$short") has a word ${word.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: '
             '${whole.clips ? 'it is drawn at ${(whole.scale * 100).round()} % of its size and still cut at the box\'s edge' : 'the text is drawn at ${(whole.scale * 100).round()} % of its size so that the word fits'}. '
-            'Give the text more width (a fill or larger width) or a smaller font size.',
+            '${why == null ? 'Give the text more width (a fill or larger width) or a smaller font size.' : because.trim()}',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
         continue;
       }
@@ -3840,12 +3881,170 @@ List<RuntimeIssue> _check(
       if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
         out.add(RuntimeIssue('text_clipped', 'warning',
             'Text "${nameOf(b)}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
-            'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
+            '${why == null ? 'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.' : because.trim()}',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
     }
   }
+  // Controls side by side in a Row drawn at different heights: a field that
+  // hugs (28) beside a button written 44 high. Said once per row.
+  final rows = <NodeBox, List<_RowControl>>{};
+  for (final b in boxes) {
+    final node = b.node ?? nodeOf(b.id);
+    if (node == null || !_controlScaleTypes.contains(node.type) || !b.drawn || !node.visible || !b.hasSize) continue;
+    final pid = b.source.parentOf(b.id);
+    if (pid == null) continue;
+    NodeBox? parentBox;
+    for (RenderObject? o = b.parent; o != null; o = o.parent) {
+      if (o is NodeBox && o.id == pid) {
+        parentBox = o;
+        break;
+      }
+    }
+    final parent = parentBox?.node;
+    if (parentBox == null || parent == null || parent.type != 'row' || parent.prop(api.FlexProps.wrap)) continue;
+    final control = _rowControl(b, node);
+    if (control != null) (rows[parentBox] ??= []).add(control);
+  }
+  final saidRows = <String>{};
+  for (final MapEntry(key: row, value: controls) in rows.entries) {
+    if (controls.length < 2) continue;
+    final heights = controls.map((c) => c.height);
+    final low = heights.reduce(math.min), high = heights.reduce(math.max);
+    // Under half a pixel is rounding; 28 beside 29 is not.
+    if (high - low < 0.5) continue;
+    if (!saidRows.add('${identityHashCode(row.source)}|${row.id}')) continue;
+    controls.sort((a, b) => _rectOf(a.box).left.compareTo(_rectOf(b.box).left));
+    String how(_RowControl c) {
+      final h = c.node.layout.height;
+      return switch (h.fit) {
+        api.SizeFit.fixed => 'h=${_num(h.value)} written',
+        api.SizeFit.fill => 'h=fill, as tall as the row',
+        _ => 'hugging',
+      };
+    }
+    final listed = [for (final c in controls) '"${nameOf(c.box)}" (${c.node.type}) ${_num(c.height)} high, ${how(c)}'];
+    // A hugging field taller than the step: its text's line is.
+    final tall = [
+      for (final c in controls)
+        if (c.step != null && c.node.layout.height.fit == api.SizeFit.hug && c.height > c.step! + 0.5) c,
+    ];
+    final why = tall.isEmpty
+        ? ''
+        : ' ${tall.map((c) => '"${nameOf(c.box)}"').join(', ')} ${tall.length == 1 ? 'hugs' : 'hug'} to ${tall.map((c) => _num(c.height)).toSet().join(', ')}, not the step\'s ${_num(tall.first.step!)}: '
+            'its text is larger than the step\'s, and a field whose line is taller than the step\'s box takes its own height. A smaller font size keeps it on the step.';
+    final component = componentInstanceOf(row.instance);
+    final file = component == null ? fileOfNode[_canvasOf(row) ?? row.id] ?? fileOfNode[row.id] : fileOfComponent(component.component);
+    out.add(RuntimeIssue('control_heights_differ', 'warning',
+        'The controls in Row "${nameOf(row)}" are drawn at different heights: ${listed.join('; ')}. '
+        'Controls in a row share a height: leave the heights off (each control hugs to the same step of the control scale), or give every control in the row the same h.$why',
+        nodeId: nameOf(row), screen: screen, size: size, file: file));
+  }
   return out;
+}
+
+/// The node types drawn on the control scale (one height step for all:
+/// 28 when they hug). A chip is a step under it (24), a toggle, a slider and
+/// a floating action button have sizes of their own.
+const _controlScaleTypes = {
+  'textField', 'dropdown', 'datePicker', 'timePicker', 'dateTimeInput', //
+  'filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'iconButton', 'segmentedButton',
+};
+
+/// A control in a row, at the height its box is drawn.
+typedef _RowControl = ({NodeBox box, api.Node node, double height, double? step});
+
+/// [b] as a control of a row at the height its box is drawn (a field's box,
+/// not its label above it or its counter under it), or null where it is not
+/// on the control scale as drawn: a field with no box (collapsed, a bare
+/// picker), or a field of lines that hugs and has grown past one.
+_RowControl? _rowControl(NodeBox b, api.Node node) {
+  for (final o in _descendants(b)) {
+    if (o is RenderFieldFrame && o.hasSize) {
+      final d = o.decoration;
+      if (d.collapsed) return null;
+      if (o.contentMultiline && node.layout.height.fit != api.SizeFit.fixed && o.contentHeightFor(o.contentRect.width) > o.contentLineHeight + 0.5) return null;
+      return (box: b, node: node, height: o.boxRect.height, step: d.tokens.defaultHeight);
+    }
+    if (o is RenderPickerField && o.hasSize) {
+      if (o.spec.bare) return null;
+      return (box: b, node: node, height: o.size.height, step: o.spec.tokens.defaultHeight);
+    }
+  }
+  return (box: b, node: node, height: b.size.height, step: null);
+}
+
+/// A number as a message shows it: whole where it is whole.
+String _num(double v) => v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
+
+/// The node box around [b] (its parent node's, or a component call's).
+NodeBox? _nodeParent(NodeBox b) {
+  for (RenderObject? o = b.parent; o != null; o = o.parent) {
+    if (o is NodeBox) return o;
+  }
+  return null;
+}
+
+/// Why [b], which draws something, is 0 wide ([horizontal]) or 0 high, and
+/// what to write: said once, on the outermost node that draws and is 0
+/// there (null for the nodes inside it, which are 0 because it is).
+///
+/// With [painted] false (a text cut in a box 0 wide): the cause alone,
+/// whatever around it paints.
+String? _zeroSizeMessage(NodeBox b, bool horizontal, String Function(NodeBox) nameOf, {bool painted = true}) {
+  double along(RenderBox o) => horizontal ? o.size.width : o.size.height;
+  bool paints(api.Node n) {
+    final d = n.decoration;
+    return d.fills.any((f) => f.visible) || d.strokes.any((s) => s.visible) || d.effects.any((e) => e.visible);
+  }
+
+  // The outermost box that is 0 along the axis: the cause is at its level.
+  var top = b;
+  for (var p = _nodeParent(b); p != null && p.hasSize && along(p) < 0.05; p = _nodeParent(p)) {
+    final pn = p.node;
+    if (painted && pn != null && pn.type != 'canvas' && paints(pn)) return null;
+    if (pn == null || pn.type == 'canvas') break;
+    // A parent that hugs is 0 because what is in it is: the cause is here.
+    if ((horizontal ? pn.layout.width : pn.layout.height).fit == api.SizeFit.hug) break;
+    top = p;
+  }
+  final n = top.node;
+  if (n == null) return null;
+  final dim = horizontal ? 'width' : 'height';
+  final adj = horizontal ? 'wide' : 'high';
+  final key = horizontal ? 'w' : 'h';
+  final fit = (horizontal ? n.layout.width : n.layout.height).fit;
+  final holder = _nodeParent(top);
+  final p = holder?.node;
+  final whose = identical(top, b) ? '' : ' (it is in "${nameOf(top)}" (${n.type}), which is 0 $adj)';
+  final head = painted
+      ? '"${nameOf(b)}" (${b.node?.type}) is 0 $adj, so its paint does not show$whose: '
+      : identical(top, b)
+          ? 'It is 0 $adj: '
+          : 'It is in "${nameOf(top)}" (${n.type}), which is 0 $adj: ';
+  if (fit == api.SizeFit.hug && n.children.isEmpty && n.type == 'box') {
+    final grows = p != null && (p.type == (horizontal ? 'row' : 'column'));
+    return '$head"${nameOf(top)}" hugs its $dim and has nothing in it. Give it a $dim ($key=…), or $key=fill to take the room its parent gives'
+        '${grows ? ' (in a ${horizontal ? 'Row' : 'Column'}, a box takes the room left with $key=fill grow: a flex with a $dim that hugs does not give it a $dim)' : ''}.';
+  }
+  if (fit == api.SizeFit.fill) {
+    // The ancestor that hugs this axis: a fill under it has no room to take.
+    for (var a = holder; a != null; a = _nodeParent(a)) {
+      final an = a.node;
+      if (an == null || an.type == 'canvas') break;
+      final afit = (horizontal ? an.layout.width : an.layout.height).fit;
+      if (afit == api.SizeFit.hug) {
+        return '$head"${nameOf(top)}" fills its $dim ($key=fill) under "${nameOf(a)}" (${an.type}), which hugs its $dim: a fill under a hug has no room to take. '
+            'Give "${nameOf(a)}" a $dim ($key=… or $key=fill), or give "${nameOf(top)}" $key=hug.';
+      }
+      if (afit == api.SizeFit.fixed) break;
+    }
+  }
+  final c = n.layout.constraints;
+  final least = horizontal ? c.minWidth : c.minHeight;
+  return '$head${p == null ? 'what holds it' : '"${nameOf(holder!)}" (${p.type})'} gave "${nameOf(top)}" no $dim'
+      '${least != null && least > 0 ? ' (its min${horizontal ? 'Width' : 'Height'}=${_num(least)} was not kept)' : ''}: '
+      'what is beside it takes the room. Give it a $dim of its own ($key=…), or let what is beside it give way (squeezable=true, maxLines).';
 }
 
 /// The built-in confirm dialog's buttons are the SDK's widgets, not nodes:

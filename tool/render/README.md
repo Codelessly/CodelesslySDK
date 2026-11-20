@@ -187,6 +187,9 @@ error: write the site page by page. The codes:
 | `long_press_no_reaction` | warning | A `--long-press` held its node, but nothing there reacts to a hold: the hold ended as a tap does (the message says whether its tap reactions ran). |
 | `missing_glyph` | warning | A text (or a control's label: a button's `"←"`) has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
 | `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
+| `icon_smaller_than_size` | warning | An icon's `size` is larger than its box (`size=16 w=10`): the glyph is held to the box, so it is drawn smaller than its size. Names the size, the box and what it is drawn at. |
+| `zero_size` | warning | A node that draws something (a fill, a border, a shadow) is laid out 0 wide or 0 high, so it does not show. Names the cause and what to write: a box that hugs with nothing in it (in a Column, `h=fill grow`), a fill under a parent that hugs, or a node the others beside it left no room. |
+| `control_heights_differ` | warning | Controls side by side in one Row (fields, selects, date and time fields, buttons, icon buttons, segmented buttons) are drawn at different heights (`Input grow` hugging to 28 beside `IconButton "send" w=44 h=44`). Said once per row: each control, its height, and whether the height was written, filled or hugged; leave the heights off or give each the same `h`. A field hugging taller than the step (its font size) is said as such. Left out: a field grown past one line, a field with no box (collapsed, a bare picker), a wrapping Row, chips (a step under), toggles and sliders. |
 | `expression_not_evaluated` | warning | A text shows `${` on screen: an expression that did not evaluate. |
 | `path_overflow` | warning | A `path` (or a box's `path`) draws outside its box; it is not clipped to it, as Flutter's `CustomPaint` is not. |
 | `layout_overflow` | warning | A node extends past its parent's box where the parent does not scroll that way. A node of a component instance is named by its path, and its parent is the one in its own document. |
@@ -200,7 +203,7 @@ error: write the site page by page. The codes:
 | `set_overwritten` | warning | A timer or `load` reaction wrote a variable a `--set` step set, after it: the capture shows the `--set` value. `--now` pins a clock. |
 | `compare_failed` | warning | `--compare` found no reference for a capture, or could not read it: the message lists the candidates. |
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |
-| `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. |
+| `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. In a box 0 wide, the message says why the box is 0 wide. |
 | `text_truncated` | warning | A text is cut at `maxLines` with overflow `clip`. |
 | `text_no_color` | warning | A text has no `style.color` (the engine paints it white), or a transparent one (alpha 0). The check is the one a `UiSession` runs on what it shows (`paragraphIssues`). |
 | `font_fallback` | warning | A font family (or a weight far from any it has) is not in the fonts directories. |

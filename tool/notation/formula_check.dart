@@ -40,12 +40,58 @@ List<String> formulaNotes(api.Json doc, Map<String, String> texts, {Set<String> 
 List<({String node, String field, String expression, String why})> unreadableFormulas(api.Json doc) {
   final out = <({String node, String field, String expression, String why})>[];
   final seen = <String>{};
-  void check(String node, String field, String expression) {
-    final e = expression.trim();
-    if (e.isEmpty || FormulaEvaluator.parses(e) || !seen.add('$node|$e')) return;
+  for (final f in formulasOf(doc)) {
+    final e = f.expression.trim();
+    if (e.isEmpty || FormulaEvaluator.parses(e) || !seen.add('${f.node}|$e')) continue;
     final why = FormulaEvaluator.errorOf(e, functionNames: FormulaEvaluator.functions) ?? 'it does not parse';
-    out.add((node: node, field: field, expression: e.length > 300 ? '${e.substring(0, 297)}...' : e, why: why));
+    out.add((node: f.node, field: f.field, expression: e.length > 300 ? '${e.substring(0, 297)}...' : e, why: why));
   }
+  return out;
+}
+
+/// What `expand` says of a variable that starts as null with no type and
+/// is read by a field (`replyTo.first_name`): null gives a text variable
+/// (`VariableType.of`), so the field reads nothing, and a map set into it
+/// is kept as its JSON text (the NOCD chat's reply strip drew no name, with
+/// no word). [doc]'s own variables (`state replyTo=null`) and the site's
+/// ([site]: name to the variable's JSON, as `NotationSite.variables`), each
+/// once, at the first node that reads it so.
+List<String> nullTextVariableNotes(api.Json doc, {Map<String, api.Json> site = const {}}) {
+  bool nullText(Object? v) => v is Map && v['type'] == 'text' && v['value'] == null && (v['formula'] ?? '') == '';
+  final own = <String>{}, declared = <String>{};
+  final variables = doc['variables'];
+  for (final scope in variables is Map ? variables.values : const []) {
+    for (final v in scope is List ? scope : const []) {
+      if (v is Map) declared.add('${v['name']}');
+      if (nullText(v)) own.add('${v['name']}');
+    }
+  }
+  final shared = {for (final e in site.entries) if (!declared.contains(e.key) && nullText(e.value)) e.key};
+  if (own.isEmpty && shared.isEmpty) return const [];
+  final out = <String>[];
+  final said = <String>{};
+  for (final f in formulasOf(doc)) {
+    for (final path in FormulaEvaluator.referencedPaths(f.expression.trim())) {
+      final dot = path.indexOf('.');
+      if (dot <= 0) continue;
+      final name = path.substring(0, dot);
+      final ofPage = own.contains(name);
+      if (!ofPage && !shared.contains(name) || !said.add(name)) continue;
+      final where = f.node.startsWith('variable ') ? f.node : 'node ${f.node}';
+      out.add('${ofPage ? 'state $name=null' : 'the site\'s variable "$name" (null in site.json)'} has no type, so it is a text variable, and $where reads '
+          '$path from it: a field of text is nothing, and a map or list set into it is kept as its JSON text. '
+          'Say its type: ${ofPage ? 'state $name:map=null (or :list)' : '"$name": {"type": "map", "value": null} (or "list")'}.');
+    }
+  }
+  return out;
+}
+
+/// Every formula of [doc]: each `${…}` (or `${= …}`, without its `=`) in a
+/// node's strings, by the node and the field it is in, and each variable's
+/// `formula` (its node `variable <name>`).
+List<({String node, String field, String expression})> formulasOf(api.Json doc) {
+  final out = <({String node, String field, String expression})>[];
+  void check(String node, String field, String expression) => out.add((node: node, field: field, expression: expression));
 
   // The `${…}` of [s]: what is between the braces, quotes and nested braces
   // read past.

@@ -19,6 +19,33 @@ void main() {
         expect(eval("matches(missing, '.*')"), isFalse);
         expect(eval("matches('abc', '([')"), isFalse);
       });
+
+      // A writer wrote `matches(draft, '(?i)https?://')` (PCRE's inline
+      // flag): Dart's RegExp threw on it, and the false it fell back to
+      // said nothing.
+      test('matches and regexReplace read inline flags at the pattern\'s start', () {
+        expect(eval("matches('Look HTTPS://x.com', '(?i)https?://')"), isTrue);
+        expect(eval("matches('Look HTTPS://x.com', 'https?://')"), isFalse);
+        expect(eval("matches('a\nb', '(?s)a.b')"), isTrue);
+        expect(eval("matches('a\nb', '(?m)^b\$')"), isTrue);
+        expect(
+          eval(r"regexReplace('Look HTTPS://x.com now', '(?is)^.*?(https?://[^ ]+).*$', '$1')"),
+          'HTTPS://x.com',
+        );
+      });
+
+      test('a broken pattern is said as a formula that failed', () {
+        final told = <(String, String)>[];
+        FormulaEvaluator.onFailure = (e, why) => told.add((e, why));
+        addTearDown(() => FormulaEvaluator.onFailure = null);
+        expect(eval("matches('abc', 'a(?i)b')"), isFalse);
+        expect(eval("regexReplace('abc', '([', 'x')"), 'abc');
+        expect(told, hasLength(2));
+        expect(told[0].$1, "matches('abc', 'a(?i)b')");
+        expect(told[0].$2, startsWith('matches\'s pattern "a(?i)b" is not a regular expression ('));
+        expect(told[0].$2, contains('so it gave false'));
+        expect(told[1].$2, contains('so it gave the text unchanged'));
+      });
     }
 
     {

@@ -118,7 +118,18 @@ class FreeformAxisPlacement {
     this.sizeFactor,
     this.factorMargin = 0,
     this.fillFrom = 0,
+    this.fillsByContent = false,
   });
+
+  /// With [FreeformAxisMode.fill]: the child has no design extent to fall
+  /// back on (`w=fill`, `{"fill": 0}`). While the container's extent is
+  /// still worked out from its children (it hugs, or nothing bounds it), such
+  /// a child is measured by its content and counts as that, as a CSS block
+  /// in a shrink-to-fit box or a Flutter Stack's non-positioned child does;
+  /// it then fills the extent that comes out. (A fill under a hug is
+  /// circular: it was given its design extent, 0, and drew nothing: text
+  /// one word a line in a bubble 0 wide.)
+  final bool fillsByContent;
 
   /// With [FreeformAxisMode.fill]: where the child starts, from the
   /// container's start (a page of a stage, the container's length, moved by
@@ -144,6 +155,7 @@ class FreeformAxisPlacement {
         minSize: minSize,
         sizeFactor: factor,
         factorMargin: margin,
+        fillsByContent: fillsByContent,
       );
 
   /// The outer extent of a child sized by [sizeFactor] in a container of
@@ -209,14 +221,14 @@ class FreeformAxisPlacement {
   /// child edge.
   double contribution(double childExtent, {required bool wraps}) =>
       switch (mode) {
-        FreeformAxisMode.fill => 0,
+        FreeformAxisMode.fill => fillsByContent ? childExtent : 0,
         FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
         _ when wraps => childExtent,
         _ => _unwrappedContribution(childExtent),
       };
 
   double _unwrappedContribution(double childExtent) => switch (mode) {
-    FreeformAxisMode.fill => 0,
+    FreeformAxisMode.fill => fillsByContent ? childExtent : 0,
     FreeformAxisMode.stretch => math.max(0, start) + math.max(0, end),
     FreeformAxisMode.align || FreeformAxisMode.fraction => childExtent,
     FreeformAxisMode.end => childExtent + math.max(0, end),
@@ -239,6 +251,8 @@ class FreeformAxisPlacement {
     }
     switch (mode) {
       case FreeformAxisMode.fill:
+        // Measured by its content while the container is sized from it.
+        if (s == null && fillsByContent) return (0, double.infinity);
         final double v = s ?? extent;
         return (v, v);
       case FreeformAxisMode.stretch:
@@ -287,22 +301,33 @@ class FreeformAxisPlacement {
       case FreeformAxisMode.fraction:
         return fraction * s - anchor * childExtent;
       case FreeformAxisMode.start:
-        offset = wraps ? math.max(0, start) : start;
+        offset = start;
       case FreeformAxisMode.end:
-        offset = s - (wraps ? math.max(0, end) : end) - childExtent;
+        offset = s - end - childExtent;
       case FreeformAxisMode.relative:
         final double? share = _freeSpaceShare;
-        if (wraps) {
-          offset = math.max(0, start);
-        } else if (share == null) {
+        if (wraps || share == null) {
           offset = start;
         } else {
           offset = start + (s - parentExtent) * share;
         }
     }
     if (!clamp) return offset;
-    final double lower = wraps ? 0 : -overhangStart;
-    final double upper = s + (wraps ? 0 : overhangEnd) - childExtent;
+    if (wraps) {
+      // A container that hugs is as big as its largest child, and a child
+      // placed further in is kept inside it; one placed outside its edge on
+      // purpose (`x=-5`, `y={"end":-12}`: a bubble's tail, a badge on a
+      // corner) hangs out by that much, as Flutter's Positioned and CSS's
+      // absolute place do. (Both were clamped to 0: the tail landed inside
+      // the bubble, with no word.) The design extent of a hugging container
+      // is no measure of where its far edge is, so only the place written
+      // on the side it is measured from counts.
+      final double lower = mode == FreeformAxisMode.end ? 0 : -overhangStart;
+      final double upper = s - childExtent + (mode == FreeformAxisMode.end ? overhangEnd : 0);
+      return math.max(lower, math.min(offset, upper));
+    }
+    final double lower = -overhangStart;
+    final double upper = s + overhangEnd - childExtent;
     return math.max(lower, math.min(offset, upper));
   }
 
@@ -324,7 +349,8 @@ class FreeformAxisPlacement {
       other.minSize == minSize &&
       other.sizeFactor == sizeFactor &&
       other.fillFrom == fillFrom &&
-      other.factorMargin == factorMargin;
+      other.factorMargin == factorMargin &&
+      other.fillsByContent == fillsByContent;
 
   @override
   int get hashCode => Object.hash(
@@ -344,6 +370,7 @@ class FreeformAxisPlacement {
     sizeFactor,
     factorMargin,
     fillFrom,
+    fillsByContent,
   );
 
   @override
@@ -458,6 +485,15 @@ class RenderFreeformLayout extends RenderBox
   FreeformPlacement _placementOf(RenderBox child) =>
       (child.parentData! as FreeformParentData).placement ?? _fallback;
 
+  bool _anyFillsByContent({required bool horizontal}) {
+    for (RenderBox? c = firstChild; c != null; c = childAfter(c)) {
+      final FreeformPlacement p = _placementOf(c);
+      final FreeformAxisPlacement a = horizontal ? p.horizontal : p.vertical;
+      if (a.mode == FreeformAxisMode.fill && a.fillsByContent) return true;
+    }
+    return false;
+  }
+
   BoxConstraints _childConstraints(
     FreeformPlacement placement,
     double? width,
@@ -499,36 +535,47 @@ class RenderFreeformLayout extends RenderBox
     // First pass, only when an extent depends on the children: measure the
     // children with the extents known so far.
     if (contentWidth || contentHeight) {
-      final Map<RenderBox, Size> sizes = {};
-      RenderBox? child = firstChild;
-      while (child != null) {
-        sizes[child] = layoutChild(
-          child,
-          _childConstraints(_placementOf(child), width, height, constraints),
-        );
-        child = childAfter(child);
+      (double, double) measure(double? width, double? height) {
+        final Map<RenderBox, Size> sizes = {};
+        RenderBox? child = firstChild;
+        while (child != null) {
+          sizes[child] = layoutChild(
+            child,
+            _childConstraints(_placementOf(child), width, height, constraints),
+          );
+          child = childAfter(child);
+        }
+        final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
+        final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
+        double needW = 0;
+        double needH = 0;
+        sizes.forEach((child, size) {
+          // A child collapsed to nothing (hidden at runtime) takes no room.
+          if (size == Size.zero) return;
+          final FreeformPlacement placement = _placementOf(child);
+          needW = math.max(
+            needW,
+            placement.horizontal.contribution(size.width, wraps: wrapsWidth) +
+                (pushX[child] ?? 0),
+          );
+          needH = math.max(
+            needH,
+            placement.vertical.contribution(size.height, wraps: wrapsHeight) +
+                (pushY[child] ?? 0),
+          );
+        });
+        return (needW, needH);
       }
-      final Map<RenderBox, double> pushX = _flowPushes(sizes, true);
-      final Map<RenderBox, double> pushY = _flowPushes(sizes, false);
-      double needW = 0;
-      double needH = 0;
-      sizes.forEach((child, size) {
-        // A child collapsed to nothing (hidden at runtime) takes no room.
-        if (size == Size.zero) return;
-        final FreeformPlacement placement = _placementOf(child);
-        needW = math.max(
-          needW,
-          placement.horizontal.contribution(size.width, wraps: wrapsWidth) +
-              (pushX[child] ?? 0),
-        );
-        needH = math.max(
-          needH,
-          placement.vertical.contribution(size.height, wraps: wrapsHeight) +
-              (pushY[child] ?? 0),
-        );
-      });
+
+      var (double needW, double needH) = measure(width, height);
       if (contentWidth) {
         width = wrapsWidth ? needW : math.max(needW, designSize.width);
+        // A child that fills the width was measured by its content, at no
+        // width: at the width that came out (the room there is) its text
+        // may take more lines. The height is measured again at that width.
+        if (contentHeight && _anyFillsByContent(horizontal: true)) {
+          needH = measure(constraints.constrainWidth(width), null).$2;
+        }
       }
       if (contentHeight) {
         height = wrapsHeight ? needH : math.max(needH, designSize.height);
@@ -669,6 +716,7 @@ class RenderFreeformLayout extends RenderBox
           ? placement.horizontal
           : placement.vertical;
       final double extent = switch (axis.mode) {
+        FreeformAxisMode.fill when axis.fillsByContent => measure(child, axis),
         FreeformAxisMode.fill || FreeformAxisMode.stretch => 0,
         _ => axis.size ?? measure(child, axis),
       };

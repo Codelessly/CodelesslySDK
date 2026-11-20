@@ -193,12 +193,30 @@ class FormulaEvaluator {
       _failed(expression, 'it does not parse');
       return null;
     }
+    final String? outer = _evaluating;
+    _evaluating = expression;
     try {
       return node.eval(resolve);
     } catch (e) {
       _failed(expression, '$e');
       return null;
+    } finally {
+      _evaluating = outer;
     }
+  }
+
+  /// The expression [evaluate] is working out (null outside one): what a
+  /// function that falls back to a value names when it says why
+  /// ([_fellBack]).
+  static String? _evaluating;
+
+  /// Says, as a formula that failed ([onFailure], [onActionFailure]), that
+  /// a function of the expression being worked out could not do what it
+  /// was asked and gave its fallback instead ([why] says which): a pattern
+  /// that is not a regular expression.
+  static void _fellBack(String why) {
+    final String? expression = _evaluating;
+    if (expression != null) _failed(expression, why);
   }
 
   /// Whether [value] counts as yes where a condition is read: nothing,
@@ -711,7 +729,7 @@ class FormulaEvaluator {
     FormulaFunctionDoc(
       'matches',
       'matches(text, pattern)',
-      r'matches(code, "^\d{4}$") → true',
+      r'matches(code, "^\d{4}$") → true; JavaScript patterns, with (?i) (?s) (?m) at the start: matches(url, "(?i)^https?://")',
     ),
     FormulaFunctionDoc(
       'slug',
@@ -2952,6 +2970,32 @@ FuzzyMatch _fuzzyFind(List<Object?> a) => FuzzyMatch.find(
       tolerance: _fuzzyOptions([_arg(a, 2)]).$1,
     );
 
+/// [pattern] (of `matches`, `regexReplace`) as a regular expression. A
+/// group of inline flags at its start sets them, as PCRE, Java, Python and
+/// .NET read one: `(?i)` ignores case, `(?s)` lets `.` match a line break,
+/// `(?m)` lets `^` and `$` match at every line, `(?u)` reads it as Unicode
+/// (`(?is)` is two). Dart's RegExp has no inline flags: it threw on them.
+RegExp _regex(String pattern) {
+  final Match? flags = _inlineFlags.firstMatch(pattern);
+  final String f = flags?[1] ?? '';
+  return RegExp(
+    flags == null ? pattern : pattern.substring(flags.end),
+    caseSensitive: !f.contains('i'),
+    multiLine: f.contains('m'),
+    dotAll: f.contains('s'),
+    unicode: f.contains('u'),
+  );
+}
+
+final RegExp _inlineFlags = RegExp(r'^\(\?([imsu]+)\)');
+
+/// Says that [pattern], given to [function], is not a regular expression
+/// ([error] says why), so the function gave [fallback].
+void _badPattern(String function, String pattern, FormatException error, String fallback) {
+  FormulaEvaluator._fellBack('$function\'s pattern "$pattern" is not a regular expression (${error.message}), so it gave $fallback. '
+      'Patterns are JavaScript\'s (Dart\'s RegExp); inline flags are read only at the start: (?i), (?s), (?m), (?u)');
+}
+
 final Map<String, _Function> _functions = {
   // fuzzy(list, query, item => text, tolerance, "keep"): the elements that
   // match, best first; a number after the text is the letters a word may be
@@ -3087,7 +3131,7 @@ final Map<String, _Function> _functions = {
       // before the reference (`\$1`, as the reference showed it, and as a
       // writer escapes a `$` elsewhere) is read with it: it was kept, so
       // `\$1` gave a backslash and the group ("B\5" for "B5").
-      return text.replaceAllMapped(RegExp(pattern), (m) {
+      return text.replaceAllMapped(_regex(pattern), (m) {
         return to.replaceAllMapped(RegExp(r'\$\$|\\?\$(\d+)|\\?\$\{(\w+)\}'), (g) {
           if (g[0] == r'$$') return r'$';
           if (g[1] != null) {
@@ -3100,7 +3144,8 @@ final Map<String, _Function> _functions = {
           return '';
         });
       });
-    } on FormatException {
+    } on FormatException catch (e) {
+      _badPattern('regexReplace', pattern, e, 'the text unchanged');
       return text;
     }
   },
@@ -3122,10 +3167,11 @@ final Map<String, _Function> _functions = {
   'matches': (a) {
     final Object? text = _arg(a, 0);
     if (text == null) return false;
+    final String pattern = FormulaEvaluator.stringify(_arg(a, 1));
     try {
-      return RegExp(FormulaEvaluator.stringify(_arg(a, 1)))
-          .hasMatch(FormulaEvaluator.stringify(text));
-    } on FormatException {
+      return _regex(pattern).hasMatch(FormulaEvaluator.stringify(text));
+    } on FormatException catch (e) {
+      _badPattern('matches', pattern, e, 'false');
       return false;
     }
   },
