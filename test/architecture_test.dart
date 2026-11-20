@@ -188,6 +188,9 @@ const widgetImportRatchet = {
   'src/app/page_transitions.dart',
   'src/app/paywalls.dart',
   'src/app/presenter.dart',
+  // The banner the presenter drew (presentation=banner), moved to its own
+  // file so documents' banners share it: the same widgets, not new ones.
+  'src/app/ui/banner.dart',
   'src/app/ui/capture_scope.dart',
   'src/app/ui/confirm_dialog.dart',
   'src/app/ui/feedback_icon.dart',

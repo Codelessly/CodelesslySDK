@@ -73,10 +73,11 @@ void main() {
     final tree = NodeTree(DocumentSource(doc));
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'r'))));
     final view = tester.renderObject(find.byType(NodeView));
-    // A square of its design size less padding (13.5), centered: the node
-    // takes the row's height.
-    expect(tree.boxOf('spin')!.rectIn(view), const Rect.fromLTWH(0, 0, 13.5, 48));
-    expect(tree.boxOf('ios')!.rectIn(view), const Rect.fromLTWH(13.5, 14, 20, 20));
+    // A written size is the node's in every parent (it took the row's height
+    // and drew centred in it): 16 × 16, centred across the row, the arc a
+    // square of that size less its padding (13.5).
+    expect(tree.boxOf('spin')!.rectIn(view), const Rect.fromLTWH(0, 16, 16, 16));
+    expect(tree.boxOf('ios')!.rectIn(view), const Rect.fromLTWH(16, 14, 20, 20));
     expect(_descendants(tree.boxOf('spin')!).whereType<RenderSpinner>().single.size, const Size(13.5, 13.5));
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
