@@ -1,14 +1,18 @@
 // Interactive pages retain the design template and motion. Flutter's
 // viewport supplies drag arbitration, accessibility and page snapping.
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/widgets.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
 import '../render/convert.dart' show clip;
+import '../render/physics.dart' show springOf;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart' show Expressions;
@@ -17,6 +21,10 @@ import 'collections_layout.dart';
 import 'collections_list_runtime.dart';
 
 final Object _pageReportZone = Object();
+
+/// The perspective entry a page view's camera of `perspective` 1 has: a
+/// motion's own (motionMatrix).
+const double pageCameraDepth = 0.0012;
 
 class RuntimePageView extends StatefulWidget {
   const RuntimePageView({
@@ -215,7 +223,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
           )
           ?.setPageOffset(index - page);
     }
-    _r.fire('scroll', event: {'page': page, 'offset': _controller.offset});
+    _r.fire('scroll', event: {'page': page, 'index': page.round(), 'offset': _controller.offset});
   }
 
   @override
@@ -249,6 +257,49 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         id: widget.itemId,
         instance: instance,
       );
+      return _camera(_posed(child, index, vertical), index, vertical);
+  }
+
+  /// [pager] that reports where it comes to rest: its `scrollEnd` reaction
+  /// (`result.page`, the page at rest, `result.index`, `result.offset`). Its
+  /// `scroll` reaction reads the page as it moves, a decimal (`result.page`).
+  Widget _reportingRest(Widget pager) => NotificationListener<ScrollEndNotification>(
+        onNotification: (n) {
+          if (n.depth == 0 && mounted) {
+            _r.fire('scrollEnd', event: {'page': _page, 'index': _page.round(), 'offset': _controller.offset});
+          }
+          return false;
+        },
+        child: pager,
+      );
+
+  /// [page] seen through the view's camera (`perspective`): a perspective
+  /// about the view's middle, so every page's 3D turn (its motion's rotateX
+  /// or rotateY) is seen from one point. No camera: [page] as it is.
+  Widget _camera(Widget page, int index, bool vertical) {
+    final perspective = _node.prop(api.PageViewProps.perspective);
+    if (perspective <= 0) return page;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: page,
+      builder: (context, child) => LayoutBuilder(
+        builder: (context, constraints) {
+          final size = constraints.biggest;
+          final d = index - _page;
+          // The view's middle, from the page's top left: the page sits d
+          // pages from it along the axis.
+          final o = Offset(size.width / 2 - (vertical ? 0 : d * size.width), size.height / 2 - (vertical ? d * size.height : 0));
+          final transform = Matrix4.translationValues(o.dx, o.dy, 0)
+            ..multiply(Matrix4.identity()..setEntry(3, 2, pageCameraDepth * perspective))
+            ..translateByDouble(-o.dx, -o.dy, 0, 1);
+          return Transform(transform: transform, child: child);
+        },
+      ),
+    );
+  }
+
+  /// A page posed by the view's page motion.
+  Widget _posed(Widget child, int index, bool vertical) {
       final motion = _node.prop(api.PageViewProps.pageMotion);
       if (motion == null) return child;
       return AnimatedBuilder(
@@ -299,24 +350,43 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         PointerDeviceKind.mouse,
       },
     );
+    // A fling that carries over many pages (snapPhysics), resting on the
+    // page nearest where it would stop, in place of one page a fling.
+    final snap = _node.prop(api.PageViewProps.pageSnapping) ? _node.prop(api.CollectionScrollProps.snapPhysics) : null;
+    // The page extent the controller places pages by.
+    final physics = snap == null
+        ? scrollPhysicsOf(_node)
+        : FlingSnapPhysics(
+            physics: snap,
+            nearest: (pixels, p, {from, direction = 0}) {
+              final extent = p.viewportDimension * _controller.viewportFraction;
+              if (extent <= 0) return pixels;
+              var stop = (pixels / extent).roundToDouble() * extent;
+              if (from != null && direction > 0 && stop < from) stop = (from / extent).ceilToDouble() * extent;
+              if (from != null && direction < 0 && stop > from) stop = (from / extent).floorToDouble() * extent;
+              return stop;
+            },
+            parent: scrollPhysicsOf(_node),
+          );
+    final pageSnapping = snap == null && _node.prop(api.PageViewProps.pageSnapping);
     if (_node.prop(api.PageViewProps.paintOrder) == api.PagePaintOrder.reverse) {
-      return _ReversePager(
+      return _reportingRest(_ReversePager(
         controller: _controller,
         scrollBehavior: scrollBehavior,
         vertical: vertical,
         reverse: _node.prop(api.CollectionScrollProps.reverse),
-        physics: scrollPhysicsOf(_node),
+        physics: physics,
         padEnds: _node.prop(api.PageViewProps.padEnds),
-        pageSnapping: _node.prop(api.PageViewProps.pageSnapping),
+        pageSnapping: pageSnapping,
         allowImplicitScrolling: _node.prop(api.PageViewProps.allowImplicitScrolling),
         viewportFraction: _node.prop(api.PageViewProps.viewportFraction),
         clipBehavior: clip(_node.prop(api.CollectionScrollProps.clipBehavior)),
         itemCount: data?.length,
         onPageChanged: _reportPage,
         itemBuilder: (context, index) => _item(context, index, vertical),
-      );
+      ));
     }
-    final Widget pages = PageView.builder(
+    final Widget pager = PageView.builder(
       controller: _controller,
       // Page turning is also a desktop interaction. Keep the host's input
       // devices while opting this pager into mouse dragging.
@@ -329,9 +399,9 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       ),
       scrollDirection: vertical ? Axis.vertical : Axis.horizontal,
       reverse: _node.prop(api.CollectionScrollProps.reverse),
-      physics: scrollPhysicsOf(_node),
+      physics: physics,
       padEnds: _node.prop(api.PageViewProps.padEnds),
-      pageSnapping: _node.prop(api.PageViewProps.pageSnapping),
+      pageSnapping: pageSnapping,
       allowImplicitScrolling: _node.prop(
         api.PageViewProps.allowImplicitScrolling,
       ),
@@ -339,7 +409,9 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       itemCount: data?.length,
       onPageChanged: _reportPage,
       itemBuilder: (context, index) => _item(context, index, vertical),
-    );    // The next page showing at the edge fades out, in place of a hard cut.
+    );
+    final Widget pages = _reportingRest(pager);
+    // The next page showing at the edge fades out, in place of a hard cut.
     final fade = _node.prop(api.PageViewProps.edgeFade);
     if (fade <= 0) return pages;
     return ShaderMask(
@@ -528,5 +600,173 @@ class RenderReversePaintFillViewport extends RenderSliverFillViewport {
       }
     }
     return false;
+  }
+}
+
+// A snapping scroll's fling that carries (CollectionScrollProps.snapPhysics,
+// codelessly_api docs/design/26, "A fling that carries"). The rule:
+//
+// 1. The release coasts by its own speed and the GesturePhysics' friction
+//    (Flutter's FrictionSimulation, drag = 1 - friction): the momentum is the
+//    physical one, never re-aimed, past items not built yet (the list builds
+//    them as it passes).
+// 2. Once slower than [_FlingLanding.captureSpeed] it is captured by the item
+//    nearest where the coast would stop (asked then, when the items around
+//    there are built and their real extents known), not one behind it, and
+//    it comes to rest on that item at a constant deceleration: the speed
+//    keeps falling to zero with no jump, and it ends exactly on the item.
+// 3. It meets the end of the scroll (the last item) as a wall: it stops there.
+//
+// A release slower than minFlingVelocity settles on the nearest item on the
+// physics' spring; with reduced motion it goes to the item nearest the
+// projected end on the spring, with no coast.
+
+/// The stop (an item's offset) nearest [pixels] in [position]; with a
+/// [direction] (1 or -1), the nearest one not behind [from] that way.
+typedef SnapStop = double Function(double pixels, ScrollMetrics position, {double? from, int direction});
+
+/// Scroll physics of a scroll that snaps to items: a fling coasts by
+/// [physics] and is captured by the stop [nearest] gives near where it
+/// would stop.
+class FlingSnapPhysics extends ScrollPhysics {
+  const FlingSnapPhysics({required this.physics, required this.nearest, super.parent});
+
+  /// The release's physics (friction, spring, the fling's speeds).
+  final api.GesturePhysics physics;
+
+  final SnapStop nearest;
+
+  /// The stop nearest the fling's projected end, released at [velocity]
+  /// from [position] (with the items known now).
+  double targetFor(ScrollMetrics position, double velocity) {
+    final projected = physics.projectFling(position.pixels, velocity);
+    return nearest(projected, position).clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+  }
+
+  static bool get _reducedMotion => SchedulerBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+
+  @override
+  FlingSnapPhysics applyTo(ScrollPhysics? ancestor) =>
+      FlingSnapPhysics(physics: physics, nearest: nearest, parent: buildParent(ancestor));
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if (position.outOfRange ||
+        (position.pixels <= position.minScrollExtent && velocity < 0) ||
+        (position.pixels >= position.maxScrollExtent && velocity > 0)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    final spring = springOf(physics);
+    final v = velocity.clamp(-physics.maxFlingVelocity, physics.maxFlingVelocity).toDouble();
+    final flings = physics.fling && v.abs() >= physics.minFlingVelocity;
+    if (_reducedMotion || !flings) {
+      // No coast: the item nearest the projected end (or, slow, where it is).
+      final target = targetFor(position, _reducedMotion ? v : 0);
+      if ((target - position.pixels).abs() < tolerance.distance && v.abs() < tolerance.velocity) return null;
+      return ScrollSpringSimulation(spring, position.pixels, target, _reducedMotion ? 0 : v, tolerance: tolerance);
+    }
+    return _FlingLanding(
+      coast: FrictionSimulation(physics.frictionDrag, position.pixels, v),
+      position: position,
+      nearest: nearest,
+      tolerance: tolerance,
+    );
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
+
+/// A free friction coast, captured below [captureSpeed] by the item nearest
+/// where it would stop and brought to rest on it at a constant deceleration.
+class _FlingLanding extends Simulation {
+  _FlingLanding({required this.coast, required ScrollMetrics position, required this.nearest, required Tolerance tolerance})
+      : _position = position,
+        _min = position.minScrollExtent,
+        _max = position.maxScrollExtent,
+        super(tolerance: tolerance) {
+    final v0 = coast.dx(0).abs();
+    final k = coast.dx(1).abs() / math.max(v0, 1e-9);
+    _at = v0 <= captureSpeed || k <= 0 || k >= 1 ? 0 : math.log(captureSpeed / v0) / math.log(k);
+    // Meeting an end first: a wall there.
+    final edge = coast.dx(0) > 0 ? _max : _min;
+    _wall = coast.x(_at) * coast.dx(0).sign >= edge * coast.dx(0).sign ? edge : null;
+  }
+
+  /// The speed (px/s) below which the coast is captured by an item.
+  static const double captureSpeed = 60;
+
+  final FrictionSimulation coast;
+  final SnapStop nearest;
+  final ScrollMetrics _position;
+  final double _min, _max;
+  late final double _at;
+  late final double? _wall;
+
+  // The landing, worked out when the coast is captured (the items there are
+  // built by then).
+  double? _x1, _v1, _target, _decel, _land;
+
+  void _capture() {
+    if (_target != null) return;
+    final x1 = coast.x(_at), v1 = coast.dx(_at);
+    final direction = v1 >= 0 ? 1 : -1;
+    final projected = x1 - v1 / math.log(coast.dx(1).abs() / math.max(coast.dx(0).abs(), 1e-9));
+    var target = nearest(projected, _position, from: x1, direction: direction).clamp(_min, _max).toDouble();
+    if ((target - x1) * direction < 0) target = x1;
+    final d = target - x1;
+    _x1 = x1;
+    _v1 = v1;
+    _target = target;
+    // Constant deceleration from v1 to rest over d: a = v1² / 2d, for 2d / v1.
+    _decel = d.abs() < 1e-6 ? 0 : v1 * v1 / (2 * d);
+    _land = d.abs() < 1e-6 ? 0 : 2 * d / v1;
+  }
+
+  /// When the coast meets the wall (null: it does not before the capture).
+  late final double? _wallAt = () {
+    final wall = _wall;
+    if (wall == null) return null;
+    // Bisect the coast's time to the wall within the coast.
+    var lo = 0.0, hi = _at;
+    for (var i = 0; i < 60; i++) {
+      final mid = (lo + hi) / 2;
+      if ((coast.x(mid) - wall) * coast.dx(0).sign < 0) {
+        lo = mid;
+      } else {
+        hi = mid;
+      }
+    }
+    return hi;
+  }();
+
+  @override
+  double x(double time) {
+    final wallAt = _wallAt;
+    if (wallAt != null) return time < wallAt ? coast.x(time) : _wall!;
+    if (time < _at) return coast.x(time);
+    _capture();
+    final t = math.min(time - _at, _land!);
+    return _x1! + _v1! * t - _decel! * t * t / 2;
+  }
+
+  @override
+  double dx(double time) {
+    final wallAt = _wallAt;
+    if (wallAt != null) return time < wallAt ? coast.dx(time) : 0;
+    if (time < _at) return coast.dx(time);
+    _capture();
+    final t = time - _at;
+    return t >= _land! ? 0 : _v1! - _decel! * t;
+  }
+
+  @override
+  bool isDone(double time) {
+    final wallAt = _wallAt;
+    if (wallAt != null) return time >= wallAt;
+    if (time < _at) return false;
+    _capture();
+    return time - _at >= _land!;
   }
 }

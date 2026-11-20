@@ -863,9 +863,10 @@ Shader shimmerShader(api.Shimmer s, double t, Rect bounds) {
 /// perspective (outermost first).
 Matrix4 motionMatrix(api.Motion m) {
   final matrix = Matrix4.identity();
-  if (m.perspective > 0 && (m.rotateX != 0 || m.rotateY != 0)) matrix.setEntry(3, 2, 0.0012 * m.perspective);
+  if (m.perspective > 0 && (m.rotateX != 0 || m.rotateY != 0 || m.translateZ != 0)) matrix.setEntry(3, 2, 0.0012 * m.perspective);
   return matrix
-    ..translateByDouble(m.translateX, m.translateY, 0, 1)
+    // translateZ is toward the viewer (CSS's); Flutter's z points into the screen.
+    ..translateByDouble(m.translateX, m.translateY, -m.translateZ, 1)
     ..scaleByDouble(m.scale * m.scaleX, m.scale * m.scaleY, 1, 1)
     ..rotateZ(m.rotate * math.pi / 180)
     ..rotateX(m.rotateX * math.pi / 180)

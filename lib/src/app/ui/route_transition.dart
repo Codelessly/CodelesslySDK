@@ -59,7 +59,7 @@ class TransitionSideView extends StatelessWidget {
     var out = child;
     if (pose.opacity < 1) out = IgnorePointer(ignoring: pose.opacity == 0, child: Opacity(opacity: pose.opacity, child: out));
     if (pose.blur > 0) out = ImageFiltered(imageFilter: ui.ImageFilter.blur(sigmaX: pose.blur, sigmaY: pose.blur), child: out);
-    if (m.translateX != 0 || m.translateY != 0 || m.scale != 1 || m.scaleX != 1 || m.scaleY != 1 || m.rotate != 0 || m.rotateX != 0 || m.rotateY != 0) {
+    if (m.translateX != 0 || m.translateY != 0 || m.translateZ != 0 || m.scale != 1 || m.scaleX != 1 || m.scaleY != 1 || m.rotate != 0 || m.rotateX != 0 || m.rotateY != 0) {
       out = Transform(alignment: Alignment(m.alignment.x, m.alignment.y), transform: motionMatrix(m), child: out);
     }
     if (m.shiftX != 0 || m.shiftY != 0) out = FractionalTranslation(translation: Offset(m.shiftX, m.shiftY), child: out);

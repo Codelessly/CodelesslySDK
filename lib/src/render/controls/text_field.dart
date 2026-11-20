@@ -210,6 +210,10 @@ class TextFieldConfig {
   final List<Object?> _props;
 
   late final api.InputDecoration decoration;
+
+  /// A code field's decoration in its own focused look (its `focused.` patch):
+  /// the slot typed into next is drawn in it. Null: none written.
+  late final api.InputDecoration? focusedDecoration;
   late final ControlTokens tokens;
   late final TextStyle valueStyle;
   late final List<(int, int, TextStyle)> runs;
@@ -370,6 +374,9 @@ class TextFieldConfig {
     c.cursorRadius = Radius.circular(n.prop(TextFieldProps.cursorRadius) ?? 1);
     c.otpLength = n.prop(TextFieldProps.otpLength);
     c.otpDigitsOnly = n.prop(TextFieldProps.otpDigitsOnly);
+    final focusPatches = n.behaviors.states.patches[api.WidgetState.focused];
+    final focusPatch = c.otpLength > 0 && focusPatches != null ? focusPatches[n.id] : null;
+    c.focusedDecoration = focusPatch == null ? null : n.patched(focusPatch).prop(TextFieldProps.decoration);
     c.maxLength = c.otpLength > 0 ? c.otpLength : n.prop(TextFieldProps.maxLength);
     c.selectionHeightStyle = ui.BoxHeightStyle.values.byName(n.prop(TextFieldProps.selectionHeightStyle).name);
     c.selectionWidthStyle = ui.BoxWidthStyle.values.byName(n.prop(TextFieldProps.selectionWidthStyle).name);
@@ -1062,23 +1069,31 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     final slots = otpSlots;
     final chars = editor.text.runes.map(String.fromCharCode).toList();
     final active = editor.selection.isValid ? editor.selection.extentOffset.clamp(0, count - 1) : chars.length.clamp(0, count - 1);
-    // Each slot is drawn as the field's own box: its fill, corners and
-    // border (`fill=`, `radius=`, `border=`, in its state: `focused.border=`
-    // while it is typed in), the slot typed into next in its focused border
-    // (`decoration.focusedBorder`, else 2 px in the accent).
+    // Each slot is drawn as the field's own box at rest (`fill=`, `radius=`,
+    // `border=`). While the field has the focus (by a pointer or the
+    // keyboard), the slot typed into next is drawn in the field's focused
+    // look: its `focused.` keys (`focused.border=`, `focused.fill=`), else
+    // its `decoration.focusedBorder`, else 2 px in the accent; the other
+    // slots stay at rest.
     final d = c.decoration;
     final own = FieldBorder.of(d.border);
     final ownSide = own == null || own.side == const BorderSide() ? null : own.side;
-    final focusedSide = FieldBorder.of(d.focusedBorder)?.side;
     final fill = d.filled == false ? null : (d.fillColor?.flutter ?? c.tokens.surface);
+    final f = c.focusedDecoration;
+    final focusedOwn = f == null ? null : FieldBorder.of(f.border);
+    final focusedSide = FieldBorder.of((f ?? d).focusedBorder)?.side ??
+        (focusedOwn != null && focusedOwn.side != ownSide && focusedOwn.side != const BorderSide()
+            ? BorderSide(color: focusedOwn.side.color, width: math.max(2, focusedOwn.side.width))
+            : null) ??
+        BorderSide(color: c.tokens.primary, width: 2);
+    final focusedFill = f == null || f.filled == false ? fill : (f.fillColor?.flutter ?? fill);
     final corners = own?.radius ?? BorderRadius.circular(c.tokens.radius('control', 7));
-    final typedIn = focusNode.hasFocus && (focusNode.showsHighlight || focusedSide != null || ownSide != null);
+    final typedIn = focusNode.hasFocus;
     for (var i = 0; i < count; i++) {
       final rect = corners.toRRect(slots[i].shift(offset));
-      if (fill != null) canvas.drawRRect(rect, Paint()..color = fill);
-      final side = typedIn && i == active
-          ? (focusedSide ?? BorderSide(color: ownSide?.color ?? c.tokens.primary, width: 2))
-          : (ownSide ?? BorderSide(color: c.tokens.primaryBorder));
+      final slotFill = typedIn && i == active ? focusedFill : fill;
+      if (slotFill != null) canvas.drawRRect(rect, Paint()..color = slotFill);
+      final side = typedIn && i == active ? focusedSide : (ownSide ?? BorderSide(color: c.tokens.primaryBorder));
       if (side.style != BorderStyle.none && side.width > 0) {
         canvas.drawRRect(rect, Paint()
           ..style = PaintingStyle.stroke

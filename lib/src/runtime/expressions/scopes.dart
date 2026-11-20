@@ -636,6 +636,10 @@ class ItemScope extends NamedScope {
   }
 
   int get index => _index;
+
+  /// Its distance from the resting page (or a snapping list's snap point), in
+  /// items; null: none given.
+  double? get pageOffset => _pageOffset;
   Object? get item => _item;
 
   static const _names = {'item', 'index', 'parent'};
