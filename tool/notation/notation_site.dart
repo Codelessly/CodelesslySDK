@@ -330,7 +330,7 @@ final class NotationSite {
 
   /// Where the expansion of component [type] goes: the manifest's reference
   /// for it, else `components/<type>.json` in the site's folder.
-  String componentOut(String type) => '$dir/${componentRefs[type] ?? 'components/$type.json'}';
+  String componentOut(String type) => '$dir/${jsonRef(componentRefs[type] ?? 'components/$type.json')}';
 
   /// Where the expansion of the page in [source] goes: the manifest's page
   /// of the same name, else `<name>.json` in the site's folder.
@@ -339,15 +339,28 @@ final class NotationSite {
     // A page listed by its name alone (`"home"`) or as a record
     // (`{"id": "home", "file": "home.json"}`) is that name's JSON.
     final ref = SiteManifest.pageRefs(manifest['pages']).where((p) => _stem(p) == name).firstOrNull;
-    return '$dir/${ref == null ? '$name.json' : RegExp(r'\.[A-Za-z0-9]+$').hasMatch(ref) ? ref : '$ref.json'}';
+    return '$dir/${ref == null ? '$name.json' : RegExp(r'\.[A-Za-z0-9]+$').hasMatch(ref) ? jsonRef(ref) : '$ref.json'}';
   }
+
+  /// The JSON a reference of site.json names: a `.txt` it lists is the
+  /// notation itself, which an expansion never writes over (NOCD 18: the
+  /// listed pages were overwritten with their JSON, the source lost), but
+  /// the `.json` beside it.
+  static String jsonRef(String ref) => ref.toLowerCase().endsWith('.txt') ? '${ref.substring(0, ref.length - 4)}.json' : ref;
+
+  /// The references site.json lists that are notation files (`pages/home.txt`):
+  /// a site lists the JSON documents its notation expands to.
+  List<String> get listedNotation => [
+        for (final r in [...SiteManifest.pageRefs(manifest['pages']), ...readStrings(manifest['components'])])
+          if (r.toLowerCase().endsWith('.txt')) r,
+      ];
 
   /// The site's expanded components, from their JSON (the manifest's
   /// list): each that reads as a component document, by type.
   late final Map<String, LayoutDocument> expanded = () {
     final out = <String, LayoutDocument>{};
     for (final e in componentRefs.entries) {
-      final f = File('$dir/${e.value}');
+      final f = File('$dir/${jsonRef(e.value)}');
       // Written from its notation by `expand` when it is not there yet; one
       // that nothing writes is said.
       if (sources.containsKey(e.key)) {

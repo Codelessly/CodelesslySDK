@@ -383,6 +383,15 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
       issues++;
     }
   }
+  // A notation file site.json lists: its JSON went beside it, not over it (NotationSite.jsonRef).
+  for (final r in site.listedNotation) {
+    final json = NotationSite.jsonRef(r);
+    final m = 'site.json lists "$r", the notation itself: its expansion is written to "$json", not over it. '
+        'List "$json" there: site.json names the JSON documents, which the render reads.';
+    stderr.writeln('site.json: $m');
+    found.add({'file': 'site.json', 'message': m});
+    issues++;
+  }
   // What is about a file not written here (a JSON component).
   for (final e in said.entries) {
     for (final m in e.value) {

@@ -13,7 +13,8 @@
 #   tool/codelessly sheet <png | dir>... --out <png> many captures on one labelled image
 #   tool/codelessly notation prompt|expand|print|apply   the compact authoring notation (tool/notation);
 #                                                  --dictionary <folder> (each a further one, or CODELESSLY_DICTIONARY)
-#                                                  reads a dictionary's words
+#                                                  reads a dictionary's words. Each also by its own name:
+#                                                  tool/codelessly expand <site folder | file.txt> [...]
 #   tool/codelessly validate <site folder | file.txt> [--open] [--dictionary <folder>]...   expand, writing nothing:
 #                                                  the issues and the words that stood in as placeholders, as JSON
 #                                                  (notation.sh validate)
@@ -55,6 +56,8 @@ run_cli() {
 case "$cmd" in
   docs|flatten|outline|sheet|states|render|mcp) run_cli "$cmd" "$@" ;;
   notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
+  # The notation's commands by their own names too (`tool/codelessly expand <site>`), as tool/codelessly notation <command>.
+  expand|print|apply|prompt|vocabulary) exec "$sdk/tool/notation/notation.sh" "$cmd" "$@" ;;
   validate) exec "$sdk/tool/notation/notation.sh" validate "$@" ;;
   replay) exec "$sdk/tool/stream/replay.sh" "$@" ;;
   serve) exec "$sdk/tool/render/serve.sh" "$@" ;;
@@ -91,5 +94,5 @@ case "$cmd" in
     [ $ok = 1 ] && exit 0 || exit 1
     ;;
   help|-h|--help) sed -n '2,/^set -u/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//' ;;
-  *) echo "Unknown command: $cmd. tool/codelessly help lists them." >&2; exit 2 ;;
+  *) echo "Unknown command: $cmd. The commands: doctor, docs, flatten, render, outline, states, sheet, notation (its expand, print, apply, prompt also by name), validate, replay, serve, mcp; tool/codelessly help describes each." >&2; exit 2 ;;
 esac
