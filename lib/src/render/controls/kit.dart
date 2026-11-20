@@ -493,6 +493,16 @@ class ControlLabel {
 
   String get text => _text;
 
+  /// How many lines it takes at most: one, cut with an ellipsis, or (null)
+  /// as many as its width needs.
+  set maxLines(int? value) {
+    if (_painter.maxLines == value) return;
+    _painter
+      ..maxLines = value
+      ..ellipsis = value == null ? null : '…';
+    _laidOutFor = null;
+  }
+
   /// The style it draws in, its fallback included.
   @visibleForTesting
   TextStyle? get debugStyle => _style;
@@ -569,6 +579,11 @@ class ControlLabel {
     // too high (a pixel, once snapped). The baseline is exact, and so are the
     // font's own ascent and descent: the glyphs' middle is half their
     // difference above it.
+    // (Several lines: the middle of them all.)
+    if (_painter.maxLines != 1 && _painter.computeLineMetrics().length > 1) {
+      _glyphCenter = _painter.height / 2;
+      return;
+    }
     final rise = _naturalRise();
     if (rise != null) _glyphCenter = _painter.computeDistanceToActualBaseline(TextBaseline.alphabetic) - rise;
   }

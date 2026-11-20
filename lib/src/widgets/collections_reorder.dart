@@ -13,7 +13,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListReorder, ListViewProps, Node, ReorderPlaceholder, ReorderStart, TriggerType;
 import 'package:flutter/gestures.dart' show ImmediateMultiDragGestureRecognizer;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show CustomSemanticsAction, SemanticsService;
 import 'package:flutter/services.dart';
 
@@ -349,19 +349,20 @@ class _ReorderListViewState extends State<ReorderListView> {
     final scrollable = _node.prop(ListViewProps.scrollable);
     return LayoutBuilder(builder: (context, constraints) {
       final bounded = vertical ? constraints.hasBoundedHeight : constraints.hasBoundedWidth;
-      return ReorderableListView.builder(
+      // The widgets layer's reorderable sliver in a scroll view of its own
+      // (what Material's ReorderableListView is made of).
+      return CustomScrollView(
         shrinkWrap: !bounded || !scrollable,
         physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-        padding: _node.layout.padding.flutter,
         scrollDirection: _axis,
-        buildDefaultDragHandles: false,
+        slivers: [SliverPadding(padding: _node.layout.padding.flutter, sliver: SliverReorderableList(
         itemCount: count,
         // Without auto-scroll the list barely moves near its edges.
         autoScrollerVelocityScalar: model?.autoScroll == false ? 0.001 : null,
         // The dragged row is drawn with boxes of its own (the row's stay
         // in the list), in its nodes' `dragged` state.
         proxyDecorator: (child, index, animation) => decorateReorderProxy(
-            Material(type: MaterialType.transparency, child: _proxy(index)), animation, model),
+            _proxy(index), animation, model),
         onReorderStart: (index) {
           _setDragged(_r, widget.itemId, _proxyInstance(index), true);
           _r.fire(TriggerType.dragStart.name, event: {'index': index, 'item': widget.items.elementAtOrNull(index)});
@@ -433,8 +434,9 @@ class _ReorderListViewState extends State<ReorderListView> {
               child: child,
             );
           }
+          // A row keeps its state as it moves: its key is the list's own.
           return Padding(
-            key: ValueKey(('reorder', _rowKey(widget.items, index))),
+            key: _ReorderRowKey(('reorder', _rowKey(widget.items, index)), this),
             padding: index == count - 1
                 ? EdgeInsets.zero
                 : vertical
@@ -443,9 +445,24 @@ class _ReorderListViewState extends State<ReorderListView> {
             child: child,
           );
         },
-      );
+      ))]);
     });
   }
+}
+
+/// The key of a row of one reorderable list: its row's key in that list
+/// (two lists may show the same rows).
+class _ReorderRowKey extends GlobalObjectKey {
+  const _ReorderRowKey(this.row, this.list) : super(row);
+
+  final Object row;
+  final Object list;
+
+  @override
+  bool operator ==(Object other) => other is _ReorderRowKey && other.row == row && identical(other.list, list);
+
+  @override
+  int get hashCode => Object.hash(row, identityHashCode(list));
 }
 
 /// Starts dragging row [index] of the reorderable list around when a
@@ -888,13 +905,10 @@ class GroupReorderListState extends State<GroupReorderList> {
     );
     final instance = ProvidedItem('dragged', _r.b.instance, _r.node.id, _rowKey(widget.items, index));
     Size? size;
-    Widget feedback() => Material(
-          type: MaterialType.transparency,
-          child: SizedBox.fromSize(
+    Widget feedback() => SizedBox.fromSize(
             size: size,
             child: decorateReorderProxy(_row(index, tag: 'dragged'), const AlwaysStoppedAnimation(1), widget.model),
-          ),
-        );
+          );
 
     void started() {
       _setDragged(_r, widget.itemId, instance, true);

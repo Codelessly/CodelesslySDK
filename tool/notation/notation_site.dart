@@ -92,10 +92,21 @@ final class NotationSite {
     for (final v in Variable.declarationsFromJson(manifest['variables'])) v.name: {'type': v.type.name, ...v.toJson()},
   };
 
-  /// The ids of its pages (each page reference's file stem).
-  late final List<String> screens = [
+  /// The ids of the pages the manifest lists (each page reference's file
+  /// stem).
+  late final List<String> listedScreens = [
     for (final p in SiteManifest.pageRefs(manifest['pages'])) _stem(p),
   ];
+
+  /// The ids of its pages: the ones the manifest lists and the ones written
+  /// in the notation (`pages/*.txt`), which a manifest with no `pages`
+  /// leaves to the folder. A bare `go album` names the page `album` whether
+  /// or not site.json lists it (with none listed it read a variable or a
+  /// loop's item of that name instead: `"to": "${= item}"`).
+  late final List<String> screens = {
+    ...listedScreens,
+    for (final p in pageSources) _stem(p),
+  }.toList();
 
   /// The dictionaries the manifest names (`dictionary`: folders of
   /// definitions, relative to it), as paths.
@@ -214,8 +225,8 @@ final class NotationSite {
   /// The words [definitionFiles] define, by the file that defines each.
   late final Map<String, String> definedWords = {
     for (final e in definitionFiles.entries)
-      for (final w in readPageDefinitions(e.value).words.keys)
-        if (notationBuiltInWord(w, catalog: standardCatalog) == null) w: e.key,
+      for (final w in readPageDefinitions(e.value).words.entries)
+        if (notationBuiltInWord(w.key, catalog: standardCatalog, primitive: w.value.every((d) => d.primitive)) == null) w.key: e.key,
   };
 
   /// The component files the site does not load (a `components/*.txt` that
@@ -260,7 +271,7 @@ final class NotationSite {
     // A word the notation already has is the notation's: this definition of
     // it is not used (the owner's decision, 2026-11-18).
     for (final e in read.words.entries) {
-      if (notationBuiltInWord(e.key, catalog: standardCatalog) case final what?) {
+      if (notationBuiltInWord(e.key, catalog: standardCatalog, primitive: e.value.every((d) => d.primitive)) case final what?) {
         for (final d in e.value) {
           _skipped.add((path: path, type: e.key, message: '${_name(path)}: line ${d.line}: ${notationBuiltInDefinition(e.key, what, kind: d.primitive ? 'primitive' : 'definition')}'));
         }

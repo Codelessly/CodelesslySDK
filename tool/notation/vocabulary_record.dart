@@ -172,8 +172,10 @@ final class RecordSnapshot {
   /// it has (notationBuiltInWord): the definition is not used, the built-in
   /// word is (resolution `built-in`, the definition kept).
   Map<String, String> get builtIns => {
-        for (final w in definitions.keys)
-          if (notationBuiltInWord(w, catalog: standardCatalog) case final b?) w: b,
+        for (final e in definitions.entries)
+          // (A primitive of a name the notation reads as another word is not
+          // used either; a define of one is.)
+          if (notationBuiltInWord(e.key, catalog: standardCatalog, primitive: RegExp(r'(^|\n)primitive\s+' + RegExp.escape(e.key) + r'\b').hasMatch(e.value.text)) case final b?) e.key: b,
       };
 }
 

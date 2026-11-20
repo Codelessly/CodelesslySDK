@@ -7,8 +7,6 @@ library;
 
 export 'src/app/app_identity.dart' show ScreenIdentity;
 export 'src/app/back_guard.dart' show BackGuard;
-export 'src/app/backdrop_screens.dart'
-    show SeeThroughZoomPageTransitionsBuilder;
 export 'src/app/codelessly_widget.dart' show CodelesslyTranslucentRoute;
 export 'src/app/fonts.dart' show FontRegistrationCache;
 export 'src/app/loader.dart' show PublishAssetSource;

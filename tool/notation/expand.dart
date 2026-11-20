@@ -362,7 +362,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
   }
   for (final (i, p) in expanded.pages.indexed) {
     report(p.path, site.pageOut(p.path), expanded.results[i], p.document, about(p.path));
-    if (!site.screens.contains(p.name)) {
+    if (!site.listedScreens.contains(p.name)) {
       stderr.writeln('${rel(p.path)}: site.json\'s pages do not list ${p.name}: add "${p.name}.json" there, or the site does not have it.');
       found.add({'file': recordPath(p.path, site.home), 'message': 'site.json\'s pages do not list ${p.name}.'});
       issues++;

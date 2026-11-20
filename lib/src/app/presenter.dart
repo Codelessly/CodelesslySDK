@@ -8,7 +8,7 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart'
     show ActionDef, Json, ModalAnchor, ModalPresentation, NavigateAction, OpenModalAction, PopoverPlacement;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'ui/presentation_scope.dart';
@@ -234,7 +234,8 @@ class CodelesslyPresenter {
         }
       }
 
-      route = CodelesslyPageRoute<Object?>(
+      route = CodelesslyPageRoute.of<Object?>(
+        codelessly: codelessly,
         fullscreenDialog: true,
         settings: RouteSettings(name: '/present/$layoutId'),
         builder: (_) => ModalFocus(
@@ -539,7 +540,7 @@ class _BannerState extends State<_Banner> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
     final curved = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
-    Widget banner = Material(type: MaterialType.transparency, child: widget.child);
+    Widget banner = widget.child;
     if (widget.dismissible) {
       banner = Dismissible(
         key: const ValueKey('Codelessly banner'),

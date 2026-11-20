@@ -1,10 +1,36 @@
 ## 40.0.0
 
+Documents that drew wrongly or held the renderer draw now, and a render says what a picture cannot: a formula that
+failed, a name the theme does not have, a child drawn over what follows it. Needs codelessly_api 40.0.0.
+
 What a page draws on a phone and by default: a text that keeps its words whole, controls at a web page's size,
 fields that read on the ground they stand on, bar charts in the theme's colour. With CodelesslyAPI 40.0.0. Read the
 first section before upgrading.
 
 ### Behaviour changes (read before upgrading)
+
+- **A condition is no for nothing.** A `visible` binding whose value is nothing (a name nothing has, a formula
+  that failed), `""`, `0`, an empty list or an empty map hides the node; a text or a record shows it. Before, any
+  value that was not true, false or a number left the node as written, so both `if length(x)==0` and
+  `if length(x)>0` drew when the formula failed, and `if parent && parent.body` drew with no parent.
+- **A child that fills its Stack and is placed off its start is drawn there** (`h=fill y={…}`: a page of a stage,
+  the Stack's size, moved by its place). It covered the Stack whatever its `x` or `y` said. A place of 0 is as
+  before.
+- **A function a formula calls is worked out once for the same arguments within one evaluation**, unless it read
+  something that differs from call to call (`random`, `pick`, `newId`, `now`, `nowMs`, a script). A body that
+  writes an argument's expression several times no longer costs the product of them.
+- **A formula that makes more than 200,000 calls of the page's own functions in one evaluation is cut off**: the
+  calls past that give nothing (`FormulaFunction.maxCalls`; `FormulaFunction.onRunaway` is told the function).
+  Functions that call each other without end returned after minutes or never.
+- **A computed variable read while another is worked out is kept** when no cycle was met under it: a variable
+  twelve others read in turn, each for every item of a list, is worked out once a change, not once a read.
+- **`regexReplace` reads a group written `\$1`** as `$1` (the backslash was kept in the result).
+- **A one-line text field whose text is taller than the kit's box** (a title at `fontSize` 44) is as tall as its
+  line; it was cut to the default height.
+- **A line chart's y axis title stays inside the chart**: one wider than the axis labels was cut at its first
+  letters.
+- **A calendar given less height than its rows ask for** keeps each day's note (a mark, a price) in the day's own
+  cell; the notes fell on the days under them.
 
 **Text**
 
@@ -28,7 +54,7 @@ first section before upgrading.
 **Charts**
 
 - **A bar chart's bars are at most 56 wide** when the node gives no `maxBarWidth`, each in the middle of its
-  column. They were as wide as their columns.
+  column. With few values in a wide card they were slabs.
 - **A bar chart with no `color` is the theme's primary wherever that shows on the surface** (1.5:1). A light
   primary (an amber, a lime) was replaced by the ink, since it does not read as text there.
 
@@ -36,6 +62,41 @@ first section before upgrading.
 
 - **`money(value, "USD")`**: a currency's three-letter code where the symbol goes is that currency's symbol
   (`$9.00`); it printed the code before the figure.
+
+### Added
+
+- **`render --screen-timeout <seconds>`** (default 120): the most real time one screen at one size may take. Past
+  it the page's own functions and computed variables give nothing, the screen is reported as an error
+  (`screen_timeout`) and the run goes on to the next. `FormulaFunction.deadline` is the limit a host sets.
+- **A site names its date**: `"now"` in `site.json` is the `--now` of every render and state of the site when none
+  is passed.
+- **`FormulaEvaluator.onFailure`** is told each formula that could not be worked out, with why;
+  **`FormulaEvaluator.truthy`** is whether a value counts as yes where a condition is read.
+- **Render diagnostics**:
+  - `formula_failed` also names a node whose formula failed when the screen was drawn (its condition, its list,
+    its text, a value) or a variable's, with the formula and why;
+  - `formula_runaway`: a formula cut off at the call limit, naming the function;
+  - `theme_name_unknown`: a color the theme does not have, `theme.<name>` written as a value's text, or
+    `theme.<name>` read in a formula where the theme gives no such value;
+  - `icon_not_drawn` also for a control's icon (an `IconButton`'s, a `Button`'s, a field's) that names no glyph,
+    and names a known icon of the same name without its style's ending;
+  - `paints_outside`: a node drawn past the bottom or the right edge of a Stack (or a box) that does not clip,
+    over something after it, with by how much;
+  - `site_now`: a `"now"` in `site.json` that is not a time.
+
+### Fixed
+
+- **A render with no `--now` starts at the real time**, as its documentation said: `now()` and `today()` gave 1
+  January 2015 (31 December 2014 in zones west of Greenwich), so calendars, countdowns and "today" lists were
+  empty. `--wait` still moves the clock; `--now` and a site's `"now"` pin it.
+- **A Stack with `fit=contain` (or `cover`) and no size of its own along an axis** (`w=fill`) scales its content's
+  size. Its frame was not a number, the picture was blank and the render's layout dump failed on it
+  ("Infinity or NaN toInt").
+- **A box that fills, measured with no bound and with nothing in it that sizes it** (a filling tile in a cell of a
+  grid whose rows hug) no longer fails the layout with "A Stack requires bounded constraints".
+- **`parent.parent.item`** (the outermost item in a list three deep) reads that item; it read nothing, so a
+  condition on it drew no row.
+- **The notation's `go page`** names a page written in the site's folder when `site.json` lists no pages.
 
 ### Desk
 
@@ -50,6 +111,145 @@ first section before upgrading.
   such a text Roboto by name, so a site whose theme names a serif was drawn in Roboto while the run reported the
   serif as fetched.
 - `text_clipped` says when a text was drawn smaller, or cut, to keep a word whole, and at what share of its size.
+
+## Unreleased
+
+### Behaviour changes (read before upgrading)
+
+**Theme**
+
+The SDK no longer uses Flutter's Material theme at all. It reads no `Theme` and puts none above a layout: a
+layout, and the runtime's own dialogs, toasts, sheets, players and lists, draw with the project's theme tokens
+and nothing else. A project looks the same in a `MaterialApp`, a `CupertinoApp` and a plain `WidgetsApp`.
+
+- **Nothing of your app's theme colours anything of the SDK's.** The loading spinner (`CodelesslyLoadingScreen`)
+  took your app theme's primary colour before a project had loaded; it is the project's primary, or a neutral
+  ink. A dialog's barrier is black at 54% unless the action sets a scrim; your `DialogTheme.barrierColor` is
+  not read.
+- **`themeDataOf` is removed.** For the project's colours in your own widgets use `surfaceRoles(tokens)` (see
+  Added); the theming guide shows a `ThemeData` built from them.
+- **`FeedbackTheme` is no longer a `ThemeExtension`** (its `lerp` is gone), and a `FeedbackTheme` in your
+  `ThemeData.extensions` is not looked for. `ResolvedFeedbackTheme.themeData` is removed
+  (`ResolvedFeedbackTheme.tokens` gives the look as theme tokens), and `ResolvedFeedbackTheme.resolve` takes
+  the theme's colour roles and font instead of a `ThemeData`.
+- **A widget of your own shown inside a layout (an external component, a registered widget) finds your app's
+  theme**, where it found one the SDK made from the project's tokens. In an app with no Material theme it finds
+  none, as anywhere else in that app. It still gets the layout's default text style and icon colour.
+- **A widget of your own inside a layout is no longer on a `Material`.** One that needs a Material ancestor (an
+  `InkWell`, a `TextField`, a `ListTile`) must bring its own `Material`.
+- **The confirm dialog's shadow is the theme's** (its largest shadow token), where it was Material's elevation.
+  A dialog look with shadows of its own is unchanged.
+- **The audio player's background and text are the theme's**: its tertiary background, its text colours and
+  its font. The sizes of the text are the same.
+
+**Screens, dialogs and sheets**
+
+- **Your app's `ThemeData.pageTransitionsTheme` (and `ThemeData.platform`) no longer change how a project's
+  screens come and go.** A screen with no transition of its own plays the SDK's page transition
+  (`CodelesslyConfig.pageTransitions`, see Added): by default the platform's, which is what an app with an
+  untouched theme played before. An app that customised its theme's page transitions and wants them for the
+  project's screens passes them in; the navigation guide has the few lines that do it.
+- **On Android the system's back swipe plays the screen's own way out under the finger**, as far as the first
+  15% of it, then leaves or comes back. It played Material's predictive-back look (the screen shrinking in a
+  rounded frame). Only apps with `android:enableOnBackInvokedCallback` are affected.
+- **On the web a screen opened through `CodelesslyWidget.onGenerateRoute` (your own `pushNamed`, a link) has no
+  page transition**, as a `navigate` action's screen already had none there. It played the transition of the
+  visitor's operating system.
+- **`CodelesslyPageRoute` is no longer a `MaterialPageRoute`** (it is a `PageRoute`): `route is
+  MaterialPageRoute` is false for a project's screens, and a paywall and a full-screen modal open in a
+  `CodelesslyPageRoute` too. `seeThroughPageTransitions` is removed, with
+  `SeeThroughZoomPageTransitionsBuilder` (`internals.dart`): above backdrop screens the SDK's transitions paint
+  nothing behind the screens by themselves.
+- **Behind two screens while they move, Android's transition and the desktop's scrim are the project's surface
+  color**, not your app theme's.
+- **A dialog comes and goes as the SDK's other presented layouts do**: it fades in and grows from 96% over
+  320 ms, and leaves over 200 ms. It faded over 150 ms both ways, as Material's dialog does. This is every
+  `openModal` dialog with no blur or scale of its own, and `confirm`.
+- **A plain bottom sheet moves as the SDK's sheets do**: up over 320 ms and down over 200 ms on the SDK's curve
+  (it was 250 ms on Material's), and a downward fling of 400 px a second closes it (it was 700). It is as wide as
+  the screen unless the action sets `sheetWidth`, which a plain sheet now follows; it was never wider than 640.
+  It still follows a finger, and closes when let go under half way.
+- **A dialog's barrier and pull to refresh are called "Dismiss" and "Refresh"** to a screen reader in every app.
+  In a Material app they were your app's Material localization. `CodelesslyConfig.labels` gives them, and the
+  other words of the runtime's own chrome, in your language (see Added).
+
+**Chrome**
+
+The runtime's own chrome looked like Material's. It is drawn with the SDK's stock controls now, in the project's
+theme (or a design system's), as the same control in a screen is.
+
+- **Buttons.** The toast's action and close button, the confirm dialog's answers, the players' play buttons, a
+  swiped row's Undo and a chat list's jump-to-latest button are the SDK's buttons with nothing of Material's over
+  them: the theme's hover and press layers, and a focus ring when the keyboard is on one (it was a tint). Their
+  colours, fonts, radii and the dialog's button height are still the feedback look's (`FeedbackTheme`, a
+  toast's or a confirm's own style).
+  - The toast's action is as wide as its label and padding (it was at least 48), and the close button's cross is
+    the icon size of the SDK's 36 px button (16; it was 18).
+  - The audio player's play button is the SDK's 44 px icon button in the theme's secondary text colour (it was
+    40 px, in the primary colour). The video player's is the SDK's small floating button at 44 px: the primary
+    colour, with its shadow.
+  - A list's jump-to-latest button is the SDK's small floating button, 44 px (it was 48 px on a tonal surface).
+- **The Undo bar** is the theme's inverse surface (the tooltip's colours), with the theme's panel radius and
+  shadow and 13 px text. It was Material's dark grey snackbar.
+- **The audio seek bar** is the SDK's slider, as an unstyled `slider` draws: its track, its thumb and its
+  disabled look. It was a 3 px track with a taller played part and a 12 px thumb.
+- **The loading spinner** is the SDK's spinner as an unstyled `circularProgressIndicator` draws it: a 24 px
+  ring, its arc a steady 30% turning once every 900 ms, in the theme's primary colour. The loading screen
+  (`CodelesslyLoadingScreen`), a paginated list's default loading footer and an audio player that is getting
+  ready showed Material's `CircularProgressIndicator` (36 px on the loading screen, its arc growing and
+  shrinking). A `loadingBuilder` of your own is unchanged.
+- **Pull to refresh** shows the SDK's spinner on a 36 px disc in the theme's raised surface, with its hairline
+  border and shadow. The arc fills from the top as the list is pulled, then turns while the list refreshes. It
+  was Material's 40 px white disc and its arc with an arrowhead. The pull that brings it down, where it rests
+  and how long it takes to leave are unchanged; `refreshColor`, `refreshBackgroundColor` and
+  `refreshDisplacement` apply as before.
+- **The line between a list's items** (`separator: divider`) is the SDK's divider: a `dividerThickness` of 0
+  draws no line (it drew a hairline of one device pixel), and a line thicker than the gap between the items is
+  centered on the gap (it grew out of one side). Any other line is unchanged.
+- **The players' and the chat list's buttons show no tooltip.** Hovering (or holding) the video and audio play
+  buttons and a list's jump-to-latest button showed "Play video", "Pause audio", "Jump to latest". They no longer
+  do; a screen reader still reads those names.
+- **The keyboard reaches the toast's, the Undo bar's and the players' buttons as it reaches a screen's controls.**
+  They are in the SDK's own focus order now (Tab, Shift+Tab, Enter and Space), where they were stops of Flutter's.
+  In the confirm dialog the focus still starts on the yes (on Cancel when it is destructive), Tab moves between
+  the two, Enter presses, Escape cancels. A revealed swipe action is no longer a Tab stop of its own: the row's
+  keys run its actions, as before. The audio seek bar takes the arrow keys, Page Up and Page Down, Home and End.
+
+### Added
+
+- **`CodelesslyConfig.pageTransitions`: the page transition of a project's screens.**
+  `CodelesslyPageTransitions.platform` (the default) plays Android's fade forwards, iOS's and macOS's slide with
+  its back swipe from the edge, the zoom on Windows and Linux, and none on the web. Each can be chosen by name on
+  every platform (`fadeForwards`, `cupertino`, `zoom`, `none`). `CodelesslyPageTransitions.animated(...)`
+  takes **any transition of the animation system**: a `RouteTransition`, with a preset (`sharedAxisX`,
+  `fadeThrough`, `iosPush`, `circularReveal`...) or its own `enter` and `exit` poses, curves and durations,
+  played as a `navigate` action's `routeTransition` is. A subclass of your own draws anything else. A
+  `navigate` action's own `transition` or `routeTransition` still wins for that navigation.
+- **`CodelesslyConfig.labels`: the words a screen reader hears for the runtime's own chrome** (`CodelesslyLabels`:
+  a dialog's barrier, a toast's close button, pull to refresh, jump to latest, the players' buttons, the seek bar),
+  English unless you give your own.
+- **`surfaceRoles(tokens)`: the colours an unstyled control draws in** (`SurfaceRoles`: surface, onSurface,
+  primary, muted, outline, hairline, error), from a project's theme tokens, for your own widgets.
+
+### Fixed
+
+- **The package is tested and documented for any app shell.** Its tests run under a plain `WidgetsApp` as well
+  as a `MaterialApp`; the README and the quickstart have a `WidgetsApp` sample and say what the SDK needs from
+  the app around it (a `Navigator`, and the Material icon font for icons); the example app is a plain
+  `WidgetsApp`, with a `MaterialApp` variant in `example/lib/main_material.dart`.
+- **A host app that is not a Material app can open dialogs and sheets, and show a reorderable list.** Under a
+  plain `WidgetsApp` (no `MaterialLocalizations` above the SDK) an `openModal` (a dialog, a cover, a bottom
+  sheet), a `confirm` and a list with `reorder` failed with "No MaterialLocalizations found". Each is a route or a
+  list of the SDK's own now, the same in every app.
+
+### Changed
+
+- **No file of the package imports Flutter's Material or Cupertino library** (23 did). An app that does not use
+  Material itself carries about 430 KB less of it (Android arm64: 104 KB of `flutter/src/material`, from
+  432 KB; 16 KB of `flutter/src/cupertino`, from 47 KB; none of `material_color_utilities`, from 72 KB). What
+  is left in such an app comes from the plugins the package depends on (`video_player`, `webview_flutter`,
+  `in_app_purchase`), which import Material themselves. A Material app carries about 300 KB less.
+  `docs/design/no-material.md` has the measurements.
 
 ## 39.0.0
 

@@ -1,6 +1,7 @@
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/widgets/collections_data_list.dart' show PullToRefresh;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -212,7 +213,7 @@ void main() {
       final s = await lists.show(tester, nodes,
           variables: [lists.v('messages', messages(0, 30), VariableType.list), lists.v('refreshed', 0, VariableType.integer)]);
       await tester.pumpAndSettle();
-      expect(find.byType(RefreshIndicator), findsOneWidget);
+      expect(find.byType(PullToRefresh), findsOneWidget);
       final p = position(tester);
       expect(p.pixels, p.maxScrollExtent);
       expect(topRow(tester, s), 'M20');

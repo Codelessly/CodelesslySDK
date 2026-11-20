@@ -117,7 +117,13 @@ class FreeformAxisPlacement {
     this.minSize = 0,
     this.sizeFactor,
     this.factorMargin = 0,
+    this.fillFrom = 0,
   });
+
+  /// With [FreeformAxisMode.fill]: where the child starts, from the
+  /// container's start (a page of a stage, the container's length, moved by
+  /// its place). 0: it covers the container.
+  final double fillFrom;
 
   /// This placement with the child sized as [factor] of the container's
   /// extent, less [margin], plus [margin].
@@ -273,7 +279,7 @@ class FreeformAxisPlacement {
     double offset;
     switch (mode) {
       case FreeformAxisMode.fill:
-        return 0;
+        return fillFrom;
       case FreeformAxisMode.stretch:
         return stretchIn(s).$1;
       case FreeformAxisMode.align:
@@ -317,6 +323,7 @@ class FreeformAxisPlacement {
       other.growsWithContent == growsWithContent &&
       other.minSize == minSize &&
       other.sizeFactor == sizeFactor &&
+      other.fillFrom == fillFrom &&
       other.factorMargin == factorMargin;
 
   @override
@@ -336,6 +343,7 @@ class FreeformAxisPlacement {
     minSize,
     sizeFactor,
     factorMargin,
+    fillFrom,
   );
 
   @override

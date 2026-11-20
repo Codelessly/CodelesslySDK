@@ -4,7 +4,7 @@
 // the screens over it).
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
@@ -159,97 +159,4 @@ class _BackdropShown extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_BackdropShown oldWidget) => shown != oldWidget.shown;
-}
-
-/// [theme] with the material page transitions painting nothing behind the
-/// screens, so a backdrop beneath the navigator shows through while screens
-/// move: the zoom transition plays without its scrim (a dark or surface
-/// color it fades in over the screen beneath: [SeeThroughZoomPageTransitionsBuilder]),
-/// the fade forwards transition (and the predictive back one's fallback)
-/// without its surface color. Other builders are kept.
-PageTransitionsTheme seeThroughPageTransitions(PageTransitionsTheme theme) => PageTransitionsTheme(builders: {
-      for (final platform in TargetPlatform.values)
-        // A platform without a builder plays the zoom transition (iOS the
-        // Cupertino one, which paints no background).
-        if (theme.builders[platform] != null || platform != TargetPlatform.iOS)
-          platform: switch (theme.builders[platform]) {
-            null || ZoomPageTransitionsBuilder() => const SeeThroughZoomPageTransitionsBuilder(),
-            FadeForwardsPageTransitionsBuilder() => const FadeForwardsPageTransitionsBuilder(backgroundColor: Colors.transparent),
-            PredictiveBackPageTransitionsBuilder() => const PredictiveBackPageTransitionsBuilder(fallbackColor: Colors.transparent),
-            PredictiveBackFullscreenPageTransitionsBuilder() =>
-              const PredictiveBackFullscreenPageTransitionsBuilder(fallbackColor: Colors.transparent),
-            final b => b,
-          },
-    });
-
-/// [ZoomPageTransitionsBuilder]'s zoom (the incoming screen fades in and
-/// grows to rest, the screen beneath grows a little) without the scrim it
-/// paints over the screen beneath: a backdrop beneath the navigator stays
-/// as it is while the screens zoom over it.
-class SeeThroughZoomPageTransitionsBuilder extends PageTransitionsBuilder {
-  const SeeThroughZoomPageTransitionsBuilder();
-
-  // ZoomPageTransitionsBuilder's curve: like the native fastOutExtraSlowIn.
-  static final _curve = TweenSequence<double>([
-    TweenSequenceItem(
-      tween: Tween<double>(begin: 0, end: 0.4).chain(CurveTween(curve: const Cubic(0.05, 0, 0.133333, 0.06))),
-      weight: 0.166666,
-    ),
-    TweenSequenceItem(
-      tween: Tween<double>(begin: 0.4, end: 1).chain(CurveTween(curve: const Cubic(0.208333, 0.82, 0.25, 1))),
-      weight: 1 - 0.166666,
-    ),
-  ]);
-  static final _fadeIn = Tween<double>(begin: 0, end: 1).chain(CurveTween(curve: const Interval(0.125, 0.25)));
-  static final _fadeOut = Tween<double>(begin: 1, end: 0).chain(CurveTween(curve: const Interval(0.0825, 0.2075)));
-  static final _enterUp = Tween<double>(begin: 0.85, end: 1).chain(_curve);
-  static final _enterDown = Tween<double>(begin: 1.10, end: 1).chain(_curve);
-  static final _exitUp = Tween<double>(begin: 1, end: 1.05).chain(_curve);
-  static final _exitDown = Tween<double>(begin: 1, end: 0.90).chain(_curve);
-
-  static Widget _zoom(Animation<double> fade, Animation<double> scale, Widget? child) => FadeTransition(
-        opacity: fade,
-        child: ScaleTransition(scale: scale, filterQuality: FilterQuality.medium, child: child),
-      );
-
-  /// A screen coming in ([reverse]: back in, as the one above leaves).
-  static Widget _enter(Animation<double> animation, Widget? child, {bool reverse = false}) => _zoom(
-        reverse ? kAlwaysCompleteAnimation : _fadeIn.animate(animation),
-        (reverse ? _enterDown : _enterUp).animate(animation),
-        child,
-      );
-
-  /// A screen leaving ([reverse]: popped), or covered.
-  static Widget _exit(Animation<double> animation, Widget? child, {bool reverse = false}) => _zoom(
-        reverse ? _fadeOut.animate(animation) : kAlwaysCompleteAnimation,
-        (reverse ? _exitDown : _exitUp).animate(animation),
-        child,
-      );
-
-  /// The screen beneath, as one comes in over it or leaves it.
-  static Widget _beneath(Animation<double> secondaryAnimation, Widget? child) => DualTransitionBuilder(
-        animation: ReverseAnimation(secondaryAnimation),
-        forwardBuilder: (_, animation, child) => _enter(animation, child, reverse: true),
-        reverseBuilder: (_, animation, child) => _exit(animation, child),
-        child: child,
-      );
-
-  @override
-  DelegatedTransitionBuilder? get delegatedTransition =>
-      (context, animation, secondaryAnimation, allowSnapshotting, child) => _beneath(secondaryAnimation, child);
-
-  @override
-  Widget buildTransitions<T>(
-    PageRoute<T> route,
-    BuildContext context,
-    Animation<double> animation,
-    Animation<double> secondaryAnimation,
-    Widget child,
-  ) =>
-      DualTransitionBuilder(
-        animation: animation,
-        forwardBuilder: (_, animation, child) => _enter(animation, child),
-        reverseBuilder: (_, animation, child) => _exit(animation, child, reverse: true),
-        child: _beneath(secondaryAnimation, child),
-      );
 }

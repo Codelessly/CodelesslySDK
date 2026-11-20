@@ -4,23 +4,24 @@
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show ButtonProps, LayoutDocument, Node, TextProps, TriggerType;
 import 'package:flutter/foundation.dart' show listEquals;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+
+import '../../render/controls/buttons.dart' show ButtonSpec;
+import '../../render/controls/tokens.dart' show ControlTokens;
 
 import '../../runtime/actions/look.dart';
 
 export '../../runtime/actions/look.dart';
 
 import '../../render/control_theme.dart' as theme show onColor;
-import '../../render/control_theme.dart' show contrastRatio, kInk, kInkOnDark, themeDataOf;
+import '../../render/control_theme.dart' show SurfaceRoles, ThemeTokensScope, bodyTextStyle, chromeButton, contrastRatio, isDarkSurface, kInk, kInkOnDark, rolesOf;
 import '../../render/convert.dart';
 
 /// The look of the runtime's own dialogs and toasts. A layout provides one
 /// read from its nodes ([FeedbackTheme.fromDocument]) and its theme tokens
-/// through a [FeedbackThemeScope]. A [FeedbackTheme] in the [ThemeData.extensions]
-/// of the theme the layout renders in wins; the layout's theme is its own
-/// (`themeDataOf`), so an app's theme doesn't reach it.
+/// through a [FeedbackThemeScope]; an app's theme doesn't reach it.
 @immutable
-class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
+class FeedbackTheme {
   const FeedbackTheme({
     this.bodyStyle,
     this.titleStyle,
@@ -95,14 +96,14 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     );
   }
 
-  /// The theme at [context], every value set: an extension of [Theme]'s,
-  /// then the layout's ([FeedbackThemeScope]), then [Theme]'s colors and
-  /// fonts (the layout's tokens, neutral without).
-  static ResolvedFeedbackTheme of(BuildContext context) {
-    final theme = Theme.of(context);
-    final combined = (theme.extension<FeedbackTheme>() ?? const FeedbackTheme()).merge(FeedbackThemeScope.maybeOf(context));
-    return ResolvedFeedbackTheme.resolve(combined, theme);
-  }
+  /// The look at [context], every value set: the layout's
+  /// ([FeedbackThemeScope]), then the colors and font of the layout's theme
+  /// tokens (neutral without).
+  static ResolvedFeedbackTheme of(BuildContext context) => ResolvedFeedbackTheme.resolve(
+        FeedbackThemeScope.maybeOf(context) ?? const FeedbackTheme(),
+        rolesOf(context),
+        fontFamily: ThemeTokensScope.maybeOf(context)?.tokens.fontFamily,
+      );
 
   /// The look a project's [tokens] set.
   factory FeedbackTheme.fromTokens(api.ThemeTokens? tokens) {
@@ -285,7 +286,6 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     return null;
   }
 
-  @override
   FeedbackTheme copyWith({
     TextStyle? bodyStyle,
     TextStyle? titleStyle,
@@ -330,33 +330,6 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
         buttonHeight: buttonHeight ?? this.buttonHeight,
         cancelBorder: cancelBorder ?? this.cancelBorder,
       );
-
-  @override
-  FeedbackTheme lerp(FeedbackTheme? other, double t) {
-    if (other == null) return this;
-    return FeedbackTheme(
-      bodyStyle: TextStyle.lerp(bodyStyle, other.bodyStyle, t),
-      titleStyle: TextStyle.lerp(titleStyle, other.titleStyle, t),
-      buttonStyle: TextStyle.lerp(buttonStyle, other.buttonStyle, t),
-      primary: Color.lerp(primary, other.primary, t),
-      onPrimary: Color.lerp(onPrimary, other.onPrimary, t),
-      surface: Color.lerp(surface, other.surface, t),
-      onSurface: Color.lerp(onSurface, other.onSurface, t),
-      error: Color.lerp(error, other.error, t),
-      success: Color.lerp(success, other.success, t),
-      warning: Color.lerp(warning, other.warning, t),
-      radius: t < 0.5 ? radius : other.radius,
-      buttonRadius: t < 0.5 ? buttonRadius : other.buttonRadius,
-      border: t < 0.5 ? border : other.border,
-      shadows: BoxShadow.lerpList(shadows, other.shadows, t),
-      buttonBorder: t < 0.5 ? buttonBorder : other.buttonBorder,
-      buttonShadows: BoxShadow.lerpList(buttonShadows, other.buttonShadows, t),
-      titleSize: t < 0.5 ? titleSize : other.titleSize,
-      messageSize: t < 0.5 ? messageSize : other.messageSize,
-      buttonHeight: t < 0.5 ? buttonHeight : other.buttonHeight,
-      cancelBorder: t < 0.5 ? cancelBorder : other.cancelBorder,
-    );
-  }
 
   @override
   bool operator ==(Object other) =>
@@ -431,16 +404,18 @@ class ResolvedFeedbackTheme {
     this.cancelBorder,
   });
 
-  factory ResolvedFeedbackTheme.resolve(FeedbackTheme t, ThemeData theme) {
-    final scheme = theme.colorScheme;
+  /// [t] with every value set: what it leaves out from the theme's [roles]
+  /// and [fontFamily].
+  factory ResolvedFeedbackTheme.resolve(FeedbackTheme t, SurfaceRoles roles, {String? fontFamily}) {
+    final scheme = roles;
     final surface = t.surface ?? scheme.surface;
-    final dark = ThemeData.estimateBrightnessForColor(surface) == Brightness.dark;
+    final dark = isDarkSurface(surface);
     var onSurface = t.onSurface ?? scheme.onSurface;
     // Text the layout uses on another background may not read here.
     if (contrastRatio(onSurface, surface) < 3) onSurface = dark ? kInkOnDark : kInk;
     final primary = t.primary ?? scheme.primary;
     final buttonRadius = t.buttonRadius ?? 12;
-    final base = theme.textTheme.bodyMedium ?? const TextStyle();
+    final base = bodyTextStyle(api.ThemeTokens(fontFamily: fontFamily), scheme.onSurface);
     final body = base.merge(t.bodyStyle);
     return ResolvedFeedbackTheme._(
       bodyStyle: body,
@@ -480,26 +455,71 @@ class ResolvedFeedbackTheme {
   /// Ink or near-white, whichever reads on [background].
   static Color onColor(Color background) => theme.onColor(background);
 
-  /// The theme of the Material widgets in a dialog, toast or picker: this
-  /// look's colors, fonts and radii as theme tokens ([themeDataOf]).
-  ThemeData get themeData => themeDataOf(
+  /// This look's colors, fonts and radii as theme tokens: the theme of what
+  /// a dialog or a toast shows.
+  api.ThemeTokens get tokens => api.ThemeTokens(
+        primary: _api(primary),
+        onPrimary: _api(onPrimary),
+        surface: _api(surface),
+        onSurface: _api(onSurface),
+        error: _api(error),
+        success: _api(success),
+        warning: _api(warning),
+        fontFamily: bodyStyle.fontFamily,
+        titleFontFamily: titleStyle.fontFamily,
+        radius: radius,
+        buttonRadius: buttonRadius,
+      );
+
+  /// Whether the look's surface is a dark one.
+  bool get dark => isDarkSurface(surface);
+
+  static api.Color _api(Color c) => api.Color(c.toARGB32());
+
+  /// The tokens of the SDK's own controls in a dialog or a toast (their
+  /// font, their timing, their states): this look's colors, fonts and radii.
+  ControlTokens get controlTokens => ControlTokens.resolve(
         api.ThemeTokens(
           primary: _api(primary),
           onPrimary: _api(onPrimary),
           surface: _api(surface),
           onSurface: _api(onSurface),
           error: _api(error),
-          success: _api(success),
-          warning: _api(warning),
           fontFamily: bodyStyle.fontFamily,
           titleFontFamily: titleStyle.fontFamily,
           radius: radius,
           buttonRadius: buttonRadius,
         ),
-        brightness: ThemeData.estimateBrightnessForColor(surface),
+        dark: dark,
       );
 
-  static api.Color _api(Color c) => api.Color(c.toARGB32());
+  /// One of the look's buttons, the SDK's stock button: [label] (or an
+  /// [icon] alone) in [foreground] and [style] on [background].
+  ButtonSpec button({
+    String label = '',
+    Map<String, Object?> icon = const {},
+    required Color foreground,
+    Color? background,
+    TextStyle style = const TextStyle(),
+    BorderSide? side,
+    required double radius,
+    EdgeInsets? padding,
+    bool enabled = true,
+    bool wrapLabel = false,
+  }) =>
+      chromeButton(
+        tokens: controlTokens,
+        label: label,
+        icon: icon,
+        foreground: foreground,
+        background: background,
+        style: style,
+        side: side,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+        padding: padding,
+        enabled: enabled,
+        wrapLabel: wrapLabel,
+      );
 }
 
 /// Provides the [FeedbackTheme] of the layout below it.

@@ -36,6 +36,7 @@ final class RenderArgs {
     this.theme,
     this.compareMap = const {},
     this.now,
+    this.screenTimeout = const Duration(seconds: 120),
     this.imageMap = const {},
     this.pickFiles = const [],
     this.googleFonts = true,
@@ -91,6 +92,12 @@ final class RenderArgs {
   /// countdowns written from it are the same in every capture.
   final DateTime? now;
 
+  /// `--screen-timeout`: the most real time one screen at one size may take
+  /// (its load, its steps, its capture). Past it the functions its formulas
+  /// call give nothing at once, so the screen ends, is reported as an error
+  /// (`screen_timeout`) and the run goes on to the next.
+  final Duration screenTimeout;
+
   /// `--image-map`: network image URLs starting with a prefix read from a folder instead (`https://cdn.x/art/` →
   /// `assets/art`), so images a document names by URL show in the capture.
   final Map<String, String> imageMap;
@@ -124,6 +131,7 @@ final class RenderArgs {
         theme: theme,
         compareMap: compareMap,
         now: now,
+        screenTimeout: screenTimeout,
         imageMap: imageMap,
         pickFiles: pickFiles,
         googleFonts: googleFonts,
@@ -182,6 +190,9 @@ Options:
                           writes it later does not change the capture.
   --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
                           and countdowns are the same in every run.
+  --screen-timeout <seconds>   The most real time one screen at one size may
+                          take (default 120): past it the screen is an error
+                          (screen_timeout) and the run goes on to the next.
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px;
                           or =x,y (--scroll reading=0,650).
   --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
@@ -264,6 +275,7 @@ RenderArgs parseArgs(List<String> argv) {
   var fullPage = false, dumpLayout = false, componentsAll = false, modals = false;
   String? label, component, props, slots, compare, theme;
   DateTime? now;
+  var screenTimeout = const Duration(seconds: 120);
   final compareMap = <String, String>{};
   final imageMap = <String, String>{};
   final pickFiles = <String>[];
@@ -334,6 +346,11 @@ RenderArgs parseArgs(List<String> argv) {
         final v = next(i++, a);
         now = DateTime.tryParse(v);
         if (now == null) throw FormatException('--now takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
+      case '--screen-timeout':
+        final v = next(i++, a);
+        final seconds = double.tryParse(v);
+        if (seconds == null || seconds <= 0) throw FormatException('--screen-timeout takes a number of seconds (120), got "$v".');
+        screenTimeout = Duration(milliseconds: (seconds * 1000).round());
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
       case '--reload':
@@ -373,6 +390,7 @@ RenderArgs parseArgs(List<String> argv) {
     theme: theme,
     compareMap: compareMap,
     now: now,
+    screenTimeout: screenTimeout,
     imageMap: imageMap,
     pickFiles: pickFiles,
     googleFonts: googleFonts,

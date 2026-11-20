@@ -89,4 +89,50 @@ void main() {
     expect(ticks, greaterThanOrEqualTo(5));
     expect(elapsed, 0);
   });
+
+  // The year a render shows: a page whose only text is `year(now())` (and
+  // `today()`'s), from a site folder whose site.json may name its date.
+  Future<(String, RenderReport)> year(WidgetTester tester, {Object? siteNow, DateTime? now, bool wait = false}) async {
+    final site = Directory('${out.path}/site')..createSync();
+    File('${site.path}/site.json').writeAsStringSync(jsonEncode({
+      'schema': 3,
+      'pages': ['home.json'],
+      'now': ?siteNow,
+    }));
+    final doc = _doc();
+    ((doc['nodes'] as Map)['clock'] as Map).remove('actions');
+    (((doc['nodes'] as Map)['shown'] as Map)['props'] as Map)['text'] = r"${= formatDate(now(), 'yyyy')} ${= formatDate(today(), 'yyyy-MM-dd')}";
+    File('${site.path}/home.json').writeAsStringSync(jsonEncode(doc));
+    final report = await runRender(
+        tester,
+        RenderArgs(
+            inputs: [site.path], out: '${out.path}/o', sizes: const [Size(390, 300)], steps: [if (wait) const Step('wait', '5000')], dumpLayout: true, now: now));
+    final boxes = jsonDecode(File('${out.path}/o/clock@390x300.layout.json').readAsStringSync()) as List;
+    return (boxes.cast<Map>().firstWhere((b) => b['id'] == 'shown')['text'] as String, report);
+  }
+
+  testWidgets('with no --now the run starts at the real time, not at the test binding\'s epoch', (tester) async {
+    final real = DateTime.now();
+    final (text, report) = await year(tester, wait: true);
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    expect(text.split(' ').first, anyOf('${real.year}', '${real.year + 1}'));
+    expect(DateTime.parse(text.split(' ').last).difference(DateTime(real.year, real.month, real.day)).inDays.abs(), lessThanOrEqualTo(1));
+  });
+
+  testWidgets('site.json names the site\'s date ("now"): the run\'s --now when none is passed', (tester) async {
+    final (text, report) = await year(tester, siteNow: '2031-03-09T10:00:00');
+    expect(report.errors, 0, reason: '${report.diagnostics}');
+    expect(text, '2031 2031-03-09');
+  });
+
+  testWidgets('--now is over the site\'s date', (tester) async {
+    final (text, _) = await year(tester, siteNow: '2031-03-09T10:00:00', now: DateTime(2027, 5, 4, 12));
+    expect(text, '2027 2027-05-04');
+  });
+
+  testWidgets('a site date that is no time is said (site_now), and the run starts at the real time', (tester) async {
+    final (text, report) = await year(tester, siteNow: 'next tuesday');
+    expect(report.diagnostics.map((d) => d['code']), contains('site_now'));
+    expect(text.split(' ').first, anyOf('${DateTime.now().year}', '${DateTime.now().year + 1}'));
+  });
 }

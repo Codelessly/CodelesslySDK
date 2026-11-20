@@ -109,6 +109,7 @@ class ButtonSpec {
     this.hoverColor,
     this.focusColor,
     this.splashColor,
+    this.wrapLabel = false,
   });
 
   final ButtonKind kind;
@@ -141,6 +142,11 @@ class ButtonSpec {
   final EdgeInsets? padding;
   final api.FloatingActionButtonType fabType;
   final Color? hoverColor, focusColor, splashColor;
+
+  /// Whether a label too long for the button's width goes on to more lines,
+  /// the button growing taller with it (a dialog's answer); else it is one
+  /// line, cut with an ellipsis.
+  final bool wrapLabel;
 
   bool get hasIcon => icon.isNotEmpty && icon['show'] != false;
 
@@ -237,7 +243,8 @@ class ButtonSpec {
       other.fabType == fabType &&
       other.hoverColor == hoverColor &&
       other.focusColor == focusColor &&
-      other.splashColor == splashColor;
+      other.splashColor == splashColor &&
+      other.wrapLabel == wrapLabel;
 
   @override
   int get hashCode => Object.hash(kind, label, background, foreground, enabled, padding, fabType);
@@ -343,6 +350,7 @@ class RenderButton extends RenderControl implements LabeledControl {
     if (v == _spec) return;
     _spec = v;
     transitionDuration = Duration(milliseconds: v.tokens.controlMs);
+    _label.maxLines = v.wrapLabel ? null : 1;
     _syncIcon();
     markNeedsLayout();
     markNeedsSemanticsUpdate();
@@ -459,6 +467,25 @@ class RenderButton extends RenderControl implements LabeledControl {
     return c.constrainHeight(_naturalHeight);
   }
 
+  // A wrapped label's lines start together (the block is centered).
+  TextAlign get _labelAlign => spec.wrapLabel ? TextAlign.start : spec.align;
+
+  /// Its size in [c]: its natural width at its height, and with a label
+  /// that wraps, tall enough for the label's lines.
+  Size _sizeFor(BoxConstraints c) {
+    var h = _heightFor(c);
+    final w = c.constrainWidth(_naturalWidth(h));
+    if (spec.wrapLabel && !_iconOnly && !c.hasTightHeight) {
+      final m = _metricsAt(h);
+      final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: m.padX);
+      final iconW = spec.hasIconSlot ? m.iconSize + (spec.label.isEmpty ? 0 : m.gap) : 0.0;
+      _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: _labelAlign);
+      _label.layout(math.max(0, w - pad.horizontal - iconW));
+      h = c.constrainHeight(math.max(h, _label.size.height + pad.vertical));
+    }
+    return Size(w, h);
+  }
+
   /// The label's style at [m], in [color].
   TextStyle _textStyle(_Metrics m, Color color) {
     final own = spec.labelStyle;
@@ -477,7 +504,7 @@ class RenderButton extends RenderControl implements LabeledControl {
 
   double _contentWidth(_Metrics m) {
     if (_iconOnly) return m.iconSize;
-    _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: spec.align);
+    _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: _labelAlign);
     final text = _label.intrinsicWidth;
     if (!spec.hasIconSlot) return text;
     return m.iconSize + (spec.label.isEmpty ? 0 : m.gap) + text;
@@ -504,10 +531,7 @@ class RenderButton extends RenderControl implements LabeledControl {
   double computeMaxIntrinsicHeight(double width) => _naturalHeight;
 
   @override
-  Size computeDryLayout(covariant BoxConstraints constraints) {
-    final h = _heightFor(constraints);
-    return constraints.constrain(Size(_naturalWidth(h), h));
-  }
+  Size computeDryLayout(covariant BoxConstraints constraints) => _sizeFor(constraints);
 
   late _Metrics _m;
   Rect _iconRect = Rect.zero;
@@ -515,15 +539,14 @@ class RenderButton extends RenderControl implements LabeledControl {
 
   @override
   void performLayout() {
-    final h = _heightFor(constraints);
-    size = constraints.constrain(Size(_naturalWidth(h), h));
+    size = _sizeFor(constraints);
     final m = _m = _metricsAt(size.height);
     final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: m.padX);
     final inner = Rect.fromLTRB(pad.left, 0, size.width - pad.right, size.height);
     if (_iconOnly) {
       _iconRect = Rect.fromCenter(center: size.center(Offset.zero), width: m.iconSize, height: m.iconSize);
     } else {
-      _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: spec.align);
+      _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: _labelAlign);
       final iconW = spec.hasIconSlot ? m.iconSize + (spec.label.isEmpty ? 0 : m.gap) : 0.0;
       _label.layout(math.max(0, inner.width - iconW));
       final content = iconW + _label.size.width;
@@ -707,7 +730,7 @@ class RenderButton extends RenderControl implements LabeledControl {
           .paint(canvas, rect);
     }
     if (!_iconOnly) {
-      _label.update(spec.label, _textStyle(_m, look.ink), align: spec.align);
+      _label.update(spec.label, _textStyle(_m, look.ink), align: _labelAlign);
       _label.layout(_laidOutLabelWidth);
       _label.paint(canvas, offset.dx + _labelLeft, offset.dy + size.height / 2);
     }

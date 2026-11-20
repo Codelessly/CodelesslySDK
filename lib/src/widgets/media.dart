@@ -2,7 +2,7 @@
 // external components). See lib/src/render/recipe.dart. Video, audio and web
 // views are the media feature's (features/media/recipes.dart).
 import 'package:codelessly_api/core.dart' show ExternalProps, Node;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import '../render/node_tree.dart' show Slot, SlotKind;

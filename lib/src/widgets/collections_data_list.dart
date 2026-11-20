@@ -11,13 +11,17 @@ import 'dart:math' as math;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, Node, Pagination, PaginationMode, SwipeAction;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
 import '../render/controls/focus.dart';
+import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf, rolesOf;
+import '../render/controls/buttons.dart' show ButtonKind;
 import '../render/controls/root.dart';
+import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
+import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/pagination.dart';
 import 'collections_data_list_model.dart';
@@ -152,7 +156,7 @@ class DataListViewState extends State<DataListView> {
     if (identical(_latestFocus?.owner, owner) && identical(_latestFocus?.scope, root.focus)) return;
     _latestFocus?.leave();
     _latestFocus = ControlFocusNode(owner, onActivate: _jumpToLatest, onFocusChange: (_) => _redrawLatestFocus())
-      ..label = (() => 'Jump to latest')
+      ..label = (() => mounted ? CodelesslyLabelsScope.of(context).jumpToLatest : 'Jump to latest')
       ..onHighlightChange = _redrawLatestFocus
       ..join(root.focus);
   }
@@ -650,7 +654,7 @@ class DataListViewState extends State<DataListView> {
     list = NotificationListener<ScrollNotification>(onNotification: _onOwnScroll, child: list);
 
     if (refreshable) {
-      list = RefreshIndicator(
+      list = PullToRefresh(
         onRefresh: _refresh,
         color: model?.refreshColor?.flutter,
         backgroundColor: model?.refreshBackgroundColor?.flutter,
@@ -715,7 +719,7 @@ class DataListViewState extends State<DataListView> {
     }
     if (sticky) {
       SchedulerBinding.instance.addPostFrameCallback((_) => _syncLatestFocus());
-      final colors = Theme.of(context).colorScheme;
+      final tokens = chromeTokensOf(context);
       final inner = list;
       // A list as tall as its items (no height of its own, in a column
       // that scrolls) has no end to stick to nor to jump to: it is its
@@ -729,20 +733,34 @@ class DataListViewState extends State<DataListView> {
           bottom: 12,
           child: Semantics(
             key: _latestKey,
-            label: 'Jump to latest',
+            label: CodelesslyLabelsScope.of(context).jumpToLatest,
             button: true,
             focused: _latestFocus?.hasFocus ?? false,
             onTap: _jumpToLatest,
             child: ExcludeSemantics(child: Focus(
               descendantsAreFocusable: false,
-              child: IconButton.filledTonal(
+              // The stop is the list's own (the semantics above): not the
+              // button's.
+              child: SizedBox.square(
                 key: const ValueKey('followListLatest'),
-                tooltip: 'Jump to latest',
-                onPressed: _jumpToLatest,
-                icon: Icon(axis == Axis.vertical ? Icons.arrow_downward : Icons.arrow_forward),
-                style: IconButton.styleFrom(minimumSize: const Size(48, 48), backgroundColor: colors.surfaceContainerHigh)
-                    .copyWith(side: WidgetStatePropertyAll(_latestFocus?.showsHighlight == true
-                        ? BorderSide(color: colors.primary, width: 2) : BorderSide.none)),
+                dimension: 44,
+                child: ControlButton(
+                  focusable: false,
+                  onPressed: _jumpToLatest,
+                  semanticsLabel: CodelesslyLabelsScope.of(context).jumpToLatest,
+                  spec: chromeButton(
+                    tokens: tokens,
+                    kind: ButtonKind.fab,
+                    fabType: api.FloatingActionButtonType.small,
+                    icon: axis == Axis.vertical
+                        ? chromeGlyph('arrow_downward', const IconData(ShellGlyphs.arrowDownward, fontFamily: ShellGlyphs.font))
+                        : chromeGlyph(
+                            'arrow_forward',
+                            const IconData(ShellGlyphs.arrowForward, fontFamily: ShellGlyphs.font, matchTextDirection: true),
+                          ),
+                    side: _latestFocus?.showsHighlight == true ? BorderSide(color: tokens.focusBorder, width: 2) : null,
+                  ),
+                ),
               ),
             )),
           ),
@@ -892,7 +910,7 @@ class _SectionIndexBarState extends State<SectionIndexBar> {
                     ),
                     child: Text(
                       '${keys[touching] ?? ''}',
-                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: Colors.white)
+                      style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: ShellColors.white)
                           .merge(widget.bubbleStyle),
                     ),
                   ),
@@ -913,29 +931,56 @@ class UndoBar extends StatelessWidget {
   final VoidCallback onUndo;
 
   @override
-  Widget build(BuildContext context) => Material(
-        color: const Color(0xFF323232),
-        elevation: 6,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16),
-          child: Row(
-            children: [
-              Expanded(child: Text(message, style: const TextStyle(color: Colors.white, fontSize: 14))),
-              TextButton(onPressed: onUndo, child: const Text('Undo')),
-            ],
-          ),
+  Widget build(BuildContext context) {
+    // The bar is the theme's inverse surface (a tooltip's): the button's
+    // states are the tokens' on it.
+    final theme = chromeTokensOf(context);
+    final tokens = chromeTokensOf(context, on: theme.tooltipBackground);
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: theme.tooltipBackground,
+        borderRadius: BorderRadius.circular(theme.radius('panel', 8)),
+        boxShadow: theme.shadows('level3'),
+      ),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.fromSTEB(14, 6, 6, 6),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: theme.tooltipText,
+                  fontSize: 13,
+                  fontFamily: theme.fontFamily,
+                  decoration: TextDecoration.none,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ),
+            ControlButton(
+              onPressed: onUndo,
+              spec: chromeButton(tokens: tokens, label: 'Undo', foreground: theme.tooltipText),
+            ),
+          ],
         ),
-      );
+      ),
+    );
+  }
 }
 
 class _DefaultLoadingFooter extends StatelessWidget {
   const _DefaultLoadingFooter();
 
   @override
-  Widget build(BuildContext context) => const Padding(
-        padding: EdgeInsets.all(16),
-        child: Center(child: SizedBox.square(dimension: 24, child: CircularProgressIndicator(strokeWidth: 2.5))),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: SizedBox.square(
+            dimension: 24,
+            child: SpinnerView(color: rolesOf(context).primary),
+          ),
+        ),
       );
 }
 
@@ -951,7 +996,7 @@ class _DefaultErrorFooter extends StatelessWidget {
           children: [
             const Text("Couldn't load more."),
             const SizedBox(height: 4),
-            Text('Tap to retry', style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+            Text('Tap to retry', style: TextStyle(color: rolesOf(context).primary)),
           ],
         ),
       );
@@ -1029,4 +1074,210 @@ class ItemSnapPhysics extends ScrollPhysics {
 
   @override
   bool get allowImplicitScrolling => false;
+}
+
+/// Pull to refresh for a vertical list: dragging [child]'s scroll view past
+/// its start brings a round indicator down from the top (the SDK's spinner
+/// on a disc, its arc filling as the drag goes); let go far enough (a quarter of the list's height) and
+/// it stays at [displacement], turning, while [onRefresh] runs, then shrinks
+/// away. Let go sooner and it goes back up.
+class PullToRefresh extends StatefulWidget {
+  const PullToRefresh({
+    super.key,
+    required this.onRefresh,
+    required this.child,
+    this.color,
+    this.backgroundColor,
+    this.displacement = 40,
+  });
+
+  final Future<void> Function() onRefresh;
+  final Widget child;
+
+  /// The arc (null: the theme's primary).
+  final Color? color;
+
+  /// The disc (null: the theme's raised surface).
+  final Color? backgroundColor;
+
+  /// How far under the list's top the indicator rests while refreshing.
+  final double displacement;
+
+  @override
+  State<PullToRefresh> createState() => _PullToRefreshState();
+}
+
+enum _Pull { drag, armed, snap, refresh, done, canceled }
+
+class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateMixin<PullToRefresh> {
+  // The part of the list's height a drag covers to arm it; how far past
+  // its resting place the drag can take the indicator.
+  static const _dragExtent = 0.25;
+  static const _overshoot = 1.5;
+  static const _snap = Duration(milliseconds: 150);
+  static const _leave = Duration(milliseconds: 200);
+
+  late final AnimationController _position = AnimationController(vsync: this);
+  late final AnimationController _scale = AnimationController(vsync: this);
+  late final Animation<double> _positionFactor = _position.drive(Tween<double>(begin: 0, end: _overshoot));
+  late final Animation<double> _scaleFactor = _scale.drive(Tween<double>(begin: 1, end: 0));
+
+  _Pull? _status;
+  double? _dragOffset;
+
+  @override
+  void dispose() {
+    _position.dispose();
+    _scale.dispose();
+    super.dispose();
+  }
+
+  // The arc fades in over the drag up to its resting place: fully there, it
+  // is armed.
+  double get _ink => (_position.value * _overshoot).clamp(0.0, 1.0);
+
+  bool _atStart(ScrollMetrics m) =>
+      (m.axisDirection == AxisDirection.up && m.extentAfter == 0) || (m.axisDirection == AxisDirection.down && m.extentBefore == 0);
+
+  bool _onScroll(ScrollNotification n) {
+    if (n.depth != 0) return false;
+    final vertical = n.metrics.axisDirection == AxisDirection.down || n.metrics.axisDirection == AxisDirection.up;
+    if (n is ScrollStartNotification && n.dragDetails != null && _atStart(n.metrics) && _status == null && vertical) {
+      _dragOffset = 0;
+      _scale.value = 0;
+      _position.value = 0;
+      setState(() => _status = _Pull.drag);
+      return false;
+    }
+    final dragging = _status == _Pull.drag || _status == _Pull.armed;
+    if (!vertical) {
+      if (dragging) _dismiss(_Pull.canceled);
+    } else if (n is ScrollUpdateNotification) {
+      if (dragging) {
+        final delta = n.scrollDelta ?? 0;
+        _dragOffset = _dragOffset! + (n.metrics.axisDirection == AxisDirection.down ? -delta : delta);
+        _checkDrag(n.metrics.viewportDimension);
+      }
+      if (_status == _Pull.armed && n.dragDetails == null) _show();
+    } else if (n is OverscrollNotification) {
+      if (dragging) {
+        _dragOffset = _dragOffset! + (n.metrics.axisDirection == AxisDirection.down ? -n.overscroll : n.overscroll);
+        _checkDrag(n.metrics.viewportDimension);
+      }
+    } else if (n is ScrollEndNotification) {
+      if (_status == _Pull.armed) {
+        if (_position.value < 1) {
+          _dismiss(_Pull.canceled);
+        } else {
+          _show();
+        }
+      } else if (_status == _Pull.drag) {
+        _dismiss(_Pull.canceled);
+      }
+    }
+    return false;
+  }
+
+  // While it is dragged the list's own overscroll glow stays away.
+  bool _onGlow(OverscrollIndicatorNotification n) {
+    if (n.depth != 0 || !n.leading || _status != _Pull.drag) return false;
+    n.disallowIndicator();
+    return true;
+  }
+
+  void _checkDrag(double extent) {
+    var value = extent <= 0 ? 0.0 : _dragOffset! / (extent * _dragExtent);
+    if (_status == _Pull.armed) value = math.max(value, 1 / _overshoot);
+    _position.value = value.clamp(0.0, 1.0);
+    if (_status == _Pull.drag && _ink >= 1) _status = _Pull.armed;
+  }
+
+  Future<void> _dismiss(_Pull to) async {
+    await Future<void>.value();
+    if (!mounted) return;
+    setState(() => _status = to);
+    if (to == _Pull.done) {
+      await _scale.animateTo(1, duration: _leave);
+    } else {
+      await _position.animateTo(0, duration: _leave);
+    }
+    if (mounted && _status == to) {
+      _dragOffset = null;
+      setState(() => _status = null);
+    }
+  }
+
+  void _show() {
+    _status = _Pull.snap;
+    _position.animateTo(1 / _overshoot, duration: _snap).then<void>((_) {
+      if (!mounted || _status != _Pull.snap) return;
+      setState(() => _status = _Pull.refresh);
+      widget.onRefresh().whenComplete(() {
+        if (mounted && _status == _Pull.refresh) _dismiss(_Pull.done);
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final child = NotificationListener<ScrollNotification>(
+      onNotification: _onScroll,
+      child: NotificationListener<OverscrollIndicatorNotification>(onNotification: _onGlow, child: widget.child),
+    );
+    final tokens = chromeTokensOf(context);
+    final color = widget.color ?? tokens.primary;
+    final turning = _status == _Pull.refresh || _status == _Pull.done;
+    return Stack(
+      children: [
+        child,
+        if (_status != null)
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: SizeTransition(
+              alignment: const AlignmentDirectional(-1, 1),
+              sizeFactor: _positionFactor,
+              child: Padding(
+                padding: EdgeInsets.only(top: widget.displacement),
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: ScaleTransition(
+                    scale: _scaleFactor,
+                    child: AnimatedBuilder(
+                      animation: _position,
+                      builder: (context, _) => Semantics(
+                        label: CodelesslyLabelsScope.of(context).refresh,
+                        child: Padding(
+                          key: const ValueKey('Codelessly pull to refresh'),
+                          padding: const EdgeInsets.all(4),
+                          child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: widget.backgroundColor ?? tokens.raisedBackground,
+                              border: Border.all(color: tokens.primaryBorder),
+                              boxShadow: tokens.shadows('level2'),
+                            ),
+                            child: SizedBox.square(
+                              dimension: 36,
+                              child: Center(
+                                child: SpinnerView(
+                                  diameter: 16,
+                                  color: turning ? color : color.withValues(alpha: color.a * _ink),
+                                  value: turning ? null : _position.value * .75,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
 }

@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/widgets/collections_data_list.dart' show PullToRefresh;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/shell_controls.dart';
 import 'support.dart' as lists;
 
 // Runtime of the widgets area's features.
@@ -379,7 +381,7 @@ void main() {
     expect(rows(tester), ['P0', 'P2']);
     expect(find.text('Delete'), findsOneWidget);
     expect(s['last'], '');
-    await tester.tap(find.text('Undo'));
+    await tester.tap(shellButton('Undo'));
     await tester.pumpAndSettle();
     expect(rows(tester), ['P0', 'P1', 'P2']);
     await tester.dragFrom(s.center('row', instance: const ProvidedItem('row', null, 'list', 1)), const Offset(-250, 0));
@@ -418,7 +420,7 @@ void main() {
     expect(rows(tester), ['P0', 'P2']);
     // The bar is below the last row, not over it.
     final last = s.center('row', instance: const ProvidedItem('row', null, 'list', 2));
-    expect(tester.getTopLeft(find.text('Undo')).dy, greaterThan(last.dy + 20));
+    expect(tester.getTopLeft(shellButton('Undo')).dy, greaterThan(last.dy + 20));
     // A revealed action is found by its id and label.
     await tester.pump(const Duration(milliseconds: 1100));
     await tester.pumpAndSettle();
@@ -440,7 +442,7 @@ void main() {
         variables: [lists.v('people', people(25), VariableType.list)], interactive: false);
     await tester.pumpAndSettle();
     expect(find.byType(CustomScrollView), findsNothing);
-    expect(find.byType(RefreshIndicator), findsNothing);
+    expect(find.byType(PullToRefresh), findsNothing);
   });
 
   testWidgets('loading earlier items keeps the rows on screen where they are', (tester) async {

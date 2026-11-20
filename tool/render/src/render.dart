@@ -87,7 +87,7 @@ const runtimeCodes = <(String, String, String)>[
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
-  ('formula_failed', 'warning', 'A formula an action works out does not parse, or fails as it is worked out (an unknown field or function, a list function given a text): the action got null. The message gives the expression and why.'),
+  ('formula_failed', 'warning', 'A formula does not parse, or fails as it is worked out (an unknown field or function, a list function given a text). One an action works out: the action got null; the message gives the expression and why. One a node reads when the screen is drawn (its condition, its list, its text, a value) or one of a variable: the node draws without it (a condition is no, a list has no rows, a text is blank); the message names the node, the formula and why.'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
   ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
@@ -112,6 +112,11 @@ const runtimeCodes = <(String, String, String)>[
   ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('theme_name_unknown', 'warning', 'A node names a color the theme does not have, writes theme.<name> as a value\'s text, or reads theme.<name> in a formula where the theme gives no such value: it draws nothing there. The message names the node, the name and what the theme has.'),
+  ('paints_outside', 'warning', 'A node is drawn past the bottom or the right edge of its Stack (or box), which does not clip, over something after it: the Stack is as big as it is written, not as what is placed in it. The message names the node, by how much, and what it covers.'),
+  ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
+  ('screen_timeout', 'error', 'A screen took longer than --screen-timeout (120 s) at one size: past the limit the functions its formulas call gave nothing, the capture is not what the page shows, and the run went on to the next screen.'),
+  ('site_now', 'warning', 'site.json\'s "now" (the time now() gives in a render of the site, when no --now is passed) is not an ISO 8601 time: the run starts at the real time.'),
   ('placeholder_word', 'warning', 'A word the notation, the design system and the site do not have stood in as a placeholder when the page was expanded with an open vocabulary (or, closed, was refused and draws nothing): the message names the word, its kind, its line and the shape it was written in. Define it, or it is recorded for support: read from the vocabulary record `notation.sh expand` saves beside the site (vocabulary.json).'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
@@ -313,6 +318,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final themeJson = api.readMap(site.manifest?['theme']);
   final textFamily = switch (themeJson?['fontFamily']) { final String f when f.trim().isNotEmpty => f, _ => 'Roboto' };
   if (docs.isEmpty) return _finish(report, args);
+  _themeNames(docs, manifest?.theme ?? api.ThemeTokens.none, issue);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
@@ -511,9 +517,19 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // which `--wait` (and every settle) moves as it moves the timers: a clock
   // or a deadline written from now() passes with them (round 10, R22: a
   // timer ticked through a nine-second wait while now() stood still).
-  FormulaClock.pinned = args.now;
+  // The test's clock starts at its binding's epoch (1 January 2015), not
+  // today: now() is the real time the run started at plus what the test's
+  // clock has moved since. A site names the day its seed data is written
+  // for (`"now"` in site.json): that is the run's `--now` when none is passed.
+  final siteNow = manifest?.now;
+  final siteTime = siteNow == null ? null : DateTime.tryParse(siteNow);
+  if (siteNow != null && siteTime == null) {
+    issue(RuntimeIssue('site_now', 'warning', 'site.json\'s "now" is "$siteNow", which is not an ISO 8601 time (2026-11-16T09:00:00): the run starts at the real time. Write it as one, or pass --now.'));
+  }
+  FormulaClock.pinned = args.now ?? siteTime;
   final testClock = tester.binding.clock;
-  FormulaClock.source = testClock.now;
+  final startedAt = DateTime.now(), clockStart = testClock.now();
+  FormulaClock.source = () => startedAt.add(testClock.now().difference(clockStart));
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
@@ -586,6 +602,55 @@ Future<void> _renderAll(
         ..screen = label
         ..size = sizeName;
       clipboardAt = (label, sizeName);
+      // The screen's time limit. Functions that call each other without end
+      // are cut off by their count (FormulaFunction.maxCalls) and, past the
+      // limit, at once: the screen ends, both are said, the run goes on.
+      final screenClock = Stopwatch()..start();
+      final runaway = <String>{};
+      FormulaFunction.deadline = DateTime.now().add(args.screenTimeout);
+      FormulaFunction.onRunaway = runaway.add;
+      // The formulas that could not be worked out while the screen ran,
+      // each with why: said at its end, with the nodes that read them.
+      final failed = <String, String>{};
+      FormulaEvaluator.onFailure = (expression, why) => failed.putIfAbsent(expression.trim(), () => why);
+      void timeLimit() {
+        FormulaEvaluator.onFailure = null;
+        _formulasFailed(failed, docs, fileOfNode, issue, label, sizeName, late: screenClock.elapsed > args.screenTimeout);
+        final names = <String>{};
+        for (final body in runaway) {
+          String? name;
+          for (final doc in docs.values) {
+            for (final scope in (api.readMap(doc['variables']) ?? const <String, Object?>{}).values) {
+              for (final v in api.readList(scope) ?? const []) {
+                if (v is Map && '${v['value']}'.contains(body)) name ??= '${v['name']}';
+              }
+            }
+          }
+          names.add(name == null ? '{${body.length > 80 ? '${body.substring(0, 80)}â€¦' : body}}' : '"$name" ({${body.length > 80 ? '${body.substring(0, 80)}â€¦' : body}})');
+        }
+        final over = screenClock.elapsed > args.screenTimeout;
+        if (names.isNotEmpty && !over) {
+          issue(RuntimeIssue(
+              'formula_runaway',
+              'error',
+              'A formula made more than ${FormulaFunction.maxCalls} calls of the functions the page defines in one evaluation, so its calls after that gave nothing and what reads it is drawn without its value: ${names.join(', ')}. '
+                  'Functions that call each other need an end every path reaches (a depth or a pass count that goes down, checked first); a value worked out for every cell from every other is kept in a variable an action writes, not recomputed by each reader.',
+              screen: label,
+              size: sizeName));
+        }
+        if (over) {
+          issue(RuntimeIssue(
+              'screen_timeout',
+              'error',
+              'Screen "$label" at $sizeName took ${screenClock.elapsed.inSeconds} s, over the limit of ${args.screenTimeout.inSeconds} s (--screen-timeout): past the limit the functions its formulas call gave nothing, so the capture is not what the page shows'
+                  '${names.isEmpty ? '' : '. The time went to ${names.join(', ')}'}. The run went on to the next screen.',
+              screen: label,
+              size: sizeName));
+        }
+        FormulaFunction.deadline = null;
+        FormulaFunction.onRunaway = null;
+      }
+
       // What the app keeps on the device (a variable marked saved, a
       // storage action, the theme mode): fresh for each capture, and handed
       // on to the app a --reload step starts.
@@ -730,6 +795,7 @@ Future<void> _renderAll(
             screen: label, size: sizeName));
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(seconds: 10));
+        timeLimit();
         controller.dispose();
         codelessly.dispose();
         continue;
@@ -1032,8 +1098,9 @@ Future<void> _renderAll(
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               // What a step names with `@` (`quantity@increment`).
               if (_partNames(b) case final parts when parts.isNotEmpty) 'parts': parts,
-              'x': _rectOf(b).left.round(),
-              'y': _rectOf(b).top.round(),
+              // (A box under a transform that is not a number has no place: 0.)
+              'x': _rectOf(b).left.isFinite ? _rectOf(b).left.round() : 0,
+              'y': _rectOf(b).top.isFinite ? _rectOf(b).top.round() : 0,
               'w': double.parse(b.size.width.toStringAsFixed(1)),
               'h': double.parse(b.size.height.toStringAsFixed(1)),
               // What a text shows, as drawn: a check reads values from it.
@@ -1063,6 +1130,7 @@ Future<void> _renderAll(
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
+      timeLimit();
       controller.dispose();
       codelessly.dispose();
     }
@@ -1110,6 +1178,179 @@ String _firstLine(String s) {
 }
 
 String _fileSafe(String s) => s.replaceAll(RegExp(r'[^A-Za-z0-9_.-]+'), '_');
+
+/// Says each formula of [failed] (formula â†’ why) that a node of [docs]
+/// reads: the node, the formula, why, and what the node shows without it.
+void _formulasFailed(Map<String, String> failed, Map<String, api.Json> docs, Map<String, String> fileOfNode, void Function(RuntimeIssue) issue, String screen, String size,
+    {required bool late}) {
+  if (failed.isEmpty || late) return;
+  bool reads(Object? value, String formula) => switch (value) {
+        final String s => s.contains(formula),
+        final List<Object?> l => l.any((e) => reads(e, formula)),
+        final Map<Object?, Object?> m => m.values.any((e) => reads(e, formula)),
+        _ => false,
+      };
+  var said = 0;
+  for (final f in failed.entries) {
+    if (f.key.length < 2) continue;
+    // Where it is read: a condition, a list's data, a text, another value.
+    final nodes = <String>[];
+    var what = 'draws without its value';
+    String? file;
+    for (final doc in docs.entries) {
+      for (final n in (api.readMap(doc.value['nodes']) ?? const <String, Object?>{}).entries) {
+        final node = api.readMap(n.value);
+        if (node == null || !reads(node, f.key)) continue;
+        if (nodes.isEmpty) {
+          file = doc.key;
+          final bind = api.readMap(node['bind']) ?? const <String, Object?>{};
+          what = reads(bind['visible'], f.key)
+              ? 'is not shown (its condition is no)'
+              : reads(bind['data'], f.key)
+                  ? 'has no rows'
+                  : reads(api.readMap(node['props'])?['text'], f.key)
+                      ? 'shows no text for it'
+                      : reads(node['actions'], f.key)
+                          ? 'action'
+                          : what;
+        }
+        if (!nodes.contains(n.key)) nodes.add(n.key);
+      }
+    }
+    // One of a variable's (a computed value others read) names the variable.
+    String? variable;
+    if (nodes.isEmpty) {
+      for (final doc in docs.values) {
+        for (final scope in (api.readMap(doc['variables']) ?? const <String, Object?>{}).values) {
+          for (final v in api.readList(scope) ?? const []) {
+            if (v is Map && reads(v['formula'] ?? v['value'], f.key)) variable ??= '${v['name']}';
+          }
+        }
+      }
+      if (variable == null) continue;
+    }
+    // One an action works out is said where the action ran.
+    if (what == 'action') continue;
+    if (++said > 12) break;
+    final formula = f.key.length > 160 ? '${f.key.substring(0, 160)}â€¦' : f.key;
+    final why = f.value.replaceFirst(RegExp(r'^(Bad state|Exception|Invalid argument\(s\)|FormatException|Unsupported operation): '), '');
+    issue(RuntimeIssue(
+        'formula_failed',
+        'warning',
+        nodes.isEmpty
+            ? 'The formula of the variable "$variable" failed when the screen ran: {$formula}: ${_firstLine(why)}. What reads "$variable" gets nothing. Write it so that it works for the values it meets (coalesce(x, â€¦) for one that may be missing).'
+            : '"${nodes.first}"${nodes.length > 1 ? ' (and ${nodes.length - 1} more)' : ''} $what: its formula {$formula} failed when the screen ran: ${_firstLine(why)}. '
+                'Write it so that it works for the values it meets (coalesce(x, â€¦) for one that may be missing, a function the formulas have).',
+        nodeId: nodes.firstOrNull,
+        file: file,
+        screen: screen,
+        size: size));
+  }
+}
+
+/// Says each name of the theme a document uses that the theme does not
+/// have: a color written by a name it has none of (`"color": "amberTint"`),
+/// written as the text `theme.amberTint`, or read in a formula as
+/// `theme.<name>` where the theme gives no such value. Each draws nothing.
+void _themeNames(Map<String, api.Json> docs, api.ThemeTokens theme, void Function(RuntimeIssue) issue) {
+  final has = [
+    ...theme.colors.keys,
+    for (final r in const ['primary', 'onPrimary', 'surface', 'onSurface', 'error', 'success', 'warning'])
+      if (theme.color(r) != null && !theme.colors.containsKey(r)) r,
+  ];
+  String list() => has.isEmpty ? 'The theme names no colors' : 'The theme has ${has.take(14).join(', ')}${has.length > 14 ? ' and ${has.length - 14} more' : ''}';
+  final values = themeValues(theme, dark: false);
+  final dark = themeValues(theme, dark: true);
+  bool given(String path) {
+    Object? a = values, b = dark;
+    for (final k in path.split('.')) {
+      a = a is Map ? a[k] : null;
+      b = b is Map ? b[k] : null;
+    }
+    return a != null || b != null;
+  }
+
+  String more(List<String> ids) => ids.toSet().length > 1 ? ' (and ${ids.toSet().length - 1} more)' : '';
+  final read = RegExp(r'(?<![A-Za-z0-9_.])theme\.([A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)');
+  for (final d in docs.entries) {
+    final api.LayoutDocument doc;
+    try {
+      doc = api.LayoutDocument.fromJson(d.value);
+    } catch (_) {
+      continue;
+    }
+    // A color named that the theme has none of.
+    for (final e in api.unknownThemeColors(doc, theme).entries) {
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} names the color "${e.key}", which the theme does not have: it draws nothing there. '
+              '${list()}. Write one of them, a color (#FF2563EB), or add "${e.key}" to the theme\'s colors.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+    // `theme.<name>` written as a value's text, or read where the theme gives nothing.
+    final asText = <String, List<String>>{}, asRead = <String, List<String>>{};
+    void scan(String id, Object? value) {
+      switch (value) {
+        case final String s when RegExp(r'^theme\.[A-Za-z_][A-Za-z0-9_.]*$').hasMatch(s):
+          (asText[s] ??= []).add(id);
+        case final String s when s.contains(r'${') && s.contains('theme.'):
+          for (final m in read.allMatches(s)) {
+            if (!given(m[1]!)) (asRead[m[1]!] ??= []).add(id);
+          }
+        case final List<Object?> l:
+          for (final v in l) {
+            scan(id, v);
+          }
+        case final Map<Object?, Object?> m:
+          for (final v in m.values) {
+            scan(id, v);
+          }
+        default:
+      }
+    }
+
+    for (final n in (api.readMap(d.value['nodes']) ?? const <String, Object?>{}).entries) {
+      scan(n.key, n.value);
+    }
+    for (final e in asText.entries) {
+      final name = e.key.split('.').last;
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} is written "${e.key}" where a value is read: that is a text, not the theme\'s value, and it draws nothing. '
+              'A color of the theme is its name alone ("$name"${has.contains(name) ? '' : ', which this theme does not have: ${list()}'}); in a formula it is theme.colors.$name.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+    for (final e in asRead.entries) {
+      final name = e.key.split('.').last;
+      issue(RuntimeIssue(
+          'theme_name_unknown',
+          'warning',
+          '"${e.value.first}"${more(e.value)} reads theme.${e.key} in a formula, and the theme gives no such value: what reads it gets nothing. '
+              '${has.contains(name) ? 'The theme\'s color "$name" is read as theme.colors.$name' : '${list()}: each is read as theme.colors.<name> (its roles as theme.primary, theme.surface)'}.',
+          nodeId: e.value.first,
+          file: d.key));
+    }
+  }
+}
+
+/// For an icon name the renderer does not know: the name without a style's
+/// ending it does know (`lock_outline` â†’ `lock`), as " (lock is one)"; else
+/// nothing.
+String _iconNear(String name) {
+  for (final ending in const ['_outlined', '_outline', '_rounded', '_round', '_sharp', '_filled', '_fill']) {
+    if (!name.endsWith(ending)) continue;
+    final base = name.substring(0, name.length - ending.length);
+    if (base.isEmpty) continue;
+    for (final candidate in [base, '${base}_outlined', '${base}_outline']) {
+      if (candidate != name && IconSources.glyphOf({'type': 'MATERIAL_ICON', 'name': candidate, 'style': 'filled'}) != null) return ' ("$candidate" is one)';
+    }
+  }
+  return '';
+}
 
 Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 8; i++) {
@@ -3360,6 +3601,43 @@ List<RuntimeIssue> _check(
     parentBox ??= pid == null ? null : byKey['$pid|${b.instance}'];
     final parent = parentBox?.node ?? (pid == null ? null : b.source.node(pid));
     final parentName = parentBox == null ? pid : nameOf(parentBox);
+    // Past a Stack or a box that does not clip, over what follows it: the
+    // child is drawn there (a Stack does not grow with what is placed in
+    // it), and the picture is wrong with nothing said.
+    if (parentBox != null && parent != null && (parent.type == 'stack' || parent.type == 'box') && parent.decoration.clip == api.Clip.none && !seen.isEmpty && b.drawn) {
+      final pr = _rectOf(parentBox);
+      final below = seen.bottom - pr.bottom, right = seen.right - pr.right;
+      final vertical = below >= right;
+      final by = vertical ? below : right;
+      if (by >= 8 && !scrollsAlong(b, !vertical, upTo: parentBox) && !scrollsAlong(parentBox, !vertical)) {
+        final strip = vertical ? Rect.fromLTRB(seen.left, pr.bottom, seen.right, seen.bottom) : Rect.fromLTRB(pr.right, seen.top, seen.right, seen.bottom);
+        NodeBox? over;
+        for (final o in boxes) {
+          if (identical(o, b) || identical(o, parentBox) || !o.drawn) continue;
+          final on = o.node;
+          if (on == null || on.type == 'canvas') continue;
+          final or = _rectOf(o);
+          if (or.isEmpty || or.intersect(strip).isEmpty || or.intersect(strip).width < 2 || or.intersect(strip).height < 2) continue;
+          // What follows the Stack: not in it, and not around it.
+          if (_isInside(o, parentBox) || _isInside(parentBox, o) || _isInside(b, o)) continue;
+          // A leaf that shows something (a text, an icon, a control), not a frame both are in.
+          if (on.children.isNotEmpty) continue;
+          over = o;
+          break;
+        }
+        if (over != null) {
+          out.add(RuntimeIssue(
+              'paints_outside',
+              'warning',
+              '"${nameOf(b)}" (${node.type}) is drawn ${by.toStringAsFixed(0)} px past the ${vertical ? 'bottom' : 'right edge'} of "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} by ${pr.height.toStringAsFixed(0)}), which does not clip, over "${nameOf(over)}" after it. '
+                  'A ${parent.type == 'stack' ? 'Stack' : 'box'} is as big as it is written, not as what is placed in it: give it the ${vertical ? 'height' : 'width'} its content needs, place the child inside it, or cut it at its edge (clip=true).',
+              nodeId: nameOf(b),
+              screen: screen,
+              size: size,
+              file: file));
+        }
+      }
+    }
     // A collapsed accordion or expansion tile clips its content by design.
     final collapses = parent?.type == 'accordion' || parent?.type == 'expansionTile';
     if (parentBox != null && parent != null && parent.type != 'canvas' && parent.type != 'stack' && !collapses && !seen.isEmpty) {
@@ -3429,7 +3707,33 @@ List<RuntimeIssue> _check(
       final image = icon['image'] ?? icon['svg'];
       if (glyph != null && image == null && IconSources.glyphOf(icon) == null) {
         out.add(RuntimeIssue('icon_not_drawn', 'warning',
-            'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
+            'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows${_iconNear('${icon['name'] ?? ''}')}'}. '
+            'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+    }
+    // The icons of a control (an IconButton's, a Button's, a field's) that
+    // name no glyph: the control is drawn without them, and nothing said so.
+    if (node.type != 'icon' && b.drawn) {
+      final named = <String>{};
+      void scan(Object? value) {
+        if (value is Map) {
+          final type = value['type'];
+          if (type == 'MATERIAL_ICON' && value['name'] is String && value['image'] == null && value['svg'] == null) {
+            final icon = value.cast<String, Object?>();
+            if ((value['name'] as String).isNotEmpty && !(value['name'] as String).contains(r'${') && IconSources.glyphOf(icon) == null) named.add(value['name'] as String);
+            return;
+          }
+          value.values.forEach(scan);
+        } else if (value is List) {
+          value.forEach(scan);
+        }
+      }
+
+      scan(api.readMap(node.toJson()['props']));
+      for (final name in named) {
+        out.add(RuntimeIssue('icon_not_drawn', 'warning',
+            '"${nameOf(b)}" (${node.type}) draws no icon for "$name": it is not a Material icon the renderer knows${_iconNear(name)}. '
             'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }

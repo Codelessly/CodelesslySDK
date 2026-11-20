@@ -24,7 +24,7 @@ Future<void> show(WidgetTester tester, Widget page) async {
   await tester.pump();
 }
 
-GraphEngine engineOf(WidgetTester tester) => tester.state<CodelesslyGraphState>(find.byType(CodelesslyGraph)).engine;
+GraphEngine engineOf(WidgetTester tester) => tester.renderObject<RenderGraph>(find.byType(CodelesslyGraph)).engine;
 
 /// A point of the graph, from its top left.
 Offset at(WidgetTester tester, double x, double y) => tester.getTopLeft(find.byType(CodelesslyGraph)) + Offset(x, y);

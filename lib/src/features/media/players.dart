@@ -10,7 +10,7 @@ import 'package:codelessly_api/codelessly_api.dart'
     show AudioPlayerProps, EmbeddedVideoProps, EmbeddedVideoSource, Node, VideoProps, WebViewGesture, WebViewProps, WebViewSourceType;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webview_flutter/webview_flutter.dart';
@@ -18,6 +18,10 @@ import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 
 import '../../render/convert.dart';
+import '../../render/control_theme.dart' show chromeButton, chromeGlyph, chromeTokensOf;
+import '../../render/controls/buttons.dart' show ButtonKind;
+import '../../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, ControlSlider, SpinnerView;
+import '../../render/paint/shell_constants.dart';
 import 'embedded_player.dart';
 import 'embedded_media_protocol.dart';
 
@@ -263,6 +267,7 @@ class _MediaVideoState extends State<MediaVideo> {
   Widget build(BuildContext context) {
     final c = _controller;
     final node = widget.node;
+    final labels = CodelesslyLabelsScope.of(context);
     final fit = boxFit(node.prop(VideoProps.fit));
     final poster = node.prop(VideoProps.poster);
     final posterImage = poster.isEmpty
@@ -270,9 +275,9 @@ class _MediaVideoState extends State<MediaVideo> {
         : Image.network(poster, fit: fit, gaplessPlayback: true, errorBuilder: (_, _, _) => const SizedBox.shrink());
     final Widget content;
     if (widget.preview || _url.isEmpty) {
-      content = posterImage ?? const Center(child: Icon(Icons.movie_outlined, semanticLabel: 'Video preview'));
+      content = posterImage ?? const Center(child: Icon(_Glyph.movieOutlined, semanticLabel: 'Video preview'));
     } else if (_failed || c == null) {
-      content = posterImage ?? const Center(child: Icon(Icons.error_outline, semanticLabel: 'Video unavailable'));
+      content = posterImage ?? const Center(child: Icon(_Glyph.errorOutline, semanticLabel: 'Video unavailable'));
     } else if (!_ready) {
       // The poster (or nothing) while loading: no spinner over the picture.
       content = posterImage ?? const SizedBox.expand();
@@ -299,9 +304,10 @@ class _MediaVideoState extends State<MediaVideo> {
             alignment: Alignment.bottomCenter,
             child: ValueListenableBuilder<VideoPlayerValue>(
               valueListenable: c,
-              builder: (context, value, _) => IconButton(
-                tooltip: value.isPlaying ? 'Pause video' : 'Play video',
-                icon: Icon(value.isPlaying ? Icons.pause_circle : Icons.play_circle),
+              builder: (context, value, _) => MediaPlayerButton(
+                floating: true,
+                label: value.isPlaying ? labels.pauseVideo : labels.playVideo,
+                icon: value.isPlaying ? pauseCircleGlyph : playCircleGlyph,
                 onPressed: () => value.isPlaying ? c.pause() : c.play(),
               ),
             ),
@@ -343,7 +349,7 @@ class MediaEmbeddedVideo extends StatelessWidget {
     final thumbnail = cloud.isNotEmpty ? cloud : api.readString(metadata['thumbnail_url']);
     final title = api.readString(metadata['title']) ?? '';
     return ColoredBox(
-      color: Colors.black,
+      color: ShellColors.black,
       child: Stack(fit: StackFit.expand, children: [
         if (thumbnail != null && thumbnail.isNotEmpty)
           Image.network(thumbnail, fit: BoxFit.cover, errorBuilder: (_, _, _) => const SizedBox.shrink()),
@@ -355,11 +361,11 @@ class MediaEmbeddedVideo extends StatelessWidget {
             child: Text(title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: Colors.white.withValues(alpha: 0.8), fontSize: 18, fontWeight: FontWeight.w300)),
+                style: TextStyle(color: ShellColors.white.withValues(alpha: 0.8), fontSize: 18, fontWeight: FontWeight.w300)),
           ),
         Center(
           child: Icon(
-            Icons.play_circle_fill,
+            _Glyph.playCircleFill,
             color: node.prop(EmbeddedVideoProps.source) == EmbeddedVideoSource.youtube
                 ? const Color(0xFFFF0000)
                 : const Color(0xFF1AB7EA),
@@ -523,31 +529,31 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
   Widget build(BuildContext context) {
     if (_node.prop(AudioPlayerProps.background)) {
       return widget.preview
-          ? const FittedBox(child: Icon(Icons.graphic_eq, semanticLabel: 'Background audio'))
+          ? const FittedBox(child: Icon(_Glyph.graphicEq, semanticLabel: 'Background audio'))
           : const SizedBox.shrink();
     }
     final description = _node.prop(AudioPlayerProps.description);
     final controls = _node.prop(AudioPlayerProps.showControls);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
+    final labels = CodelesslyLabelsScope.of(context);
+    final tokens = chromeTokensOf(context);
     final player = _player;
     return ColoredBox(
-      color: colors.surfaceContainerHigh,
+      color: tokens.tertiaryBackground,
       child: Row(children: [
         if (widget.preview || _url.isEmpty)
-          const IconButton.filledTonal(tooltip: 'Play audio', onPressed: null, icon: Icon(Icons.play_arrow))
+          MediaPlayerButton(label: labels.playAudio, icon: playArrowGlyph)
         else if (_failed || player == null)
-          const Icon(Icons.error_outline, semanticLabel: 'Audio unavailable')
+          const Icon(_Glyph.errorOutline, semanticLabel: 'Audio unavailable')
         else if (!_ready)
-          const CircularProgressIndicator()
+          Padding(padding: const EdgeInsets.all(10), child: SpinnerView(color: tokens.primary))
         else if (controls)
-          IconButton(
-            tooltip: _playing ? 'Pause audio' : 'Play audio',
+          MediaPlayerButton(
+            label: _playing ? labels.pauseAudio : labels.playAudio,
+            icon: _playing ? pauseCircleGlyph : playCircleGlyph,
             onPressed: () => _run(_playing ? player.pause : player.play),
-            icon: Icon(_playing ? Icons.pause_circle : Icons.play_circle),
           )
         else
-          const Icon(Icons.audiotrack_outlined, semanticLabel: 'Audio'),
+          const Icon(_Glyph.audiotrackOutlined, semanticLabel: 'Audio'),
         Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -556,41 +562,92 @@ class _MediaAudioPlayerState extends State<MediaAudioPlayer> with WidgetsBinding
               Text(description.isNotEmpty ? description : 'Audio',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleSmall?.copyWith(color: colors.onSurface)),
+                  style: TextStyle(color: tokens.onSurface, fontFamily: tokens.fontFamily, fontSize: 14, fontWeight: FontWeight.w500, height: 20 / 14)),
               if (!_failed && controls)
                 SizedBox(
+                  width: double.infinity,
                   height: 24,
-                  child: SliderTheme(
-                    data: SliderTheme.of(context).copyWith(
-                      trackHeight: 3,
-                      thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 6, disabledThumbRadius: 5, elevation: 0, pressedElevation: 0),
-                      overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-                      activeTrackColor: colors.primary,
-                      thumbColor: colors.primary,
-                      inactiveTrackColor: colors.surfaceContainerHighest,
-                      disabledActiveTrackColor: colors.onSurface.withValues(alpha: 0.24),
-                      disabledInactiveTrackColor: colors.onSurface.withValues(alpha: 0.12),
-                      disabledThumbColor: colors.onSurfaceVariant,
-                    ),
-                    child: Slider(
-                      value: _position.inMilliseconds.clamp(0, _duration.inMilliseconds).toDouble(),
-                      max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1,
-                      onChanged: _ready && _duration > Duration.zero && player != null
-                          ? (v) => _run(() => player.seek(Duration(milliseconds: v.round())))
-                          : null,
-                    ),
+                  child: MediaSeekBar(
+                    value: _position.inMilliseconds.clamp(0, _duration.inMilliseconds).toDouble(),
+                    max: _duration.inMilliseconds > 0 ? _duration.inMilliseconds.toDouble() : 1,
+                    onChanged: _ready && _duration > Duration.zero && player != null
+                        ? (v) => _run(() => player.seek(Duration(milliseconds: v.round())))
+                        : null,
                   ),
                 ),
               if (!_failed && controls)
                 Text('${_clock(_position)} / ${_duration > Duration.zero ? _clock(_duration) : '--:--'}',
-                    style: theme.textTheme.labelSmall),
+                    style: TextStyle(color: tokens.secondaryText, fontFamily: tokens.fontFamily, fontSize: 11, fontWeight: FontWeight.w500, height: 16 / 11)),
             ],
           ),
         ),
       ]),
     );
   }
+}
+
+/// A player's button, 44 px: the SDK's icon button, or ([floating], over a
+/// video's picture) its small floating button. With
+/// nothing to press ([onPressed] null) it is drawn disabled and takes no
+/// input.
+class MediaPlayerButton extends StatelessWidget {
+  const MediaPlayerButton({required this.label, required this.icon, this.onPressed, this.floating = false});
+
+  /// What a screen reader says.
+  final String label;
+  final api.Json icon;
+  final VoidCallback? onPressed;
+  final bool floating;
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+        dimension: 44,
+        child: ControlButton(
+          onPressed: onPressed,
+          interactive: onPressed != null,
+          semanticsLabel: label,
+          spec: chromeButton(
+            tokens: chromeTokensOf(context),
+            kind: floating ? ButtonKind.fab : ButtonKind.icon,
+            fabType: api.FloatingActionButtonType.small,
+            icon: icon,
+            enabled: onPressed != null,
+          ),
+        ),
+      );
+}
+
+final api.Json playArrowGlyph = chromeGlyph('play_arrow', _Glyph.playArrow);
+final api.Json playCircleGlyph = chromeGlyph('play_circle', _Glyph.playCircle);
+final api.Json pauseCircleGlyph = chromeGlyph('pause_circle', _Glyph.pauseCircle);
+
+/// The audio player's seek bar: the SDK's slider. With nothing to seek
+/// ([onChanged] null) it is drawn disabled and takes no input.
+class MediaSeekBar extends StatelessWidget {
+  const MediaSeekBar({required this.value, required this.max, this.onChanged});
+
+  final double value, max;
+  final ValueChanged<double>? onChanged;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+      // Clear of the player's end edge.
+      padding: const EdgeInsetsDirectional.only(end: 12),
+      child: ControlSlider(
+        interactive: onChanged != null,
+        enabled: onChanged != null,
+        tokens: chromeTokensOf(context),
+        onChanged: onChanged,
+        semanticsLabel: CodelesslyLabelsScope.of(context).seek,
+        node: Node.fromJson(<String, Object?>{
+          'type': 'slider',
+          'props': {
+            'value': value,
+            'max': max,
+            'inverted': Directionality.maybeOf(context) == TextDirection.rtl,
+          },
+        }, id: 'seek')!,
+      ));
 }
 
 // --- web view ------------------------------------------------------------------
@@ -604,14 +661,14 @@ class WebViewPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: Colors.blue)),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), border: Border.all(color: ShellColors.blue)),
       child: Container(
         margin: const EdgeInsets.all(8),
         alignment: Alignment.center,
-        decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
+        decoration: BoxDecoration(color: ShellColors.blue50, borderRadius: BorderRadius.circular(6)),
         child: FractionallySizedBox(
           child: LayoutBuilder(
-            builder: (context, c) => Icon(icon, color: Colors.blue, size: math.min(c.maxWidth, c.maxHeight)),
+            builder: (context, c) => Icon(icon, color: ShellColors.blue, size: math.min(c.maxWidth, c.maxHeight)),
           ),
         ),
       ),
@@ -645,9 +702,9 @@ class MediaWebViewNode extends StatelessWidget {
       final embed = api.readString(node.prop(WebViewProps.embed)['type']);
       return WebViewPreview(
         icon: switch (embed) {
-          'googleMaps' => Icons.map_outlined,
-          'twitter' => Icons.chat_bubble_outline,
-          _ => Icons.language_rounded,
+          'googleMaps' => _Glyph.mapOutlined,
+          'twitter' => _Glyph.chatBubbleOutline,
+          _ => _Glyph.languageRounded,
         },
       );
     }
@@ -755,4 +812,19 @@ class _MediaWebViewState extends State<MediaWebView> {
       },
     );
   }
+}
+
+/// The icons drawn here, from the MaterialIcons font.
+abstract final class _Glyph {
+  static const playArrow = IconData(ShellGlyphs.playArrow, fontFamily: ShellGlyphs.font);
+  static const playCircle = IconData(ShellGlyphs.playCircle, fontFamily: ShellGlyphs.font);
+  static const pauseCircle = IconData(ShellGlyphs.pauseCircle, fontFamily: ShellGlyphs.font);
+  static const errorOutline = IconData(ShellGlyphs.errorOutline, fontFamily: ShellGlyphs.font);
+  static const audiotrackOutlined = IconData(ShellGlyphs.audiotrackOutlined, fontFamily: ShellGlyphs.font);
+  static const chatBubbleOutline = IconData(ShellGlyphs.chatBubbleOutline, fontFamily: ShellGlyphs.font);
+  static const graphicEq = IconData(ShellGlyphs.graphicEq, fontFamily: ShellGlyphs.font);
+  static const languageRounded = IconData(ShellGlyphs.languageRounded, fontFamily: ShellGlyphs.font);
+  static const mapOutlined = IconData(ShellGlyphs.mapOutlined, fontFamily: ShellGlyphs.font);
+  static const movieOutlined = IconData(ShellGlyphs.movieOutlined, fontFamily: ShellGlyphs.font);
+  static const playCircleFill = IconData(ShellGlyphs.playCircleFill, fontFamily: ShellGlyphs.font);
 }

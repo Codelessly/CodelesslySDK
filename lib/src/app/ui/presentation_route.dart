@@ -5,7 +5,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart' show Breakpoints, CanvasProps, ModalPresentation;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +14,7 @@ import '../../render/controls/focus.dart';
 import '../../render/controls/kit.dart' show firstTextUnder;
 import '../../render/layout/design_scroll.dart' show ScrollDragGate;
 import '../../render/node_view.dart';
+import '../../render/paint/shell_constants.dart';
 import '../../runtime/actions/ui.dart' show SheetStop;
 
 /// The width below which an adaptive modal with no breakpoint of its own is
@@ -29,6 +30,74 @@ ModalPresentation resolvePresentation(ModalPresentation presentation, double? wi
     presentation == ModalPresentation.adaptive
         ? (width != null && width < sheetBelowWidth ? ModalPresentation.bottomSheet : ModalPresentation.dialog)
         : presentation;
+
+/// What a screen reader calls the barrier behind a dialog or a sheet
+/// ([CodelesslyLabels.dismiss]: the host's word, else English).
+String barrierDismissLabel(BuildContext context) => CodelesslyLabelsScope.of(context).dismiss;
+
+/// Opens [builder]'s content as a dialog over the nearest navigator: it
+/// fades in over 150 ms behind a barrier of [barrierColor] (null: the
+/// theme's, else black at 54%) that a tap closes when [barrierDismissible].
+/// The content is built under the opener's themes, text direction and media
+/// query, inside the safe area when [useSafeArea].
+///
+/// One route in every host app (a `RawDialogRoute` of the widgets layer):
+/// nothing of Material's is needed above it.
+Future<T?> showShellDialog<T>({
+  required BuildContext context,
+  required WidgetBuilder builder,
+  bool barrierDismissible = true,
+  Color? barrierColor,
+  bool useSafeArea = true,
+  RouteSettings? routeSettings,
+}) {
+  final navigator = Navigator.of(context);
+  final themes = InheritedTheme.capture(from: context, to: navigator.context);
+  final direction = Directionality.of(context);
+  final media = MediaQuery.maybeOf(context);
+  return navigator.push<T>(_ShellDialogRoute<T>(
+    settings: routeSettings,
+    barrierDismissible: barrierDismissible,
+    barrierLabel: barrierDismissLabel(context),
+    barrierColor: barrierColor ?? ShellColors.black54,
+    transitionDuration: PresentationRoute.enterDuration,
+    traversalEdgeBehavior: TraversalEdgeBehavior.closedLoop,
+    transitionBuilder: (context, animation, _, child) {
+      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
+      return FadeTransition(
+        opacity: curved,
+        child: ScaleTransition(scale: Tween<double>(begin: 0.96, end: 1).animate(curved), child: child),
+      );
+    },
+    pageBuilder: (routeContext, _, _) {
+      Widget dialog = themes.wrap(Builder(builder: builder));
+      if (media != null) dialog = MediaQuery(data: media, child: dialog);
+      dialog = Directionality(textDirection: direction, child: dialog);
+      if (useSafeArea) dialog = SafeArea(child: dialog);
+      // A tap inside the dialog is not a tap on the barrier.
+      return Semantics(hitTestBehavior: ui.SemanticsHitTestBehavior.opaque, child: dialog);
+    },
+  ));
+}
+
+/// A dialog's route: it comes as every presented layout does (it fades in
+/// and grows from 96% over [PresentationRoute.enterDuration]) and goes over
+/// [PresentationRoute.exitDuration].
+class _ShellDialogRoute<T> extends RawDialogRoute<T> {
+  _ShellDialogRoute({
+    required super.pageBuilder,
+    super.barrierDismissible,
+    super.barrierColor,
+    super.barrierLabel,
+    super.transitionDuration,
+    super.transitionBuilder,
+    super.settings,
+    super.traversalEdgeBehavior,
+  });
+
+  @override
+  Duration get reverseTransitionDuration => PresentationRoute.exitDuration;
+}
 
 /// Presents [builder]'s content as [presentation] says, with a barrier that
 /// [barrierDismissible] lets the user tap to close it.
@@ -46,17 +115,23 @@ class PresentationRoute<T> extends PopupRoute<T> {
     this.insets = EdgeInsets.zero,
     this.showDragHandle = false,
     this.barrierDismissible = true,
-    this.barrierColor = Colors.black54,
+    this.barrierColor = ShellColors.black54,
     this.barrierBlur = 0,
     this.enterScale = 0.96,
+    this.plainSheet = false,
     double sheetBelowWidth = 0,
     super.settings,
   })  : presentation = resolvePresentation(presentation, MediaQuery.maybeSizeOf(context)?.width, sheetBelowWidth: sheetBelowWidth),
-        _barrierLabel = MaterialLocalizations.of(context).modalBarrierDismissLabel,
+        _barrierLabel = barrierDismissLabel(context),
         _themes = InheritedTheme.capture(from: context, to: Navigator.of(context).context);
 
   static const enterDuration = Duration(milliseconds: 320);
   static const exitDuration = Duration(milliseconds: 200);
+
+  /// A plain bottom sheet ([plainSheet]): the curve it comes and goes on,
+  /// and the downward fling (px a second) that closes it.
+  static const Curve plainSheetCurve = Curves.easeOutCubic;
+  static const double plainSheetFling = 400;
   static const double defaultSheetWidth = 400;
   static const double bottomSheetRadius = 10;
   static const Size dragHandleSize = Size(40, 4);
@@ -97,6 +172,43 @@ class PresentationRoute<T> extends PopupRoute<T> {
   /// The scale a dialog grows from.
   final double enterScale;
 
+  /// A bottom sheet with nothing of its own set (no radius, handle, stops,
+  /// margin or height limit): not clipped, it comes up from its own height,
+  /// follows a finger that drags it, and closes
+  /// when it is let go under half way or flung down.
+  final bool plainSheet;
+
+  bool get _plain => plainSheet && (presentation == ModalPresentation.bottomSheet || presentation == ModalPresentation.adaptive);
+
+  // The plain sheet's place: on the curve, or straight under a finger.
+  ProxyAnimation? _sheetAnimation;
+
+  ProxyAnimation get _sheet => _sheetAnimation ??= ProxyAnimation(_curved(plainSheetCurve));
+
+  Animation<double> _curved(Curve curve) => CurvedAnimation(parent: animation!, curve: curve, reverseCurve: curve);
+
+  void _sheetDragStart() => _sheet.parent = animation;
+
+  void _sheetDragBy(double fraction) {
+    final c = controller;
+    if (c == null || c.status == AnimationStatus.reverse) return;
+    c.value -= fraction;
+  }
+
+  /// The finger lifted at [velocity] (px a second, positive: down): it
+  /// goes on from where it is, shut when flung down or under half way.
+  void _sheetDragEnd(double velocity) {
+    final c = controller;
+    if (c == null || c.status == AnimationStatus.reverse) return;
+    _sheet.parent = _curved(Split(c.value, endCurve: plainSheetCurve));
+    final close = velocity > plainSheetFling || (velocity >= -plainSheetFling && c.value < 0.5);
+    if (close) {
+      if (isCurrent) navigator?.pop();
+    } else {
+      c.forward();
+    }
+  }
+
   final CapturedThemes? _themes;
 
   @override
@@ -125,6 +237,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
         ModalPresentation.bottomSheet || ModalPresentation.adaptive => _BottomSheet(
             width: sheetWidth,
             margin: sheetMargin,
+            plain: _plain ? (place: _sheet, onDragStart: _sheetDragStart, onDragBy: _sheetDragBy, onDragEnd: _sheetDragEnd) : null,
             cornerRadius: cornerRadius ?? bottomSheetRadius,
             maxHeightFactor: maxHeightFactor,
             snapHeights: snapHeights,
@@ -144,6 +257,9 @@ class PresentationRoute<T> extends PopupRoute<T> {
       BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic, reverseCurve: Curves.easeInCubic);
     switch (presentation) {
+      // (A plain sheet moves itself, by its own height.)
+      case ModalPresentation.bottomSheet || ModalPresentation.adaptive when _plain:
+        return child;
       case ModalPresentation.bottomSheet || ModalPresentation.adaptive:
         return SlideTransition(
             position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(curved), child: child);
@@ -171,9 +287,17 @@ class PresentationRoute<T> extends PopupRoute<T> {
 }
 
 class _BottomSheet extends StatefulWidget {
-  const _BottomSheet({this.width, this.margin = 0, required this.cornerRadius, required this.maxHeightFactor, required this.snapHeights, this.stop, required this.showDragHandle, required this.builder});
+  const _BottomSheet({this.width, this.margin = 0, this.plain, required this.cornerRadius, required this.maxHeightFactor, required this.snapHeights, this.stop, required this.showDragHandle, required this.builder});
 
   final SheetStop? stop;
+
+  /// A plain sheet: where it is (0 down, 1 up), and its drag.
+  final ({
+    Animation<double> place,
+    VoidCallback onDragStart,
+    void Function(double fraction) onDragBy,
+    void Function(double velocity) onDragEnd
+  })? plain;
 
   final double? width;
   final double margin;
@@ -322,6 +446,46 @@ class _BottomSheetState extends State<_BottomSheet> {
     final stops = _stops;
     final maxHeight = available * widget.maxHeightFactor.clamp(0, 1);
     final height = stops.isEmpty ? null : (_dragHeight ?? available * stops[_stop.clamp(0, stops.length - 1)]).clamp(0.0, maxHeight);
+    if (widget.plain case final plain?) {
+      // Up from under the screen's bottom edge by its own height; a drag
+      // on it moves it by the same measure.
+      final sheetKey = GlobalObjectKey(this);
+      double heightOf() => (sheetKey.currentContext?.findRenderObject() as RenderBox?)?.size.height ?? 1;
+      return Padding(
+        padding: EdgeInsets.only(bottom: keyboard),
+        child: ClipRect(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: AnimatedBuilder(
+              animation: plain.place,
+              builder: (context, child) =>
+                  FractionalTranslation(translation: Offset(0, 1 - plain.place.value), child: child),
+              child: ConstrainedBox(
+                key: sheetKey,
+                constraints: BoxConstraints(maxWidth: sheetWidth, maxHeight: maxHeight),
+                child: GestureDetector(
+                  key: const ValueKey('Codelessly bottom sheet'),
+                  excludeFromSemantics: true,
+                  onVerticalDragStart: (_) => plain.onDragStart(),
+                  onVerticalDragUpdate: (d) => plain.onDragBy(d.primaryDelta! / heightOf()),
+                  onVerticalDragEnd: (d) => plain.onDragEnd(d.velocity.pixelsPerSecond.dy),
+                  onVerticalDragCancel: () => plain.onDragEnd(0),
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: MediaQuery.removeViewInsets(
+                      context: context,
+                      removeBottom: true,
+                      child: Builder(builder: widget.builder),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: EdgeInsets.only(bottom: keyboard + (floating ? widget.margin : 0)),
       child: Align(

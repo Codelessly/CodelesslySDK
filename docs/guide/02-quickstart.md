@@ -121,6 +121,32 @@ The project loads with no network. (Images, icons and web fonts that its layouts
 see [Theming and fonts](11-theming-and-fonts.md).) [Loading modes](04-loading-and-caching.md#where-a-bundle-file-comes-from) says where the file
 comes from.
 
+### In an app that is not a Material app
+
+The samples above use `MaterialApp`; the SDK does not need it. In a `CupertinoApp` they are the same with the
+other app widget. With a plain `WidgetsApp`:
+
+```dart
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:flutter/widgets.dart';
+
+void main() {
+  final codelessly = Codelessly(config: const CodelesslyConfig(slug: 'my-project'));
+
+  runApp(WidgetsApp(
+    color: const Color(0xFF2F6BFF),
+    onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+  ));
+}
+```
+
+What the SDK needs from the app around it:
+
+- **A `Navigator` above the widget**, for navigation actions, dialogs and sheets. `onGenerateRoute` (as above),
+  `home` or `routes` gives an app one.
+- **The Material icon font**, for icons: `uses-material-design: true` under `flutter:` in your `pubspec.yaml`.
+  That is the font file only (tree-shaken to the icons used), not the Material library.
+
 ## 4. Run
 
 ![Terminal running flutter run; a phone showing a spinner while the project loads, then the entry screen](images/02-quickstart/step4-run.png)

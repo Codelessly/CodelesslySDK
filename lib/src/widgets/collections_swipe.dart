@@ -4,7 +4,8 @@ import 'dart:async' show unawaited;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, SwipeAction, SwipeActions;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import '../render/control_theme.dart' show rolesOf;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
 import 'package:flutter/services.dart'
@@ -212,9 +213,9 @@ class _SwipeActionsBoxState extends State<SwipeActionsBox>
                     widget.actionWidth,
                     offset.abs() / math.max(1, shown.length),
                   ),
-            child: Material(
+            child: ColoredBox(
               color: action.background.flutter,
-              child: InkWell(
+              child: _ActionTarget(
                 onTap: () => _run(action, offset.sign),
                 child: Semantics(
                   button: true,
@@ -313,7 +314,7 @@ class _SwipeFocus extends SingleChildRenderObjectWidget {
         ..label = label
         ..actions = actions
         ..direction = direction
-        ..ringColor = Theme.of(context).colorScheme.primary;
+        ..ringColor = rolesOf(context).primary;
 
   @override
   void updateRenderObject(
@@ -326,7 +327,7 @@ class _SwipeFocus extends SingleChildRenderObjectWidget {
     ..label = label
     ..actions = actions
     ..direction = direction
-    ..ringColor = Theme.of(context).colorScheme.primary;
+    ..ringColor = rolesOf(context).primary;
 }
 
 class _RenderSwipeFocus extends RenderProxyBox {
@@ -493,4 +494,36 @@ class _Glyph extends LeafRenderObjectWidget {
       renderObject
         ..icon = icon
         ..color = color;
+}
+
+/// A revealed action's press target: a tap runs it, and a mouse over it
+/// shows a faint layer of the theme's hover color and the click cursor.
+class _ActionTarget extends StatefulWidget {
+  const _ActionTarget({required this.onTap, required this.child});
+
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_ActionTarget> createState() => _ActionTargetState();
+}
+
+class _ActionTargetState extends State<_ActionTarget> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) => MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: DecoratedBox(
+            position: DecorationPosition.foreground,
+            decoration: BoxDecoration(color: _hovered ? rolesOf(context).onSurface.withValues(alpha: .04) : null),
+            child: widget.child,
+          ),
+        ),
+      );
 }

@@ -23,7 +23,7 @@ import 'typewriter.dart';
 import 'hero.dart';
 import 'play.dart';
 import 'contracts.dart';
-import 'control_theme.dart' show ControlTheme, backdropOf;
+import 'control_theme.dart' show ThemeTokensScope, backdropOf;
 import 'controls/focus.dart' show FocusGate;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
@@ -1633,11 +1633,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final inner = build;
       build = (context) => TextDefaultScope(style: style, child: inner(context));
     }
-    // Its Material widgets take the layout's theme, made for what they're
-    // drawn on (ControlTheme): never Material's defaults or the app's.
+    // Its widgets take the layout's theme tokens, for what they're drawn
+    // on, and the text style and icon color those give: never the app's.
     final surface = backdropOf(source.node, source.parentOf, id);
     final themed = build;
-    build = (context) => ControlTheme(surface: surface, child: Builder(builder: themed));
+    build = (context) => ThemeTokensScope.withDefaults(
+        tokens: tree.theme, dark: tree.dark, surface: surface, child: Builder(builder: themed));
     // Its widgets lay out in the node's direction (Flutter's Directionality:
     // a ListView runs from the right, a text field types right to left).
     if (_node?.behaviors.textDirection case final api.TextDirection dir) {
@@ -2091,7 +2092,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // would with no decoration, so a size the parent forces (a fixed child
     // stretched between two pins) reaches it instead of its design size.
     final stack = _obtain<RenderStack>('shellStack',
-        () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
+        () => RenderShellStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none, fit: StackFit.passthrough));
     _stackExtras[stack] = (under, over);
     if (content == null) {
       _innerChains[stack] = const [];
@@ -2107,7 +2108,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
           ..textDirection = directionOf(n)
         ..padding = padding);
       inner.add(_obtain<RenderStack>('padStack',
-          () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
+          () => RenderShellStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
     }
     content(inner);
     _innerChains[stack] = inner;
@@ -2411,14 +2412,31 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
 
   void _freeform(Node n, List<RenderBox> chain, {List<String>? children}) {
     // A fitted board: laid out at its design size, then scaled into the box.
-    final fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
+    var fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
+    // The board's design size: the Stack's own, and along an axis where it
+    // has none (`w=fill`, `h=hug`: no size of its own to scale from) its
+    // content's. With neither there is nothing to fit (a board of no size
+    // scaled to a box is a transform of infinities: the frame is not a
+    // number anywhere under it).
+    var boardSize = n.innerSize;
+    if (fit != null && (boardSize.width <= 0 || boardSize.height <= 0)) {
+      var w = 0.0, h = 0.0;
+      for (final id in children ?? n.children) {
+        final c = nodeOf(id);
+        if (c == null) continue;
+        w = math.max(w, c.designSize.width);
+        h = math.max(h, c.designSize.height);
+      }
+      boardSize = Size(boardSize.width > 0 ? boardSize.width : w, boardSize.height > 0 ? boardSize.height : h);
+      if (boardSize.width <= 0 || boardSize.height <= 0 || !boardSize.isFinite) fit = null;
+    }
     if (fit != null) {
-      chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = n.innerSize);
+      chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = boardSize);
       chain.add(_obtain<RenderFittedBox>('boardFit', () => RenderFittedBox(textDirection: directionOf(n), clipBehavior: Clip.hardEdge))
           ..textDirection = directionOf(n)
         ..fit = BoxFit.values.byName(fit.name)
         ..alignment = n.prop(api.StackProps.fitAlignment).flutter);
-      final board = BoxConstraints.tight(n.innerSize);
+      final board = BoxConstraints.tight(boardSize);
       chain.add(_obtain<RenderConstrainedBox>('boardSize', () => RenderConstrainedBox(additionalConstraints: board))
         ..additionalConstraints = board);
     }
@@ -2426,7 +2444,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         'freeform', () => RenderFreeformLayout(wrapsWidth: false, wrapsHeight: false, designSize: Size.zero))
       ..wrapsWidth = fit == null && n.hFit == SizeFit.hug
       ..wrapsHeight = fit == null && n.vFit == SizeFit.hug
-      ..designSize = n.innerSize
+      ..designSize = fit == null ? n.innerSize : boardSize
       ..textDirection = directionOf(n);
     _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
     chain.add(layout);
@@ -2863,6 +2881,23 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       final relative = pos.relative;
       // A fill child pinned to both edges fills the space between its
       // insets; pinned to one edge (or none) it fills the container.
+      // A fill child placed off the container's start (`h=fill
+      // y={(index - page) * stage.height}`: a page of a stage, moved by
+      // its place) is the container's length from there. (It filled the
+      // container where it stood, whatever its place said.)
+      if (expands && !pos.isStretch && pos.start != null && pos.start != 0 && pos.end == null) {
+        return FreeformAxisPlacement(
+          mode: FreeformAxisMode.fill,
+          start: start,
+          extent: extent,
+          parentExtent: parentExtent,
+          clamp: !isScrollAxis,
+          expands: true,
+          preserveDesignOverflow: false,
+          growsWithContent: grows,
+          fillFrom: pos.start!,
+        );
+      }
       if (expands && !(pos.isStretch && !isScrollAxis)) return at(FreeformAxisMode.fill);
       if (isScrollAxis) return at(FreeformAxisMode.start);
       if (pos.isStretch && !wraps) {
@@ -3314,5 +3349,29 @@ class _LiveTextSemantics extends RenderProxyBox {
     config
       ..isSemanticBoundary = true
       ..liveRegion = true;
+  }
+}
+
+/// A node's shell: a Stack that, given no bound along an axis while nothing
+/// in it sizes it (every child is pinned to it: a box that fills, measured
+/// at its content in a row of a grid that hugs), is as small as it may be
+/// along that axis. Flutter's Stack takes the largest size there, which is
+/// no size ("A Stack requires bounded constraints").
+class RenderShellStack extends RenderStack {
+  RenderShellStack({super.alignment, super.textDirection, super.clipBehavior, super.fit});
+
+  @override
+  BoxConstraints get constraints {
+    final c = super.constraints;
+    if (c.hasBoundedWidth && c.hasBoundedHeight) return c;
+    for (var child = firstChild; child != null; child = childAfter(child)) {
+      if (!(child.parentData! as StackParentData).isPositioned) return c;
+    }
+    return BoxConstraints(
+      minWidth: c.minWidth,
+      maxWidth: c.hasBoundedWidth ? c.maxWidth : c.minWidth,
+      minHeight: c.minHeight,
+      maxHeight: c.hasBoundedHeight ? c.maxHeight : c.minHeight,
+    );
   }
 }

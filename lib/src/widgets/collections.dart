@@ -9,7 +9,16 @@ import 'dart:math' as math;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show Node, SizeFit, CollectionScrollProps, ListViewProps, GridViewProps, PageViewProps, ScrollProps, TableViewProps;
-import 'package:flutter/material.dart' show Divider, VerticalDivider, SizedBox, Widget, SliverGridDelegate, SliverGridDelegateWithFixedCrossAxisCount, SliverGridDelegateWithMaxCrossAxisExtent;
+import 'package:flutter/widgets.dart'
+    show
+        BuildContext,
+        Directionality,
+        LeafRenderObjectWidget,
+        SizedBox,
+        SliverGridDelegate,
+        SliverGridDelegateWithFixedCrossAxisCount,
+        SliverGridDelegateWithMaxCrossAxisExtent,
+        Widget;
 import 'package:flutter/rendering.dart';
 
 import '../render/convert.dart';
@@ -27,6 +36,7 @@ import 'collections_pagination.dart';
 import 'collections_page_runtime.dart';
 import 'collections_reorder.dart';
 import 'collections_table.dart';
+import 'material.dart' show RenderDivider;
 
 /// Recipes for the collections group, by node type.
 final Map<String, WidgetRecipe> collectionsRecipes = {
@@ -505,14 +515,9 @@ void _dataList(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node
   final spacing = n.prop(ListViewProps.spacing);
   final color = n.prop(ListViewProps.dividerColor).flutter;
   Widget gap() => switch (separator) {
-        api.ListSeparator.divider when vertical => Divider(
-            height: spacing,
-            thickness: n.prop(ListViewProps.dividerThickness),
-            color: color,
-            indent: n.prop(ListViewProps.dividerIndent),
-            endIndent: n.prop(ListViewProps.dividerEndIndent)),
-        api.ListSeparator.divider => VerticalDivider(
-            width: spacing,
+        api.ListSeparator.divider => ListSeparatorLine(
+            vertical: !vertical,
+            extent: spacing,
             thickness: n.prop(ListViewProps.dividerThickness),
             color: color,
             indent: n.prop(ListViewProps.dividerIndent),
@@ -838,4 +843,47 @@ api.ListSeparator listSeparator(Node n) {
   final separator = n.prop(ListViewProps.separator);
   if (separator == api.ListSeparator.none && n.prop(ListViewProps.spacing) != 0) return api.ListSeparator.space;
   return separator;
+}
+
+/// The line between a list's items: [extent] along the list, as long as the
+/// list is wide, with a [thickness] line through its middle ([vertical]: a
+/// standing line, between the items of a horizontal list). [indent] is at
+/// the line's start: the right of a lying line in a right-to-left layout.
+/// The SDK's divider ([RenderDivider]).
+class ListSeparatorLine extends LeafRenderObjectWidget {
+  const ListSeparatorLine({
+    super.key,
+    required this.vertical,
+    required this.extent,
+    required this.thickness,
+    required this.color,
+    this.indent = 0,
+    this.endIndent = 0,
+  });
+
+  final bool vertical;
+  final double extent;
+  final double thickness;
+  final Color color;
+  final double indent;
+  final double endIndent;
+
+  @override
+  RenderDivider createRenderObject(BuildContext context) => RenderDivider().._apply(this, context);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderDivider renderObject) => renderObject._apply(this, context);
+}
+
+extension on RenderDivider {
+  void _apply(ListSeparatorLine line, BuildContext context) {
+    final flipped = !line.vertical && Directionality.maybeOf(context) == TextDirection.rtl;
+    this
+      ..vertical = line.vertical
+      ..extent = line.extent
+      ..thickness = line.thickness
+      ..color = line.color
+      ..indent = flipped ? line.endIndent : line.indent
+      ..endIndent = flipped ? line.indent : line.endIndent;
+  }
 }

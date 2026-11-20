@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../render/paint/shell_constants.dart';
 import 'embedded_media_protocol.dart';
 
 bool get embeddedPlayerSupported => WebViewPlatform.instance != null;
@@ -132,8 +133,13 @@ let attempts=0,timer;frame.onload=()=>{clearInterval(timer);attempts=0;const hel
   @override
   Widget build(BuildContext context) => _failed
       ? const ColoredBox(
-          color: Colors.black,
-          child: Center(child: Icon(Icons.error_outline, semanticLabel: 'Embedded video unavailable')),
+          color: ShellColors.black,
+          child: Center(child: Icon(_Glyph.errorOutline, semanticLabel: 'Embedded video unavailable')),
         )
       : WebViewWidget(key: ValueKey(_controller), controller: _controller);
+}
+
+/// The icons drawn here, from the MaterialIcons font.
+abstract final class _Glyph {
+  static const errorOutline = IconData(ShellGlyphs.errorOutline, fontFamily: ShellGlyphs.font);
 }
