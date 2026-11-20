@@ -214,7 +214,8 @@ Options:
                           double click: a photo's zoom).
   --long-press <nodeId>   Hold a finger on the node, then lift (a longPress
                           reaction, a context menu on touch). =<ms> holds that
-                          long (default 700): --long-press bubble#3=900.
+                          long (default 700): --long-press bubble#3=900;
+                          =<ms>,hold does not lift (the next step does).
   --right-click <nodeId>  Click the node with a mouse's secondary button (a
                           secondaryClick reaction, a context menu).
   --reload                Close the app and start it again on the same screen
@@ -229,6 +230,8 @@ Options:
                           PNG at each time (ms after that step, which does not
                           settle first), <png name>-f<n>-<ms>ms.png, n the burst (--frames
                           0,100,200,335). Steps go on after the last one.
+                          After any step (--tap send --frames 120); first,
+                          from the page's load (a mount animation).
   --unfocus              Take the focus from the focused field (no caret in the
                           capture; its blur/unfocus reactions run).
   --key <key>             Press a key on what has the focus: ArrowLeft, ArrowRight,

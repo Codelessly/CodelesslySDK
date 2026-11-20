@@ -134,13 +134,23 @@ Future<void> _serve(WidgetTester tester, String dir) async {
         break;
       }
     } catch (e, s) {
-      // A run that throws answers with the error; the server keeps serving.
-      File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n');
+      // A run that throws answers with the error, and the server stops: what it threw in the middle of (a build,
+      // a layout) can leave the widget tree it keeps half torn down, and every later run would draw on that
+      // (duplicate GlobalKeys, detached render objects, screens that never load). The next run starts afresh.
+      File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n'
+          'The render server stopped after it: the next run starts from a fresh Flutter.\n');
       File('$argsFile.status').writeAsStringSync('2');
+      break;
     }
     // Whatever a run left for the test to find is that run's, not the next one's.
     tester.takeException();
     File('$dir/served').writeAsStringSync('${++served}\n');
+    // The next run gets a sound tree: an empty frame builds and lays out without an error. A run whose failure
+    // (a framework assertion in a build) left it broken ends the server rather than the next run's capture.
+    if (!await renderTreeSound(tester)) {
+      stderr.writeln('The render server stopped: run $served left the widget tree broken; the next run starts afresh.');
+      break;
+    }
   }
   File('$dir/ready').deleteSync();
 }

@@ -1092,7 +1092,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   @override
   void reportGeometry(TextInputConnection connection) {
-    if (!attached || !_editable.hasSize) return;
+    // Focused while it attaches (its editable, a child, is attached after
+    // it): the geometry is sent after the frame ([_scheduleGeometry]).
+    if (!attached || !_editable.attached || !_editable.hasSize) return;
     final c = config;
     connection
       ..setEditableSizeAndTransform(_editable.size, _editable.getTransformTo(null))
