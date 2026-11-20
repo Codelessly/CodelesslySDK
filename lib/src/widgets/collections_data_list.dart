@@ -12,7 +12,9 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, Node, Pagination, PaginationMode, SwipeAction;
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCacheExtent;
+import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/rendering.dart'
+    show GrowthDirection, RenderAbstractViewport, RenderSliverMultiBoxAdaptor, ScrollCacheExtent, SliverMultiBoxAdaptorParentData;
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
@@ -21,6 +23,7 @@ import '../render/control_theme.dart' show chromeButton, chromeGlyph, chromeToke
 import '../render/controls/buttons.dart' show ButtonKind;
 import '../render/controls/root.dart';
 import '../render/node_tree.dart' show RenderTree;
+import '../render/controls/spinner.dart' show SpinnerStyle;
 import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
@@ -174,6 +177,9 @@ class DataListViewState extends State<DataListView> implements LazyItems {
   /// The items built now, by index.
   final Map<int, BuildContext> _built = {};
 
+  /// The items built now, by key.
+  final Map<Object?, BuildContext> _builtByKey = {};
+
   /// The scroll offset that puts each built item at the start of the view,
   /// by index.
   Map<int, double> _itemStarts() {
@@ -321,6 +327,15 @@ class DataListViewState extends State<DataListView> implements LazyItems {
     return index != null && index >= 0 && index < items.length ? index : -1;
   }
 
+  @override
+  String? keyAt(int index) {
+    final items = _items;
+    if (index < 0 || index >= items.length) return null;
+    final v = items[index];
+    final key = v is Map ? (v['id'] ?? v['key'] ?? _keyOf(v)) : _keyOf(v);
+    return key == null || identical(key, v) && v is Map ? null : '$key';
+  }
+
   /// Builds item [index] when the list has not (a list builds only the
   /// items near its view): scrolls toward it, from the items built where it
   /// is and their extents, a frame at a time, until it is laid out. Whether
@@ -458,7 +473,7 @@ class DataListViewState extends State<DataListView> implements LazyItems {
 
   Widget _item(BuildContext context, int index, Object? item) {
     final key = _keyOf(item);
-    Widget child = _IndexedItem(index: index, list: this, child: _node$('row', widget.itemId, key, index, item));
+    Widget child = _IndexedItem(index: index, itemKey: key, list: this, child: _node$('row', widget.itemId, key, index, item));
     if (widget.gridDelegate == null) {
       child = ListItemBox(axis: _axis, main: widget.itemMain, stretch: widget.stretch, child: child);
     }
@@ -640,6 +655,8 @@ class DataListViewState extends State<DataListView> implements LazyItems {
     final twoWay = model?.mode == PaginationMode.bidirectional && sections == null;
     final sticky = _node.sticksToEnd && !twoWay;
     if (sticky) _followEnd(items);
+    // (A list paged a page at a time shows each page from its start.)
+    final anchored = !twoWay && sections == null && widget.gridDelegate == null && model?.mode != PaginationMode.pages;
 
     final List<Widget> slivers;
     Key? center;
@@ -662,18 +679,10 @@ class DataListViewState extends State<DataListView> implements LazyItems {
         })),
         _sliverList(_delegate(after, onBuilt: (index) => _onItemBuilt(index, after.length)), key: _centerKey),
       ];
-    } else if (sticky && sections == null) {
-      // Items put before the anchor grow up from it.
-      var at = items.indexWhere((item) => _keyOf(item) == _anchor);
-      if (at < 0) {
-        at = 0;
-        _anchor = items.isEmpty ? null : _keyOf(items.first);
-      }
+    } else if (anchored) {
+      // Built with the view's size known (below).
       center = _centerKey;
-      slivers = [
-        _sliverList(_delegate(items, count: at, reversed: true)),
-        _sliverList(_delegate(items, start: at, onBuilt: (index) => _onItemBuilt(index, items.length)), key: _centerKey),
-      ];
+      slivers = const [];
     } else if (sections != null) {
       slivers = _sectionSlivers(context, items, sections);
     } else {
@@ -694,16 +703,35 @@ class DataListViewState extends State<DataListView> implements LazyItems {
         // A list as long as its items (no height: stickToEnd with nothing to
         // stick in) has no end to keep in view: its items in order, with no
         // anchor (a shrink-wrapped viewport cannot have one: it threw).
-        final parts = shrink && center != null
-            ? [_sliverList(_delegate(items, onBuilt: (index) => _onItemBuilt(index, items.length))), if (footer != null) SliverToBoxAdapter(child: footer)]
-            : all;
+        final List<Widget> parts;
+        if (shrink && center != null) {
+          parts = [_sliverList(_delegate(items, onBuilt: (index) => _onItemBuilt(index, items.length))), if (footer != null) SliverToBoxAdapter(child: footer)];
+        } else if (anchored) {
+          // Items put before the anchor grow up (or left) from it, so the
+          // offset of everything from the anchor on stays; what else moves
+          // what is in view is undone as the list lays out (_HoldPhysics).
+          final at = _anchorIndex(items, sticky: sticky);
+          parts = [
+            if (at > 0)
+              _sliverList(_delegate(items, count: at, reversed: true, onBuilt: (index) => _onItemBuilt(index, items.length)),
+                  // A fresh sliver as its count changes: one keeping the rows
+                  // it laid out underestimates how far it reaches.
+                  key: ValueKey(('before', at))),
+            _sliverList(_delegate(items, start: at, onBuilt: (index) => _onItemBuilt(index, items.length)), key: _centerKey),
+            if (footer != null) SliverToBoxAdapter(child: footer),
+          ];
+        } else {
+          parts = all;
+        }
+        final direction = getAxisDirectionFromAxisReverseAndDirectionality(context, axis, _node.prop(CollectionScrollProps.reverse));
+        final physics = _withSnapping(refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics);
         return CustomScrollView(
           controller: scrollController,
           scrollDirection: axis,
           reverse: _node.prop(CollectionScrollProps.reverse),
           shrinkWrap: shrink,
           center: shrink ? null : center,
-          physics: _withSnapping(refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics),
+          physics: anchored && !shrink ? _HoldPhysics(adjust: _held, parent: physics) : physics,
           scrollCacheExtent: cache == null ? null : ScrollCacheExtent.pixels(cache),
           clipBehavior: clip(_node.prop(CollectionScrollProps.clipBehavior)),
           slivers: [
@@ -714,7 +742,7 @@ class DataListViewState extends State<DataListView> implements LazyItems {
                 // (With the sliver's key: the viewport's center is found by it.
                 // A padded list that keeps its end in view, stickToEnd with
                 // pad=, asserted and drew nothing: round 11b, team-chat.)
-                SliverPadding(key: sliver.key, padding: _paddingFor(padding, sliver, parts, axis), sliver: sliver),
+                SliverPadding(key: sliver.key, padding: _paddingFor(padding, sliver, parts, direction), sliver: sliver),
           ],
         );
       },
@@ -731,6 +759,7 @@ class DataListViewState extends State<DataListView> implements LazyItems {
         color: model?.refreshColor?.flutter,
         backgroundColor: model?.refreshBackgroundColor?.flutter,
         displacement: model?.refreshDisplacement ?? 40,
+        style: _node.prop(api.ListViewProps.refreshStyle),
         child: list,
       );
     }
@@ -800,7 +829,7 @@ class DataListViewState extends State<DataListView> implements LazyItems {
           ? inner
           : Stack(children: [
         Positioned.fill(child: inner),
-        if (!_atEnd) PositionedDirectional(
+        if (!_atEnd && _node.prop(api.ListViewProps.jumpToLatest)) PositionedDirectional(
           end: 12,
           bottom: 12,
           child: Semantics(
@@ -842,14 +871,185 @@ class DataListViewState extends State<DataListView> implements LazyItems {
     return list;
   }
 
-  /// The list's padding goes before the first sliver and after the last.
-  EdgeInsets _paddingFor(EdgeInsets padding, Widget sliver, List<Widget> slivers, Axis axis) {
+  /// The list's padding goes before the first sliver and after the last:
+  /// on the side the list scrolls from (the bottom of a reversed list) and
+  /// the side it scrolls to.
+  EdgeInsets _paddingFor(EdgeInsets padding, Widget sliver, List<Widget> slivers, AxisDirection direction) {
     final first = identical(sliver, slivers.first), last = identical(sliver, slivers.last);
-    if (axis == Axis.vertical) {
-      return padding.copyWith(top: first ? padding.top : 0, bottom: last ? padding.bottom : 0);
-    }
-    return padding.copyWith(left: first ? padding.left : 0, right: last ? padding.right : 0);
+    return switch (direction) {
+      AxisDirection.down => padding.copyWith(top: first ? padding.top : 0, bottom: last ? padding.bottom : 0),
+      AxisDirection.up => padding.copyWith(bottom: first ? padding.bottom : 0, top: last ? padding.top : 0),
+      AxisDirection.right => padding.copyWith(left: first ? padding.left : 0, right: last ? padding.right : 0),
+      AxisDirection.left => padding.copyWith(right: first ? padding.right : 0, left: last ? padding.left : 0),
+    };
   }
+
+  // --- holding what is in view as the items change ----------------------------
+  //
+  // A list over data keeps what is in view where it is when items are put
+  // before it or taken out before it (CSS scroll anchoring). Items put
+  // before the anchor (the first item the list showed, while it is there)
+  // go in a sliver before it that grows away from it, so they move nothing.
+  // Any other move of what is in view (items put or taken out between the
+  // anchor and the view, the anchor taken out) is undone as the list lays
+  // out: the first item in view before the change is put back where it was
+  // ([_HoldPhysics]). At the list's very start, what is put there shows
+  // instead (as a browser does at the top of a page) unless `stickToStart`
+  // is false and the items fill the list, or the list sticks to its end.
+
+  /// The keys of the items as last built.
+  List<Object?> _lastKeys = const [];
+
+  /// What the next layout holds, set when the items change: an item's key
+  /// and where it started, or the list's start ([_Hold.start]).
+  _Hold? _hold;
+
+  /// Where the list is anchored in [items]: the index of the first item of
+  /// the anchor sliver. Sets [_hold] when the items changed.
+  int _anchorIndex(List<Object?> items, {required bool sticky}) {
+    final keys = [for (final item in items) _keyOf(item)];
+    final lastKeys = _lastKeys;
+    _lastKeys = keys;
+    if (keys.isEmpty) {
+      _anchor = null;
+      return 0;
+    }
+    var at = _anchor == null ? -1 : keys.indexOf(_anchor);
+    final p = scrollController.hasClients && scrollController.positions.length == 1 ? scrollController.position : null;
+    if (p != null && p.hasContentDimensions && p.hasPixels && !listEquals(keys, lastKeys)) {
+      _hold = _holdFor(p, keys, lastKeys, sticky: sticky);
+      if (_hold != null) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => _hold = null);
+      }
+    }
+    if (at < 0 && _anchor != null) {
+      // The anchor went: the next item after it still there.
+      final was = lastKeys.indexOf(_anchor);
+      for (var i = was + 1; was >= 0 && i < lastKeys.length && at < 0; i++) {
+        at = keys.indexOf(lastKeys[i]);
+      }
+    }
+    if (at < 0) at = 0;
+    _anchor = keys[at];
+    return at;
+  }
+
+  /// What to hold as the items change from [lastKeys] to [keys]: the list's
+  /// start, or the first item in view (its end past the view's start) that
+  /// is still there; null: nothing.
+  _Hold? _holdFor(ScrollPosition p, List<Object?> keys, List<Object?> lastKeys, {required bool sticky}) {
+    if (p.pixels <= p.minScrollExtent + 0.5 &&
+        (p.maxScrollExtent <= 0 || (!sticky && _node.prop(api.ListViewProps.stickToStart)))) {
+      return const _Hold.start();
+    }
+    for (final i in _built.keys.toList()..sort()) {
+      if (i >= lastKeys.length || !keys.contains(lastKeys[i])) continue;
+      final ro = _built[i]!.mounted ? _built[i]!.findRenderObject() : null;
+      if (ro is! RenderBox || !ro.attached || !ro.hasSize) continue;
+      final viewport = RenderAbstractViewport.maybeOf(ro);
+      final at = _placeOf(ro);
+      if (viewport == null || at == null) continue;
+      final extent = _axis == Axis.vertical ? ro.size.height : ro.size.width;
+      if (viewport.getOffsetToReveal(ro, 0).offset + extent <= p.pixels + 0.5) continue;
+      final hold = _Hold(lastKeys[i], at, p.pixels);
+      // Items taken out between the anchor and the held one bring it that
+      // much nearer the anchor: go there first, so it is laid out where
+      // the list looks (the layout then puts it back exactly).
+      final anchorAt = _anchor == null ? -1 : lastKeys.indexOf(_anchor);
+      if (anchorAt >= 0) {
+        final present = keys.toSet();
+        final from = math.min(anchorAt, i + 1), to = math.max(anchorAt, i);
+        var gone = 0.0, seen = 0.0, measured = 0;
+        for (final c in _built.entries) {
+          final box = c.value.mounted ? c.value.findRenderObject() : null;
+          if (box is RenderBox && box.hasSize) {
+            seen += _axis == Axis.vertical ? box.size.height : box.size.width;
+            measured++;
+          }
+        }
+        final average = measured == 0 ? 0.0 : seen / measured;
+        for (var k = from; k < to; k++) {
+          if (present.contains(lastKeys[k])) continue;
+          final box = _built[k]?.mounted ?? false ? _built[k]!.findRenderObject() : null;
+          gone += box is RenderBox && box.hasSize ? (_axis == Axis.vertical ? box.size.height : box.size.width) : average;
+        }
+        if (gone > 0) p.correctPixels(p.pixels + (i >= anchorAt ? -gone : gone));
+      }
+      return hold;
+    }
+    return null;
+  }
+
+  /// Where [box] (an item's) is laid out in the list's scroll offsets, from
+  /// its sliver's place and its own in it (its edge toward the anchor: the
+  /// start in the anchor's sliver, the end in the one before it); null
+  /// when it is in no sliver. Reads no size, so it can be asked while the
+  /// list lays out.
+  static double? _placeOf(RenderBox box) {
+    RenderObject child = box;
+    while (child.parent != null && child.parent is! RenderSliverMultiBoxAdaptor) {
+      child = child.parent!;
+    }
+    final sliver = child.parent;
+    final data = child.parentData;
+    if (sliver is! RenderSliverMultiBoxAdaptor || data is! SliverMultiBoxAdaptorParentData) return null;
+    final at = sliver.constraints.precedingScrollExtent + (data.layoutOffset ?? 0);
+    return sliver.constraints.growthDirection == GrowthDirection.reverse ? -at : at;
+  }
+
+  /// The offset the list takes as it lays out after its items changed:
+  /// its start, or the held item back where it was; null: as it is.
+  double? _held(ScrollMetrics oldPosition, ScrollMetrics newPosition) {
+    final hold = _hold;
+    if (hold == null) return null;
+    _hold = null;
+    if (hold.atStart) return newPosition.minScrollExtent;
+    final context = _builtByKey[hold.key];
+    final ro = context == null || !context.mounted ? null : context.findRenderObject();
+    final now = ro is RenderBox && ro.attached ? _placeOf(ro) : null;
+    if (now == null) return null;
+    return hold.pixels + now - hold.offset;
+  }
+}
+
+/// What a list holds in view as its items change: where item [key] started
+/// (its offset at the start of the view), or the list's start.
+class _Hold {
+  const _Hold(this.key, this.offset, this.pixels) : atStart = false;
+  const _Hold.start()
+      : key = null,
+        offset = 0,
+        pixels = 0,
+        atStart = true;
+  final Object? key;
+  final double offset;
+
+  /// The list's offset when [offset] was read.
+  final double pixels;
+  final bool atStart;
+}
+
+/// Scroll physics that put a list's offset where [adjust] says as the list
+/// lays out with new extents (items put in or taken out): what keeps what
+/// is in view in place, in the same frame.
+class _HoldPhysics extends ScrollPhysics {
+  const _HoldPhysics({required this.adjust, super.parent});
+
+  final double? Function(ScrollMetrics oldPosition, ScrollMetrics newPosition) adjust;
+
+  @override
+  _HoldPhysics applyTo(ScrollPhysics? ancestor) => _HoldPhysics(adjust: adjust, parent: buildParent(ancestor));
+
+  @override
+  double adjustPositionForNewDimensions({
+    required ScrollMetrics oldPosition,
+    required ScrollMetrics newPosition,
+    required bool isScrolling,
+    required double velocity,
+  }) =>
+      adjust(oldPosition, newPosition) ??
+      super.adjustPositionForNewDimensions(
+          oldPosition: oldPosition, newPosition: newPosition, isScrolling: isScrolling, velocity: velocity);
 }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -1076,8 +1276,11 @@ class _DefaultErrorFooter extends StatelessWidget {
 
 /// An item of a [DataListView], known to the list by its index while built.
 class _IndexedItem extends StatefulWidget {
-  const _IndexedItem({required this.index, required this.list, required this.child});
+  const _IndexedItem({required this.index, required this.itemKey, required this.list, required this.child});
   final int index;
+
+  /// The item's key (its `id`).
+  final Object? itemKey;
   final DataListViewState list;
   final Widget child;
 
@@ -1086,24 +1289,46 @@ class _IndexedItem extends StatefulWidget {
 }
 
 class _IndexedItemState extends State<_IndexedItem> {
+  void _enter() {
+    widget.list._built[widget.index] = context;
+    widget.list._builtByKey[widget.itemKey] = context;
+  }
+
+  void _leave(_IndexedItem w) {
+    if (identical(widget.list._built[w.index], context)) widget.list._built.remove(w.index);
+    if (identical(widget.list._builtByKey[w.itemKey], context)) widget.list._builtByKey.remove(w.itemKey);
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.list._built[widget.index] = context;
+    _enter();
   }
 
   @override
   void didUpdateWidget(covariant _IndexedItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.index != widget.index && identical(widget.list._built[oldWidget.index], context)) {
-      widget.list._built.remove(oldWidget.index);
-    }
-    widget.list._built[widget.index] = context;
+    _leave(oldWidget);
+    _enter();
+  }
+
+  // Out of the tree (a row the list let go, kept to be reused or
+  // dropped), it is not the built item at its index.
+  @override
+  void deactivate() {
+    _leave(widget);
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _enter();
   }
 
   @override
   void dispose() {
-    if (identical(widget.list._built[widget.index], context)) widget.list._built.remove(widget.index);
+    _leave(widget);
     super.dispose();
   }
 
@@ -1161,7 +1386,11 @@ class PullToRefresh extends StatefulWidget {
     this.color,
     this.backgroundColor,
     this.displacement = 40,
+    this.style = api.RefreshStyle.disc,
   });
+
+  /// A disc over the list, or iOS's ticked spinner with no disc.
+  final api.RefreshStyle style;
 
   final Future<void> Function() onRefresh;
   final Widget child;
@@ -1320,7 +1549,26 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
                       animation: _position,
                       builder: (context, _) => Semantics(
                         label: CodelesslyLabelsScope.of(context).refresh,
-                        child: Padding(
+                        child: widget.style == api.RefreshStyle.spinner
+                            // iOS's control: the ticks alone (system gray),
+                            // fading in as the pull opens room for them, then
+                            // stepping round while it refreshes.
+                            ? SizedBox.square(
+                                key: const ValueKey('Codelessly pull to refresh'),
+                                dimension: 44,
+                                child: Center(
+                                  child: Opacity(
+                                    opacity: turning ? 1 : _ink,
+                                    child: SpinnerView(
+                                      diameter: 20,
+                                      style: SpinnerStyle.ticks,
+                                      turning: turning,
+                                      color: widget.color ?? const Color(0xFF8E8E93),
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : Padding(
                           key: const ValueKey('Codelessly pull to refresh'),
                           padding: const EdgeInsets.all(4),
                           child: DecoratedBox(
@@ -1353,3 +1601,4 @@ class _PullToRefreshState extends State<PullToRefresh> with TickerProviderStateM
     );
   }
 }
+
