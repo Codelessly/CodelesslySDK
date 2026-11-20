@@ -1,14 +1,18 @@
 // Interactive pages retain the design template and motion. Flutter's
 // viewport supplies drag arbitration, accessibility and page snapping.
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/widgets.dart';
 
 import '../render/behaviors.dart' show motionMatrix;
 import '../render/convert.dart' show clip;
+import '../render/physics.dart' show springOf;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart';
 import '../runtime/expressions/engine.dart' show Expressions;
@@ -17,6 +21,10 @@ import 'collections_layout.dart';
 import 'collections_list_runtime.dart';
 
 final Object _pageReportZone = Object();
+
+/// The perspective entry a page view's camera of `perspective` 1 has: a
+/// motion's own (motionMatrix).
+const double pageCameraDepth = 0.0012;
 
 class RuntimePageView extends StatefulWidget {
   const RuntimePageView({
@@ -249,6 +257,36 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         id: widget.itemId,
         instance: instance,
       );
+      return _camera(_posed(child, index, vertical), index, vertical);
+  }
+
+  /// [page] seen through the view's camera (`perspective`): a perspective
+  /// about the view's middle, so every page's 3D turn (its motion's rotateX
+  /// or rotateY) is seen from one point. No camera: [page] as it is.
+  Widget _camera(Widget page, int index, bool vertical) {
+    final perspective = _node.prop(api.PageViewProps.perspective);
+    if (perspective <= 0) return page;
+    return AnimatedBuilder(
+      animation: _controller,
+      child: page,
+      builder: (context, child) => LayoutBuilder(
+        builder: (context, constraints) {
+          final size = constraints.biggest;
+          final d = index - _page;
+          // The view's middle, from the page's top left: the page sits d
+          // pages from it along the axis.
+          final o = Offset(size.width / 2 - (vertical ? 0 : d * size.width), size.height / 2 - (vertical ? d * size.height : 0));
+          final transform = Matrix4.translationValues(o.dx, o.dy, 0)
+            ..multiply(Matrix4.identity()..setEntry(3, 2, pageCameraDepth * perspective))
+            ..translateByDouble(-o.dx, -o.dy, 0, 1);
+          return Transform(transform: transform, child: child);
+        },
+      ),
+    );
+  }
+
+  /// A page posed by the view's page motion.
+  Widget _posed(Widget child, int index, bool vertical) {
       final motion = _node.prop(api.PageViewProps.pageMotion);
       if (motion == null) return child;
       return AnimatedBuilder(
@@ -299,15 +337,30 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         PointerDeviceKind.mouse,
       },
     );
+    // A fling that carries over many pages (snapPhysics), resting on the
+    // page nearest where it would stop, in place of one page a fling.
+    final snap = _node.prop(api.PageViewProps.pageSnapping) ? _node.prop(api.CollectionScrollProps.snapPhysics) : null;
+    // The page extent the controller places pages by.
+    final physics = snap == null
+        ? scrollPhysicsOf(_node)
+        : FlingSnapPhysics(
+            physics: snap,
+            nearest: (pixels, p) {
+              final extent = p.viewportDimension * _controller.viewportFraction;
+              return extent <= 0 ? pixels : (pixels / extent).roundToDouble() * extent;
+            },
+            parent: scrollPhysicsOf(_node),
+          );
+    final pageSnapping = snap == null && _node.prop(api.PageViewProps.pageSnapping);
     if (_node.prop(api.PageViewProps.paintOrder) == api.PagePaintOrder.reverse) {
       return _ReversePager(
         controller: _controller,
         scrollBehavior: scrollBehavior,
         vertical: vertical,
         reverse: _node.prop(api.CollectionScrollProps.reverse),
-        physics: scrollPhysicsOf(_node),
+        physics: physics,
         padEnds: _node.prop(api.PageViewProps.padEnds),
-        pageSnapping: _node.prop(api.PageViewProps.pageSnapping),
+        pageSnapping: pageSnapping,
         allowImplicitScrolling: _node.prop(api.PageViewProps.allowImplicitScrolling),
         viewportFraction: _node.prop(api.PageViewProps.viewportFraction),
         clipBehavior: clip(_node.prop(api.CollectionScrollProps.clipBehavior)),
@@ -329,9 +382,9 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       ),
       scrollDirection: vertical ? Axis.vertical : Axis.horizontal,
       reverse: _node.prop(api.CollectionScrollProps.reverse),
-      physics: scrollPhysicsOf(_node),
+      physics: physics,
       padEnds: _node.prop(api.PageViewProps.padEnds),
-      pageSnapping: _node.prop(api.PageViewProps.pageSnapping),
+      pageSnapping: pageSnapping,
       allowImplicitScrolling: _node.prop(
         api.PageViewProps.allowImplicitScrolling,
       ),
@@ -529,4 +582,92 @@ class RenderReversePaintFillViewport extends RenderSliverFillViewport {
     }
     return false;
   }
+}
+
+// A snapping scroll's fling that carries (CollectionScrollProps.snapPhysics,
+// codelessly_api docs/design/26): the scroll coasts by the release's speed,
+// slowing by the GesturePhysics' friction, over as many items as it
+// carries, and comes to rest exactly on the item nearest where it would
+// stop; a slow release settles on the nearest item on the physics' spring.
+// With reduced motion it settles on the same item on the spring, with no
+// coast.
+
+/// Scroll physics of a scroll that snaps to items: a fling coasts by
+/// [physics] and rests on the stop [nearest] gives for where it would stop.
+class FlingSnapPhysics extends ScrollPhysics {
+  const FlingSnapPhysics({required this.physics, required this.nearest, super.parent});
+
+  /// The release's physics (friction, spring, the fling's speeds).
+  final api.GesturePhysics physics;
+
+  /// The stop (an item's offset) nearest [pixels] in [position].
+  final double Function(double pixels, ScrollMetrics position) nearest;
+
+  /// The stop the scroll comes to rest on, released at [velocity] from
+  /// [position]: the one nearest the fling's projected end.
+  double targetFor(ScrollMetrics position, double velocity) {
+    final projected = physics.projectFling(position.pixels, velocity);
+    return nearest(projected, position).clamp(position.minScrollExtent, position.maxScrollExtent).toDouble();
+  }
+
+  static bool get _reducedMotion => SchedulerBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+
+  @override
+  FlingSnapPhysics applyTo(ScrollPhysics? ancestor) =>
+      FlingSnapPhysics(physics: physics, nearest: nearest, parent: buildParent(ancestor));
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if (position.outOfRange ||
+        (velocity <= 0 && position.pixels <= position.minScrollExtent && velocity < 0) ||
+        (velocity >= 0 && position.pixels >= position.maxScrollExtent && velocity > 0)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final tolerance = toleranceFor(position);
+    final target = targetFor(position, velocity);
+    final distance = target - position.pixels;
+    if (distance.abs() < tolerance.distance && velocity.abs() < tolerance.velocity) return null;
+    final spring = springOf(physics);
+    // Reduced motion: no coast; the same item, on the spring from rest.
+    if (_reducedMotion) return ScrollSpringSimulation(spring, position.pixels, target, 0, tolerance: tolerance);
+    final v = velocity.clamp(-physics.maxFlingVelocity, physics.maxFlingVelocity).toDouble();
+    if (!physics.fling || v.abs() < physics.minFlingVelocity || distance.abs() < tolerance.distance || distance.sign != v.sign) {
+      return ScrollSpringSimulation(spring, position.pixels, target, v, tolerance: tolerance);
+    }
+    // A friction coast whose end is the item: the drag that stops a fling
+    // of speed v after `distance` (FrictionSimulation ends at x0 - v / ln drag).
+    final drag = math.exp(-v / distance).clamp(1e-9, 0.9999).toDouble();
+    return _LandingSimulation(FrictionSimulation(drag, position.pixels, v), target, spring, tolerance);
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
+}
+
+/// A friction coast aimed at [target], handed to a spring for its last
+/// stretch once it is slower than [_handOff] pixels a second (a coast
+/// reaches its end only in the limit): it ends exactly on [target].
+class _LandingSimulation extends Simulation {
+  _LandingSimulation(this.coast, this.target, SpringDescription spring, Tolerance tolerance) : super(tolerance: tolerance) {
+    final v0 = coast.dx(0).abs();
+    final k = coast.dx(1).abs() / math.max(v0, 1e-9);
+    _at = v0 <= _handOff || k <= 0 || k >= 1 ? 0 : math.log(_handOff / v0) / math.log(k);
+    _settle = ScrollSpringSimulation(spring, coast.x(_at), target, coast.dx(_at), tolerance: tolerance);
+  }
+
+  static const double _handOff = 60;
+
+  final FrictionSimulation coast;
+  final double target;
+  late final double _at;
+  late final ScrollSpringSimulation _settle;
+
+  @override
+  double x(double time) => time < _at ? coast.x(time) : (_settle.isDone(time - _at) ? target : _settle.x(time - _at));
+
+  @override
+  double dx(double time) => time < _at ? coast.dx(time) : _settle.dx(time - _at);
+
+  @override
+  bool isDone(double time) => time >= _at && _settle.isDone(time - _at);
 }

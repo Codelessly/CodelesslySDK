@@ -855,9 +855,14 @@ class RenderTree {
     if (r != null && n.media.isNotEmpty) n = n.atScreen(r.width, r.height, r.breakpoints);
     if (_states.isEmpty) return n;
     var out = n;
+    // A code field draws its own focused look on the slot typed into next
+    // (RenderTextField.otpSlots): its own focused patch is not the whole
+    // field's.
+    final ownFocusDrawn = n.type == 'textField' && n.prop(api.TextFieldProps.otpLength) > 0;
     for (final e in _states.entries) {
       if (e.key.$2 != instance) continue;
-      final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, e.value, props: n.spec?.props);
+      final active = ownFocusDrawn && e.key.$1 == id ? ({...e.value}..remove(api.WidgetState.focused)) : e.value;
+      final patch = source.node(e.key.$1)?.behaviors.states.patchFor(id, active, props: n.spec?.props);
       if (patch != null) out = withoutBindsUnder(out.patched(patch), patch);
     }
     return out;

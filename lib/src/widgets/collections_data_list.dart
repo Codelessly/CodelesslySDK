@@ -25,6 +25,7 @@ import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, Spi
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/built_items.dart';
+import 'collections_page_runtime.dart' show FlingSnapPhysics;
 import '../runtime/lists/pagination.dart';
 import 'collections_data_list_model.dart';
 import 'collections_list_runtime.dart';
@@ -419,6 +420,16 @@ class DataListViewState extends State<DataListView> implements LazyItems {
   ScrollPhysics? _withSnapping(ScrollPhysics? physics) {
     if (!_node.prop(CollectionScrollProps.itemSnapping)) return physics;
     _refreshSnapStartsSoon();
+    final snap = _node.prop(CollectionScrollProps.snapPhysics);
+    if (snap != null) {
+      // A fling that carries over many items, resting on the start nearest
+      // where it would stop.
+      return FlingSnapPhysics(
+        physics: snap,
+        nearest: (pixels, _) => _snapStarts.isEmpty ? pixels : _snapStarts.reduce((a, b) => (a - pixels).abs() <= (b - pixels).abs() ? a : b),
+        parent: physics,
+      );
+    }
     return ItemSnapPhysics(starts: () => _snapStarts, parent: physics);
   }
 
