@@ -1416,6 +1416,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // A border drawn over the content (an inside stroke of a node that holds
     // some: _shell's strokesOver) is that layer's, not the decoration's: it
     // takes the new color there, or the old one stayed drawn over the box.
+    // A node cut to a shape of its own draws its border along the shape
+    // (_clipLayers' border painter), not in the shell: that painter takes the
+    // new colors; a border that comes or goes there is laid out again.
+    if (nd.hasClipShape || od.hasClipShape) {
+      if (od.hasClipShape != nd.hasClipShape || od.visibleStrokes.isEmpty != nd.visibleStrokes.isEmpty) return false;
+      final border = _objects['clipBorder'];
+      if (nd.visibleStrokes.isNotEmpty) {
+        if (border is! RenderCustomPaint || !border.attached) return false;
+        border.foregroundPainter = ClipBorderPainter(nd);
+      }
+    }
     final over = _objects['overStroke'];
     final strokesOver = over is RenderNodePaint && over.attached;
     if (strokesOver) over.decoration = nd;
