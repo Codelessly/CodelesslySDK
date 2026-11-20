@@ -1,3 +1,11 @@
+## 40.1.0
+
+Needs codelessly_api 40.1.0.
+
+- **A `lineChart` whose rows have a name for their x** (`xField: "day"` over `{"day": "Mon", "count": 3}`) draws
+  them in the order written, a step apart, each labelled by it under the plot. Rows with no number for their x
+  were left out, so the chart drew nothing. Rows with numbers are placed by them, as before.
+
 ## 40.0.0
 
 Documents that drew wrongly or held the renderer draw now, and a render says what a picture cannot: a formula that
