@@ -152,6 +152,11 @@ class RenderToggle extends RenderControl implements LabeledControl {
       ToggleKind.radio => n.prop(RadioProps.label),
     };
     final style = TextStyle(fontFamily: tokens.fontFamily, fontSize: 13, height: 1.5, color: tokens.primaryText);
+    // A label longer than the room beside the mark wraps onto more lines,
+    // and the control grows with it, unless its height is written: it was
+    // cut to one line with an ellipsis (a consent line of 120 characters,
+    // NOCD parts 21 and 22). The mark and the whole control keep the tap.
+    _labelText.maxLines = design.height > 0 ? 1 : null;
     if (_labelText.update(label, style, align: TextAlign.start) || label != _label) {
       _label = label;
       _labelText.layout(double.infinity);
@@ -331,6 +336,9 @@ class RenderToggle extends RenderControl implements LabeledControl {
   /// The gap between the mark and its label (SSUI's 8).
   static const double labelGap = 8;
 
+  /// One line of the label (13 px at 1.5).
+  static const double _labelLine = 13 * 1.5;
+
   /// The mark's size when it hugs: its design size, else SSUI's. With a
   /// label the mark is always SSUI's and the design size is the whole
   /// control's.
@@ -352,37 +360,62 @@ class RenderToggle extends RenderControl implements LabeledControl {
   }
 
   @override
-  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => !_hasLabel || !hasSize
-      ? const []
-      : [(text: _label, fontFamily: _labelText.fontFamily, glyphs: _labelText.glyphBoxes(_markNatural.width + labelGap, size.height / 2))];
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels {
+    if (!_hasLabel || !hasSize) return const [];
+    _labelAtSize();
+    return [(text: _label, fontFamily: _labelText.fontFamily, glyphs: _labelText.glyphBoxes(_markNatural.width + labelGap, size.height / 2))];
+  }
+
+  /// The label laid out at the control's own width, if a measure since its
+  /// layout left it at another.
+  void _labelAtSize() {
+    if (hasSize && _labelFor != size.width) _layLabel(size.width);
+  }
 
   @override
   double computeMinIntrinsicWidth(double height) => _natural.width;
   @override
   double computeMaxIntrinsicWidth(double height) => _natural.width;
   @override
-  double computeMinIntrinsicHeight(double width) => _natural.height;
+  double computeMinIntrinsicHeight(double width) => _naturalAt(width).height;
   @override
-  double computeMaxIntrinsicHeight(double width) => _natural.height;
+  double computeMaxIntrinsicHeight(double width) => _naturalAt(width).height;
 
   @override
-  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.constrain(_natural);
+  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.constrain(_naturalAt(constraints.maxWidth));
+
+  /// [_natural] with the label laid out in [width] (its lines, where it wraps).
+  Size _naturalAt(double width) {
+    _layLabel(width);
+    return _natural;
+  }
+
+  /// The width the label was last laid out for: what paints it lays it out
+  /// again at the control's own width when a measure left it at another.
+  double? _labelFor;
+
+  void _layLabel(double width) {
+    _labelFor = width;
+    if (!_hasLabel) return;
+    final room = width - _markNatural.width - labelGap;
+    _labelText.layout(room.isFinite ? math.max(0, room) : double.infinity);
+  }
 
   @override
   void performLayout() {
-    if (_hasLabel) {
-      final room = constraints.maxWidth - _markNatural.width - labelGap;
-      _labelText.layout(room.isFinite ? math.max(0, room) : double.infinity);
-    }
+    _layLabel(constraints.maxWidth);
     size = constraints.constrain(_natural);
   }
 
   /// Where the mark is: a checkbox's box, a radio's ring, a switch's track.
   Rect get markRect {
+    _labelAtSize();
     if (_hasLabel) {
       // Beside its label: SSUI's mark at the start, centered on the line.
       final m = _markNatural;
-      return Rect.fromLTWH(0, (size.height - m.height) / 2, m.width, m.height);
+      // A label on more than one line: the mark by its first line.
+      final line = _labelText.size.height > _labelLine + 1 ? math.max(m.height, _labelLine) : size.height;
+      return Rect.fromLTWH(0, (line - m.height) / 2, m.width, m.height);
     }
     final box = Offset.zero & size;
     final n = node;
@@ -502,6 +535,7 @@ class RenderToggle extends RenderControl implements LabeledControl {
       case ToggleKind.switchToggle:
         _paintSwitch(canvas);
     }
+    _labelAtSize();
     if (_hasLabel) _labelText.paint(canvas, _markNatural.width + labelGap, size.height / 2);
     canvas.restore();
   }

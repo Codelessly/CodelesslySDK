@@ -109,8 +109,17 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       await run.host.ui.navigate(action, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
       if (a.anchor == ModalAnchor.node) RevealAnchor.named = await _namedAnchor(a, run);
-      final result = await _openModal(a, run);
+      final opener = ModalOpener();
+      modalOpeners.add(opener);
+      final Object? result;
+      try {
+        result = await _openModal(a, run);
+      } finally {
+        modalOpeners.remove(opener);
+      }
       if (result != null) run.result = result;
+      // What the modal's chain did after its close (runner.dart).
+      if (opener.rest.isNotEmpty) await runActions(opener.rest, run);
     case CloseModalAction():
       run.host.ui.closeModal(a.result == null ? null : run.evaluateJson(a.result));
     case RetryFailedAction():

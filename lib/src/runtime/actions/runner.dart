@@ -496,10 +496,30 @@ Future<void> runActions(List<ActionDef> actions, ActionRun run) async {
         if (e is! ActionsCanceled) run.host.reportError(e, s, action: a.type);
       }));
     } else {
+      // What follows a close in a modal's chain (`close; skipping=true;
+      // delay ms=750; skipping=false; go next`) is the screen's under it:
+      // the modal's scope went with the modal, so the rest stopped there
+      // (NOCD parts 19, 21: "The script scope was disposed", the route
+      // never changed). It is handed to the chain that opened the modal,
+      // which runs it, in its own scope, once the modal has closed.
+      if (a is CloseModalAction && i + 1 < actions.length && modalOpeners.isNotEmpty) {
+        modalOpeners.last.rest.addAll(actions.sublist(i + 1));
+        await perform();
+        return;
+      }
       await perform();
     }
   }
 }
+
+/// A chain waiting on a modal it opened: the actions that followed a close
+/// in the modal's own chain, which it runs once the modal has closed.
+class ModalOpener {
+  final List<ActionDef> rest = [];
+}
+
+/// The chains waiting on a modal they opened, the innermost last.
+final List<ModalOpener> modalOpeners = [];
 
 Future<void> _perform(ActionDef a, ActionRun run) async {
   final handler = run._registry.handler(a.type);

@@ -11,27 +11,106 @@ import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show Formul
 /// rewrites some names, `col.id` to `item.id`, so a shorter start is tried
 /// too), else the node. A line in [said] (`path:line`, already given an
 /// issue, as its brackets) is not said again.
-List<String> formulaNotes(api.Json doc, Map<String, String> texts, {Set<String> said = const {}}) {
+List<String> formulaNotes(api.Json doc, Map<String, String> texts, {Set<String> said = const {}, Map<String, api.Json> site = const {}}) {
   final out = <String>[];
   for (final f in unreadableFormulas(doc)) {
-    String? where;
-    for (final n in [40, 24, 12]) {
-      final probe = f.expression.length <= n ? f.expression : f.expression.substring(0, n);
-      for (final t in texts.entries) {
-        final at = t.value.indexOf(probe);
-        if (at < 0) continue;
-        final before = t.value.substring(0, at);
-        final line = '\n'.allMatches(before).length + 1;
-        where = '${t.key}:$line:${at - before.lastIndexOf('\n')}';
-        break;
-      }
-      if (where != null) break;
-    }
+    final where = _whereWritten(f.expression, texts);
     if (where != null && said.contains(where.substring(0, where.lastIndexOf(':')))) continue;
     out.add('${where ?? 'node ${f.node}'}: the formula does not parse, so ${f.node.startsWith('variable ') ? f.node : 'node ${f.node} (${f.field})'} gets nothing from it: '
         '${f.why}. The expression: ${f.expression}');
   }
+  // A call to a function the formulas do not have (`str(badge)`,
+  // `substr(name,0,5)`, `has(reply,'id')`): the formula parses, and gives
+  // nothing when it runs. Only the render said so (NOCD parts 01, 03, 11).
+  for (final f in unknownFunctionCalls(doc, site: site)) {
+    final where = _whereWritten(f.expression, texts);
+    if (where != null && said.contains(where.substring(0, where.lastIndexOf(':')))) continue;
+    final near = nearestFunctions(f.name);
+    out.add('${where ?? 'node ${f.node}'}: the formula calls ${f.name}(…), a function the formulas do not have, so ${f.node.startsWith('variable ') ? f.node : 'node ${f.node} (${f.field})'} gets nothing from it'
+        '${near.isEmpty ? '' : '. Did you mean ${near.join(', ')}?'} The expression: ${f.expression}');
+  }
   return out;
+}
+
+/// Where [expression] was written: the first of [texts] (a path and its
+/// text) that holds its start, at its line and column (the expansion
+/// rewrites some names, `col.id` to `item.id`, so a shorter start is tried
+/// too); null when none does.
+String? _whereWritten(String expression, Map<String, String> texts) {
+  for (final n in [40, 24, 12]) {
+    final probe = expression.length <= n ? expression : expression.substring(0, n);
+    for (final t in texts.entries) {
+      final at = t.value.indexOf(probe);
+      if (at < 0) continue;
+      final before = t.value.substring(0, at);
+      final line = '\n'.allMatches(before).length + 1;
+      return '${t.key}:$line:${at - before.lastIndexOf('\n')}';
+    }
+  }
+  return null;
+}
+
+/// The calls in [doc]'s formulas to a name that is neither one of the
+/// engine's functions nor a variable of the document or of [site] (a page's
+/// own function, `state digits(v)=…`, is a variable), each formula once.
+List<({String node, String field, String expression, String name})> unknownFunctionCalls(api.Json doc, {Map<String, api.Json> site = const {}}) {
+  final known = <String>{...site.keys};
+  final variables = doc['variables'];
+  for (final scope in variables is Map ? variables.values : const []) {
+    for (final v in scope is List ? scope : const []) {
+      if (v is Map && v['name'] is String) known.add(v['name'] as String);
+    }
+  }
+  final out = <({String node, String field, String expression, String name})>[];
+  final seen = <String>{};
+  for (final f in formulasOf(doc)) {
+    final e = f.expression.trim();
+    if (e.isEmpty || !FormulaEvaluator.parses(e)) continue;
+    for (final name in FormulaEvaluator.userFunctionCalls(e)) {
+      if (known.contains(name) || name.contains('.') || !seen.add('$name|$e')) continue;
+      out.add((node: f.node, field: f.field, expression: e.length > 300 ? '${e.substring(0, 297)}...' : e, name: name));
+    }
+  }
+  return out;
+}
+
+/// Up to three of the engine's functions nearest [name]: those whose name
+/// holds it or is held by it, then the fewest edits away (at most a third
+/// of its length, and 3).
+List<String> nearestFunctions(String name) {
+  final lower = name.toLowerCase();
+  int edits(String a, String b) {
+    var prev = List<int>.generate(b.length + 1, (i) => i);
+    for (var i = 1; i <= a.length; i++) {
+      final cur = <int>[i];
+      for (var j = 1; j <= b.length; j++) {
+        cur.add([prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] == b[j - 1] ? 0 : 1)].reduce((x, y) => x < y ? x : y));
+      }
+      prev = cur;
+    }
+    return prev[b.length];
+  }
+
+  // Other languages' names for what the formulas call otherwise.
+  const other = {
+    'str': 'text', 'tostring': 'text', 'totext': 'text', 'string': 'text', 'substr': 'substring', 'len': 'length',
+    'has': 'contains', 'haskey': 'contains', 'int': 'number', 'parseint': 'number', 'parsefloat': 'number', 'tonumber': 'number',
+  };
+  final scored = <(int, String)>[
+    if (other[lower] case final String o when FormulaEvaluator.functions.contains(o)) (-1, o),
+  ];
+  for (final f in FormulaEvaluator.functions) {
+    if (scored.any((s) => s.$2 == f)) continue;
+    final l = f.toLowerCase();
+    if (lower.length >= 3 && (l.contains(lower) || lower.contains(l) && l.length >= 3)) {
+      scored.add((0, f));
+      continue;
+    }
+    final d = edits(lower, l);
+    if (d <= 3 && d <= (lower.length / 3).ceil()) scored.add((d, f));
+  }
+  scored.sort((a, b) => a.$1 != b.$1 ? a.$1.compareTo(b.$1) : a.$2.length.compareTo(b.$2.length));
+  return [for (final s in scored.take(3)) s.$2];
 }
 
 /// The formulas of [doc] the engine cannot parse: each `${…}` (or

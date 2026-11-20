@@ -216,7 +216,7 @@ Future<void> main(List<String> args) async {
   final text = File(file).readAsStringSync();
   // A formula the engine cannot parse gives nothing: said where it was
   // written (formula_check.dart), unless an issue of its line said it.
-  more.addAll(formulaNotes(document, {file: text, for (final e in site?.definitionFiles.entries ?? const <MapEntry<String, String>>[]) e.key: e.value},
+  more.addAll(formulaNotes(document, {file: text, for (final e in site?.definitionFiles.entries ?? const <MapEntry<String, String>>[]) e.key: e.value}, site: site?.variables ?? const {},
       said: {for (final i in result.issues) '$file:${i.line}'}));
   // A variable null with no type (text) read by a field: it reads nothing.
   more.addAll(nullTextVariableNotes(document, site: site?.variables ?? const {}));
@@ -308,7 +308,7 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
     // written (formula_check.dart), unless an issue of its line said it.
     more = [
       ...more,
-      ...formulaNotes(document, {rel(source): text, for (final e in site.definitionFiles.entries) rel(e.key): e.value},
+      ...formulaNotes(document, {rel(source): text, for (final e in site.definitionFiles.entries) rel(e.key): e.value}, site: site.variables,
           said: {for (final i in r.issues) '${rel(source)}:${i.line}'}),
       // A variable null with no type (text) read by a field: it reads nothing.
       ...nullTextVariableNotes(document, site: site.variables),
