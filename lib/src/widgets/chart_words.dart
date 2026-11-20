@@ -2,6 +2,12 @@
 // and `plotChart` are each written out as a graph (its spec and rows) and
 // drawn by it. Nothing here draws: a chart's look is the graph's, and what
 // a chart type says that the graph has no word for is not drawn.
+//
+// A node that leaves a key out draws as its type always has: nothing of a
+// chart's look is chosen here. What a chart asks for by a key of its own
+// (a legend, a rounded scale, dots, a fading area, the total in a donut's
+// hole, a tooltip) is said in the graph's words; the words of the notation
+// that write those keys are codelessly_api's.
 import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
@@ -18,8 +24,30 @@ String? _hexOr(api.Color? c) => c == null ? null : _hex(c);
 const _still = {'dragPan': false, 'wheelZoom': false, 'pinchZoom': false, 'axisScale': false, 'doubleTapReset': false};
 const _noCrosshair = {'enabled': false};
 
+/// A line up the plot through the row under the pointer, and nothing else
+/// of a crosshair: what a line chart shows while it is read.
+const _rowLine = {
+  'enabled': true,
+  'on': 'hover',
+  'horizontal': false,
+  'line': 'solid',
+  'timeLabel': 'none',
+  'priceTag': false,
+};
+
+/// Room above a rounded scale's top line, so the line and its figure are
+/// whole.
+const _headroom = 6.0;
+
+/// A chart's legend: none unless it asks; then under a plot when there are
+/// two or more named series, and for slices ([polar]) always, beside the
+/// ring or under it.
+Json _legend(bool show, {bool polar = false}) => {'show': !show ? 'none' : (polar ? 'always' : 'auto')};
+
 Json _style({api.Color? grid, api.Color? text, double? fontSize, String? fontFamily, double topInset = 0}) => {
       'grid': ?_hexOr(grid),
+      // The line through the row under the pointer is as quiet as the grid.
+      'crosshair': ?_hexOr(grid),
       'text': ?_hexOr(text),
       'fontSize': ?fontSize,
       'fontFamily': ?fontFamily,
@@ -49,6 +77,9 @@ ChartGraph barChartGraph(Node n) {
   final most = values.whereType<double>().fold(0.0, math.max);
   final top = max > 0 ? max : (most > 0 ? most : 1.0);
   final lines = p(BarChartProps.gridLines);
+  // Round lines over its largest value, each labeled with its own, where
+  // the chart asks for them and gives neither a top nor labels.
+  final round = p(BarChartProps.gridValues) && max <= 0 && gridLabels.isEmpty && lines > 0;
   return (
     data: [
       for (var i = 0; i < values.length; i++) {'i': i, 'label': i < labels.length ? labels[i] : '', 'value': values[i]},
@@ -72,18 +103,24 @@ ChartGraph barChartGraph(Node n) {
       'panes': [
         {
           'y': {
-            'domain': 'fixed',
-            'min': 0,
-            'max': top + p(BarChartProps.barHeadroom) * 0,
+            if (round) ...{
+              'domain': 'data',
+              'include': [0],
+              'nice': true,
+            } else ...{
+              'domain': 'fixed',
+              'min': 0,
+              'max': top + p(BarChartProps.barHeadroom) * 0,
+            },
             'side': p(BarChartProps.gridLabelsLeft) ? 'left' : 'right',
-            'width': gridLabels.isEmpty ? 0 : p(BarChartProps.gridLabelWidth),
-            'labels': gridLabels.isNotEmpty,
+            'width': gridLabels.isEmpty && !round ? 0 : p(BarChartProps.gridLabelWidth),
+            'labels': gridLabels.isNotEmpty || round,
             'decimals': p(BarChartProps.valueDecimals) ?? 0,
             'suffix': p(BarChartProps.valueSuffix),
             // The lines the chart asks for, evenly from zero to the top,
             // with the labels it gives them.
             'ticks': lines,
-            if (lines > 0)
+            if (lines > 0 && !round)
               'tickValues': [
                 for (var k = 0; k <= lines; k++)
                   {'value': top * k / lines, if (k < gridLabels.length) 'label': gridLabels[k]},
@@ -93,7 +130,6 @@ ChartGraph barChartGraph(Node n) {
             {
               'type': 'bar',
               'y': 'value',
-              'name': 'Value',
               'color': ?_hexOr(color),
               if (colors.isNotEmpty) 'colors': [for (final c in colors) _hex(c)],
               'radius': p(BarChartProps.barRadius),
@@ -102,14 +138,22 @@ ChartGraph barChartGraph(Node n) {
           ],
         },
       ],
-      'selection': {'on': 'none', 'dim': p(BarChartProps.dimmedOpacity), 'tooltip': false},
+      // Drawn, not offered, unless the chart asks for its tooltip: then the
+      // bar under the pointer (or a finger) says its value.
+      'selection': p(BarChartProps.tooltip)
+          ? {'on': 'hover', 'dim': p(BarChartProps.dimmedOpacity)}
+          : {'on': 'none', 'dim': p(BarChartProps.dimmedOpacity), 'tooltip': false},
       'crosshair': _noCrosshair,
       'interactions': _still,
+      'legend': _legend(false),
       'style': _style(
         grid: p(BarChartProps.gridColor),
         text: p(BarChartProps.labelColor),
         fontSize: fontSize,
-        fontFamily: p(BarChartProps.labelFontFamily),
+        // An empty family is none of the chart's own.
+        fontFamily: p(BarChartProps.labelFontFamily).isEmpty ? null : p(BarChartProps.labelFontFamily),
+        // Room over a rounded scale's top line, as a series chart has.
+        topInset: round ? _headroom : 0,
       ),
     },
   );
@@ -157,30 +201,37 @@ ChartGraph seriesChartGraph(Node n) {
         'panes': [
           {
             'coord': 'polar',
-            'y': {'width': 0, 'decimals': 0},
+            'y': {'width': 0, 'decimals': 0, 'prefix': p(ChartProps.yLabelPrefix), 'suffix': p(ChartProps.yLabelSuffix)},
             'marks': [
               {
                 'type': 'arc',
                 'y': first?.field ?? 'value',
-                'name': first == null || first.name.isEmpty ? 'Value' : first.name,
-                if (first != null) 'color': _hex(first.color),
+                'name': ?(first == null || first.name.isEmpty ? null : first.name),
+                // A series that says no color: each slice the palette's next.
+                if (first != null && (first.toJson() as Map).containsKey('color')) 'color': _hex(first.color),
                 if (first?.colorField case final field?) 'colorField': field,
                 // The ring is this share of the diameter thick.
                 'inner': (1 - 2 * p(ChartProps.donutThickness)).clamp(0.0, 0.96),
                 'gap': p(ChartProps.sliceGap),
                 'startAngle': p(ChartProps.startAngle),
+                // The whole in the hole, when the chart says what it is.
+                if (p(ChartProps.centerLabel) case final label?) ...{'center': 'total', 'centerLabel': label},
               },
             ],
           },
         ],
         'selection': {...selection, 'by': 'mark', 'grow': 4},
         'crosshair': _noCrosshair,
+        // Its slices' labels with their shares, beside it where its box has
+        // the room.
+        'legend': _legend(p(ChartProps.legend), polar: true),
         'style': style,
       },
     );
   }
 
   final line = type == ChartType.line;
+  final inset = p(ChartProps.plotInset) ?? 0;
   final minY = p(ChartProps.minY), maxY = p(ChartProps.maxY);
   final band = p(ChartProps.selectionColor);
   return (
@@ -199,6 +250,10 @@ ChartGraph seriesChartGraph(Node n) {
         'tickEvery': math.max(1, p(ChartProps.xLabelEvery)),
         'labels': p(ChartProps.showXAxis),
         'axisHeight': p(ChartProps.showXAxis) ? p(ChartProps.xAxisHeight) : 0,
+        // The widest a bar is drawn, where the chart says one.
+        if (!line) 'maxBarWidth': ?p(ChartProps.maxBarWidth),
+        // A line's ends and their dots stand whole inside the plot.
+        if (line && inset > 0) 'inset': inset,
       },
       'panes': [
         {
@@ -217,6 +272,8 @@ ChartGraph seriesChartGraph(Node n) {
             } else ...{
               'domain': 'data',
               'margins': [0.05, 0],
+              // Out to the grid's lines: the plot starts and ends on one.
+              'nice': p(ChartProps.roundScale) && p(ChartProps.gridLines) > 0,
               // From zero, unless the chart fits its least value.
               'include': [
                 ?minY,
@@ -230,7 +287,16 @@ ChartGraph seriesChartGraph(Node n) {
             // Areas under lines under bars' tops: fills first.
             for (final s in series)
               if (s.kind == ChartSeriesKind.area)
-                {'type': 'area', 'y': s.field, 'name': s.name, 'color': _hex(s.color), 'fillOpacity': s.fillOpacity, 'curved': s.curved},
+                {
+                  'type': 'area',
+                  'y': s.field,
+                  'name': s.name,
+                  'color': _hex(s.color),
+                  // Strongest under the line, gone at the foot of the plot.
+                  'fillOpacity': s.fillOpacity,
+                  'fade': s.fade,
+                  'curved': s.curved,
+                },
             for (final s in series)
               if (!line && s.kind == ChartSeriesKind.bar)
                 {
@@ -252,6 +318,8 @@ ChartGraph seriesChartGraph(Node n) {
                   'width': s.strokeWidth,
                   'curved': s.curved,
                   if (s.endDot) 'endDot': s.strokeWidth + 1.5,
+                  // Few enough points to tell apart: a dot on each.
+                  if (rows.length <= p(ChartProps.dots) && !s.endDot) 'dots': s.strokeWidth + 1,
                 },
           ],
           'guides': [
@@ -269,9 +337,10 @@ ChartGraph seriesChartGraph(Node n) {
         },
       ],
       'selection': {...selection, if (!line && band != null) 'band': _hex(band)},
-      'crosshair': _noCrosshair,
+      'crosshair': line && hover && p(ChartProps.cursorLine) ? _rowLine : _noCrosshair,
       'interactions': _still,
-      'style': style,
+      'legend': _legend(p(ChartProps.legend)),
+      'style': {...style, if (inset > 0) 'topInset': inset},
     },
   );
 }
@@ -307,6 +376,11 @@ ChartGraph lineChartGraph(Node n) {
   final at = selectedX == null ? -1 : rows.indexWhere((r) => r[xField] == selectedX);
   final yTicks = p(LineChartProps.yTicks), xTicks = p(LineChartProps.xTicks);
   final zero = p(LineChartProps.zeroLineColor);
+  // Where the chart asks for them and gives no ticks of its own: round
+  // ones with their numbers, in the room it keeps left of the plot.
+  final ownTicks = p(LineChartProps.gridValues) && yTicks.isEmpty && pad.left >= 24;
+  final whole = rows.every((r) => r[yField] is! num || r[yField] == (r[yField]! as num).roundToDouble());
+  final scrub = p(LineChartProps.scrubEnabled);
   return (
     data: rows,
     selected: at < 0 ? null : {'index': at},
@@ -336,8 +410,8 @@ ChartGraph lineChartGraph(Node n) {
           'y': {
             'side': 'left',
             'width': pad.left,
-            'labels': yTicks.isNotEmpty,
-            'decimals': p(LineChartProps.tooltipYDecimals),
+            'labels': yTicks.isNotEmpty || ownTicks,
+            'decimals': ownTicks && whole && !n.props.has(LineChartProps.tooltipYDecimals) ? 0 : p(LineChartProps.tooltipYDecimals),
             'suffix': p(LineChartProps.tooltipYSuffix),
             if (yMin != null && yMax != null) ...{
               'domain': 'fixed',
@@ -346,12 +420,13 @@ ChartGraph lineChartGraph(Node n) {
             } else ...{
               'domain': 'data',
               'include': [?yMin, ?yMax],
+              'nice': ownTicks,
             },
             'tickValues': [
               for (final t in yTicks)
                 if (_num(t['y']) case final y?) {'value': y, 'label': '${t['label'] ?? ''}'},
             ],
-            if (yTicks.isEmpty) 'ticks': 0,
+            if (yTicks.isEmpty) 'ticks': ownTicks ? 4 : 0,
           },
           'marks': [
             if (top != null && top.alpha > 0)
@@ -366,7 +441,6 @@ ChartGraph lineChartGraph(Node n) {
             {
               'type': 'line',
               'y': yField,
-              'name': yField,
               'color': ?_hexOr(line),
               'width': p(LineChartProps.lineWidth),
               'curved': p(LineChartProps.smooth),
@@ -411,12 +485,14 @@ ChartGraph lineChartGraph(Node n) {
         },
       ],
       'selection': {
-        'on': p(LineChartProps.scrubEnabled) ? 'hover' : 'none',
+        'on': scrub ? 'hover' : 'none',
         'dim': 1,
+        'tooltip': p(LineChartProps.tooltip),
         'tooltipFill': ?_hexOr(p(LineChartProps.tooltipBackground)),
       },
-      'crosshair': _noCrosshair,
+      'crosshair': scrub && p(LineChartProps.cursorLine) ? _rowLine : _noCrosshair,
       'interactions': _still,
+      'legend': _legend(false),
       'style': _style(
         grid: p(LineChartProps.gridColor),
         text: label.color,

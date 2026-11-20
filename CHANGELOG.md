@@ -1,3 +1,65 @@
+## 40.2.0
+
+Charts drawn right whatever they are written with: labels that never touch, a smooth line that keeps to its values,
+series told apart, a tooltip that reads on its page. A node that leaves a key out draws as it did; the look of the
+notation's chart words is keys they write (codelessly_api 40.2.0, which this needs).
+
+### Drawn right, for every graph and chart
+
+- **The labels under a plot never touch.** They are measured: where all do not fit, every second, third… from the
+  first is written, evenly apart; the step ends on the last label where a step near the smallest does, and where
+  none does the last is left out rather than set at an odd gap. Before, each label that ran into the one before it
+  was dropped, so the first of a line chart was missing and the gaps were uneven. A fitted view with no `tickEvery`
+  has its ticks on those rows.
+- **Long labels are cut before they are thinned away.** Where thinning alone would write fewer than half of them,
+  each (or every second) is cut with an ellipsis to the room between two, while that room holds about seven letters.
+- **A smooth line keeps to its values.** `curved` marks are drawn as a monotone curve: between two points the line
+  stays between them. The curve it replaces rose above peaks and dipped below troughs the data did not have.
+- **Series with no color are told apart.** A `chart`'s series that write none take the theme's series colors in
+  turn (`colors.chart1`, `chart2`… where the theme names them, else its primary followed by colors of other hues
+  as light and as strong as it; a theme with no primary starts from `#2563EB`); they were all one green. A donut's
+  rows that give no color, and a graph's marks that write none, take them the same way (an area and the line along
+  its top share one); a graph's were all `#2962FF`.
+- **A graph on a page takes the theme's colors where its style says nothing**: the grid, the labels, a crosshair's
+  tag and the tooltip. A `graph` node drew a fixed light style whatever the theme, so its grid was lost on a dark
+  page.
+- **A tooltip is a surface with a hairline round it and a soft shadow**, in the surface's ink; it was an inverted
+  box. It stays over the panes: beside the pointer on the side that has the room, never over a legend or out of the
+  graph. One mark with no `name` writes its value alone (it wrote the row field's name), and a graph too small to
+  hold a tooltip draws none.
+- **Bars side by side are each at most the widest a bar is drawn** (`maxBarWidth`); the group was that wide
+  together.
+- `tool/codelessly render` draws a `graph` node's labels, and a chart's whose family is written empty, in the
+  render's default family; a graph whose style named no family drew boxes for letters.
+
+### Keys, off unless written (codelessly_api 40.2.0)
+
+- **`chart`**: `legend`, `roundScale` (the scale rounded out to its grid lines, never leaving more than a third of
+  the plot empty over the highest value; its figures have the decimals of its step, a thousand and more a
+  separator, ten thousand and more written `20K`), `dots`, `cursorLine`, `plotInset`, `maxBarWidth`, a series'
+  `fade`, and for a donut `legend` (its labels and shares beside the ring where its box has the room, else under
+  it) and `centerLabel` (its total in its hole; the selected slice's value and label while one is selected).
+- **`lineChart`**: `gridValues` (round lines with their figures where `plotPadding` keeps 24 or more left of the
+  plot), `cursorLine`, `tooltip`. **`barChart`**: `gridValues`, `tooltip`.
+- **`graph`**: `legend`, `style.palette`, `style.ink`, `style.tooltip`, `tooltipText`, `tooltipBorder`, `x.inset`,
+  `y.nice`, a mark's `dots`, `center` and `centerLabel`. `GraphEngine.legend` is the legend as laid out,
+  `GraphEngine.xLabels` the labels that are written, `graphPalette` the colors a graph uses when neither its marks
+  nor its style say.
+
+### Layout, formulas and the render tool
+
+- **A negative `x` or `y` on a child of a Stack that hugs holds**: the child hangs out by that much.
+- **A fill child with no size of its own, under a Stack sized from its children, takes its content's size.** It was
+  0 wide.
+- **A flex child's `minWidth` is kept** when its Row squeezes.
+- **Setting a map or list variable to null gives null.** It gave `{}` or `[]`.
+- **`matches` and `regexReplace` read leading inline flags** (`(?i)`, `(?s)`, `(?m)`, `(?u)`); a pattern that
+  fails is reported.
+- **The expand says** a null variable with no type that a formula reads by a field, and notes a site expanded at
+  the default width of 1440.
+- **The render says** `zero_size` with why, `icon_smaller_than_size`, `control_heights_differ` (controls of
+  different heights in one Row), and why a text's box is 0 wide.
+
 ## 40.1.0
 
 Needs codelessly_api 40.1.0.

@@ -48,7 +48,7 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   LineChartProps.spec.type: _chartWord,
   GraphProps.spec.type: (b, n, chain) {
     chain.add(_indicatorFit(b, n));
-    addGraph(b, n, chain);
+    addGraph(b, n, chain, theme: _graphTheme(b));
   },
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(_themed(b, n))),
 };
@@ -56,7 +56,15 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
 /// A chart type, drawn as the graph it says, in the theme's colors.
 void _chartWord(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(_indicatorFit(b, n));
-  addChartGraph(b, _themed(b, n), chain);
+  addChartGraph(b, _themed(b, n), chain, theme: _graphTheme(b));
+}
+
+/// What a graph drawn at [b] takes from the theme where its style says
+/// nothing ([graphThemeStyle]).
+Map<String, Object?> _graphTheme(NodeBuilder b) {
+  b.tree.dependOnTheme(b);
+  final theme = b.tree.components?.theme ?? api.ThemeTokens.none;
+  return graphThemeStyle(theme, surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
 }
 
 /// The size a drawn indicator has along an axis it hugs: it has no content
@@ -85,7 +93,8 @@ RenderBox _indicatorFit(NodeBuilder b, Node n) {
 Node _themed(NodeBuilder b, Node n) {
   b.tree.dependOnTheme(b);
   final theme = b.tree.components?.theme ?? api.ThemeTokens.none;
-  return withThemeColors(withChartPalette(n, theme), surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
+  final roles = surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id));
+  return withThemeColors(withChartPalette(n, theme, roles), roles);
 }
 
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {
