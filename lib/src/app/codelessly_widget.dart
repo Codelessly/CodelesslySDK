@@ -24,6 +24,7 @@ import 'package:flutter/rendering.dart' show RendererBinding;
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
+import '../render/controls/focus.dart' show ControlFocusScope;
 import '../render/source.dart';
 import '../widgets/tree.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
@@ -781,14 +782,25 @@ class _LayoutViewState extends State<_LayoutView> {
   /// `screen`: the device's size, breakpoint, orientation and light or
   /// dark mode (the site's theme mode over the device's), kept as they
   /// change.
+  /// The keyboard's height at the last look ([_updateScreen]).
+  double _keyboard = 0;
+
+  /// Whether this page makes room for the software keyboard itself: a
+  /// full-screen page lays out above it ([build]), as Flutter's Scaffold
+  /// with `resizeToAvoidBottomInset` does. A dialog's or sheet's route moves
+  /// its screen itself.
+  bool get _makesRoomForKeyboard => (CanvasSizingScope.maybeOf(context) ?? widget.sizing) == CanvasSizing.fill;
+
   void _updateScreen() {
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
     final screen = {
       ...screenValues(mq.size.width, mq.size.height, dark: _dark, breakpoints: _breakpoints),
       // What the device covers: the safe area, the keyboard, and the text
-      // scale the layout's text is drawn at.
-      ...deviceEdgesOf(mq, maxTextScale: _codelessly.config.maxTextScaleFactor),
+      // scale the layout's text is drawn at. On a page that has made room
+      // for the keyboard, nothing of it still covers the page: it reads 0,
+      // as a Scaffold's body reads no view inset (never lifted twice).
+      ...deviceEdgesOf(mq, maxTextScale: _codelessly.config.maxTextScaleFactor, keyboardRoomMade: _makesRoomForKeyboard),
       // How the screen is shown: as a modal (dialog or sheet), and as a
       // bottom sheet, whose drag handle sits over its top edge.
       'modal': widget.sizing != CanvasSizing.fill,
@@ -805,6 +817,17 @@ class _LayoutViewState extends State<_LayoutView> {
           !BackdropScreenScope.of(context) &&
           CodelesslyBackdropHost.showsBackdrop(context),
     };
+    // The keyboard opening (or growing) keeps the focused control in view,
+    // as Flutter's EditableText does: a field shows its caret, once the
+    // page has laid out above the keyboard.
+    final keyboard = mq.viewInsets.bottom;
+    if (keyboard > _keyboard && _makesRoomForKeyboard) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final owner = ControlFocusScope.focusedScope?.focused?.owner;
+        if (mounted && owner != null && owner.attached) owner.showOnScreen(duration: const Duration(milliseconds: 150));
+      });
+    }
+    _keyboard = keyboard;
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
   }
 
@@ -1328,6 +1351,25 @@ class _LayoutViewState extends State<_LayoutView> {
       }
       return view;
     });
+    // A page lays out above the software keyboard (Flutter's Scaffold with
+    // `resizeToAvoidBottomInset`): its scroll views end at the keyboard's
+    // top, where a focused field is kept in view, and a column pinned to
+    // the page's foot rides above it. Room made, `screen.keyboard` reads 0
+    // here (nothing still covers the page) and `screen.insets.bottom` 0
+    // while it is open (the home indicator is under it), so a page that
+    // pads its foot by them and one that writes nothing end the same.
+    // (A dialog's or sheet's route moves it itself.) The same widgets
+    // whether it is open or not: the screen below keeps its state (the
+    // focused field keeps the focus as the keyboard opens).
+    final media = MediaQuery.maybeOf(context);
+    final keyboard = media != null && _makesRoomForKeyboard ? media.viewInsets.bottom : 0.0;
+    content = Padding(padding: EdgeInsets.only(bottom: keyboard), child: content);
+    if (media != null) {
+      content = MediaQuery(
+        data: keyboard > 0 ? media.removeViewInsets(removeBottom: true) : media,
+        child: content,
+      );
+    }
     // The look of the runtime's own toasts and dialogs: the project's
     // tokens, then what the layout's nodes show. Its actions show them from
     // inside it ([_ScreenUi]), where this theme and look apply.

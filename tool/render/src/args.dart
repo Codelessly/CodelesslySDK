@@ -238,7 +238,9 @@ Options:
                           screen.textScale, as in a host that lets layouts
                           follow it (the nodes' text keeps its written size).
   --keyboard <px>         A step: the soft keyboard opens, px tall (0 closes
-                          it), read as screen.keyboard; the home indicator's
+                          it). A full-screen page lays out above it and keeps
+                          the focused field in view (screen.keyboard reads
+                          what still covers it: 0 there); the home indicator's
                           inset goes under it. --focus composer --keyboard 336.
   --screen-timeout <seconds>   The most real time one screen at one size may
                           take (default 120): past it the screen is an error

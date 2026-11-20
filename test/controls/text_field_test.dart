@@ -612,6 +612,68 @@ void main() {
       expect(recorded.fired, isNot(contains('note submitted')));
     });
 
+    testWidgets('focusing a field taller than the view shows its caret and keeps its top in view; it is not scrolled whole',
+        (tester) async {
+      final (tree, _) = runningTree({
+        'schema': 3,
+        'roots': ['page'],
+        'nodes': {
+          'page': {
+            'type': 'column',
+            'layout': {'width': 390, 'height': 400},
+            'props': {'scrollable': true, 'crossAxisAlignment': 'start'},
+            'children': ['title', 'intro', 'script'],
+          },
+          'title': {'type': 'textField', 'layout': {'width': 390, 'height': 40}, 'props': {'hint': 'Title'}},
+          'intro': {'type': 'box', 'layout': {'width': 390, 'height': 260}},
+          'script': {
+            'type': 'textField',
+            'layout': {'width': 390, 'height': 800},
+            'props': {'maxLines': 0, 'textAlignVertical': 'top', 'hint': 'Write the script'},
+          },
+        },
+      });
+      addTearDown(tree.dispose);
+      await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'page', interactive: true)));
+      final f = _field(tree, 'script');
+      final top = f.localToGlobal(Offset.zero).dy;
+      expect(top, 300);
+      // Tab from the title, as the script page's draft did.
+      await _focus(tester, tree, 'title');
+      await _key(tester, LogicalKeyboardKey.tab);
+      expect(f.focusNode.hasFocus, isTrue);
+      await tester.pump(const Duration(milliseconds: 400));
+      final after = f.localToGlobal(Offset.zero).dy;
+      expect(after, inInclusiveRange(0, 400 - f.contentRect.top - f.contentLineHeight),
+          reason: 'the top and the caret\'s line in the 400 high view (it was scrolled to ${after.round()})');
+    });
+
+    testWidgets('maxLines 3 in a box taller than three lines shows three, no part of a fourth: fixed or a hugging minimum',
+        (tester) async {
+      const long = 'I practiced an exposure for five minutes today and it went better than the last time, '
+          'then I wrote it down here so that I would remember how it felt and what I would try next week.';
+      Map<String, Object?> props() => {
+            'minLines': 3,
+            'maxLines': 3,
+            'initialValue': long,
+            'textAlignVertical': 'top',
+            'style': {'fontSize': 14},
+            'decoration': {
+              'contentPadding': [16, 13, 16, 13],
+              'constraints': {'minHeight': 87, 'maxHeight': 87},
+            },
+          };
+      final (tree, _) = await _show(tester, {
+        'fixed': {'type': 'textField', 'layout': {'width': 360, 'height': 87}, 'props': props()},
+        'hugging': {'type': 'textField', 'layout': {'width': 360, 'height': {'hug': 87}}, 'props': props()},
+      });
+      for (final id in ['fixed', 'hugging']) {
+        final f = _field(tree, id);
+        expect(f.boxRect.height, 87, reason: id);
+        expect(f.contentRect.height, closeTo(3 * f.contentLineHeight, .01), reason: '$id: three lines, not the 61 the padding leaves');
+      }
+    });
+
     testWidgets('textInputAction next moves the focus to the next control', (tester) async {
       final (tree, _) = await _show(tester, {
         'first': hugging('textField', {'textInputAction': 'next'}),

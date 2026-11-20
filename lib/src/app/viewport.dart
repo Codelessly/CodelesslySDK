@@ -17,14 +17,23 @@ import '../runtime/expressions/scopes.dart' show deviceEdgeValues;
 /// The host supplies them as Flutter does: the platform's view metrics, or
 /// a `MediaQuery` the app puts above the layout (a `SafeArea` around it
 /// consumes the insets, so the layout reads none).
-Map<String, Object?> deviceEdgesOf(MediaQueryData mq, {double? maxTextScale}) {
+///
+/// The keyboard is what still covers the page, as a Scaffold's body reads
+/// it: where the SDK has made room for it ([keyboardRoomMade]: a full-screen
+/// page laid out above it) that is 0, else its height. The bottom inset is
+/// what the keyboard leaves of it (the home indicator is under an open
+/// keyboard: 0). So a bar padded by `screen.keyboard + screen.insets.bottom`
+/// and a bar that writes nothing both rest on the keyboard, never lifted
+/// twice.
+Map<String, Object?> deviceEdgesOf(MediaQueryData mq, {double? maxTextScale, bool keyboardRoomMade = false}) {
   final scaler = maxTextScale == null ? mq.textScaler : mq.textScaler.clamp(maxScaleFactor: maxTextScale);
+  final keyboard = mq.viewInsets.bottom;
   return deviceEdgeValues(
     top: mq.padding.top,
     right: mq.padding.right,
-    bottom: mq.padding.bottom,
+    bottom: math.max(0, mq.padding.bottom - keyboard),
     left: mq.padding.left,
-    keyboard: mq.viewInsets.bottom,
+    keyboard: keyboardRoomMade ? 0 : keyboard,
     // A factor (a nonlinear scaler, Android 14's, scales body text by this).
     textScale: (scaler.scale(100) / 100 * 100).roundToDouble() / 100,
   );

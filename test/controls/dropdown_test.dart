@@ -287,6 +287,35 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('screen readers on: opened, chosen, opened, dismissed and opened again, with no semantics assertion',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final (tree, _) = await _show(tester, {
+      's': _select(value: 'Apple'),
+      'b': hugging('filledButton', {'label': 'Below'}),
+    });
+    final d = _dropdown(tree, 's');
+    for (var round = 0; round < 3; round++) {
+      await tester.tapAt(centerOf(tree, 's'));
+      await tester.pump();
+      expect(d.isOpen, isTrue);
+      expect(d.menu.rows[2].debugSemantics, isNotNull, reason: 'the menu\'s rows are read each time it opens');
+      if (round.isEven) {
+        await tester.tapAt(_global(d.menu.rows[round + 1]).center);
+      } else {
+        await tester.tapAt(const Offset(390, 290));
+      }
+      await tester.pump();
+      expect(d.isOpen, isFalse);
+      expect(tester.takeException(), isNull);
+    }
+    await tester.tapAt(centerOf(tree, 's'));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(d.debugSemantics!.getSemanticsData().flagsCollection.isExpanded, Tristate.isTrue);
+    handle.dispose();
+  });
+
   testWidgets('the node\'s props: dropdownColor, borderRadius, item style, alignment, icon color, no underline', (tester) async {
     final (tree, _) = await _show(tester, {
       's': _select(value: 'Apple', props: {

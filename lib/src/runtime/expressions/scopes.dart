@@ -795,8 +795,10 @@ Map<String, Object?> screenValues(double width, double height,
 /// * `insets`: `{top, right, bottom, left}`, the safe area: a status bar, a
 ///   notch, a home indicator. As Flutter's `MediaQuery.padding`, a side the
 ///   keyboard covers has none (the home indicator is under it).
-/// * `keyboard`: how much of the screen's bottom the soft keyboard covers (0
-///   while it is closed), as `MediaQuery.viewInsets.bottom`.
+/// * `keyboard`: how much of the page the soft keyboard still covers (0 while
+///   it is closed): 0 on a full-screen page, which the SDK lays out above the
+///   keyboard (as a Scaffold's body reads no view inset), else
+///   `MediaQuery.viewInsets.bottom`.
 /// * `textScale`: the scale the screen's text is drawn at (1: as designed).
 ///
 /// A bar pinned to the bottom rides above the keyboard and clears the home

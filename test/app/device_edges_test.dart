@@ -67,10 +67,13 @@ void main() {
     expect(c.read('screen.insets.top'), 47.0);
     expect(c.read('screen.insets.bottom'), 34.0);
 
+    // A full-screen page lays out above the keyboard (the SDK makes room),
+    // so nothing of it still covers the page: 0, as a Scaffold's body reads
+    // no view inset. The home indicator is under it: no bottom inset.
     tester.view.viewInsets = const FakeViewPadding(bottom: 336);
     tester.view.padding = const FakeViewPadding(top: 47);
     await tester.pump();
-    expect(c.read('screen.keyboard'), 336.0);
+    expect(c.read('screen.keyboard'), 0.0);
     expect(c.read('screen.insets.bottom'), 0.0);
 
     tester.view.viewInsets = FakeViewPadding.zero;
@@ -83,7 +86,20 @@ void main() {
     final c = await _show(tester, _app(),
         media: (mq) => mq.copyWith(padding: const EdgeInsets.only(top: 20), viewInsets: const EdgeInsets.only(bottom: 250)));
     expect(c.read('screen.insets.top'), 20.0);
-    expect(c.read('screen.keyboard'), 250.0);
+    expect(c.read('screen.keyboard'), 0.0, reason: 'a full-screen page has made room for it');
+  });
+
+  test('the keyboard is what still covers the page: its height where no room was made, 0 where it was', () {
+    const mq = MediaQueryData(size: Size(390, 844), padding: EdgeInsets.only(top: 47, bottom: 34), viewInsets: EdgeInsets.only(bottom: 336));
+    final away = deviceEdgesOf(mq);
+    expect(away['keyboard'], 336.0, reason: 'a host that handles the inset itself, or a layout that is not full-screen');
+    expect((away['insets'] as Map)['bottom'], 0.0, reason: 'the home indicator is under the keyboard');
+    final room = deviceEdgesOf(mq, keyboardRoomMade: true);
+    expect(room['keyboard'], 0.0);
+    expect((room['insets'] as Map)['bottom'], 0.0);
+    final closed = deviceEdgesOf(mq.copyWith(viewInsets: EdgeInsets.zero), keyboardRoomMade: true);
+    expect(closed['keyboard'], 0.0);
+    expect((closed['insets'] as Map)['bottom'], 34.0);
   });
 
   testWidgets('the text scale the text is drawn at: the platform\'s, up to the config\'s largest', (tester) async {

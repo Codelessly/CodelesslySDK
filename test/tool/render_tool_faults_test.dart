@@ -407,6 +407,37 @@ void main() {
     });
   });
 
+  group('--keyboard', () {
+    testWidgets('opens the software keyboard: the page lays out above it, so nothing of it covers the page (screen.keyboard 0)', (tester) async {
+      final page = {
+        'schema': 3,
+        'roots': ['kb'],
+        'nodes': {
+          'kb': _canvas('col'),
+          'col': {
+            'type': 'column',
+            'children': ['reads', 'room', 'foot'],
+            'layout': {'width': {'fill': 390}, 'height': {'fill': 700}},
+          },
+          'reads': _text(r'keyboard ${screen.keyboard}'),
+          'room': {'type': 'column', 'layout': {'width': {'fill': 390}, 'height': {'fill': 0}, 'flex': 1}},
+          'foot': _box(w: 390, h: 56),
+        },
+      };
+      final report = await runPage(tester, page, const [Step('keyboard', '300')]);
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(textOf(report, 'reads'), 'keyboard 0');
+      final foot = boxesOf(report.images.single).firstWhere((b) => b['id'] == 'foot');
+      expect((foot['y'] as num) + (foot['h'] as num), 400, reason: 'the foot rides on the keyboard (700 - 300)');
+    });
+
+    test('a step: takes a height in pixels', () {
+      expect(parseArgs(['p', '--out', 'o', '--keyboard', '300']).steps.map((s) => '$s'), ['--keyboard 300']);
+      expect(parseArgs(['p', '--out', 'o']).steps, isEmpty);
+      expect(() => parseArgs(['p', '--out', 'o', '--keyboard', 'tall']), throwsFormatException);
+    });
+  });
+
   testWidgets('a turned node\'s layout entry has where it is drawn, and the outline says it', (tester) async {
     final report = await runPage(tester, {
       'schema': 3,

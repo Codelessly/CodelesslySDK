@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/spinner.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show SizedBox, TickerMode;
+import 'package:flutter/widgets.dart' show Align, Alignment, SizedBox, TickerMode;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -98,6 +98,35 @@ void main() {
     await tester.pump(const Duration(milliseconds: 225));
     expect(spin.turns, 0);
     expect(spin.debugNeedsPaint, isFalse);
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a spinner with a written size keeps it where it is placed: 20 × 20 centred in a stack, not the stack\'s size',
+      (tester) async {
+    final (tree, _) = runningTree({
+      'schema': 3,
+      'roots': ['stack'],
+      'nodes': {
+        'stack': {
+          'type': 'stack',
+          'layout': {'width': 390, 'height': 500},
+          'children': ['spin'],
+        },
+        'spin': {
+          'type': 'circularProgressIndicator',
+          'layout': {
+            'width': 20,
+            'height': 20,
+            'x': {'align': 0},
+            'y': {'align': 0},
+          },
+        },
+      },
+    });
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'stack', interactive: true)));
+    expect(rectOf(tree, 'spin'), const Rect.fromLTWH(185, 240, 20, 20));
+    expect(_spinner(tree, 'spin').size, const Size(20, 20));
     await tester.pumpWidget(const SizedBox());
   });
 

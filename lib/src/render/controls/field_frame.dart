@@ -668,6 +668,11 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
   /// hugs; its first line sits at the top).
   bool get contentMultiline => false;
 
+  /// At most how many lines of a multi-line content show in a box with a
+  /// height of its own (a field's `maxLines` there); the rest scrolls
+  /// inside. Null: as many as the box holds.
+  int? get contentVisibleLines => null;
+
   /// Whether it shows nothing (the hint shows).
   bool get contentEmpty;
 
@@ -1183,6 +1188,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
       final padBottom = d.collapsed ? 0.0 : (d.contentPadding?.bottom ?? padTop);
       top = boxRect.top + padTop;
       height = math.max(line, boxRect.height - padTop - padBottom);
+      // A box taller than its lines (an 87 high field of three 14 px lines
+      // in its padding) shows no part of a line past them.
+      final lines = contentVisibleLines;
+      if (lines != null && lines > 0) height = math.min(height, math.max(line, lines * line));
     } else {
       final free = boxRect.height - line;
       final y = _alignVertical?.y ?? 0;
