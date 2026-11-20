@@ -191,7 +191,8 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
 /// ready): its arc in [color], turning in a square of [diameter] or of the
 /// size it is given.
 class SpinnerView extends LeafRenderObjectWidget {
-  const SpinnerView({super.key, required this.color, this.diameter = 24, this.value});
+  const SpinnerView(
+      {super.key, required this.color, this.diameter = 24, this.value, this.style = SpinnerStyle.arc, this.turning = true});
 
   final Color color;
   final double diameter;
@@ -200,19 +201,26 @@ class SpinnerView extends LeafRenderObjectWidget {
   /// still; null: the arc turns.
   final double? value;
 
+  /// An arc, or iOS's eight ticks.
+  final SpinnerStyle style;
+
+  /// False holds it still (ticks drawn as a pull reveals them).
+  final bool turning;
+
   @override
-  RenderSpinner createRenderObject(BuildContext context) => RenderSpinner()
+  RenderSpinner createRenderObject(BuildContext context) => RenderSpinner(style: style)
     ..color = color
     ..diameter = diameter
     ..value = value
-    ..animating = TickerMode.valuesOf(context).enabled;
+    ..animating = turning && TickerMode.valuesOf(context).enabled;
 
   @override
   void updateRenderObject(BuildContext context, RenderSpinner renderObject) => renderObject
+    ..style = style
     ..color = color
     ..diameter = diameter
     ..value = value
-    ..animating = TickerMode.valuesOf(context).enabled;
+    ..animating = turning && TickerMode.valuesOf(context).enabled;
 }
 
 /// A root for the SDK's controls where the surroundings are widgets and no

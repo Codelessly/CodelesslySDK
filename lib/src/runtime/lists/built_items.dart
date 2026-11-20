@@ -20,6 +20,10 @@ abstract interface class LazyItems {
   /// index); -1: none.
   int indexOfItem(String item);
 
+  /// The key of item [index] as text (its `id`, or the list's key path);
+  /// null when it has none.
+  String? keyAt(int index);
+
   /// Builds item [index] (scrolls toward it until it is laid out); whether
   /// it is.
   Future<bool> buildItem(int index);

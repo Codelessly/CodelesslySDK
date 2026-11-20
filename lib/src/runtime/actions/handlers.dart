@@ -624,10 +624,10 @@ List<NodeBox> scopedBoxesOf(RenderTree tree, String id, Object? instance) {
 /// the one whose `${item.id}` (or `${item.key}`, or the item itself, as
 /// text) reads [item], else the one whose `${index}` is [item]. Each copy is
 /// asked in its own scope, so a node inside an item template matches too.
-NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance}) {
+NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance, bool byIndex = true}) {
   final binder = tree.binder;
   if (binder == null) return null;
-  NodeBox? byIndex;
+  NodeBox? asIndex;
   final index = int.tryParse(item);
   // A component call a list repeats is drawn by its definition's root: the
   // copies are found by the call's id.
@@ -640,9 +640,9 @@ NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance}) {
     final value = readPath(scope, 'item');
     final key = value is Map ? (value['id'] ?? value['key']) : value;
     if (key != null && '$key' == item) return b;
-    if (index != null && byIndex == null && readPath(scope, 'index') == index) byIndex = b;
+    if (byIndex && index != null && asIndex == null && readPath(scope, 'index') == index) asIndex = b;
   }
-  return byIndex;
+  return asIndex;
 }
 
 /// The box (global) of the node [OpenModalAction.anchorNode] names, in a
@@ -688,7 +688,9 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
           // No node has that id: the one on screen with that name (a
           // responsive screen's layouts have their own ids, the same names).
           tree.boxesNamed(id).lastOrNull);
-  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance));
+  // The copy whose item has that key, built; else the copy at that index
+  // (`item={3}`), unless a list has an item keyed 3 it has not built.
+  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance, byIndex: false));
   if (tree != null && item.isNotEmpty && box == null) {
     // The copy of an item a list has not built (a long list builds the
     // items near its view only: a chat's first message, seen from its
@@ -697,12 +699,15 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
     for (final list in lists) {
       final index = list.indexOfItem(item);
       if (index < 0 || !await list.buildItem(index)) continue;
-      box = repeatOf(tree, id, item, instance: run.instance);
+      // Named by its key, the copy of that item; by its index, the copy
+      // at it.
+      box = repeatOf(tree, id, item, instance: run.instance, byIndex: list.keyAt(index) != item);
       if (box != null) break;
     }
+    if (lists.isEmpty) box ??= repeatOf(tree, id, item, instance: run.instance);
     // A node a list repeats, and no item of that key: said below, not the
     // first copy revealed in its place.
-    if (lists.isEmpty) box = named();
+    if (lists.isEmpty) box ??= named();
   }
   // Not on this screen: from an overlay (a menu's item, a dialog's button),
   // the node is the page's under it (support desk, test 11: a Menu's
