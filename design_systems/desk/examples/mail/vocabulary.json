@@ -3,7 +3,7 @@
  "version": 1,
  "about": "Every word the notation files here used, with how each resolved, kept across expands. Written by tool/notation/notation.sh expand (codelessly_api docs/design/19-open-vocabulary.md, section 15); --no-record leaves it alone.",
  "first": "2026-11-19T22:14:49Z",
- "last": "2026-11-19T23:54:37Z",
+ "last": "2026-11-20T00:20:19Z",
  "expands": [
   {
    "at": "2026-11-19T22:14:49Z",
@@ -42,6 +42,16 @@
   },
   {
    "at": "2026-11-19T23:54:37Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-20T00:14:59Z",
+   "vocabulary": "closed",
+   "files": 1
+  },
+  {
+   "at": "2026-11-20T00:20:19Z",
    "vocabulary": "closed",
    "files": 1
   }
@@ -88,8 +98,8 @@
  "files": {
   "pages/mailbox.txt": {
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
-   "expands": 8
+   "last": "2026-11-20T00:20:19Z",
+   "expands": 10
   }
  },
  "words": [
@@ -107,16 +117,16 @@
      "signature": "Account \"text\" \"text\"",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -135,7 +145,7 @@
    "seen": {
     "Account \"text\" \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -153,16 +163,16 @@
      "signature": "Actions ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Actions",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -181,7 +191,7 @@
    "seen": {
     "Actions ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -199,16 +209,16 @@
      "signature": "Brand \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Brand \"Postbox\" icon=\"mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -227,7 +237,7 @@
    "seen": {
     "Brand \"text\" icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -245,16 +255,16 @@
      "signature": "Dialog \"text\" w= ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Dialog#compose \"New message\" w=640",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -273,7 +283,7 @@
    "seen": {
     "Dialog \"text\" w= ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -291,16 +301,16 @@
      "signature": "Empty \"text\" \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -319,7 +329,7 @@
    "seen": {
     "Empty \"text\" \"text\" icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -337,22 +347,22 @@
      "signature": "FileTile \"text\" \"text\"",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "FileTile \"text\" \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -373,11 +383,11 @@
    "seen": {
     "FileTile \"text\" \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "FileTile \"text\" \"text\" icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -395,16 +405,16 @@
      "signature": "ListGroup \"text\"",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "ListGroup \"{m.day}\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -423,7 +433,7 @@
    "seen": {
     "ListGroup \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -441,16 +451,16 @@
      "signature": "ListRow \"text\" \"text\" attachment= meta= preview= selected= starred= unread= onTap",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -469,7 +479,7 @@
    "seen": {
     "ListRow \"text\" \"text\" attachment= meta= preview= selected= starred= unread= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -487,34 +497,34 @@
      "signature": "NavItem \"text\" icon= selected= onTap",
      "uses": 4,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "NavItem \"text\" badge= icon= selected= onTap",
      "uses": 2,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "NavItem \"text\" badge= icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "NavItem \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -543,19 +553,19 @@
    "seen": {
     "NavItem \"text\" badge= icon= selected= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "NavItem \"text\" icon= selected= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "NavItem \"text\" badge= icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "NavItem \"text\" icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -573,16 +583,16 @@
      "signature": "NavSection \"text\"",
      "uses": 2,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "NavSection \"Mailbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -602,7 +612,7 @@
    "seen": {
     "NavSection \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -620,16 +630,16 @@
      "signature": "SearchField @ hint=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "SearchField @q hint=\"Search mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -648,7 +658,7 @@
    "seen": {
     "SearchField @ hint=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -666,16 +676,16 @@
      "signature": "Separator",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Separator",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -694,7 +704,7 @@
    "seen": {
     "Separator": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -712,16 +722,16 @@
      "signature": "SideButton \"text\" icon= shortcut= onTap",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -740,7 +750,7 @@
    "seen": {
     "SideButton \"text\" icon= shortcut= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -758,16 +768,16 @@
      "signature": "Toolbar ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Toolbar",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -786,7 +796,7 @@
    "seen": {
     "Toolbar ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -802,11 +812,11 @@
    "uses": 1,
    "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -833,11 +843,11 @@
    "uses": 1,
    "example": "Account \"Jamie Park\" \"jamie@northline.design\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -864,11 +874,11 @@
    "uses": 1,
    "example": "Brand \"Postbox\" icon=\"mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -895,11 +905,11 @@
    "uses": 1,
    "example": "Dialog#compose \"New message\" w=640",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -926,11 +936,11 @@
    "uses": 1,
    "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -957,11 +967,11 @@
    "uses": 1,
    "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -988,11 +998,11 @@
    "uses": 2,
    "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1020,11 +1030,11 @@
    "uses": 2,
    "example": "FileTile \"Site walk notes.txt\" \"164 KB\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1052,11 +1062,11 @@
    "uses": 1,
    "example": "ListGroup \"{m.day}\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1083,11 +1093,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1114,11 +1124,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1145,11 +1155,11 @@
    "uses": 8,
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1183,11 +1193,11 @@
    "uses": 2,
    "example": "NavSection \"Mailbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1215,11 +1225,11 @@
    "uses": 1,
    "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1246,11 +1256,11 @@
    "uses": 1,
    "example": "Brand \"Postbox\" icon=\"mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1277,11 +1287,11 @@
    "uses": 1,
    "example": "Dialog#compose \"New message\" w=640",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1308,11 +1318,11 @@
    "uses": 1,
    "example": "Empty \"No messages\" \"Nothing matches this view.\" icon=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1339,11 +1349,11 @@
    "uses": 1,
    "example": "FileTile \"Studio visit agenda.pdf\" \"1.2 MB\" icon=\"picture_as_pdf\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1370,11 +1380,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1401,11 +1411,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1432,11 +1442,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1463,11 +1473,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1494,11 +1504,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1525,11 +1535,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1556,11 +1566,11 @@
    "uses": 3,
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1589,11 +1599,11 @@
    "uses": 8,
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1627,11 +1637,11 @@
    "uses": 6,
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1663,11 +1673,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1694,11 +1704,11 @@
    "uses": 1,
    "example": "SearchField @q hint=\"Search mail\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1725,11 +1735,11 @@
    "uses": 1,
    "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1756,11 +1766,11 @@
    "uses": 1,
    "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1787,11 +1797,11 @@
    "uses": 1,
    "example": "ListRow \"{m.from}\" \"{m.subject}\" preview=\"{m.snippet}\" meta=\"{m.time}\" unread={coalesce(m.unread, false)} starred={coalesce(m.starred, false)} attachment={coalesce(m.files, false)} selected={openId...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1818,11 +1828,11 @@
    "uses": 6,
    "example": "NavItem \"Inbox\" icon=\"inbox\" badge=\"4\" selected={folder == \"inbox\"} onTap={folder=\"inbox\"}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1854,11 +1864,11 @@
    "uses": 1,
    "example": "SideButton \"Compose\" icon=\"edit\" shortcut=\"C\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "component": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1888,16 +1898,16 @@
      "signature": "App ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "App",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1916,7 +1926,7 @@
    "seen": {
     "App ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -1935,16 +1945,16 @@
      "signature": "Avatar \"text\" size=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Avatar \"{cur.from}\" size=36",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -1963,7 +1973,7 @@
    "seen": {
     "Avatar \"text\" size=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -1982,28 +1992,28 @@
      "signature": "Button \"text\" icon= onTap",
      "uses": 2,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Button \"text\" icon=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Button \"text\" onTap",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2027,15 +2037,15 @@
    "seen": {
     "Button \"text\" icon= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Button \"text\" icon=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Button \"text\" onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2054,34 +2064,34 @@
      "signature": "Column ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Column border-bottom= gap= pad= ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Column gap= maxw= pad= phone.pad= tablet.pad= ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Column grow ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Column",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2106,19 +2116,19 @@
    "seen": {
     "Column ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Column border-bottom= gap= pad= ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Column gap= maxw= pad= phone.pad= tablet.pad= ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Column grow ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2137,16 +2147,16 @@
      "signature": "Divider",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Divider",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2165,7 +2175,7 @@
    "seen": {
     "Divider": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2184,16 +2194,16 @@
      "signature": "Footer ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Footer",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2212,7 +2222,7 @@
    "seen": {
     "Footer ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2231,16 +2241,16 @@
      "signature": "Grid cols= gap= ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Grid cols=2 gap=8",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2259,7 +2269,7 @@
    "seen": {
     "Grid cols= gap= ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2278,28 +2288,28 @@
      "signature": "IconButton \"text\" tooltip=",
      "uses": 6,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "IconButton \"text\" tooltip= onTap",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "IconButton \"text\" show= tooltip= onTap",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2327,15 +2337,15 @@
    "seen": {
     "IconButton \"text\" tooltip= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "IconButton \"text\" show= tooltip= onTap": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "IconButton \"text\" tooltip=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2354,22 +2364,22 @@
      "signature": "Input \"text\" \"text\"",
      "uses": 2,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Input \"text\" \"text\" multiline",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Input \"To\" \"name@example.com\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2391,11 +2401,11 @@
    "seen": {
     "Input \"text\" \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Input \"text\" \"text\" multiline": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2414,16 +2424,16 @@
      "signature": "Main phone.visible= w= phone.w=fill tablet.w=320 ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2442,7 +2452,7 @@
    "seen": {
     "Main phone.visible= w= phone.w=fill tablet.w=320 ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2461,16 +2471,16 @@
      "signature": "Nav ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Nav",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2489,7 +2499,7 @@
    "seen": {
     "Nav ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2508,16 +2518,16 @@
      "signature": "Pane phone.visible= phone.w=fill ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Pane phone.w=fill phone.visible={reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2536,7 +2546,7 @@
    "seen": {
     "Pane phone.visible= phone.w=fill ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2555,22 +2565,22 @@
      "signature": "Row gap= middle ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Row gap= ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Row gap=12 middle",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2591,11 +2601,11 @@
    "seen": {
     "Row gap= middle ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Row gap= ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2614,16 +2624,16 @@
      "signature": "SegmentedButton @ items=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2642,7 +2652,7 @@
    "seen": {
     "SegmentedButton @ items=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2661,16 +2671,16 @@
      "signature": "Sidebar hide= tablet.w=64 ...",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2689,7 +2699,7 @@
    "seen": {
     "Sidebar hide= tablet.w=64 ...": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2708,16 +2718,16 @@
      "signature": "Spacer",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Spacer",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2736,7 +2746,7 @@
    "seen": {
     "Spacer": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2755,28 +2765,28 @@
      "signature": "Text \"text\"",
      "uses": 7,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Text \"text\" hide=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     {
      "signature": "Text \"text\" phone.size=20",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "Text.barTitle \"Inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2805,15 +2815,15 @@
    "seen": {
     "Text \"text\"": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Text \"text\" hide=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     },
     "Text \"text\" phone.size=20": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2831,16 +2841,16 @@
      "signature": "canvas \"text\" path=",
      "uses": 1,
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    ],
    "example": "canvas \"Mailbox\" path=\"mailbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2859,7 +2869,7 @@
    "seen": {
     "canvas \"text\" path=": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    }
   },
@@ -2875,11 +2885,11 @@
    "uses": 1,
    "example": "Avatar \"{cur.from}\" size=36",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2906,11 +2916,11 @@
    "uses": 4,
    "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2940,11 +2950,11 @@
    "uses": 8,
    "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -2978,11 +2988,11 @@
    "uses": 3,
    "example": "Input \"To\" \"name@example.com\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3011,11 +3021,11 @@
    "uses": 3,
    "example": "Input \"To\" \"name@example.com\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3044,11 +3054,11 @@
    "uses": 9,
    "example": "Text.barTitle \"Inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3083,11 +3093,11 @@
    "uses": 1,
    "example": "canvas \"Mailbox\" path=\"mailbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3114,11 +3124,11 @@
    "uses": 1,
    "example": "Avatar \"{cur.from}\" size=36",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3145,11 +3155,11 @@
    "uses": 3,
    "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3178,11 +3188,11 @@
    "uses": 1,
    "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3209,11 +3219,11 @@
    "uses": 2,
    "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3241,11 +3251,11 @@
    "uses": 1,
    "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3272,11 +3282,11 @@
    "uses": 2,
    "example": "Column gap=10 pad=[16,12,16,12] border-bottom=line",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3304,11 +3314,11 @@
    "uses": 1,
    "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3335,11 +3345,11 @@
    "uses": 1,
    "example": "Column gap=20 pad=[48,32,48,48] tablet.pad=[28,24,28,32] phone.pad=[16,16,16,24] maxw=820",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3366,11 +3376,11 @@
    "uses": 1,
    "example": "Grid cols=2 gap=8",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3397,11 +3407,11 @@
    "uses": 1,
    "example": "Grid cols=2 gap=8",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3428,11 +3438,11 @@
    "uses": 1,
    "example": "IconButton \"arrow_back\" tooltip=\"Back to the list\" show=phone onTap={reading=false}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3459,11 +3469,11 @@
    "uses": 8,
    "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3497,11 +3507,11 @@
    "uses": 1,
    "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3528,11 +3538,11 @@
    "uses": 1,
    "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3559,11 +3569,11 @@
    "uses": 1,
    "example": "Pane phone.w=fill phone.visible={reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3590,11 +3600,11 @@
    "uses": 2,
    "example": "Row gap=12 middle",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3622,11 +3632,11 @@
    "uses": 1,
    "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3653,11 +3663,11 @@
    "uses": 1,
    "example": "SegmentedButton @view items=[\"All mail\",\"Unread\",\"Starred\"]",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3684,11 +3694,11 @@
    "uses": 1,
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3715,11 +3725,11 @@
    "uses": 1,
    "example": "Text.caption \"1 of {length(mail)}\" hide=phone",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3746,11 +3756,11 @@
    "uses": 1,
    "example": "canvas \"Mailbox\" path=\"mailbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3777,11 +3787,11 @@
    "uses": 1,
    "example": "Column grow",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3808,11 +3818,11 @@
    "uses": 1,
    "example": "Input \"Message\" \"Write your message…\" multiline",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3839,11 +3849,11 @@
    "uses": 1,
    "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3870,11 +3880,11 @@
    "uses": 1,
    "example": "Main w=380 tablet.w=320 phone.w=fill phone.visible={!reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3901,11 +3911,11 @@
    "uses": 1,
    "example": "Pane phone.w=fill phone.visible={reading}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3932,11 +3942,11 @@
    "uses": 1,
    "example": "Row gap=12 middle",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3963,11 +3973,11 @@
    "uses": 1,
    "example": "Sidebar tablet.w=64 hide=phone",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -3994,11 +4004,11 @@
    "uses": 1,
    "example": "Text.heading2 \"{cur.subject}\" phone.size=20",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4025,11 +4035,11 @@
    "uses": 3,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4056,11 +4066,11 @@
    "uses": 2,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4087,11 +4097,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4118,11 +4128,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4149,11 +4159,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4180,11 +4190,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4211,11 +4221,11 @@
    "uses": 3,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4242,11 +4252,11 @@
    "uses": 2,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4273,11 +4283,11 @@
    "uses": 3,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4304,11 +4314,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4335,11 +4345,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4366,11 +4376,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4397,11 +4407,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4428,11 +4438,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4459,11 +4469,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4490,11 +4500,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4521,11 +4531,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4552,11 +4562,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4583,11 +4593,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4614,11 +4624,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4645,11 +4655,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4676,11 +4686,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4707,11 +4717,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4738,11 +4748,11 @@
    "uses": 2,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4769,11 +4779,11 @@
    "uses": 3,
    "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4802,11 +4812,11 @@
    "uses": 2,
    "example": "IconButton \"edit\" tooltip=\"Compose (C)\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4834,11 +4844,11 @@
    "uses": 1,
    "example": "Button.ghost \"Discard\" onTap={close}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4865,11 +4875,11 @@
    "uses": 2,
    "example": "Button.outline \"Reply\" icon=\"reply\" onTap={open compose}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4897,11 +4907,11 @@
    "uses": 1,
    "example": "Text.barTitle \"Inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4928,11 +4938,11 @@
    "uses": 4,
    "example": "Text.caption \"{length(mail)} messages, 4 unread\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4962,11 +4972,11 @@
    "uses": 1,
    "example": "Text.heading2 \"{cur.subject}\" phone.size=20",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -4993,11 +5003,11 @@
    "uses": 1,
    "example": "Text.overline \"2 ATTACHMENTS\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5024,11 +5034,11 @@
    "uses": 1,
    "example": "Text.reading \"{cur.snippet} If the door is locked, give me a ring and I'll come down.\\n\\nI've attached the current notes and a short agenda. The two things I'd like to settle in person are the trac...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5055,11 +5065,11 @@
    "uses": 1,
    "example": "Text.strong \"{cur.from}\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5085,11 +5095,11 @@
    "uses": 2,
    "example": "close",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5116,11 +5126,11 @@
    "uses": 3,
    "example": "open compose",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5148,11 +5158,11 @@
    "uses": 9,
    "example": "folder=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5185,11 +5195,11 @@
    "uses": 1,
    "example": "toast \"Sent\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5215,11 +5225,11 @@
    "uses": 6,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5247,11 +5257,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5277,11 +5287,11 @@
    "uses": 1,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5307,11 +5317,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5337,11 +5347,11 @@
    "uses": 1,
    "example": "state cur:map={coalesce(find(mail, 'id', openId), first(mail))}",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5367,11 +5377,11 @@
    "uses": 2,
    "example": "state shown:list={filter(mail, m => (view == 'All mail' || (view == 'Unread' && coalesce(m.unread, false)) || (view == 'Starred' && coalesce(m.starred, false))) && contains(lower(m.from + ' ' + m.s...",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5398,11 +5408,11 @@
    "uses": 1,
    "example": "each m in shown",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5429,11 +5439,11 @@
    "uses": 2,
    "example": "if index == 0 || at(shown, index - 1).day != m.day",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
@@ -5461,11 +5471,11 @@
    "uses": 8,
    "example": "state folder=\"inbox\"",
    "first": "2026-11-19T22:14:49Z",
-   "last": "2026-11-19T23:54:37Z",
+   "last": "2026-11-20T00:20:19Z",
    "history": {
     "core": {
      "first": "2026-11-19T22:14:49Z",
-     "last": "2026-11-19T23:54:37Z"
+     "last": "2026-11-20T00:20:19Z"
     }
    },
    "files": {
