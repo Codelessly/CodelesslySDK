@@ -61,7 +61,7 @@ final class MarkdownLook {
 
 /// Inline Markdown: **bold**, `code`, _italic_, @mentions and links.
 final RegExp _inline = RegExp(
-  r'(\*\*[^*\n]+\*\*)|(`[^`\n]+`)|((?<![\w])_[^_\n]+_(?![\w]))|((?<![\w])@[a-zA-Z][\w-]*)|((?:https?://)?[\w-]+(?:\.[\w-]+)*\.(?:io|com|org|net|dev|app)(?:/[\w/.?=&%-]*\w)?)',
+  r'(\*\*[^*\n]+\*\*)|(`[^`\n]+`)|((?<![\w])_[^_\n]+_(?![\w]))|((?<![\w])@[a-zA-Z][\w-]*)|((?<![\w.@-])(?:https?://)?[\w-]+(?:\.[\w-]+)*\.(?:io|com|org|net|dev|app)(?:/[\w/.?=&%-]*\w)?)',
 );
 final RegExp _bullet = RegExp(r'^(\s*)([-*]) ');
 final RegExp _numbered = RegExp(r'^(\s*)(\d+)[.)] ');
@@ -86,11 +86,11 @@ final RegExp _numbered = RegExp(r'^(\s*)(\d+)[.)] ');
     color: look.codeColor,
     backgroundColor: look.codeBackground,
   );
-  void add(String text, [api.TextStyle? style]) {
+  void add(String text, [api.TextStyle? style, String? link]) {
     if (text.isEmpty) return;
     final start = out.length;
     out.write(text);
-    if (style != null && !style.isEmpty) runs.add(api.TextRun(start, out.length, style));
+    if (style != null && !style.isEmpty) runs.add(api.TextRun(start, out.length, style, link: link));
   }
 
   void inline(String line) {
@@ -127,6 +127,8 @@ final RegExp _numbered = RegExp(r'^(\s*)(\d+)[.)] ');
             decoration: api.TextDecoration.underline,
             decorationColor: link == null || link.name != null ? null : link.withAlpha((link.alpha * 0.4).round()),
           ),
+          // A tap opens it (a bare domain on the web).
+          s.startsWith(RegExp('https?://')) ? s : 'https://$s',
         );
       }
       at = m.end;

@@ -732,6 +732,11 @@ class FormulaEvaluator {
       r'matches(code, "^\d{4}$") → true; JavaScript patterns, with (?i) (?s) (?m) at the start: matches(url, "(?i)^https?://")',
     ),
     FormulaFunctionDoc(
+      'regexMatches',
+      'regexMatches(text, pattern)',
+      r'regexMatches("call 555-0100 or 555-0199", "\d{3}-\d{4}") → [{start: 5, end: 13, text: 555-0100, groups: []}, …]; the runs of a text: map(regexMatches(t, "#\w+"), m => {start: m.start, end: m.end, link: m.text})',
+    ),
+    FormulaFunctionDoc(
       'slug',
       'slug(text)',
       'slug("Kind of Blue!") → kind-of-blue',
@@ -3175,6 +3180,32 @@ final Map<String, _Function> _functions = {
       return false;
     }
   },
+  // Every match of a pattern in a text, in order: where it is (`start`,
+  // `end`: UTF-16 offsets, as a text run's), what it matched (`text`) and its
+  // groups (`groups`, null for a group that took no part). An empty match
+  // is skipped: it has no characters to mark.
+  'regexMatches': (a) {
+    final Object? text = _arg(a, 0);
+    if (text == null) return <Object?>[];
+    final String s = FormulaEvaluator.stringify(text);
+    final String pattern = FormulaEvaluator.stringify(_arg(a, 1));
+    if (s.isEmpty || pattern.isEmpty) return <Object?>[];
+    try {
+      return [
+        for (final m in _regex(pattern).allMatches(s))
+          if (m.end > m.start)
+            {
+              'start': m.start,
+              'end': m.end,
+              'text': m[0],
+              'groups': [for (var i = 1; i <= m.groupCount; i++) m[i]],
+            },
+      ];
+    } on FormatException catch (e) {
+      _badPattern('regexMatches', pattern, e, 'no matches');
+      return <Object?>[];
+    }
+  },
   'slug': (a) => _slug(_arg(a, 0)),
   'seconds': (a) => _seconds(_arg(a, 0)),
   'duration': (a) => _duration(_arg(a, 0)),
@@ -4000,6 +4031,7 @@ class _Binary extends _Node {
     final Object? a = left.eval(resolve);
     if (op == '&&') return _truthy(a) ? right.eval(resolve) : a;
     if (op == '||') return _truthy(a) ? a : right.eval(resolve);
+    if (op == '??') return a ?? right.eval(resolve);
     final Object? b = right.eval(resolve);
     switch (op) {
       case '+':
@@ -4136,11 +4168,22 @@ class _Parser {
   }
 
   _Node _ternary() {
-    final _Node condition = _or();
+    final _Node condition = _nullish();
     if (!_eat('?')) return condition;
     final _Node then = _ternary();
     _expect(':');
     return _Ternary(condition, then, _ternary());
+  }
+
+  /// `a ?? b`: `a`, or `b` when `a` is null (Dart's and JavaScript's null
+  /// fallback; `coalesce` also passes over empty text). Binds looser than
+  /// `||` and tighter than `? :`, as in both languages.
+  _Node _nullish() {
+    _Node node = _or();
+    while (_eat('??')) {
+      node = _Binary('??', node, _or());
+    }
+    return node;
   }
 
   _Node _or() {

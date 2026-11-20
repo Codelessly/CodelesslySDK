@@ -11,6 +11,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/screen.dart' as screen;
+
 // A text with a fixed height is that height, like Flutter's
 // `SizedBox(height: h, child: Text(...))`: longer text doesn't grow it (or
 // its parent) and the paragraph clips what doesn't fit.
@@ -189,6 +191,73 @@ void main() {
      expect(paragraphs.single.text.toPlainText(),'hello cheers!');
     });
    }
+
+    // A run with a link takes a tap of its own (design 26): the text's
+    // linkTap reactions run with the run in `result`; a text with none
+    // opens the link; the rest of the text stays the text's.
+    group('links', () {
+      const sentence = 'Read the Terms or the Privacy Policy.';
+      Map<String, Json> text({List<Json> actions = const []}) => {
+            'col': {'type': 'column', 'children': ['t'], 'layout': {'width': 400, 'height': {'hug': 40}}},
+            't': {
+              'type': 'text',
+              'layout': {'width': 400, 'height': {'hug': 20}},
+              'props': {
+                'text': sentence,
+                'style': {'fontSize': 16},
+                'runs': [
+                  {'start': 9, 'end': 14, 'style': {'fontWeight': 700}, 'link': 'terms'},
+                  {'start': 22, 'end': 36, 'style': {'fontWeight': 700}, 'link': 'https://example.com/privacy'},
+                ],
+              },
+              'actions': actions,
+            },
+          };
+
+      Future<void> tapRange(WidgetTester tester, NodeTree tree, int start, int end) async {
+        final p = _paragraph(tree, 't');
+        final box = p.getBoxesForSelection(TextSelection(baseOffset: start, extentOffset: end)).first.toRect();
+        await tester.tapAt(p.localToGlobal(box.center));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('a tap on a link runs the text\'s linkTap with the run, not its tap', (tester) async {
+        final s = await screen.show(tester, text(actions: [
+          screen.reaction('linkTap', [
+            {'type': 'setVariable', 'variable': 'opened', 'value': r'${result.link}:${result.text}:${result.start}'},
+          ]),
+          screen.reaction('click', [screen.add('taps')]),
+        ]), variables: [screen.v('opened', ''), screen.v('taps', 0, VariableType.integer)]);
+        await tapRange(tester, s.tree, 9, 14);
+        expect(s['opened'], 'terms:Terms:9');
+        expect(s['taps'], 0);
+        await tapRange(tester, s.tree, 22, 36);
+        expect(s['opened'], 'https://example.com/privacy:Privacy Policy:22');
+        // Elsewhere in the text: the text's own tap.
+        await tapRange(tester, s.tree, 0, 4);
+        expect(s['taps'], 1);
+        expect(s['opened'], 'https://example.com/privacy:Privacy Policy:22');
+      });
+
+      testWidgets('a text with no linkTap opens the link', (tester) async {
+        final links = RecordingLinkOpener();
+        final s = await screen.show(tester, text(), services: Services(links: links));
+        await tapRange(tester, s.tree, 22, 36);
+        expect(links.opened, ['https://example.com/privacy']);
+      });
+
+      testWidgets('a link run is drawn in its style with every character kept', (tester) async {
+        final s = await screen.show(tester, text());
+        final p = _paragraph(s.tree, 't');
+        expect(p.text.toPlainText(), sentence);
+        final linked = <String>[];
+        p.text.visitChildren((span) {
+          if (span is TextSpan && span.recognizer != null) linked.add(span.text!);
+          return true;
+        });
+        expect(linked, ['Terms', 'Privacy Policy']);
+      });
+    });
 
     test('a text style\'s last setting per font feature wins, and tabular figures can be asked for', () {
       final s = textStyle(const api.TextStyle(fontFeatures: ['lnum', 'liga', 'liga=0'], tabularFigures: true));
