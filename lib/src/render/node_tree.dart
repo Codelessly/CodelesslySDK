@@ -2691,8 +2691,12 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // A cap across a stretching parent holds, at the start (CSS max-width
     // over align-items: stretch), unless its align places it.
     final capped = cross == api.CrossAxisAlignment.stretch && (isRow ? n.layout.constraints.maxHeight : n.layout.constraints.maxWidth) != null;
+    // A size written across holds too (CSS align-items: stretch leaves an
+    // item with a width of its own at that width): a 64 tile in a
+    // stretching column is 64 wide, at the start.
+    final keepsCross = crossFit == SizeFit.hug || crossFit == SizeFit.fixed;
     final Alignment? align = n.layout.align?.flutter ??
-        ((cross == api.CrossAxisAlignment.stretch && crossFit == SizeFit.hug && !parentHugsCross) || capped ? Alignment.topLeft : null);
+        ((cross == api.CrossAxisAlignment.stretch && keepsCross && !parentHugsCross) || capped ? Alignment.topLeft : null);
     // A bare box filling across a row/column that hugs that axis and
     // stretches: its siblings set the thickness (RenderStretchFiller).
     if (cross == api.CrossAxisAlignment.stretch && parentHugsCross && crossFit == SizeFit.fill &&

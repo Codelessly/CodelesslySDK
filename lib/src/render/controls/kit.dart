@@ -631,6 +631,15 @@ class ControlLabel {
 
   Size get size => _painter.size;
 
+  /// How many lines it was laid out on.
+  int get lineCount => _painter.computeLineMetrics().length;
+
+  /// The height of its first line (its whole height when it has none).
+  double get firstLineHeight {
+    final lines = _painter.computeLineMetrics();
+    return lines.isEmpty ? _painter.height : lines.first.height;
+  }
+
   /// Where its glyphs are (ascent to descent of each line's text) when it
   /// is painted from [left] centered on [centerY].
   List<Rect> glyphBoxes(double left, double centerY) {

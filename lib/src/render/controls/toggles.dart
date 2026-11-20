@@ -321,7 +321,9 @@ class RenderToggle extends RenderControl implements LabeledControl {
   // --- geometry -----------------------------------------------------------------
 
   String _label = '';
-  final ControlLabel _labelText = ControlLabel();
+  /// Its label wraps onto as many lines as its width needs (a consent line
+  /// beside a checkbox), never cut to one line with an ellipsis.
+  final ControlLabel _labelText = ControlLabel()..maxLines = null;
 
   bool get _hasLabel => _label.isNotEmpty;
 
@@ -343,7 +345,8 @@ class RenderToggle extends RenderControl implements LabeledControl {
     return Size(_design.width > 0 ? _design.width : ssui.width, _design.height > 0 ? _design.height : ssui.height);
   }
 
-  /// Its size when it hugs: the mark, and its label beside it.
+  /// Its size when it hugs: the mark, and its label beside it (laid out at
+  /// the width it has: a long label wraps and the control grows taller).
   Size get _natural {
     final mark = _markNatural;
     if (!_hasLabel) return mark;
@@ -351,49 +354,77 @@ class RenderToggle extends RenderControl implements LabeledControl {
         math.max(mark.height, _labelText.size.height.ceilToDouble()));
   }
 
+  /// Lays the label out in what is left of [width] beside the mark.
+  void _layoutLabel(double width) {
+    if (!_hasLabel) return;
+    final room = width - _markNatural.width - labelGap;
+    _labelText.layout(room.isFinite ? math.max(0, room) : double.infinity);
+  }
+
+  /// Its height at [width]: its label wrapped there.
+  double _heightAt(double width) {
+    _layoutLabel(width);
+    return _natural.height;
+  }
+
+  /// Where the label's lines are centred: the middle of the box, or, wrapped
+  /// onto several lines, the middle of them all from the top.
+  double get _labelCenterY => _labelText.lineCount > 1 ? _labelText.size.height / 2 : size.height / 2;
+
   @override
-  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => !_hasLabel || !hasSize
-      ? const []
-      : [(text: _label, fontFamily: _labelText.fontFamily, glyphs: _labelText.glyphBoxes(_markNatural.width + labelGap, size.height / 2))];
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels {
+    if (!_hasLabel || !hasSize) return const [];
+    _layoutLabel(size.width);
+    return [(text: _label, fontFamily: _labelText.fontFamily, glyphs: _labelText.glyphBoxes(_markNatural.width + labelGap, _labelCenterY))];
+  }
 
   @override
   double computeMinIntrinsicWidth(double height) => _natural.width;
   @override
   double computeMaxIntrinsicWidth(double height) => _natural.width;
   @override
-  double computeMinIntrinsicHeight(double width) => _natural.height;
+  double computeMinIntrinsicHeight(double width) => _heightAt(width);
   @override
-  double computeMaxIntrinsicHeight(double width) => _natural.height;
+  double computeMaxIntrinsicHeight(double width) => _heightAt(width);
 
   @override
-  Size computeDryLayout(covariant BoxConstraints constraints) => constraints.constrain(_natural);
+  Size computeDryLayout(covariant BoxConstraints constraints) {
+    _layoutLabel(constraints.maxWidth);
+    return constraints.constrain(_natural);
+  }
 
   @override
   void performLayout() {
-    if (_hasLabel) {
-      final room = constraints.maxWidth - _markNatural.width - labelGap;
-      _labelText.layout(room.isFinite ? math.max(0, room) : double.infinity);
-    }
+    _layoutLabel(constraints.maxWidth);
     size = constraints.constrain(_natural);
   }
+
+  /// The side of an 18 px mark in a [target] px touch target, scaled to a
+  /// node [side] across, and never less than the node itself up to 18.
+  static double _markIn(double side, double target) => math.max(side * 18 / target, math.min(side, 18));
 
   /// Where the mark is: a checkbox's box, a radio's ring, a switch's track.
   Rect get markRect {
     if (_hasLabel) {
-      // Beside its label: SSUI's mark at the start, centered on the line.
+      // Beside its label: SSUI's mark at the start, centered on the line
+      // (on the first line of a label that wraps).
       final m = _markNatural;
-      return Rect.fromLTWH(0, (size.height - m.height) / 2, m.width, m.height);
+      final centerY = _labelText.lineCount > 1 ? _labelText.firstLineHeight / 2 : size.height / 2;
+      return Rect.fromLTWH(0, math.max(0, centerY - m.height / 2), m.width, m.height);
     }
     final box = Offset.zero & size;
     final n = node;
     switch (_kind) {
       case ToggleKind.checkbox:
         final hug = _design.width <= 0 || _design.height <= 0;
-        final side = hug || n.prop(CheckboxProps.compact) ? size.shortestSide : size.shortestSide * 18 / 40;
+        // Flutter's 18 px box in its 40 px target, scaled to the node; a
+        // node smaller than that target is the box itself (up to 18): an
+        // 18 × 18 checkbox drew an 8 px box.
+        final side = hug || n.prop(CheckboxProps.compact) ? size.shortestSide : _markIn(size.shortestSide, 40);
         return Rect.fromCenter(center: box.center, width: side, height: side);
       case ToggleKind.radio:
         final hug = _design.width <= 0 || _design.height <= 0;
-        final side = hug || n.prop(RadioProps.compact) ? size.shortestSide : size.shortestSide * 18 / 32;
+        final side = hug || n.prop(RadioProps.compact) ? size.shortestSide : _markIn(size.shortestSide, 32);
         return Rect.fromCenter(center: box.center, width: side, height: side);
       case ToggleKind.switchToggle:
         if (n.prop(SwitchProps.fillTrack) || (_design.width <= 0 && _design.height <= 0)) return box;
@@ -491,6 +522,9 @@ class RenderToggle extends RenderControl implements LabeledControl {
   }
 
   void _paintToggle(PaintingContext context, Offset offset) {
+    // At its own width (an intrinsic measure since may have laid it out at
+    // another).
+    _layoutLabel(size.width);
     final canvas = context.canvas;
     canvas.save();
     canvas.translate(offset.dx, offset.dy);
@@ -502,7 +536,7 @@ class RenderToggle extends RenderControl implements LabeledControl {
       case ToggleKind.switchToggle:
         _paintSwitch(canvas);
     }
-    if (_hasLabel) _labelText.paint(canvas, _markNatural.width + labelGap, size.height / 2);
+    if (_hasLabel) _labelText.paint(canvas, _markNatural.width + labelGap, _labelCenterY);
     canvas.restore();
   }
 
