@@ -27,8 +27,6 @@ first section before upgrading.
 - **`regexReplace` reads a group written `\$1`** as `$1` (the backslash was kept in the result).
 - **A one-line text field whose text is taller than the kit's box** (a title at `fontSize` 44) is as tall as its
   line; it was cut to the default height.
-- **A line chart's y axis title stays inside the chart**: one wider than the axis labels was cut at its first
-  letters.
 - **A calendar given less height than its rows ask for** keeps each day's note (a mark, a price) in the day's own
   cell; the notes fell on the days under them.
 
@@ -53,6 +51,13 @@ first section before upgrading.
 
 **Charts**
 
+- **The chart types are drawn by the graph.** A `chart`, `barChart`, `lineChart` and `plotChart` node is written
+  out as a `graph` node and drawn by it, as one render object: bars that stack or stand side by side, lines,
+  areas, candles and slices round a center, with a selection (hover, tap to pin, a finger pressing and moving)
+  and its tooltip, guides, value labels and its own grid and axis labels, so a label at an edge is not cut. The
+  charts' own painters are removed, and pictures of charts differ.
+- **What a chart type says that the graph has no word for is not drawn**: the timeline chart, end labels, totals
+  over stacks, a bar's gap, and the plot chart's selection guides and marker shapes.
 - **A bar chart's bars are at most 56 wide** when the node gives no `maxBarWidth`, each in the middle of its
   column. With few values in a wide card they were slabs.
 - **A bar chart with no `color` is the theme's primary wherever that shows on the surface** (1.5:1). A light
@@ -62,59 +67,6 @@ first section before upgrading.
 
 - **`money(value, "USD")`**: a currency's three-letter code where the symbol goes is that currency's symbol
   (`$9.00`); it printed the code before the figure.
-
-### Added
-
-- **`render --screen-timeout <seconds>`** (default 120): the most real time one screen at one size may take. Past
-  it the page's own functions and computed variables give nothing, the screen is reported as an error
-  (`screen_timeout`) and the run goes on to the next. `FormulaFunction.deadline` is the limit a host sets.
-- **A site names its date**: `"now"` in `site.json` is the `--now` of every render and state of the site when none
-  is passed.
-- **`FormulaEvaluator.onFailure`** is told each formula that could not be worked out, with why;
-  **`FormulaEvaluator.truthy`** is whether a value counts as yes where a condition is read.
-- **Render diagnostics**:
-  - `formula_failed` also names a node whose formula failed when the screen was drawn (its condition, its list,
-    its text, a value) or a variable's, with the formula and why;
-  - `formula_runaway`: a formula cut off at the call limit, naming the function;
-  - `theme_name_unknown`: a color the theme does not have, `theme.<name>` written as a value's text, or
-    `theme.<name>` read in a formula where the theme gives no such value;
-  - `icon_not_drawn` also for a control's icon (an `IconButton`'s, a `Button`'s, a field's) that names no glyph,
-    and names a known icon of the same name without its style's ending;
-  - `paints_outside`: a node drawn past the bottom or the right edge of a Stack (or a box) that does not clip,
-    over something after it, with by how much;
-  - `site_now`: a `"now"` in `site.json` that is not a time.
-
-### Fixed
-
-- **A render with no `--now` starts at the real time**, as its documentation said: `now()` and `today()` gave 1
-  January 2015 (31 December 2014 in zones west of Greenwich), so calendars, countdowns and "today" lists were
-  empty. `--wait` still moves the clock; `--now` and a site's `"now"` pin it.
-- **A Stack with `fit=contain` (or `cover`) and no size of its own along an axis** (`w=fill`) scales its content's
-  size. Its frame was not a number, the picture was blank and the render's layout dump failed on it
-  ("Infinity or NaN toInt").
-- **A box that fills, measured with no bound and with nothing in it that sizes it** (a filling tile in a cell of a
-  grid whose rows hug) no longer fails the layout with "A Stack requires bounded constraints".
-- **`parent.parent.item`** (the outermost item in a list three deep) reads that item; it read nothing, so a
-  condition on it drew no row.
-- **The notation's `go page`** names a page written in the site's folder when `site.json` lists no pages.
-
-### Desk
-
-- `Tabs` scroll sideways, with a fade at the edge, where the row has no room for them all. They were cut.
-- `Property`: its label is as wide as its words (112 at least, 220 at most); it was cut at 112 beside free room.
-- `ListRow`: its description says how tall it is (44 with one line, 66 with two, 87 with a `preview`) and that no
-  height is written on it; its previews are at those heights.
-
-### Tools
-
-- **The render command draws a text that names no family in the theme's `fontFamily`**, as an app does. It gave
-  such a text Roboto by name, so a site whose theme names a serif was drawn in Roboto while the run reported the
-  serif as fetched.
-- `text_clipped` says when a text was drawn smaller, or cut, to keep a word whole, and at what share of its size.
-
-## Unreleased
-
-### Behaviour changes (read before upgrading)
 
 **Theme**
 
@@ -217,6 +169,30 @@ theme (or a design system's), as the same control in a screen is.
 
 ### Added
 
+- **The `graph` node**: rows drawn as marks (bars, lines, areas, candles, slices) on rows one place each or a
+  linear x scale, with ticks, guides, panes, a crosshair and a selection it publishes as state. When the rows
+  change, the marks move from the values on screen to the new ones; a linear x scale's view pans and zooms
+  about the pointer and is set and read as `{from, to}`.
+
+- **`render --screen-timeout <seconds>`** (default 120): the most real time one screen at one size may take. Past
+  it the page's own functions and computed variables give nothing, the screen is reported as an error
+  (`screen_timeout`) and the run goes on to the next. `FormulaFunction.deadline` is the limit a host sets.
+- **A site names its date**: `"now"` in `site.json` is the `--now` of every render and state of the site when none
+  is passed.
+- **`FormulaEvaluator.onFailure`** is told each formula that could not be worked out, with why;
+  **`FormulaEvaluator.truthy`** is whether a value counts as yes where a condition is read.
+- **Render diagnostics**:
+  - `formula_failed` also names a node whose formula failed when the screen was drawn (its condition, its list,
+    its text, a value) or a variable's, with the formula and why;
+  - `formula_runaway`: a formula cut off at the call limit, naming the function;
+  - `theme_name_unknown`: a color the theme does not have, `theme.<name>` written as a value's text, or
+    `theme.<name>` read in a formula where the theme gives no such value;
+  - `icon_not_drawn` also for a control's icon (an `IconButton`'s, a `Button`'s, a field's) that names no glyph,
+    and names a known icon of the same name without its style's ending;
+  - `paints_outside`: a node drawn past the bottom or the right edge of a Stack (or a box) that does not clip,
+    over something after it, with by how much;
+  - `site_now`: a `"now"` in `site.json` that is not a time.
+
 - **`CodelesslyConfig.pageTransitions`: the page transition of a project's screens.**
   `CodelesslyPageTransitions.platform` (the default) plays Android's fade forwards, iOS's and macOS's slide with
   its back swipe from the edge, the zoom on Windows and Linux, and none on the web. Each can be chosen by name on
@@ -232,6 +208,18 @@ theme (or a design system's), as the same control in a screen is.
   primary, muted, outline, hairline, error), from a project's theme tokens, for your own widgets.
 
 ### Fixed
+
+- **A render with no `--now` starts at the real time**, as its documentation said: `now()` and `today()` gave 1
+  January 2015 (31 December 2014 in zones west of Greenwich), so calendars, countdowns and "today" lists were
+  empty. `--wait` still moves the clock; `--now` and a site's `"now"` pin it.
+- **A Stack with `fit=contain` (or `cover`) and no size of its own along an axis** (`w=fill`) scales its content's
+  size. Its frame was not a number, the picture was blank and the render's layout dump failed on it
+  ("Infinity or NaN toInt").
+- **A box that fills, measured with no bound and with nothing in it that sizes it** (a filling tile in a cell of a
+  grid whose rows hug) no longer fails the layout with "A Stack requires bounded constraints".
+- **`parent.parent.item`** (the outermost item in a list three deep) reads that item; it read nothing, so a
+  condition on it drew no row.
+- **The notation's `go page`** names a page written in the site's folder when `site.json` lists no pages.
 
 - **The package is tested and documented for any app shell.** Its tests run under a plain `WidgetsApp` as well
   as a `MaterialApp`; the README and the quickstart have a `WidgetsApp` sample and say what the SDK needs from
@@ -250,6 +238,20 @@ theme (or a design system's), as the same control in a screen is.
   is left in such an app comes from the plugins the package depends on (`video_player`, `webview_flutter`,
   `in_app_purchase`), which import Material themselves. A Material app carries about 300 KB less.
   `docs/design/no-material.md` has the measurements.
+
+### Desk
+
+- `Tabs` scroll sideways, with a fade at the edge, where the row has no room for them all. They were cut.
+- `Property`: its label is as wide as its words (112 at least, 220 at most); it was cut at 112 beside free room.
+- `ListRow`: its description says how tall it is (44 with one line, 66 with two, 87 with a `preview`) and that no
+  height is written on it; its previews are at those heights.
+
+### Tools
+
+- **The render command draws a text that names no family in the theme's `fontFamily`**, as an app does. It gave
+  such a text Roboto by name, so a site whose theme names a serif was drawn in Roboto while the run reported the
+  serif as fetched.
+- `text_clipped` says when a text was drawn smaller, or cut, to keep a word whole, and at what share of its size.
 
 ## 39.0.0
 
