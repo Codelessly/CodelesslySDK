@@ -106,14 +106,14 @@ const runtimeCodes = <(String, String, String)>[
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
   ('text_no_color', 'warning', 'A text has no color (the engine paints it white: invisible on a light background), or a transparent one. Set props.style.color.'),
   ('font_fallback', 'warning', 'A font family (or weight/style) a text style names is neither declared in site.json\'s "fonts" nor in a --fonts directory: the text is drawn in another font. The message names the family and the nodes that use it.'),
-  ('font_missing', 'error', 'A font file site.json\'s "fonts" declares is not there (the path is relative to the site), or is not a font file it can read.'),
+  ('font_missing', 'error', 'Font files site.json\'s "fonts" declares are not there (a path is relative to the site), or are not font files it can read: one report for the site, before any screen, naming each face, its file, where it was looked for and what its text is drawn with meanwhile. The run goes on.'),
   ('design_system_missing', 'error', 'The design system site.json names ("designSystem": a folder relative to it, or an absolute path) has no readable design_system.json.'),
   ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
   ('formula_invalid', 'warning', 'A formula of a node (a binding, a value, an action) or of a variable does not parse, so it gives nothing where it is used: a list with no rows, a text with no value. The message names the node, the field, the expression and why it does not parse (an unbalanced bracket, a stray word).'),
   ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
-  ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
+  ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now; --stage sets a value once without holding it.'),
   ('theme_name_unknown', 'warning', 'A node names a color the theme does not have, writes theme.<name> as a value\'s text, or reads theme.<name> in a formula where the theme gives no such value: it draws nothing there. The message names the node, the name and what the theme has.'),
   ('paints_outside', 'warning', 'A node is drawn past the bottom or the right edge of its Stack (or box), which does not clip, over something after it: the Stack is as big as it is written, not as what is placed in it. The message names the node, by how much, and what it covers.'),
   ('formula_runaway', 'error', 'A formula made more calls of the page\'s own functions in one evaluation than can be meant (functions that call each other without end): the calls past the limit gave nothing, and what reads the formula is drawn without its value. The message names the function.'),
@@ -344,11 +344,6 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     if (siteDir != null) ...declaredFonts(declared, siteDir, declaredProblems),
     ...scanFonts(args.fontDirs),
   ];
-  for (final p in declaredProblems) {
-    issue(RuntimeIssue('font_missing', 'error',
-        'Font "${p.family}" declares ${p.asset}: ${p.reason}. ${p.missing ? 'Put the file there (paths are relative to site.json)' : 'Declare a .ttf, .otf or .woff file'}; its text falls back meanwhile.',
-        file: api.SiteManifest.fileName));
-  }
   final fetcher = DirectoryFontFetcher(faces);
   final symbolFont = systemSymbolFont();
   await tester.runAsync(() async {
@@ -474,6 +469,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
             if (f.url == null) (family: f.family, weight: f.weight, italic: f.italic),
         ], google));
   }
+  // The font files site.json declares that are not there (or not read):
+  // one report for the site, before any screen, each face with its file,
+  // where it was looked for and what its text is drawn in instead.
+  final unusableFamilies = _reportDeclaredFonts(declaredProblems, declared, fetcher, siteDir, issue);
   // A page's nodes before a component's of the same id (a page's row3 was
   // reported in a component's file: test 9, admin 4 and kanban 9); a node
   // box is placed by its canvas or its component instead ([_fileOf]).
@@ -541,13 +540,15 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   try {
     if (alone.isEmpty) {
       await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
-          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
+          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
+          unusableFamilies: unusableFamilies);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
+          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
+          unusableFamilies: unusableFamilies);
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
@@ -572,6 +573,43 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   return _finish(report, args);
 }
 
+/// Says once, as one `font_missing` error, every font file site.json declares
+/// that is not there or not read: each face (family, weight, style) with the
+/// file named, the folder it was looked for in and the face its text is drawn
+/// in meanwhile. Returns the families (lower case) none of whose declared files
+/// could be used: their `font_fallback` warnings would only repeat this.
+Set<String> _reportDeclaredFonts(List<DeclaredFontProblem> problems, List<api.FontFamily> declared, DirectoryFontFetcher fetcher,
+    String? siteDir, void Function(RuntimeIssue) issue) {
+  if (problems.isEmpty) return const {};
+  String face(String family, int weight, bool italic) => '"$family" $weight${italic ? ' italic' : ''}';
+  final lines = [
+    for (final p in problems)
+      () {
+        final instead = fetcher.faceFor(p.family, p.weight, p.italic);
+        final drawn = instead == null ? 'the engine\'s default' : '${instead.family} ${instead.weight}${instead.italic ? ' italic' : ''}';
+        return '${face(p.family, p.weight, p.italic)}: "${p.asset}" ${p.missing ? 'is not there (looked for at ${p.path})' : 'is not a font file it can read (${p.reason})'}; drawn with $drawn';
+      }(),
+  ];
+  final missing = problems.where((p) => p.missing).length;
+  final unread = problems.length - missing;
+  final families = {for (final p in problems) p.family};
+  issue(RuntimeIssue(
+    'font_missing',
+    'error',
+    '${problems.length} font file${problems.length == 1 ? '' : 's'} site.json declares for ${families.map((f) => '"$f"').join(', ')} '
+        '${missing == problems.length ? '${problems.length == 1 ? 'is' : 'are'} not there' :unread == problems.length ? 'cannot be read' : 'are not there or cannot be read'}'
+        '${siteDir == null ? '' : ' (an "asset" path is relative to the site folder, $siteDir)'}: ${lines.join('; ')}. '
+        'Every capture draws these faces in the fallback until the files are there: put each file at its path, or point its "asset" at where it is '
+        '(.ttf, .otf or .woff). Reported once for the site; the run goes on.',
+    file: api.SiteManifest.fileName,
+  ));
+  final bad = {for (final p in problems) '${p.family.toLowerCase()}|${p.asset}'};
+  return {
+    for (final f in declared)
+      if (f.fonts.isNotEmpty && f.fonts.every((a) => bad.contains('${f.family.toLowerCase()}|${a.asset}'))) f.family.toLowerCase(),
+  };
+}
+
 Future<void> _renderAll(
   WidgetTester tester,
   RenderArgs args,
@@ -586,6 +624,7 @@ Future<void> _renderAll(
   Map<String, List<String>> fontUsers = const {},
   Map<String, Set<String>> svgUsers = const {},
   String? siteDir,
+  Set<String> unusableFamilies = const {},
 }) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s),
@@ -983,15 +1022,23 @@ Future<void> _renderAll(
       await _countersSettled(tester);
 
       // A --set holds against what no step did: a timer or a load reaction
-      // that wrote the variable after it (a clock) is undone, and said.
+      // that wrote the variable after it (a clock) is undone, and said. A
+      // --stage is set once and never held (nor does it end a --set's hold
+      // but of its own variable): what the page does after it shows.
       final held = <String, Object?>{};
       for (final step in args.steps) {
         if (step.kind == 'set') {
           held[step.target] = _stepValue(step);
-        } else if (!const {'wait', 'set'}.contains(step.kind)) {
+        } else if (step.kind == 'stage') {
+          held.remove(step.target);
+        } else if (step.kind != 'wait') {
           held.clear();
         }
       }
+      final waited = <String>{
+        for (var i = 0; i < args.steps.length; i++)
+          if (args.steps[i].kind == 'set' && args.steps.skip(i + 1).any((s) => s.kind == 'wait')) args.steps[i].target,
+      };
       for (final e in held.entries) {
         final now = _readVariable(binding, controller, e.key);
         if (jsonEncode(now) == jsonEncode(e.value)) continue;
@@ -999,7 +1046,8 @@ Future<void> _renderAll(
         await tester.pump();
         issue(RuntimeIssue('set_overwritten', 'warning',
             '--set ${e.key}: a reaction (a timer, a load) set it to ${jsonEncode(now)} after the step; the capture shows it as set, ${jsonEncode(e.value)}. '
-            'A clock written from now() stays put with --now <ISO time> (now() returns it).',
+            'A clock written from now() stays put with --now <ISO time> (now() returns it).'
+            '${waited.contains(e.key) ? ' To start the page from this value and capture what its timers make of it over the --wait, write --stage ${e.key}=${jsonEncode(e.value)} (set once, not held).' : ''}',
             screen: label, size: sizeName));
       }
 
@@ -1017,6 +1065,8 @@ Future<void> _renderAll(
             (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 &&
             m.substitute!.contains('italic') == m.italic;
         if (near) continue;
+        // A family site.json declares whose files are all missing: font_missing said it, with the fallback.
+        if (unusableFamilies.contains(m.family.toLowerCase())) continue;
         final style = '${m.weight}${m.italic ? ' italic' : ''}';
         final has = [for (final f in faces) if (f.family.toLowerCase() == m.family.toLowerCase()) '${f.weight}${f.italic ? ' italic' : ''}'];
         final slug = m.family.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
@@ -2222,7 +2272,9 @@ String? _canvasNameOf(NodeBox b) {
 /// [prefer] (`--type`: the one with a text field in it), that one is meant.
 ({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
   final exact = _locateExact(binding, id, prefer: prefer);
-  if (exact.box != null || !(exact.problem ?? '').startsWith('no node ') || id.contains('#')) return exact;
+  if (exact.box != null || !(exact.problem ?? '').startsWith('no node ')) return exact;
+  if (_locateInWord(binding, id, prefer: prefer) case final inWord?) return inWord;
+  if (id.contains('#')) return exact;
   // A node inside a component instance named without the calls above it
   // (`joinSeason/action`, `action` for `FieldSeason1/joinSeason/action`):
   // the node whose full path ends with what was written, when one node on
@@ -2249,6 +2301,47 @@ String? _canvasNameOf(NodeBox b) {
   if (shown.isEmpty) return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
   final view = Offset.zero & binding.renderViews.first.size;
   return (box: shown.where((b) => _rectOf(b).overlaps(view)).firstOrNull ?? shown.last, problem: null);
+}
+
+/// Node [id] written inside a defined word (a site's `components/*.txt`, a
+/// dictionary word), which the expansion inlines with each node's id scoped
+/// by the call: `IconButton#editorBack` in `EditorBar` is
+/// `editorBack_editorBar1`, under the call's root `editorBar1`. The id as
+/// written reaches it (`editorBack`, `dayCell#22` for a list copy) when one
+/// such node is on screen; `editorBar1/editorBack` names one call's. Null
+/// when no node on screen has such an id (the caller says what it found).
+({NodeBox? box, String? problem})? _locateInWord(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
+  final segments = id.split('/');
+  final last = segments.last;
+  final hash = last.lastIndexOf('#');
+  final copy = hash >= 0 && int.tryParse(last.substring(hash + 1)) != null ? last.substring(hash) : '';
+  final name = copy.isEmpty ? last : last.substring(0, hash);
+  if (name.isEmpty) return null;
+  // The call written before it (`editorBar1/editorBack`), when there is one.
+  final call = segments.length > 1 ? segments[segments.length - 2].split('#').first : null;
+  final ids = <String>{};
+  for (final b in _boxes(binding)) {
+    if (!b.id.startsWith('${name}_')) continue;
+    final uid = b.id.substring(name.length + 1);
+    if (call != null && uid != call) continue;
+    // Scoped by a call it is inside: the word's root carries the call's id.
+    var inside = false;
+    for (RenderObject? p = b.parent; p != null && !inside; p = p.parent) {
+      if (p is NodeBox && p.id == uid) inside = true;
+    }
+    if (inside) ids.add(b.id);
+  }
+  if (ids.isEmpty) return null;
+  if (ids.length > 1) {
+    final calls = [for (final i in ids) '${i.substring(name.length + 1)}/$name$copy'];
+    return (
+      box: null,
+      problem: 'ambiguous: "$name" is written inside ${ids.length} uses of a defined word on screen (${ids.join(', ')}). '
+          'Name the one meant by its call: ${calls.take(6).join(' or ')}',
+    );
+  }
+  // The expanded id in place of the written one, inside the same segments.
+  return _locateExact(binding, [...segments.take(segments.length - 1), '${ids.single}$copy'].join('/'), prefer: prefer);
 }
 
 /// [path] (a component's node by its call ids, `cards#2/cta`) with each
@@ -3142,7 +3235,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         await tester.pump();
       }
       return null;
-    case 'set':
+    case 'set' || 'stage':
       _writeVariable(binding, controller, step.target, _stepValue(step));
       return null;
     case 'scroll':

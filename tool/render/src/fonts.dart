@@ -213,7 +213,7 @@ Iterable<int> _weightsOf(int weight, (int, int)? axis) sync* {
 }
 
 /// A declared font file that could not be used: missing, or not read.
-typedef DeclaredFontProblem = ({String family, String asset, String reason, bool missing});
+typedef DeclaredFontProblem = ({String family, int weight, bool italic, String asset, String path, String reason, bool missing});
 
 /// The faces a site declares (`site.json`'s `fonts`, files relative to
 /// [siteDir]), each under its declared family, weight and style (as a
@@ -225,7 +225,7 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
     for (final a in f.fonts) {
       final file = File(sitePath(siteDir, a.asset));
       if (!file.existsSync()) {
-        problems.add((family: f.family, asset: a.asset, reason: 'no file ${file.path}', missing: true));
+        problems.add((family: f.family, weight: a.weight, italic: a.italic, asset: a.asset, path: file.path, reason: 'no file ${file.path}', missing: true));
         continue;
       }
       if (a.asset.toLowerCase().endsWith('.woff2')) continue; // not a format this renderer reads
@@ -233,7 +233,7 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
       String? reason;
       final sfnt = sfntOf(bytes, why: (r) => reason = r);
       if (sfnt == null) {
-        problems.add((family: f.family, asset: a.asset, reason: reason ?? 'not read', missing: false));
+        problems.add((family: f.family, weight: a.weight, italic: a.italic, asset: a.asset, path: file.path, reason: reason ?? 'not read', missing: false));
         continue;
       }
       var path = file.path;
@@ -395,6 +395,24 @@ class DirectoryFontFetcher implements FontFetcher {
     return same.first;
   }
 
+  /// `monospace` (and its other generic names): Roboto Mono.
+  FontFace? _generic(String family, int weight, bool italic) =>
+      monospaceFamilies.contains(family.toLowerCase()) ? match('Roboto Mono', weight, italic) : null;
+
+  /// The face a text in [family] at [weight] and [italic] is drawn in: its
+  /// own file, else what stands in for it (Roboto Mono for a monospace
+  /// family, an open stand-in, a face of its class, Roboto); null when not
+  /// even Roboto is here.
+  FontFace? faceFor(String family, int weight, bool italic) {
+    // A family with no file at all is drawn in Roboto (the test
+    // environment's own fallback draws boxes, which nobody can review).
+    final generic = _generic(family, weight, italic);
+    // A named monospace face no file provides (IBM Plex Mono) is drawn in
+    // Roboto Mono, as `monospace` is, and said.
+    final mono = generic == null && fontClassOf(family) == FontClass.mono ? match('Roboto Mono', weight, italic) : null;
+    return match(family, weight, italic) ?? generic ?? openStandIn(family, weight, italic) ?? mono ?? classFace(family, weight, italic) ?? match('Roboto', weight, italic);
+  }
+
   /// How long each fetch takes at least: a slow font source (a large file,
   /// a network), for tests of what is measured before it arrives.
   static Duration debugLatency = Duration.zero;
@@ -420,13 +438,8 @@ class DirectoryFontFetcher implements FontFetcher {
       Zone.root.createTimer(debugLatency, waited.complete);
       await waited.future;
     }
-    // A family with no file at all is drawn in Roboto (the test
-    // environment's own fallback draws boxes, which nobody can review).
-    final generic = monospaceFamilies.contains(font.family.toLowerCase()) ? match('Roboto Mono', font.weight, font.italic) : null;
-    // A named monospace face no file provides (IBM Plex Mono) is drawn in
-    // Roboto Mono, as `monospace` is, and said.
-    final mono = generic == null && fontClassOf(font.family) == FontClass.mono ? match('Roboto Mono', font.weight, font.italic) : null;
-    final face = match(font.family, font.weight, font.italic) ?? generic ?? openStandIn(font.family, font.weight, font.italic) ?? mono ?? classFace(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);
+    final generic = _generic(font.family, font.weight, font.italic);
+    final face = faceFor(font.family, font.weight, font.italic);
     if (face == null || (generic == null || !identical(face, generic)) && (face.family.toLowerCase() != font.family.toLowerCase() ||
         face.weight != font.weight || face.italic != font.italic)) {
       final miss = (

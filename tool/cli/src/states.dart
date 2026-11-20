@@ -72,6 +72,14 @@ Future<int> statesMain(List<String> argv) async {
   if (states.isEmpty) throw const UsageError('No states to render (the manifest has none, or --only matched none).');
 
   final results = <Map<String, Object?>>[];
+  String line(Map d) {
+    final msg = '${d['message'] ?? ''}';
+    return '${d['severity']} ${d['code']} ${d['nodeId'] ?? d['path'] ?? ''}: ${msg.length > 200 ? msg.substring(0, 200) : msg}';
+  }
+
+  // Problems of the site itself (site.json: a declared font file or the design system not there), met before any
+  // screen: every state has them. Said once, first, not again in each state's list; still counted in each state.
+  final siteProblems = <String>{};
   for (final s in states) {
     final name = '${s['name']}';
     final sdir = '$out/$name';
@@ -135,6 +143,9 @@ Future<int> statesMain(List<String> argv) async {
     }
     File('$sdir/render.log').writeAsStringSync(log.toString());
     final diags = allDiags.where((x) => !ignore.contains(x['code'])).toList();
+    // A state is right only when it shows something: a run that wrote no picture (it stopped before the capture,
+    // or the command never started: an argument the shell could not pass) fails, whatever its status said.
+    if (noCapture(merged['images']!, status, log.toString()) case final d?) diags.add(d);
     final errors = diags.where((x) => x['severity'] == 'error').toList();
     final warnings = diags.where((x) => x['severity'] != 'error').toList();
     final comps = merged['comparisons']!.cast<Map>();
@@ -153,11 +164,11 @@ Future<int> statesMain(List<String> argv) async {
       }
       File('$sdir/outline.txt').writeAsStringSync(text.toString());
     }
-    String line(Map d) {
-      final msg = '${d['message'] ?? ''}';
-      return '${d['severity']} ${d['code']} ${d['nodeId'] ?? d['path'] ?? ''}: ${msg.length > 200 ? msg.substring(0, 200) : msg}';
+    final ofSite = [for (final d in diags) if (isSiteProblem(d)) d];
+    for (final d in ofSite) {
+      final text = '${d['severity']} ${d['code']}: ${d['message']}';
+      if (siteProblems.add(text)) stdout.writeln('site $text');
     }
-
     final logText = log.toString();
     results.add({
       'state': name,
@@ -170,8 +181,9 @@ Future<int> statesMain(List<String> argv) async {
       'matching': worst,
       'comparisons': comps,
       'images': [for (final i in merged['images']!) '$sdir/$i'],
-      'problems': [for (final d in [...errors, ...warnings].take(12)) line(d)],
-      'log': hasDiagnostics ? null : logText.substring(logText.length > 1500 ? logText.length - 1500 : 0),
+      'problems': [for (final d in [...errors, ...warnings].where((d) => !isSiteProblem(d)).take(12)) line(d)],
+      if (ofSite.isNotEmpty) 'siteProblems': ofSite.length,
+      'log': hasDiagnostics || logText.isEmpty ? null : logText.substring(logText.length > 1500 ? logText.length - 1500 : 0),
     });
     final match = worst == null ? 'no reference' : '${(worst * 100).toStringAsFixed(1)}% match';
     stdout.writeln('${failed ? 'FAIL' : 'ok  '} ${name.padRight(32)} ${errors.length} errors, ${warnings.length} warnings, '
@@ -187,7 +199,15 @@ Future<int> statesMain(List<String> argv) async {
   File('$out/summary.json').writeAsStringSync(prettyJson(results));
   final md = StringBuffer()
     ..writeln('# States\n')
-    ..writeln('${results.length} states from `${manifestFile.path}`; worst first.\n')
+    ..writeln('${results.length} states from `${manifestFile.path}`; worst first.\n');
+  if (siteProblems.isNotEmpty) {
+    md.writeln('## The site\n\nMet before any screen, so every state has them (counted in each state below, listed here once):\n');
+    for (final p in siteProblems) {
+      md.writeln('- $p');
+    }
+    md.writeln();
+  }
+  md
     ..writeln('| State | Result | Errors | Warnings | Worst match | Codes |')
     ..writeln('|---|---|---|---|---|---|');
   for (final r in results) {
@@ -216,14 +236,37 @@ Future<int> statesMain(List<String> argv) async {
     }
   }
   stdout.writeln('wrote $out/summary.md');
-  return results.any((r) => r['failed'] == true) ? 1 : 0;
+  final failedCount = results.where((r) => r['failed'] == true).length;
+  stdout.writeln(failedCount == 0
+      ? 'all ${results.length} states ok'
+      : '$failedCount of ${results.length} states failed${siteProblems.isEmpty ? '' : ' (${siteProblems.length} problem${siteProblems.length == 1 ? '' : 's'} of the site itself in every state: see "The site" in summary.md)'}');
+  return failedCount > 0 ? 1 : 0;
 }
+
+/// The `no_capture` error of a state whose runs wrote no picture ([images] empty), whatever their exit [status]:
+/// a state is checked by its captures, so one with none failed (it stopped before the capture, or the render command
+/// never ran). Null when there is a picture.
+Map<String, Object?>? noCapture(List<Object?> images, int status, String log) {
+  if (images.isNotEmpty) return null;
+  final said = log.trim();
+  return {
+    'severity': 'error',
+    'code': 'no_capture',
+    'message': 'The state wrote no picture (render exit status $status'
+        '${said.isEmpty ? ', and no output at all: the render command did not run' : ''}). '
+        'A state is checked by its captures: see render.log in its folder.',
+  };
+}
+
+/// A problem of the site itself, met before any screen was rendered (a font file or the design system site.json
+/// names that is not there): the same in every state.
+bool isSiteProblem(Map d) => d['file'] == 'site.json' && d['screen'] == null && d['nodeId'] == null;
 
 const _doc = '''tool/codelessly states <states.json> [--out dir] [--only name]... [--sizes WxH,...] [--no-sheet] [--outline]
 
 Renders every state a manifest lists, compares each with its reference, and writes <out>/summary.md and
 summary.json (worst first), <out>/sheet.png and each state's captures in <out>/<state>/. Exit 1 when a state has
-errors or matches its reference less than minMatch. The manifest (paths relative to it):
+errors, wrote no picture, or matches its reference less than minMatch. The manifest (paths relative to it):
 
   {
     "documents": ["site"],                 what to render: documents or a site folder
@@ -240,6 +283,8 @@ errors or matches its reference less than minMatch. The manifest (paths relative
     ]
   }
 
-A step is {"<render option without -->": value} (tap, hover, type, set, scroll, drag, key, navigate, wait, focus;
-{"unfocus": true}), or a list of raw arguments. A state's compare is a file, a folder, or a map from size to file
+A step is {"<render option without -->": value} (tap, hover, type, set, stage, scroll, drag, key, navigate, wait,
+focus; {"unfocus": true}), or a list of raw arguments; values reach the render as written ({"set": "items=[]"},
+{"type": "note=one\\ntwo"} types both lines). A state that writes no picture fails (no_capture). Problems of the
+site itself (a font file site.json declares that is not there) are said once, under "The site" in summary.md. A state's compare is a file, a folder, or a map from size to file
 (each size then renders on its own); its documents replace the manifest's for that state.''';

@@ -2,12 +2,20 @@
 # Render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
 #       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text]
-#       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--long-press id] [--right-click id] [--reload] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time] [--screen-timeout seconds]
+#       [--set name=json] [--stage name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--long-press id] [--right-click id] [--reload] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time] [--screen-timeout seconds]
 #       [--label text] [--state label steps... (repeatable)] [--compare png|dir] [--compare-map screen=name]
 #       [--component Type [--props json] [--slots file]]
 #       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
 # Exit status: 0 no errors (warnings allowed), 1 errors, 2 bad arguments or a crash.
 set -u
+# The arguments from a file, each ended by a NUL, when the caller could not put them on a command line (on Windows
+# one holding a newline: tool/cli's runCaptured writes them there and names the file).
+if [ -n "${CODELESSLY_ARGS_FILE:-}" ] && [ -f "$CODELESSLY_ARGS_FILE" ]; then
+  mapfile -d '' -t file_args < "$CODELESSLY_ARGS_FILE"
+  rm -f "$CODELESSLY_ARGS_FILE"
+  unset CODELESSLY_ARGS_FILE
+  set -- "${file_args[@]}"
+fi
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sdk="$(cd "$here/../.." && pwd)"
 # Scripts run on the QuickJS library tool/build_quickjs.sh builds, when it is there and none is named.
@@ -60,7 +68,7 @@ for a in "$@"; do
         # A table (a .json file) is a path too.
         case "$key" in *.json) key="$(abs "$key")" ;; esac
         args+=("$key=$dir")
-      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|scroll|drag|navigate|wait|frames|now|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|stage|scroll|drag|navigate|wait|frames|now|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"
@@ -104,7 +112,8 @@ codelessly_find_api
 
 work="$(mktemp -d "$out/.render.XXXXXX")"
 trap 'rm -rf "$work"; codelessly_release_lock' EXIT
-printf '%s\n' "${args[@]}" > "$work/args"
+# One argument after another, each ended by a NUL: an argument may hold a newline (--type note=$'one\ntwo').
+printf '%s\0' "${args[@]}" > "$work/args"
 
 # The render server (tool/render/serve.sh), when it is up and serves this code: the run is a request to it.
 server="$sdk/build/.render-server"
