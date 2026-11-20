@@ -165,6 +165,35 @@ void main() {
     expect(f.boxRect.height, 50);
   });
 
+  testWidgets('an autofocus field takes the focus once: moved (its route leaving), it neither takes it again nor throws', (tester) async {
+    // A Save that blurs the page's autofocus title, then navigates: the
+    // leaving page's render objects are detached and attached again (the
+    // navigator's overlay moves them), and the field must not autofocus on
+    // that attach, before its editable is attached (an `attached` assertion).
+    final source = DocumentSource(_doc({
+      'f': {
+        'type': 'textField',
+        'layout': {'width': 200, 'height': 46},
+        'props': {'initialValue': 'Practice', 'autofocus': true},
+      },
+    }));
+    final tree = NodeTree(source);
+    final key = GlobalKey();
+    Widget view() => NodeView(key: key, tree: tree, rootId: 's', interactive: true);
+    await tester.pumpWidget(MaterialApp(home: Center(child: view())));
+    await tester.pump();
+    expect(textField(tester).focusNode.hasFocus, isTrue, reason: 'autofocus on its first attach');
+    textField(tester).focusNode.unfocus();
+    await tester.pump();
+    // The same render objects under another parent: detached, then attached.
+    await tester.pumpWidget(MaterialApp(home: Align(child: Padding(padding: const EdgeInsets.all(8), child: view()))));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(textField(tester).focusNode.hasFocus, isFalse, reason: 'autofocus is not taken again on a later attach');
+    await tester.pumpWidget(const SizedBox());
+    tree.dispose();
+  });
+
   group('a focused field that goes away', () {
     Map<String, Json> form() => {
           'col': {'type': 'column', 'children': ['form', 'thanks'], 'layout': {'width': 400, 'height': 400}},

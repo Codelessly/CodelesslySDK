@@ -1,6 +1,6 @@
 // Render every state of a site from one manifest, compare each with its reference, and summarize.
 //
-//   tool/codelessly states <states.json> [--out dir] [--only name]... [--sizes WxH,...] [--no-sheet] [--outline]
+//   tool/codelessly states <states.json> [--out dir] [--only name]... [--sizes WxH,...] [--no-sheet] [--outline] [--cold]
 //
 // A screen is right only when every state of it is: empty, filled, errors, a dialog open, hovered, at each size.
 // This runs the render command once per state (`--label <state>`), then writes `<out>/summary.md` and
@@ -71,8 +71,53 @@ Future<int> statesMain(List<String> argv) async {
   ];
   if (states.isEmpty) throw const UsageError('No states to render (the manifest has none, or --only matched none).');
 
+  // One warm renderer for the whole manifest: the render server (tool/render/serve.sh), started for this run when
+  // none is up and stopped at its end, so a state costs its rendering, not a start of Flutter. Each state is still a
+  // run of its own from a fresh app (a new app, a new screen, nothing stored); a run that breaks the server's tree
+  // stops it, and the next state starts another. `--cold` starts Flutter for each state instead.
+  final cold = a.has('--cold') || states.length < 2;
+  var owned = false;
+  Future<bool> serverUp() async => (await runCaptured(serveScript, const ['--status'])).$2.startsWith('Render server up');
+  Future<bool> startServer() async {
+    final (code, _) = await runCaptured(serveScript, const ['--idle', '900'], timeout: const Duration(minutes: 15));
+    return code == 0 && await serverUp();
+  }
+
+  if (cold) {
+    stdout.writeln(a.has('--cold')
+        ? 'Cold: Flutter starts for each state (--cold).'
+        : 'One state: rendered the usual way (a render server already up is used).');
+  } else if (await serverUp()) {
+    stdout.writeln('Warm: the render server already up renders every state (left running).');
+  } else if (await startServer()) {
+    owned = true;
+    stdout.writeln('Warm: a render server started for this manifest renders every state (stopped at the end).');
+  } else {
+    stdout.writeln('Cold: the render server did not start (tool/codelessly serve says why); Flutter starts for each state.');
+  }
+  try {
+    return await _renderStates(states, a, m, manifestFile, out, docs, common, refs, minMatch, ignore, () async {
+      // A server this run started that stopped (a run broke its tree, or the code changed): started again.
+      if (owned && !await serverUp()) {
+        stdout.writeln(await startServer()
+            ? '(the render server had stopped; started a new one)'
+            : '(the render server had stopped and did not start again: the next states start Flutter each)');
+      }
+    });
+  } finally {
+    if (owned) await runCaptured(serveScript, const ['--stop']);
+  }
+}
+
+/// Whether a render command's output says the render server drew it (else Flutter was started for it).
+bool renderedWarm(String log) => log.contains(', the render server (pid ');
+
+Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File manifestFile, String out, List<String> docs,
+    List<String> common, Object? refs, double? minMatch, Set<String> ignore, Future<void> Function() beforeState) async {
+  final base = manifestFile.parent.path;
   final results = <Map<String, Object?>>[];
   for (final s in states) {
+    await beforeState();
     final name = '${s['name']}';
     final sdir = '$out/$name';
     Directory(sdir).createSync(recursive: true);
@@ -159,11 +204,13 @@ Future<int> statesMain(List<String> argv) async {
     }
 
     final logText = log.toString();
+    final warm = renderedWarm(logText);
     results.add({
       'state': name,
       'status': status,
       'failed': failed,
       'seconds': (watch.elapsedMilliseconds / 100).round() / 10,
+      'renderer': warm ? 'server' : 'cold',
       'errors': errors.length,
       'warnings': warnings.length,
       'codes': ({for (final d in diags) '${d['code']}'}.toList()..sort()),
@@ -175,7 +222,7 @@ Future<int> statesMain(List<String> argv) async {
     });
     final match = worst == null ? 'no reference' : '${(worst * 100).toStringAsFixed(1)}% match';
     stdout.writeln('${failed ? 'FAIL' : 'ok  '} ${name.padRight(32)} ${errors.length} errors, ${warnings.length} warnings, '
-        '$match (${results.last['seconds']}s)');
+        '$match (${results.last['seconds']}s, ${warm ? 'warm' : 'cold'})');
   }
 
   results.sort((x, y) {
@@ -219,7 +266,7 @@ Future<int> statesMain(List<String> argv) async {
   return results.any((r) => r['failed'] == true) ? 1 : 0;
 }
 
-const _doc = '''tool/codelessly states <states.json> [--out dir] [--only name]... [--sizes WxH,...] [--no-sheet] [--outline]
+const _doc = '''tool/codelessly states <states.json> [--out dir] [--only name]... [--sizes WxH,...] [--no-sheet] [--outline] [--cold]
 
 Renders every state a manifest lists, compares each with its reference, and writes <out>/summary.md and
 summary.json (worst first), <out>/sheet.png and each state's captures in <out>/<state>/. Exit 1 when a state has
@@ -240,6 +287,13 @@ errors or matches its reference less than minMatch. The manifest (paths relative
     ]
   }
 
-A step is {"<render option without -->": value} (tap, hover, type, set, scroll, drag, key, navigate, wait, focus;
-{"unfocus": true}), or a list of raw arguments. A state's compare is a file, a folder, or a map from size to file
-(each size then renders on its own); its documents replace the manifest's for that state.''';
+A step is {"<render option without -->": value} (tap, hover, type, set, scroll, drag, key, navigate, wait, focus,
+long-press, frames; {"unfocus": true}), or a list of raw arguments. {"frames": [0, 120]} after a step captures what
+it started at those ms with no settle first (`<png>-f<n>-<ms>ms.png`, with an outline under --outline); first in a
+state, from the page's load: [{"tap": "send"}, {"frames": [120]}] catches a pending row, [{"long-press": "msg=399,hold"},
+{"frames": [0]}] a hold in progress. A state's compare is a file, a folder, or a map from size to file (each size
+then renders on its own); its documents replace the manifest's for that state.
+
+The states share one warm renderer: when no render server (tool/codelessly serve) is up, one is started for the run
+and stopped at its end; each state is still its own run, from a fresh app. The first line says which renderer ran,
+and each state's line says warm or cold. --cold starts Flutter for each state instead.''';

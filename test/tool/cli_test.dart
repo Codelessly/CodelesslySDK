@@ -147,6 +147,14 @@ void main() {
         ['--tap', 'go', '--unfocus', '--wait', '300', '--set', 'n=1']);
     expect(absolutizeArgs('/m', ['--fonts', 'f', '--fonts', 'system', '--image-map', 'urls.json=art', '--image-map', 'https://x/=a']),
         ['--fonts', '/m/f', '--fonts', 'system', '--image-map', '/m/urls.json=/m/art', '--image-map', 'https://x/=/m/a']);
+    // A frames step from a manifest's list (render takes `[0,120]` as the times).
+    expect(stepArgs([{'tap': 'send'}, {'frames': [0, 120]}, {'long-press': 'msg=399,hold'}]),
+        ['--tap', 'send', '--frames', '[0,120]', '--long-press', 'msg=399,hold']);
+  });
+
+  test('states: each state says whether the render server drew it', () {
+    expect(renderedWarm('Rendering with codelessly_sdk 40.2.0, the render server (pid 812).\nwrote a.png'), isTrue);
+    expect(renderedWarm('Rendering with codelessly_sdk 40.2.0, Flutter /c/flutter/bin/flutter.\nwrote a.png'), isFalse);
   });
 
   test('sheet: one row per state, narrowest size first', () {

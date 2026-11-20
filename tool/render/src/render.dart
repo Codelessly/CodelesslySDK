@@ -749,7 +749,7 @@ Future<void> _renderAll(
       // The page shown (the last one navigated to): what a --reload starts
       // again on, as a browser reloads the address it is at.
       final pages = _PageObserver();
-      Future<void> show() async {
+      Future<void> show({bool filmLoad = false}) async {
         await tester.pumpWidget(RepaintBoundary(
           key: boundary,
           child: MaterialApp(
@@ -771,7 +771,15 @@ Future<void> _renderAll(
           await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
           await tester.pump(const Duration(milliseconds: 100));
         }
-        await _settle(tester);
+        // Filmed from the load (`--frames` the first step): what the page
+        // starts as it shows (an entrance, a mount animation, a first timer)
+        // is caught from its first frame. Its fonts and images still load (in
+        // real time), but none of the page's time passes.
+        if (filmLoad) {
+          await _settleNoTime(tester);
+        } else {
+          await _settle(tester);
+        }
         collect();
       }
 
@@ -793,7 +801,7 @@ Future<void> _renderAll(
       }
 
       tester.takeAnnouncements();
-      await show();
+      await show(filmLoad: args.steps.firstOrNull?.kind == 'frames');
       hear('load', baseline: true);
       if (!controller.isLoaded) {
         issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
@@ -814,7 +822,8 @@ Future<void> _renderAll(
         // step before it (which does not settle first), as a camera filming
         // what the step started: a flight, a transition, an entrance.
         if (step.kind == 'frames') {
-          final times = [for (final t in step.target.split(',')) int.tryParse(t.trim())];
+          // `0,120` or, from a manifest's list, `[0,120]`.
+          final times = [for (final t in step.target.replaceAll(RegExp(r'[\[\]\s]'), '').split(',')) int.tryParse(t)];
           if (times.isEmpty || times.any((t) => t == null || t < 0) || !_ascending(times.cast<int>())) {
             issue(RuntimeIssue('interaction_failed', 'error', '--frames ${step.target}: give ascending times in ms, from 0 (--frames 0,100,200,335).',
                 screen: label, size: sizeName));
@@ -842,6 +851,11 @@ Future<void> _renderAll(
               File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
             });
             report.images.add(file);
+            // With --dump-layout, each frame's boxes too (an outline per frame).
+            if (args.dumpLayout) {
+              File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
+                  .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(_frameLayout(binding)));
+            }
           }
           final framesNext = stepIndex + 1 < args.steps.length && args.steps[stepIndex + 1].kind == 'frames';
           if (!framesNext) await _settle(tester);
@@ -874,7 +888,7 @@ Future<void> _renderAll(
             await tester.pump();
           }
           pages.reset();
-          await show();
+          await show(filmLoad: stepIndex + 1 < args.steps.length && args.steps[stepIndex + 1].kind == 'frames');
           // On the page navigated to before, not the one the run began on.
           if (at != null && controller.isLoaded) {
             final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: at.name, arguments: at.arguments));
@@ -1187,6 +1201,22 @@ Future<void> _renderAll(
   }
 }
 
+/// The boxes a `--frames` capture shows (as `--dump-layout` writes them for
+/// the capture at the end): every node's place and size and the text it shows.
+List<Map<String, Object?>> _frameLayout(WidgetsBinding binding) => [
+      for (final b in _boxes(binding))
+        {
+          'id': b.id,
+          if (b.instance != null) 'instance': '${b.instance}',
+          if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
+          'x': _rectOf(b).left.isFinite ? _rectOf(b).left.round() : 0,
+          'y': _rectOf(b).top.isFinite ? _rectOf(b).top.round() : 0,
+          'w': double.parse(b.size.width.toStringAsFixed(1)),
+          'h': double.parse(b.size.height.toStringAsFixed(1)),
+          if (_shownText(b) case final String text) 'text': text,
+        },
+    ];
+
 /// Whether [times] never go back (a `--frames` list).
 bool _ascending(List<int> times) {
   for (var i = 1; i < times.length; i++) {
@@ -1422,6 +1452,31 @@ Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 4; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
+}
+
+/// What [_settle] waits for in real time (fonts, images), with none of the
+/// screen's time passing: a frame drawn with what loaded, the page's clock
+/// (timers, animations) where it was.
+Future<void> _settleNoTime(WidgetTester tester) async {
+  await tester.runAsync(() async {
+    await CodelesslyFonts.settled.timeout(const Duration(milliseconds: 500), onTimeout: () {});
+    await PaintImages.settled(timeout: const Duration(seconds: 3));
+  });
+  await tester.pump();
+}
+
+/// Whether the test's widget tree takes an empty frame without an error:
+/// a render server (which keeps one tree for many runs) checks it after each
+/// run, and stops rather than draw the next run on a tree a failure broke.
+Future<bool> renderTreeSound(WidgetTester tester) async {
+  tester.takeException();
+  try {
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump();
+  } catch (_) {
+    return false;
+  }
+  return tester.takeException() == null;
 }
 
 /// Pumps (in 100 ms steps, at most 20 s of the screen's time) while a
@@ -2967,9 +3022,13 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       // time, then lifted: a `longPress` reaction, a context menu on touch.
       // `--long-press bubble=900`: held that long (ms) before the lift; 700
       // without (past Flutter's long press, not an 800 ms hold's).
-      final held = RegExp(r'^(.*)=(\d+)$').firstMatch(step.target);
+      // `=399,hold`: held that long and not lifted (as `--drag ...,hold`):
+      // `--frames 0` then catches the hold in progress; the next step, or
+      // the end of the capture, lifts it.
+      final held = RegExp(r'^(.*)=(\d+)(\s*,\s*hold)?\s*$').firstMatch(step.target);
       final target = held?.group(1) ?? step.target;
       final holdMs = held == null ? 700 : int.parse(held.group(2)!);
+      final keepDown = held?.group(3) != null;
       final (point, problem) = await pointAt(target, 'long-press');
       if (point == null) return problem;
       var at = point;
@@ -3017,6 +3076,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       // the hold starts (a lift at its end) runs on its own clock.
       for (var t = 0; t < holdMs; t += 16) {
         await tester.pump(Duration(milliseconds: math.min(16, holdMs - t)));
+      }
+      if (keepDown) {
+        _held = g;
+        return null;
       }
       await g.up(timeStamp: Duration(milliseconds: holdMs));
       return null;

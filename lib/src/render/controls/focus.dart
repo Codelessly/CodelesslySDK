@@ -146,11 +146,26 @@ class ControlFocusNode {
 
   bool _autofocus = false;
 
+  /// Whether its autofocus has had its turn (it joined an active scope with
+  /// autofocus on): as Flutter's `autofocus`, once, not again each time its
+  /// control is attached (a page's render objects moved by the navigator as
+  /// its route leaves would take the focus back from a field a Save blurred).
+  bool _autofocused = false;
+
   /// Takes the focus as soon as it joins a scope (Flutter's `autofocus`).
   set autofocus(bool v) {
     if (v == _autofocus) return;
     _autofocus = v;
-    if (v) _scope?._autofocus(this);
+    _autofocused = false;
+    if (v) _tryAutofocus();
+  }
+
+  void _tryAutofocus() {
+    final s = _scope;
+    if (s == null || _autofocused || !_autofocus) return;
+    // An inactive scope (a page under a dialog) gives it its turn later.
+    if (s.active) _autofocused = true;
+    s._autofocus(this);
   }
 
   bool get hasFocus => _scope?.focused == this;
@@ -180,7 +195,7 @@ class ControlFocusNode {
     _scope?._remove(this);
     _scope = scope;
     scope._nodes.add(this);
-    if (_autofocus) scope._autofocus(this);
+    _tryAutofocus();
   }
 
   /// Leaves its scope (the control detached): it loses the focus.
