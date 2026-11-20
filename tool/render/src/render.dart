@@ -731,6 +731,8 @@ Future<void> _renderAll(
       if (args.theme != null) codelessly.setThemeMode(api.ThemeMode.tryParse(args.theme));
       tester.view.devicePixelRatio = 1;
       tester.view.physicalSize = ui.Size(size.width, size.height);
+      // `--keyboard`: the software keyboard open over the screen.
+      tester.view.viewInsets = args.keyboard > 0 ? FakeViewPadding(bottom: args.keyboard) : FakeViewPadding.zero;
       // The harness runs on a desktop even when it captures a phone. Give
       // desktop captures a connected mouse and narrower captures touch
       // capability, so a page reading device.hover sees the simulated device.

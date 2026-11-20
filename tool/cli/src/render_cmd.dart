@@ -15,7 +15,7 @@ import 'outline.dart';
 /// Render options that take a value (so their value is not a document).
 const renderValued = {
   '--out', '--sizes', '--screen', '--fonts', '--theme', '--tap', '--double-tap', '--long-press', '--right-click', '--wheel', '--pinch', '--drag', '--hover', '--focus', '--key', '--type',
-  '--set', '--stage', '--frames', '--now', '--clock', '--screen-timeout', '--scroll', '--navigate', '--wait', '--label', '--state', '--compare', '--compare-map', '--design-system',
+  '--set', '--stage', '--frames', '--now', '--clock', '--keyboard', '--screen-timeout', '--scroll', '--navigate', '--wait', '--label', '--state', '--compare', '--compare-map', '--design-system',
   '--component', '--props', '--slots', '--image-map', '--pick-file',
 };
 

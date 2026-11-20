@@ -1414,6 +1414,20 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     tree.interactions?.attachChanged(this);
   }
 
+  /// A chain taken back (a node shown again after a condition hid it, its
+  /// content kept) may have changed while it was out of the tree: a row's
+  /// check mark added for the option just chosen. Flutter marks nothing for
+  /// semantics in a detached subtree, so the kept semantics of its
+  /// unchanged objects stop the next semantics pass from reaching what was
+  /// added, and it asserted `!semantics.parentDataDirty` (a picker opened
+  /// again). The subtree forgets its semantics as it comes back, and is
+  /// read whole.
+  @override
+  void adoptChild(RenderObject child) {
+    if (owner?.semanticsOwner != null) child.clearSemantics();
+    super.adoptChild(child);
+  }
+
   @override
   void detach() {
     super.detach();

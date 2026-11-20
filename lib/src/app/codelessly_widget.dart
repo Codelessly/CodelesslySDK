@@ -24,6 +24,7 @@ import 'package:flutter/rendering.dart' show RendererBinding;
 
 import '../render/node_tree.dart';
 import '../render/node_view.dart';
+import '../render/controls/focus.dart' show ControlFocusScope;
 import '../render/source.dart';
 import '../widgets/tree.dart';
 import '../runtime/gestures/drag_and_drop.dart' show dragIdleValues;
@@ -781,6 +782,9 @@ class _LayoutViewState extends State<_LayoutView> {
   /// `screen`: the device's size, breakpoint, orientation and light or
   /// dark mode (the site's theme mode over the device's), kept as they
   /// change.
+  /// The keyboard's height at the last look ([_updateScreen]).
+  double _keyboard = 0;
+
   void _updateScreen() {
     final mq = MediaQuery.maybeOf(context);
     if (mq == null) return;
@@ -801,7 +805,23 @@ class _LayoutViewState extends State<_LayoutView> {
       'backdrop': widget.sizing == CanvasSizing.fill &&
           !BackdropScreenScope.of(context) &&
           CodelesslyBackdropHost.showsBackdrop(context),
+      // The software keyboard's height while it is open (0 when closed),
+      // and the device's safe-area insets (a notch, a home indicator), in
+      // logical pixels: `${screen.keyboard > 0}`, `${screen.insets.bottom}`.
+      'keyboard': mq.viewInsets.bottom,
+      'insets': {'top': mq.padding.top, 'right': mq.padding.right, 'bottom': mq.padding.bottom, 'left': mq.padding.left},
     };
+    // The keyboard opening (or growing) keeps the focused control in view,
+    // as Flutter's EditableText does: a field shows its caret, once the
+    // page has laid out above the keyboard.
+    final keyboard = mq.viewInsets.bottom;
+    if (keyboard > _keyboard && widget.sizing == CanvasSizing.fill) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final owner = ControlFocusScope.focusedScope?.focused?.owner;
+        if (mounted && owner != null && owner.attached) owner.showOnScreen(duration: const Duration(milliseconds: 150));
+      });
+    }
+    _keyboard = keyboard;
     if (!jsonEquality.equals(screen, _screen.values['screen'])) _screen.values.set('screen', screen);
   }
 
@@ -1325,6 +1345,22 @@ class _LayoutViewState extends State<_LayoutView> {
       }
       return view;
     });
+    // A page lays out above the software keyboard (Flutter's Scaffold with
+    // `resizeToAvoidBottomInset`): its scroll views end at the keyboard's
+    // top, where a focused field is kept in view, and a column pinned to
+    // the page's foot rides above it. Its own reading of the keyboard is
+    // `screen.keyboard`. (A dialog's or sheet's route moves it itself.)
+    // The same widgets whether it is open or not: the screen below keeps
+    // its state (the focused field keeps the focus as the keyboard opens).
+    final media = MediaQuery.maybeOf(context);
+    final keyboard = media != null && (CanvasSizingScope.maybeOf(context) ?? widget.sizing) == CanvasSizing.fill ? media.viewInsets.bottom : 0.0;
+    content = Padding(padding: EdgeInsets.only(bottom: keyboard), child: content);
+    if (media != null) {
+      content = MediaQuery(
+        data: keyboard > 0 ? media.removeViewInsets(removeBottom: true) : media,
+        child: content,
+      );
+    }
     // The look of the runtime's own toasts and dialogs: the project's
     // tokens, then what the layout's nodes show. Its actions show them from
     // inside it ([_ScreenUi]), where this theme and look apply.

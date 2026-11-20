@@ -78,10 +78,10 @@ void main() {
   String failure(RenderReport report) =>
       '${report.diagnostics.firstWhere((d) => d['code'] == 'interaction_failed', orElse: () => {'message': 'none: ${report.diagnostics}'})['message']}';
 
-  Future<RenderReport> runPage(WidgetTester tester, Map<String, Object?> page, List<Step> steps, {DateTime? clock}) {
+  Future<RenderReport> runPage(WidgetTester tester, Map<String, Object?> page, List<Step> steps, {DateTime? clock, double keyboard = 0}) {
     final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(page));
     return runRender(tester,
-        RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 700)], steps: steps, dumpLayout: true, clock: clock));
+        RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 700)], steps: steps, dumpLayout: true, clock: clock, keyboard: keyboard));
   }
 
   group('a capture is named after the page shown at its end', () {
@@ -404,6 +404,37 @@ void main() {
     test('does not go with --now', () {
       expect(() => parseArgs(['p', '--out', 'o', '--now', '2026-01-01T00:00:00Z', '--clock', '2026-01-01T00:00:00Z']), throwsFormatException);
       expect(parseArgs(['p', '--out', 'o', '--clock', '2026-01-01T00:00:00Z']).clock, DateTime.utc(2026));
+    });
+  });
+
+  group('--keyboard', () {
+    testWidgets('opens the software keyboard: the page lays out above it and reads it as screen.keyboard', (tester) async {
+      final page = {
+        'schema': 3,
+        'roots': ['kb'],
+        'nodes': {
+          'kb': _canvas('col'),
+          'col': {
+            'type': 'column',
+            'children': ['reads', 'room', 'foot'],
+            'layout': {'width': {'fill': 390}, 'height': {'fill': 700}},
+          },
+          'reads': _text(r'keyboard ${screen.keyboard}'),
+          'room': {'type': 'column', 'layout': {'width': {'fill': 390}, 'height': {'fill': 0}, 'flex': 1}},
+          'foot': _box(w: 390, h: 56),
+        },
+      };
+      final report = await runPage(tester, page, const [], keyboard: 300);
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(textOf(report, 'reads'), 'keyboard 300');
+      final foot = boxesOf(report.images.single).firstWhere((b) => b['id'] == 'foot');
+      expect((foot['y'] as num) + (foot['h'] as num), 400, reason: 'the foot rides on the keyboard (700 - 300)');
+    });
+
+    test('takes a height in pixels', () {
+      expect(parseArgs(['p', '--out', 'o', '--keyboard', '300']).keyboard, 300);
+      expect(parseArgs(['p', '--out', 'o']).keyboard, 0);
+      expect(() => parseArgs(['p', '--out', 'o', '--keyboard', 'tall']), throwsFormatException);
     });
   });
 

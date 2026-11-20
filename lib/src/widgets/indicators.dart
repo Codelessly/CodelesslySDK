@@ -137,8 +137,11 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(b.obtain<RenderConstrainedBox>('spinnerMost', () => RenderConstrainedBox(additionalConstraints: most))..additionalConstraints = most);
     chain.add(b.obtain<RenderAspectRatio>('spinnerRound', () => RenderAspectRatio(aspectRatio: 1)));
   } else {
-    // As it always laid out: a square of its design size (less padding),
-    // centered in what its parent gives it.
+    // A square of its design size (less padding), centered in its box. The
+    // box is its written size: without the fit box the centering box took
+    // all its parent's room, so a 20 × 20 spinner aligned in a Stack was
+    // laid out at the Stack's size (NOCD 03, 04).
+    chain.add(b.fitBox('indicatorFit', l.width.fit, l.height.fit, Size(l.width.value, l.height.value)));
     final inner = Size(
       (l.width.value - l.padding.horizontal).clamp(0, double.infinity),
       (l.height.value - l.padding.vertical).clamp(0, double.infinity),

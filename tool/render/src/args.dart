@@ -37,6 +37,7 @@ final class RenderArgs {
     this.compareMap = const {},
     this.now,
     this.clock,
+    this.keyboard = 0,
     this.screenTimeout = const Duration(seconds: 120),
     this.imageMap = const {},
     this.pickFiles = const [],
@@ -98,6 +99,11 @@ final class RenderArgs {
   /// clock does: a countdown ticks through a wait, the same in every run.
   final DateTime? clock;
 
+  /// `--keyboard`: the software keyboard's height (logical pixels), open
+  /// over every screen from its start: a page lays out above it and reads
+  /// it as `screen.keyboard`. 0: closed.
+  final double keyboard;
+
   /// `--screen-timeout`: the most real time one screen at one size may take
   /// (its load, its steps, its capture). Past it the functions its formulas
   /// call give nothing at once, so the screen ends, is reported as an error
@@ -138,6 +144,7 @@ final class RenderArgs {
         compareMap: compareMap,
         now: now,
         clock: clock,
+        keyboard: keyboard,
         screenTimeout: screenTimeout,
         imageMap: imageMap,
         pickFiles: pickFiles,
@@ -214,6 +221,10 @@ Options:
                           with the screen's time, as a device's clock does: a
                           countdown to a deadline ticks through --wait 1200.
                           The same in every run. (Not with --now.)
+  --keyboard <px>         The software keyboard is open, this many pixels high,
+                          over every screen (a phone's: 300): a page lays out
+                          above it, a column at its foot rides on it, and
+                          formulas read it as screen.keyboard.
   --screen-timeout <seconds>   The most real time one screen at one size may
                           take (default 120): past it the screen is an error
                           (screen_timeout) and the run goes on to the next.
@@ -326,6 +337,7 @@ RenderArgs parseArgs(List<String> argv) {
   var fullPage = false, dumpLayout = false, componentsAll = false, modals = false;
   String? label, component, props, slots, compare, theme;
   DateTime? now, clock;
+  var keyboard = 0.0;
   var screenTimeout = const Duration(seconds: 120);
   final compareMap = <String, String>{};
   final imageMap = <String, String>{};
@@ -401,6 +413,11 @@ RenderArgs parseArgs(List<String> argv) {
         final v = next(i++, a);
         clock = DateTime.tryParse(v);
         if (clock == null) throw FormatException('--clock takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
+      case '--keyboard':
+        final v = next(i++, a);
+        final px = double.tryParse(v);
+        if (px == null || px < 0) throw FormatException('--keyboard takes the height of the keyboard in pixels (300), got "$v".');
+        keyboard = px;
       case '--screen-timeout':
         final v = next(i++, a);
         final seconds = double.tryParse(v);
@@ -449,6 +466,7 @@ RenderArgs parseArgs(List<String> argv) {
     compareMap: compareMap,
     now: now,
     clock: clock,
+    keyboard: keyboard,
     screenTimeout: screenTimeout,
     imageMap: imageMap,
     pickFiles: pickFiles,

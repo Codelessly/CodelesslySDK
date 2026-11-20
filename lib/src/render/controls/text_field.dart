@@ -15,6 +15,7 @@ import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Node, SizeFit, TextFieldProps;
+import 'package:flutter/animation.dart' show Curve, Curves;
 import 'package:flutter/foundation.dart' show ValueNotifier, listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -232,7 +233,7 @@ class TextFieldConfig {
   late final double? cursorHeight;
   late final double cursorWidth;
   late final Radius cursorRadius;
-  late final int? maxLength, maxLines, minLines;
+  late final int? maxLength, maxLines, minLines, visibleLines;
   late final int otpLength;
   late final bool otpDigitsOnly;
   late final bool expands, oneLine;
@@ -270,6 +271,12 @@ class TextFieldConfig {
     var max = maxLinesProp >= 1 ? maxLinesProp : null;
     var min = minLinesProp != null && minLinesProp >= 1 ? minLinesProp : null;
     if (max != null && min != null && min > max) max = min;
+    // `maxLines` says how many lines show, also where the box is taller
+    // than they are (its own height, or a minimum height on a hugging
+    // one): it drew the top of a fourth line in a box three fitted. An
+    // editable that fills its box takes no line counts (Flutter's
+    // `expands`), so the frame keeps the count.
+    c.visibleLines = max != null && max > 1 ? max : null;
     if (c.expands) max = min = null;
     c.maxLines = max;
     c.minLines = min;
@@ -1001,6 +1008,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   bool get contentMultiline => !(_config?.oneLine ?? true);
 
   @override
+  int? get contentVisibleLines => _config?.visibleLines;
+
+  @override
   bool get contentEmpty => editor.text.isEmpty;
 
   @override
@@ -1077,6 +1087,24 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     } else if (before < 0) {
       _scroll.jumpTo(_scroll.pixels + before);
     }
+  }
+
+  /// Asked to show itself (the focus coming to it), a field shows its
+  /// caret, as an editable does, from its top down to the caret's line:
+  /// the top stays in view where that fits, and the caret always does. A
+  /// field taller than the view (an 800 px script) was scrolled whole into
+  /// view, its foot at the view's foot, and the caret away from the top.
+  @override
+  void showOnScreen({RenderObject? descendant, Rect? rect, Duration duration = Duration.zero, Curve curve = Curves.ease}) {
+    if (descendant == null && rect == null && _editable.hasSize && _editable.attached && contentMultiline) {
+      final position = editor.selection.isValid ? editor.selection.extent : const TextPosition(offset: 0);
+      final end = _editable.getEndpointsForSelection(TextSelection.fromPosition(position)).first.point;
+      final at = (_editable.parentData! as BoxParentData).offset;
+      final caretBottom = at.dy + end.dy;
+      final bottom = math.max(boxRect.top + 1, math.min(size.height, caretBottom + (boxRect.bottom - contentRect.bottom).clamp(0.0, 16.0)));
+      rect = Rect.fromLTRB(0, 0, size.width, bottom);
+    }
+    super.showOnScreen(descendant: descendant, rect: rect, duration: duration, curve: curve);
   }
 
   bool _geometryScheduled = false;
