@@ -658,15 +658,20 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
     );
   }
 
+  // Along its axis a viewport can be any length: its content scrolls (CSS
+  // gives a scroll container no automatic minimum either). So a row squeezed
+  // for room gives way to the room there is, and scrolls: a hugging strip
+  // of tabs in a row narrower than its tabs ran past the screen's edge (nocd
+  // therapy home, 464 wide in 390).
   @override
   double computeMinIntrinsicWidth(double height) =>
-      child?.getMinIntrinsicWidth(height) ?? 0;
+      _axis == Axis.horizontal ? 0 : child?.getMinIntrinsicWidth(height) ?? 0;
   @override
   double computeMaxIntrinsicWidth(double height) =>
       child?.getMaxIntrinsicWidth(height) ?? 0;
   @override
   double computeMinIntrinsicHeight(double width) =>
-      child?.getMinIntrinsicHeight(width) ?? 0;
+      _axis == Axis.vertical ? 0 : child?.getMinIntrinsicHeight(width) ?? 0;
   @override
   double computeMaxIntrinsicHeight(double width) =>
       child?.getMaxIntrinsicHeight(width) ?? 0;

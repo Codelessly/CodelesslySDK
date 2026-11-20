@@ -62,6 +62,8 @@ void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
           }
         : null;
   box.enabled = box.spec.enabled && !states.contains(api.WidgetState.disabled);
+  final disabledPatch = api.readMap(n.behaviors.states.patches[api.WidgetState.disabled]?[n.id]);
+  box.ownDisabledLook = api.readMap(api.readMap(disabledPatch?['props'])?['style'])?['backgroundColor'] != null;
   box.busy = box.spec.loading;
   // An icon-only button has no visible label: its tooltip is its name for
   // assistive technology, as well as the hint shown to sighted users.
@@ -329,6 +331,17 @@ class RenderButton extends RenderControl implements LabeledControl {
   /// The spinner shown while it is loading.
   RenderSpinner? get spinner => identical(icon, _spinner) ? _spinner : null;
 
+  bool _ownDisabledLook = false;
+
+  /// Whether its node draws its own disabled look (a `disabled` state style,
+  /// `disabled.fill=#FFC7C9F8`): that is what it shows, not faded to half
+  /// (a written #C7C9F8 painted as a darker violet).
+  set ownDisabledLook(bool v) {
+    if (v == _ownDisabledLook) return;
+    _ownDisabledLook = v;
+    markNeedsPaint();
+  }
+
   bool _interactive = false;
 
   /// Whether it takes pointers and focus (a running app); a design canvas
@@ -534,14 +547,26 @@ class RenderButton extends RenderControl implements LabeledControl {
   Size computeDryLayout(covariant BoxConstraints constraints) => _sizeFor(constraints);
 
   late _Metrics _m;
+  EdgeInsets _pad = EdgeInsets.zero;
   Rect _iconRect = Rect.zero;
   double _labelLeft = 0;
+
+  /// The padding in a button [width] wide at [m]: the node's, else the
+  /// scale's, which gives way (down to none) before the label is cut. A 64
+  /// wide button 44 high drew "D…" for "Done": its 24 px sides left the
+  /// 40 px word 16.
+  EdgeInsets _padIn(double width, _Metrics m) {
+    if (spec.padding case final own?) return own;
+    // (A label that wraps takes more lines instead.)
+    final room = _iconOnly || spec.wrapLabel ? m.padX : (width - _contentWidth(m)) / 2;
+    return EdgeInsets.symmetric(horizontal: room.clamp(0.0, m.padX));
+  }
 
   @override
   void performLayout() {
     size = _sizeFor(constraints);
     final m = _m = _metricsAt(size.height);
-    final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: m.padX);
+    final pad = _pad = _padIn(size.width, m);
     final inner = Rect.fromLTRB(pad.left, 0, size.width - pad.right, size.height);
     if (_iconOnly) {
       _iconRect = Rect.fromCenter(center: size.center(Offset.zero), width: m.iconSize, height: m.iconSize);
@@ -646,6 +671,9 @@ class RenderButton extends RenderControl implements LabeledControl {
       ? const []
       : [(text: spec.label, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, size.height / 2))];
 
+  /// Whether its label is cut (narrower than its one line).
+  bool get debugLabelCut => !_iconOnly && _label.size.width + 0.5 < _label.intrinsicWidth;
+
   /// The label's color now (its states included).
   Color get labelColor => _look().ink;
 
@@ -696,7 +724,7 @@ class RenderButton extends RenderControl implements LabeledControl {
   @override
   void paint(PaintingContext context, Offset offset) {
     // Loading draws as disabled (SSUI's button).
-    final off = busy ? 1.0 : stateValue(api.WidgetState.disabled);
+    final off = busy ? 1.0 : _ownDisabledLook ? 0.0 : stateValue(api.WidgetState.disabled);
     if (off > 0) {
       // Disabled: the whole button at SSUI's 50 %.
       final alpha = (255 - 127 * off).round();
@@ -739,9 +767,8 @@ class RenderButton extends RenderControl implements LabeledControl {
   }
 
   double get _laidOutLabelWidth {
-    final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: _m.padX);
     final iconW = spec.hasIconSlot ? _m.iconSize + (spec.label.isEmpty ? 0 : _m.gap) : 0.0;
-    return math.max(0, size.width - pad.horizontal - iconW);
+    return math.max(0, size.width - _pad.horizontal - iconW);
   }
 
   @override
