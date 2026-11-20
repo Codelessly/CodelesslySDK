@@ -284,10 +284,21 @@ String? _colorText(Object? v) => v is String && v.startsWith('#') ? v : null;
 ChartGraph lineChartGraph(Node n) {
   T p<T>(api.PropDef<T> def) => n.prop(def);
   final xField = p(LineChartProps.xField), yField = p(LineChartProps.yField);
-  final rows = [
-    for (final r in p(LineChartProps.data))
-      if (r[xField] is num) r,
-  ]..sort((a, b) => (a[xField]! as num).compareTo(b[xField]! as num));
+  final written = p(LineChartProps.data);
+  // Rows whose x is a name (a day, a month) and no number: in the order
+  // written, a step apart, each labelled by it under the plot. (They were
+  // left out, and the chart drew nothing.)
+  final named = written.isNotEmpty && written.every((r) => r[xField] is! num) && written.any((r) => r[xField] != null);
+  const place = '_x';
+  final x = named ? place : xField;
+  final rows = named
+      ? [
+          for (var i = 0; i < written.length; i++) {...written[i], place: i},
+        ]
+      : ([
+          for (final r in written)
+            if (r[xField] is num) r,
+        ]..sort((a, b) => (a[xField]! as num).compareTo(b[xField]! as num)));
   final pad = p(LineChartProps.plotPadding);
   final label = p(LineChartProps.axisLabelStyle);
   final yMin = p(LineChartProps.yMin), yMax = p(LineChartProps.yMax);
@@ -300,20 +311,22 @@ ChartGraph lineChartGraph(Node n) {
     data: rows,
     selected: at < 0 ? null : {'index': at},
     spec: {
-      'key': xField,
+      'key': x,
       'animate': p(LineChartProps.animate) ? p(LineChartProps.animationDuration) : 0,
       'animateIn': p(LineChartProps.animateIn),
       'x': {
         'scale': 'linear',
-        'field': xField,
+        'field': x,
         'label': p(LineChartProps.tooltipLabelField).isEmpty ? xField : p(LineChartProps.tooltipLabelField),
         'format': '',
         'min': ?p(LineChartProps.xMin),
         'max': ?p(LineChartProps.xMax),
         'grid': false,
-        'labels': xTicks.isNotEmpty,
+        'labels': xTicks.isNotEmpty || named,
         'axisHeight': pad.bottom,
         'tickValues': [
+          if (named && xTicks.isEmpty)
+            for (var i = 0; i < written.length; i++) {'value': i, 'label': '${written[i][xField] ?? ''}'},
           for (final t in xTicks)
             if (_num(t['x']) case final x?) {'value': x, 'label': '${t['label'] ?? ''}'},
         ],

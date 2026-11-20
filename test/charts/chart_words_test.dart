@@ -213,6 +213,31 @@ void main() {
           ...extra,
         };
 
+    test('rows whose x is a name are drawn in the order written, each labelled by it', () {
+      final named = node('lineChart', {
+        'data': [
+          {'day': 'Mon', 'n': 3},
+          {'day': 'Tue', 'n': 5},
+          {'day': 'Wed', 'n': 4},
+        ],
+        'xField': 'day',
+        'yField': 'n',
+      });
+      final e = engineOf(named);
+      expect(e.count, 3);
+      expect(e.xOfRow(0), lessThan(e.xOfRow(1)));
+      expect(e.xOfRow(1), lessThan(e.xOfRow(2)));
+      final x = chartGraphOf(named)!.spec['x'] as Map;
+      expect(x['labels'], isTrue);
+      expect(x['tickValues'], [
+        {'value': 0, 'label': 'Mon'},
+        {'value': 1, 'label': 'Tue'},
+        {'value': 2, 'label': 'Wed'},
+      ]);
+      // Rows with numbers are as they were: only those, by their x.
+      expect(engineOf(node('lineChart', props())).count, 3);
+    });
+
     test('points stand where their numbers are, not one place each', () {
       final e = engineOf(node('lineChart', props()));
       expect(e.linear, isTrue);
