@@ -10,6 +10,7 @@ import 'dart:math' as math;
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Json, Node, SizeFit, FlexProps, ScrollProps, TextProps, IconProps;
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart' show TapGestureRecognizer;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart' show HardwareKeyboard;
@@ -2637,19 +2638,48 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       if (runs.isNotEmpty) base = base.merge(runs.first.style);
       (text, runs) = markdownRuns(text, look, color: base.color, fontSize: base.fontSize);
     }
+    _releaseLinkTaps();
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
     // Runs style ranges; they do not replace the unstyled characters.
     // Split at each boundary so gaps and overlapping styles retain text once.
     final bounds = <int>{0, text.length,
       for (final r in runs) ...[r.start.clamp(0, text.length), r.end.clamp(0, text.length)]}.toList()..sort();
+    final shown = text;
+    // A run with a link takes a tap where the app runs (one recognizer a
+    // run, over each piece of it): the text's `linkTap` reactions, or the
+    // link opened (TreeReactions.fire).
+    // The last run over a piece with a link is the one a tap there means.
+    TapGestureRecognizer? tapOf(List<api.TextRun> over) {
+      final r = over.where((r) => (r.link ?? '').isNotEmpty).lastOrNull;
+      if (r == null || !tree.animates) return null;
+      return _linkTaps[r] ??= TapGestureRecognizer(debugOwner: this)
+        ..onTap = () {
+          final start = r.start.clamp(0, shown.length), end = r.end.clamp(start, shown.length);
+          tree.interactions?.fire(this, api.TriggerType.linkTap.name, event: {
+            'result': {'link': r.link, 'text': shown.substring(start, end), 'start': start, 'end': end},
+          });
+        };
+    }
+
     return TextSpan(children: [
       for (var i = 0; i + 1 < bounds.length; i++)
-        TextSpan(
-          text: text.substring(bounds[i], bounds[i + 1]),
-          style: textStyle(runs.where((r) => r.start <= bounds[i] && r.end >= bounds[i + 1])
-              .fold(base, (style, run) => style.merge(run.style))),
-        ),
+        if (runs.where((r) => r.start <= bounds[i] && r.end >= bounds[i + 1]).toList() case final over)
+          TextSpan(
+            text: text.substring(bounds[i], bounds[i + 1]),
+            style: textStyle(over.fold(base, (style, run) => style.merge(run.style))),
+            recognizer: tapOf(over),
+          ),
     ]);
+  }
+
+  /// The recognizers of the text's link runs ([_textSpan]), by run.
+  final Map<api.TextRun, TapGestureRecognizer> _linkTaps = {};
+
+  void _releaseLinkTaps() {
+    for (final r in _linkTaps.values) {
+      r.dispose();
+    }
+    _linkTaps.clear();
   }
 
   void _icon(Node n, List<RenderBox> chain) {
@@ -3204,6 +3234,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     }
     _unsubscribe();
     tree.interactions?.released(this);
+    _releaseLinkTaps();
     for (final h in _islands.values) {
       h.release();
     }

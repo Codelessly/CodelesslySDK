@@ -17,7 +17,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
-import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction, HapticKind, kDefaultHoldMs;
+import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction, OpenLinkAction, Reaction, HapticKind, kDefaultHoldMs;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -221,6 +221,18 @@ class TreeReactions implements NodeInteractions {
       if (i is! int || i < 0 || i >= destinations.length || destinations[i].actions.isEmpty) return;
       node = node.copyWith(actions: destinations[i].actions);
       trigger = 'click';
+    }
+    // A link in a text (a run's `link`) runs the text's linkTap reactions;
+    // a text with none opens the link.
+    if (trigger == TriggerType.linkTap.name && !node.actions.any((r) => r.trigger.type == TriggerType.linkTap)) {
+      final link = switch (event['result']) {
+        final Map<Object?, Object?> m => '${m['link'] ?? ''}',
+        _ => '',
+      };
+      if (link.isEmpty) return;
+      node = node.copyWith(actions: [
+        api.Reaction(trigger: const Trigger(TriggerType.linkTap), actions: [api.OpenLinkAction(url: link)]),
+      ]);
     }
     // A held press repeats only click reactions that opted in; a node may
     // also have a one-shot click reaction (for example, opening a panel).

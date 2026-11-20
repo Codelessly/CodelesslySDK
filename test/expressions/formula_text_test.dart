@@ -15,6 +15,38 @@ void main() {
         expect(eval("matches('EX-102', '^[A-Z]{2}-[0-9]+\$')"), isTrue);
       });
 
+      // A text's links and marks are runs over the matches of a pattern
+      // (design 26): where each is, what it matched and its groups.
+      test('regexMatches gives every match with where it is', () {
+        expect(eval(r"regexMatches('call 555-0100 or 555-0199', '\d{3}-(\d{4})')"), [
+          {'start': 5, 'end': 13, 'text': '555-0100', 'groups': ['0100']},
+          {'start': 17, 'end': 25, 'text': '555-0199', 'groups': ['0199']},
+        ]);
+        expect(eval("regexMatches('a b', '(x)?b')"), [
+          {'start': 2, 'end': 3, 'text': 'b', 'groups': [null]},
+        ]);
+        // An empty match marks nothing; nothing to search gives no matches.
+        expect(eval("regexMatches('abc', 'x*')"), isEmpty);
+        expect(eval("regexMatches(missing, 'a')"), isEmpty);
+        expect(eval("regexMatches('abc', '([')"), isEmpty);
+        // Runs made of them.
+        expect(eval("map(regexMatches(t, '#[a-z]+'), m => {start: m.start, end: m.end, link: m.text})", {'t': 'go #now and #later'}), [
+          {'start': 3, 'end': 7, 'link': '#now'},
+          {'start': 12, 'end': 18, 'link': '#later'},
+        ]);
+      });
+
+      test('a ?? b is b only when a is null', () {
+        expect(eval("route.entry ?? 'start'", {'route.entry': null}), 'start');
+        expect(eval("e ?? 'start'", {'e': 'subtype'}), 'subtype');
+        expect(eval("e ?? 'start'", {'e': ''}), '');
+        expect(eval("e ?? 0", {'e': false}), false);
+        expect(eval("(e ?? f) == 'subtype'", {'f': 'subtype'}), isTrue);
+        expect(eval("a ?? b ?? 'c'"), 'c');
+        // Looser than ||, tighter than ? :.
+        expect(eval("e ?? false || true ? 'y' : 'n'"), 'y');
+      });
+
       test('matches is false for a missing value or a broken pattern', () {
         expect(eval("matches(missing, '.*')"), isFalse);
         expect(eval("matches('abc', '([')"), isFalse);

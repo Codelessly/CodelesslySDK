@@ -2524,7 +2524,7 @@ ui.Rect _rectOf(RenderBox b) {
 
 /// A step target's `@` part (`@2`, `@increment`, `@option:Alaska`,
 /// `@2026-11-23`).
-final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|option:.*|\d{4}-\d{2}-\d{2})$');
+final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|option:.*|link:.*|\d{4}-\d{2}-\d{2})$');
 
 const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
 
@@ -2661,7 +2661,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     // (`@decrement`, `@increment`), a slider's thumb (`@thumb`, a range's
     // upper `@thumb-end`), an option of a dropdown (`@option:Alaska`; the
     // dropdown is opened first when it is closed).
-    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|option:(.+))$').firstMatch(target);
+    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|option:(.+)|link:(.+))$').firstMatch(target);
     if (named != null) {
       final id = named[1]!, what = named[2]!;
       final found = _locate(binding, id);
@@ -2671,6 +2671,18 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final box = found.box!;
       final parts = _partNames(box);
       String none() => '--$verb $target: "$id" has no part "@$what"${parts.isEmpty ? ' (it has no named parts)' : '; its parts: ${parts.join(', ')}'}.';
+      // A link in a text (a run with a link): by its characters, or its
+      // number among the text's links (`@link:0`).
+      if (named[4] case final String want) {
+        await centerInView(box);
+        final links = _linksIn(box);
+        final n = int.tryParse(want);
+        final hit = links.where((l) => l.text == want).firstOrNull ??
+            links.where((l) => l.text.contains(want)).firstOrNull ??
+            (n != null && n >= 0 && n < links.length ? links[n] : null);
+        if (hit == null) return (null, none());
+        return (hit.at, null);
+      }
       if (what == 'increment' || what == 'decrement') {
         final field = _firstIn<RenderTextField>(box);
         if (field == null || !(field.decoration.prefix?.button ?? false)) return (null, none());
@@ -2890,7 +2902,8 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'tap':
       var (at, problem) = await pointAt(step.target, 'tap');
       if (at == null) return problem;
-      if (!reactsToTap(hitAt(at))) {
+      // A link in a text takes the tap itself (its run's recognizer).
+      if (!step.target.contains('@link:') && !reactsToTap(hitAt(at))) {
         // A block called by its id (`DateRangePicker#dates`, a design
         // system's component) whose one tappable part is inside it: that
         // part is meant.
@@ -3389,6 +3402,9 @@ List<String> _partNames(NodeBox b) {
   }
 
   visit(b);
+  if (control == null) {
+    if (_linksIn(b) case final links when links.isNotEmpty) return [for (final l in links) '@link:${l.text}'];
+  }
   return switch (control) {
     final RenderItemBar bar => [for (var i = 0; i < bar.itemRects.length; i++) '@$i'],
     final RenderSegmentedButton s => [for (var i = 0; i < s.segmentRects.length; i++) '@$i'],
@@ -3398,6 +3414,50 @@ List<String> _partNames(NodeBox b) {
     RenderCalendar() => const ['@<yyyy-MM-dd>'],
     _ => const [],
   };
+}
+
+/// The links of the text [b] draws (its runs with a `link`, which take a
+/// tap of their own): each one's characters, the paragraph, and the point
+/// of its first piece where a tap lands on it.
+List<({String text, RenderParagraph paragraph, ui.Offset at})> _linksIn(NodeBox b) {
+  RenderParagraph? paragraph;
+  void visit(RenderObject o) {
+    if (paragraph != null || (o is NodeBox && !identical(o, b))) return;
+    if (o is RenderParagraph) {
+      paragraph = o;
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(b);
+  final p = paragraph;
+  if (p == null || !p.attached || !p.hasSize) return const [];
+  // The pieces of the text in order, with where each starts; the pieces of
+  // one recognizer are one link.
+  final out = <({String text, RenderParagraph paragraph, ui.Offset at})>[];
+  final seen = <GestureRecognizer, int>{};
+  var offset = 0;
+  p.text.visitChildren((span) {
+    if (span is! TextSpan) return true;
+    final s = span.text ?? '';
+    if (span.recognizer case final r? when s.isNotEmpty) {
+      final i = seen[r];
+      if (i == null) {
+        final boxes = p.getBoxesForSelection(TextSelection(baseOffset: offset, extentOffset: offset + s.length));
+        if (boxes.isNotEmpty) {
+          seen[r] = out.length;
+          out.add((text: s, paragraph: p, at: p.localToGlobal(boxes.first.toRect().center)));
+        }
+      } else {
+        final l = out[i];
+        out[i] = (text: l.text + s, paragraph: l.paragraph, at: l.at);
+      }
+    }
+    offset += s.length;
+    return true;
+  });
+  return out;
 }
 
 /// Puts the keyboard focus on the first control or press target inside

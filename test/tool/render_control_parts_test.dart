@@ -28,6 +28,7 @@ final _doc = {
       {'name': 'qty', 'type': 'integer', 'value': 2},
       {'name': 'volume', 'type': 'integer', 'value': 50},
       {'name': 'region', 'type': 'text', 'value': 'Alps'},
+      {'name': 'opened', 'type': 'text', 'value': 'none'},
     ],
   },
   'nodes': {
@@ -43,7 +44,7 @@ final _doc = {
     },
     'col': {
       'type': 'column',
-      'children': ['label', 'quantity', 'vol', 'regionPick'],
+      'children': ['label', 'quantity', 'vol', 'regionPick', 'legal', 'openedLabel'],
       'layout': {'width': {'fill': 390}, 'height': {'fill': 700}},
       'props': {'spacing': 12},
     },
@@ -77,6 +78,32 @@ final _doc = {
       },
       'bind': {'props.value': r'${region}'},
       'actions': [_changes('region')],
+    },
+    // A text with two links (runs with a link): `@link:<label>`.
+    'legal': {
+      'type': 'text',
+      'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
+      'props': {
+        'text': 'Read the Terms or the Privacy Policy.',
+        'style': {'fontSize': 14, 'color': '#FF000000'},
+        'runs': [
+          {'start': 9, 'end': 14, 'link': 'terms'},
+          {'start': 22, 'end': 36, 'link': 'privacy'},
+        ],
+      },
+      'actions': [
+        {
+          'trigger': {'type': 'linkTap'},
+          'actions': [
+            {'type': 'setVariable', 'variable': 'opened', 'value': r'${result.link}'},
+          ],
+        },
+      ],
+    },
+    'openedLabel': {
+      'type': 'text',
+      'layout': {'width': {'fill': 390}, 'height': {'hug': 20}},
+      'props': {'text': r'opened ${opened}', 'style': {'fontSize': 14, 'color': '#FF000000'}},
     },
   },
 };
@@ -132,5 +159,16 @@ void main() {
     expect(parts('regionPick'), ['@option:Alps', '@option:Alaska', '@option:Andes']);
     final message = report.diagnostics.firstWhere((d) => d['code'] == 'interaction_failed')['message'] as String;
     expect(message, contains('its parts: @decrement, @increment'));
+    expect(parts('legal'), ['@link:Terms', '@link:Privacy Policy']);
+  });
+
+  testWidgets('a link in a text, by its characters, a part of them or its number', (tester) async {
+    String opened(List<Map> boxes) => '${boxes.firstWhere((b) => b['id'] == 'openedLabel')['text']}';
+    for (final (target, link) in [('legal@link:Privacy', 'privacy'), ('legal@link:Terms', 'terms'), ('legal@link:1', 'privacy')]) {
+      final (report, boxes) = await run(tester, [Step('tap', target)]);
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.warnings, 0, reason: '${report.diagnostics}');
+      expect(opened(boxes), 'opened $link', reason: target);
+    }
   });
 }
