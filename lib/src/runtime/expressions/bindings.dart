@@ -745,6 +745,9 @@ class NodeBinder implements TreeBindings, InstanceBindings {
     );
   }
 
+  /// The scope [provideItem] gave repeat [instance]; null: none (yet).
+  ItemScope? providedScope(ProvidedItem instance) => _provided[instance];
+
   /// Lets go of the scope of repeat [instance] (its widget no longer shows
   /// it). Not disposed: a box leaving with it may still listen.
   void forgetItem(ProvidedItem instance) => _provided.remove(instance);

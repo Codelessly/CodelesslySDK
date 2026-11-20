@@ -1442,7 +1442,7 @@ class RenderPageItems extends RenderCollection {
     }
     return api.Pose(
       motion: api.Motion(
-        translateX: m.translateX, translateY: m.translateY, shiftX: m.shiftX, shiftY: m.shiftY, scale: m.scale, //
+        translateX: m.translateX, translateY: m.translateY, translateZ: m.translateZ, shiftX: m.shiftX, shiftY: m.shiftY, scale: m.scale, //
         scaleX: m.scaleX, scaleY: m.scaleY, rotate: m.rotate, rotateX: m.rotateX, rotateY: m.rotateY,
         perspective: m.perspective, alignment: api.Alignment(ax, ay), backfaceHidden: m.backfaceHidden, path: m.path,
       ),

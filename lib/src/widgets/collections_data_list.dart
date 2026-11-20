@@ -24,6 +24,7 @@ import '../render/node_tree.dart' show RenderTree;
 import '../render/node_view.dart' show CodelesslyLabelsScope, ControlButton, SpinnerView;
 import '../render/paint/shell_constants.dart';
 import '../render/recipe.dart';
+import '../runtime/expressions/bindings.dart' show ProvidedItem;
 import '../runtime/lists/built_items.dart';
 import 'collections_page_runtime.dart' show FlingSnapPhysics;
 import '../runtime/lists/pagination.dart';
@@ -243,6 +244,12 @@ class DataListViewState extends State<DataListView> implements LazyItems {
   bool _onOwnScroll(ScrollNotification n) {
     if (n.depth != 0) return false;
     _refreshSnapStartsSoon();
+    // The rows' distances move with the scroll: at once while no frame is
+    // being laid out (a drag, a fling's tick), else after it.
+    if (_rowInstances.isNotEmpty) {
+      final phase = SchedulerBinding.instance.schedulerPhase;
+      phase == SchedulerPhase.idle || phase == SchedulerPhase.transientCallbacks ? _updateItemOffsets() : _itemOffsetsSoon();
+    }
     if (n is ScrollUpdateNotification && !_scrollEventPending) {
       _scrollEventPending = true;
       SchedulerBinding.instance.addPostFrameCallback((_) {
@@ -426,11 +433,41 @@ class DataListViewState extends State<DataListView> implements LazyItems {
       // where it would stop.
       return FlingSnapPhysics(
         physics: snap,
-        nearest: (pixels, _) => _snapStarts.isEmpty ? pixels : _snapStarts.reduce((a, b) => (a - pixels).abs() <= (b - pixels).abs() ? a : b),
+        nearest: _snapStop,
         parent: physics,
       );
     }
     return ItemSnapPhysics(starts: () => _snapStarts, parent: physics);
+  }
+
+  /// The item start nearest [pixels] (with a [direction], not behind [from]
+  /// that way). Past the items built, it is worked out from their stride
+  /// (the average distance between built starts: exact for a list of one
+  /// item extent); a fling is captured near its end, where the items are
+  /// built, so its landing reads real starts.
+  double _snapStop(double pixels, ScrollMetrics position, {double? from, int direction = 0}) {
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    final fresh = phase == SchedulerPhase.idle || phase == SchedulerPhase.transientCallbacks;
+    final starts = [...(fresh ? _itemStarts().values : _snapStarts)]..sort();
+    if (starts.isEmpty) return pixels;
+    final stride = starts.length > 1 ? (starts.last - starts.first) / (starts.length - 1) : position.viewportDimension;
+    final candidates = <double>[...starts];
+    // Extrapolated stops a stride apart past the built ones, toward pixels.
+    if (stride > 0) {
+      if (pixels > starts.last) {
+        final k = ((pixels - starts.last) / stride).round();
+        candidates.addAll([starts.last + k * stride, starts.last + (k + 1) * stride]);
+      } else if (pixels < starts.first) {
+        final k = ((starts.first - pixels) / stride).round();
+        candidates.addAll([starts.first - k * stride, starts.first - (k + 1) * stride]);
+      }
+    }
+    final allowed = [
+      for (final c in candidates)
+        if (from == null || direction == 0 || (c - from) * direction >= -0.5) c,
+    ];
+    final pool = allowed.isEmpty ? candidates : allowed;
+    return pool.reduce((a, b) => (a - pixels).abs() <= (b - pixels).abs() ? a : b);
   }
 
   @override
@@ -459,7 +496,89 @@ class DataListViewState extends State<DataListView> implements LazyItems {
   /// The node box of repeat [key] of node [id], in the scope of [item] at
   /// [index].
   Widget _node$(String tag, String id, Object? key, int index, Object? item) {
-    return NodeChild(tree: _r.tree, id: id, instance: _m.provide(tag, key, index, item));
+    final instance = _m.provide(tag, key, index, item);
+    if (tag == 'row' && _node.prop(CollectionScrollProps.itemSnapping)) {
+      _rowInstances[index] = instance;
+      // A value from the first build (the item reads pageOffset as it binds):
+      // worked out from the built items' stride, made exact after layout.
+      final scope = _r.binder?.providedScope(instance);
+      if (scope != null && scope.pageOffset == null) scope.setPageOffset(_estimatedOffset(index));
+      _itemOffsetsSoon();
+    }
+    return NodeChild(tree: _r.tree, id: id, instance: instance);
+  }
+
+  // --- an item's distance from the snap point (a compatibility layer) ---------
+  //
+  // STAND-IN until the SDK has its own list (docs/design/26 in codelessly_api,
+  // "A list item's distance"). The list is still Flutter's ListView, so an
+  // item's distance from the list's snap point (the start of the view, where
+  // itemSnapping rests an item) is worked out from the outside after each
+  // frame: the built items' starts as the viewport reports them, each item's
+  // extent from its box. What a list of our own would give that this cannot:
+  // a distance for items not built yet (here only built items have one: a
+  // value read off-screen is null); extents known ahead of layout (here an
+  // item's extent is known only once it is laid out, so the first frame of a
+  // new item reads its distance a frame late); and one pass that poses every
+  // item as it lays them out (here each changed distance notifies the item's
+  // scope, and every box that reads it re-applies: a cost per item per
+  // frame while the list moves).
+
+  /// The row repeats built now, by index (with itemSnapping).
+  final Map<int, ProvidedItem> _rowInstances = {};
+  bool _itemOffsetsPending = false;
+
+  bool _followsPixels = false;
+
+  /// The scroll moved (a drag, a fling's tick, a jump): the rows' distances
+  /// move with it, at once while no frame is being laid out, else after it.
+  void _pixelsMoved() {
+    if (_rowInstances.isEmpty) return;
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    phase == SchedulerPhase.idle || phase == SchedulerPhase.transientCallbacks ? _updateItemOffsets() : _itemOffsetsSoon();
+  }
+
+  void _itemOffsetsSoon() {
+    if (!_followsPixels) {
+      _followsPixels = true;
+      scrollController.addListener(_pixelsMoved);
+    }
+    if (_itemOffsetsPending) return;
+    _itemOffsetsPending = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _itemOffsetsPending = false;
+      if (mounted) _updateItemOffsets();
+    });
+  }
+
+  /// Row [index]'s distance from the snap point before it is laid out: from
+  /// the built rows' stride (item i taken to start at i strides), else its
+  /// index (the list at its start).
+  double _estimatedOffset(int index) {
+    final starts = [..._snapStarts]..sort();
+    final stride = starts.length > 1 ? (starts.last - starts.first) / (starts.length - 1) : 0.0;
+    if (stride <= 0 || !scrollController.hasClients) return index.toDouble();
+    return index - scrollController.position.pixels / stride;
+  }
+
+  /// Gives each built row its distance from the snap point, in items:
+  /// `pageOffset`, as a page view's page reads (0 at rest at the start of
+  /// the view, 1.5 halfway between the next two, negative before it).
+  void _updateItemOffsets() {
+    if (!scrollController.hasClients || !_node.prop(CollectionScrollProps.itemSnapping)) return;
+    final pixels = scrollController.position.pixels;
+    final starts = _itemStarts();
+    _rowInstances.removeWhere((i, _) => !starts.containsKey(i));
+    final vertical = _node.prop(CollectionScrollProps.scrollDirection) == api.Axis.vertical;
+    for (final e in starts.entries) {
+      final instance = _rowInstances[e.key];
+      if (instance == null) continue;
+      final ro = _built[e.key]?.findRenderObject();
+      if (ro is! RenderBox || !ro.hasSize) continue;
+      final extent = vertical ? ro.size.height : ro.size.width;
+      if (extent <= 0) continue;
+      _r.binder?.providedScope(instance)?.setPageOffset((e.value - pixels) / extent);
+    }
   }
 
   /// A slot node of the list (a footer), in the list's scope.
