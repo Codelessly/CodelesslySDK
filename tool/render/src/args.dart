@@ -36,6 +36,7 @@ final class RenderArgs {
     this.theme,
     this.compareMap = const {},
     this.now,
+    this.clock,
     this.screenTimeout = const Duration(seconds: 120),
     this.imageMap = const {},
     this.pickFiles = const [],
@@ -92,6 +93,11 @@ final class RenderArgs {
   /// countdowns written from it are the same in every capture.
   final DateTime? now;
 
+  /// `--clock`: the instant `now()` starts at on each screen, then moves with
+  /// the screen's time (every --wait, settle and animation), as a device's
+  /// clock does: a countdown ticks through a wait, the same in every run.
+  final DateTime? clock;
+
   /// `--screen-timeout`: the most real time one screen at one size may take
   /// (its load, its steps, its capture). Past it the functions its formulas
   /// call give nothing at once, so the screen ends, is reported as an error
@@ -131,6 +137,7 @@ final class RenderArgs {
         theme: theme,
         compareMap: compareMap,
         now: now,
+        clock: clock,
         screenTimeout: screenTimeout,
         imageMap: imageMap,
         pickFiles: pickFiles,
@@ -175,6 +182,10 @@ Options:
                           get -<mode> in their names. Steps may toggle it.
   --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
                           picks the n-th copy (0-based) of a node a list repeats.
+                          <field>@suffix (@prefix) taps a text field's icon
+                          that has reactions, in the field: it keeps the focus.
+                          A toast's button: toastAction or its label (Undo),
+                          toastClose; a confirm's: confirmOk, confirmCancel.
                           shift+<nodeId> (ctrl+, alt+, meta+, mod+) holds keys
                           through it: a Shift-click. Also on --drag, --hover,
                           --double-tap, --long-press, --right-click.
@@ -197,12 +208,20 @@ Options:
                           follows starts from it (an initial index an auto timer
                           advances, a state a delay replaces). Never held.
   --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
-                          and countdowns are the same in every run.
+                          and countdowns are the same in every run. It stays
+                          put: a --wait does not move it.
+  --clock <ISO time>      now() starts at this time on each screen and moves
+                          with the screen's time, as a device's clock does: a
+                          countdown to a deadline ticks through --wait 1200.
+                          The same in every run. (Not with --now.)
   --screen-timeout <seconds>   The most real time one screen at one size may
                           take (default 120): past it the screen is an error
                           (screen_timeout) and the run goes on to the next.
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px;
-                          or =x,y (--scroll reading=0,650).
+                          or =x,y (--scroll reading=0,650). Its scroll and
+                          scrollEnd reactions run (result.offset, result.max),
+                          as a user's scroll runs them; --drag moves it with a
+                          finger instead (a pull, a fling, a swipe).
   --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
                           with a query string for its params (speaker?id=ada,
                           /project?id=7): the screen reads them as \${route.id}.
@@ -210,6 +229,9 @@ Options:
                           second and release (a reorder handle, a slider, a
                           draggable card, a swipe: --drag row=-140,0).
   --drag <nodeId>=<nodeId>    Drag the node onto another node (a drop target).
+                          ,press=<ms> after either: the finger rests that long
+                          before it moves (a hold reaction, then a drag on the
+                          same pointer: --drag wrapper=100,-100,press=500).
   --double-tap <nodeId>   Tap the node twice in quick succession (a double tap, a
                           double click: a photo's zoom).
   --long-press <nodeId>   Hold a finger on the node, then lift (a longPress
@@ -300,7 +322,7 @@ RenderArgs parseArgs(List<String> argv) {
   final fonts = <String>[];
   var fullPage = false, dumpLayout = false, componentsAll = false, modals = false;
   String? label, component, props, slots, compare, theme;
-  DateTime? now;
+  DateTime? now, clock;
   var screenTimeout = const Duration(seconds: 120);
   final compareMap = <String, String>{};
   final imageMap = <String, String>{};
@@ -372,6 +394,10 @@ RenderArgs parseArgs(List<String> argv) {
         final v = next(i++, a);
         now = DateTime.tryParse(v);
         if (now == null) throw FormatException('--now takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
+      case '--clock':
+        final v = next(i++, a);
+        clock = DateTime.tryParse(v);
+        if (clock == null) throw FormatException('--clock takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
       case '--screen-timeout':
         final v = next(i++, a);
         final seconds = double.tryParse(v);
@@ -397,6 +423,9 @@ RenderArgs parseArgs(List<String> argv) {
   }
   if (inputs.isEmpty) throw FormatException('Name a document or a directory of documents.\n\n$usage');
   if (out == null) throw FormatException('--out <dir> is required.\n\n$usage');
+  if (now != null && clock != null) {
+    throw const FormatException('--now and --clock do not go together: --now pins now() for the whole run, --clock starts it there and lets it move.');
+  }
   return RenderArgs(
     inputs: inputs,
     out: out,
@@ -416,6 +445,7 @@ RenderArgs parseArgs(List<String> argv) {
     theme: theme,
     compareMap: compareMap,
     now: now,
+    clock: clock,
     screenTimeout: screenTimeout,
     imageMap: imageMap,
     pickFiles: pickFiles,

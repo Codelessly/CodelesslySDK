@@ -1178,6 +1178,17 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl,
     return FieldFramePart.none;
   }
 
+  /// Where a press on the prefix's (or the suffix's) icon lands, in the
+  /// frame's coordinates: a button affix's slot, a tappable icon's box; null
+  /// when that affix takes no press (none, or no reactions).
+  Rect? affixTarget({required bool prefix}) {
+    final a = prefix ? decoration.prefix : decoration.suffix;
+    if (a == null) return null;
+    if (a.button) return buttonSlot(prefix: prefix);
+    final r = prefix ? _prefixIconRect : _suffixIconRect;
+    return a.tappable && !r.isEmpty ? r : null;
+  }
+
   /// The slot of a button affix (its whole height of the box, as wide as
   /// the box is high), at the start for the prefix (the end in RTL).
   Rect buttonSlot({required bool prefix}) {

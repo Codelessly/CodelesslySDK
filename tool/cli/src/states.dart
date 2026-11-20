@@ -15,6 +15,7 @@ import 'outline.dart';
 import 'render_cmd.dart' show sheet;
 
 /// A step as render options: `{"tap": "go"}` → `--tap go`, `{"unfocus": true}` → `--unfocus`, a list as it is.
+/// A key written in camel case is the option's name (`{"longPress": "row"}` → `--long-press row`).
 List<String> stepArgs(Object? steps) => [
       for (final s in (steps as List?) ?? const [])
         ...switch (s) {
@@ -23,12 +24,19 @@ List<String> stepArgs(Object? steps) => [
           final Map m => [
               for (final e in m.entries)
                 ...(e.value == true
-                    ? ['--${e.key}']
-                    : ['--${e.key}', e.value is Map || e.value is List ? jsonEncode(e.value) : '${e.value}']),
+                    ? ['--${_optionName('${e.key}')}']
+                    : ['--${_optionName('${e.key}')}', e.value is Map || e.value is List ? jsonEncode(e.value) : '${e.value}']),
             ],
           _ => const <String>[],
         },
     ];
+
+/// A step's key as the render option it names: `longPress` → `long-press`, `doubleTap` → `double-tap`.
+String _optionName(String key) => key.replaceFirst(RegExp(r'^-+'), '').replaceAllMapped(RegExp(r'(?<=[a-z0-9])([A-Z])'), (m) => '-${m[1]!.toLowerCase()}');
+
+/// [args] without `--outline`, and whether it was there: the states command's own option (each state's layout
+/// dumped and outlined), which the render takes as `--dump-layout`, written in a manifest's or a state's args.
+(List<String>, bool) takeOutline(List<String> args) => ([for (final x in args) if (x != '--outline') x], args.contains('--outline'));
 
 const _pathOptions = {'--fonts', '--compare', '--slots', '--design-system', '--pick-file'};
 
@@ -64,11 +72,7 @@ Future<int> statesMain(List<String> argv) async {
   final refs = m['references'];
   final minMatch = (m['minMatch'] as num?)?.toDouble();
   final ignore = {for (final c in (m['ignore'] as List? ?? const [])) '$c'};
-  final only = a.all('--only');
-  final states = [
-    for (final s in (m['states'] as List? ?? const []).cast<Map>())
-      if (only.isEmpty || only.any((o) => '${s['name']}'.contains(o))) s,
-  ];
+  final states = pickStates((m['states'] as List? ?? const []).cast<Map>(), a.all('--only'));
   if (states.isEmpty) throw const UsageError('No states to render (the manifest has none, or --only matched none).');
 
   final results = <Map<String, Object?>>[];
@@ -85,13 +89,18 @@ Future<int> statesMain(List<String> argv) async {
     final sdir = '$out/$name';
     Directory(sdir).createSync(recursive: true);
     final sizes = a['--sizes'] ?? s['sizes'] as String? ?? m['sizes'] as String? ?? '390x844,834x1112,1440x900';
-    final args = [
+    // `--outline` in the manifest's args or the state's is this command's own (the render takes --dump-layout).
+    final (written, outlined) = takeOutline([
       ...common,
       ...absolutizeArgs(base, [for (final x in (s['args'] as List? ?? const [])) '$x']),
       if (s['screen'] != null) ...['--screen', '${s['screen']}'],
       ...stepArgs(s['steps']),
+    ]);
+    final outline = a.has('--outline') || outlined;
+    final args = [
+      ...written,
       '--label', name,
-      if (a.has('--outline')) '--dump-layout',
+      if (outline && !written.contains('--dump-layout')) '--dump-layout',
       for (final e in ((s['compareMap'] as Map?) ?? const {}).entries) ...['--compare-map', '${e.key}=${e.value}'],
     ];
     final compare = s.containsKey('compare') ? s['compare'] : refs;
@@ -152,7 +161,7 @@ Future<int> statesMain(List<String> argv) async {
     final matches = [for (final c in comps) if (c['matching'] is num) (c['matching'] as num).toDouble()];
     final worst = matches.isEmpty ? null : matches.reduce((x, y) => x < y ? x : y);
     final failed = (status == 2 && !hasDiagnostics) || errors.isNotEmpty || (minMatch != null && worst != null && worst < minMatch);
-    if (a.has('--outline')) {
+    if (outline) {
       final text = StringBuffer();
       final tree = DocumentTree.load(stateDocs);
       for (final f in layoutFiles(sdir)) {
@@ -243,6 +252,16 @@ Future<int> statesMain(List<String> argv) async {
   return failedCount > 0 ? 1 : 0;
 }
 
+/// The states of [all] the `--only` names in [only] pick, in the manifest's order (none written: all): a name a
+/// state has picks that state alone (`--only profile` is not also `profile-loading`); a name no state has picks
+/// every state whose name contains it (`--only picker-` for a group).
+List<Map> pickStates(List<Map> all, List<String> only) {
+  if (only.isEmpty) return all;
+  final names = {for (final s in all) '${s['name']}'};
+  bool picks(String o, String name) => names.contains(o) ? name == o : name.contains(o);
+  return [for (final s in all) if (only.any((o) => picks(o, '${s['name']}'))) s];
+}
+
 /// The `no_capture` error of a state whose runs wrote no picture ([images] empty), whatever their exit [status]:
 /// a state is checked by its captures, so one with none failed (it stopped before the capture, or the render command
 /// never ran). Null when there is a picture.
@@ -283,8 +302,12 @@ errors, wrote no picture, or matches its reference less than minMatch. The manif
     ]
   }
 
+--only <name> picks the state of that name alone; a name no state has picks every state whose name contains it
+(--only picker- for a group). Repeatable. --outline (here, or in the manifest's or a state's "args") dumps each
+capture's layout and writes the state's outline.txt.
+
 A step is {"<render option without -->": value} (tap, hover, type, set, stage, scroll, drag, key, navigate, wait,
-focus; {"unfocus": true}), or a list of raw arguments; values reach the render as written ({"set": "items=[]"},
+focus, long-press, or longPress in camel case; {"unfocus": true}), or a list of raw arguments; values reach the render as written ({"set": "items=[]"},
 {"type": "note=one\\ntwo"} types both lines). A state that writes no picture fails (no_capture). Problems of the
 site itself (a font file site.json declares that is not there) are said once, under "The site" in summary.md. A state's compare is a file, a folder, or a map from size to file
 (each size then renders on its own); its documents replace the manifest's for that state.''';

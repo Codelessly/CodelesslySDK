@@ -530,7 +530,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   if (siteNow != null && siteTime == null) {
     issue(RuntimeIssue('site_now', 'warning', 'site.json\'s "now" is "$siteNow", which is not an ISO 8601 time (2026-11-16T09:00:00): the run starts at the real time. Write it as one, or pass --now.'));
   }
-  FormulaClock.pinned = args.now ?? siteTime;
+  // `--clock`: not pinned; each screen starts it at that time (_renderAll).
+  FormulaClock.pinned = args.clock != null ? null : args.now ?? siteTime;
   final testClock = tester.binding.clock;
   final startedAt = DateTime.now(), clockStart = testClock.now();
   FormulaClock.source = () => startedAt.add(testClock.now().difference(clockStart));
@@ -715,6 +716,12 @@ Future<void> _renderAll(
             config: CodelesslyConfig(
                 services: Services(analytics: recorder, exports: exporter, storage: storage, filePicker: picker), fontTimeout: const Duration(seconds: 5)),
           );
+      // `--clock`: now() starts at that time on each screen at each size and
+      // moves with the test's clock (every --wait, settle and animation).
+      if (args.clock case final DateTime clock) {
+        final testClock = tester.binding.clock, from = testClock.now();
+        FormulaClock.source = () => clock.add(testClock.now().difference(from));
+      }
       var codelessly = start();
       var controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
@@ -764,7 +771,10 @@ Future<void> _renderAll(
           final advice = node == null || by == null ? null : _overflowAdvice(binding, node, double.parse(by[1]!), text);
           issue(RuntimeIssue('render_exception', 'error',
               node == null
-                  ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
+                  ? inSemanticsPass(text, details?.stack)
+                      ? '$text (Thrown in Flutter\'s semantics pass, which builds what a screen reader reads after the frame is drawn: the capture is as painted. '
+                          'The SDK\'s render objects left that tree inconsistent: a fault of the runtime, not of the page, and nothing to change in the document.)'
+                      : '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
                   : advice ?? 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
               nodeId: node?.tree.pathOf(node.id, node.instance),
               screen: label,
@@ -1055,6 +1065,7 @@ Future<void> _renderAll(
       // a text that appeared after the screen settled) is waited for first:
       // its text is measured, checked and drawn in it, not in the fallback.
       await _fontsSettled(tester, fetcher);
+      await layoutSettled(tester);
       for (final i in _check(binding, published, docs, fileOfNode, label, sizeName, faces)) {
         issue(i);
       }
@@ -1205,6 +1216,10 @@ Future<void> _renderAll(
               'h': double.parse(b.size.height.toStringAsFixed(1)),
               // What a text shows, as drawn: a check reads values from it.
               if (_shownText(b) case final String text) 'text': text,
+              // Turned or scaled (a `motion` rotate, scale), or cut by a
+              // clip: the part of the screen it is drawn in, as the PNG
+              // shows it (x, y, w, h above are its laid-out box).
+              if (paintedBox(b, _visibleClip(b)) case final Map<String, Object> painted) 'painted': painted,
             },
           // The built-in confirm's buttons, over the page.
           for (final b in _builtIns(binding))
@@ -1471,6 +1486,25 @@ Future<void> _settle(WidgetTester tester) async {
   });
   for (var i = 0; i < 4; i++) {
     await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// Whether an error Flutter reported came from its semantics pass (the
+/// accessibility tree, built after the frame is painted): an assertion such as
+/// `!semantics.parentDataDirty` (NOCD 09, 18, 28), or a stack through
+/// `flushSemantics`.
+bool inSemanticsPass(String text, StackTrace? stack) =>
+    '$stack'.contains('flushSemantics') || RegExp(r"'[^']*\bsemantics\b[^']*'", caseSensitive: false).hasMatch(text) || text.contains('SemanticsNode');
+
+/// Lays out what changed after the last frame, before the checks read it: a
+/// write that landed as the frame ended (a timer's, a mock stream's next
+/// words) leaves a text to be measured, and reading it then asserted
+/// (`RenderParagraph.didExceedMaxLines`: '!debugNeedsLayout', before the PNG:
+/// NOCD 12). A frame with no time passing: no timer runs.
+Future<void> layoutSettled(WidgetTester tester) async {
+  bool dirty() => tester.binding.renderViews.any((v) => _descendants(v).any((o) => o.debugNeedsLayout));
+  for (var i = 0; i < 4 && dirty(); i++) {
+    await tester.pump();
   }
 }
 
@@ -2069,9 +2103,13 @@ bool _shown(NodeBox b) {
 /// Follows the pages a navigator shows (not its dialogs and sheets): [shown]
 /// is the name of the page on top that was navigated to (null: the first).
 class _PageObserver extends NavigatorObserver {
-  final List<RouteSettings> _pages = [];
+  // The pages by their routes, bottom first: a route that leaves takes its
+  // own entry, not the top one (a reset pushes the new page, then removes
+  // the old ones under it: the new page stayed shown, the file was named
+  // after the old one or the first: NOCD 07 and 21).
+  final List<Route<dynamic>> _pages = [];
 
-  RouteSettings? get shown => _pages.lastOrNull;
+  RouteSettings? get shown => _pages.lastOrNull?.settings;
 
   void reset() => _pages.clear();
 
@@ -2084,13 +2122,11 @@ class _PageObserver extends NavigatorObserver {
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (_isPage(route)) _pages.add(route.settings);
+    if (_isPage(route)) _pages.add(route);
   }
 
   @override
-  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
-    if (_isPage(route) && _pages.isNotEmpty) _pages.removeLast();
-  }
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) => _pages.remove(route);
 
   @override
   void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) => didPop(route, previousRoute);
@@ -2588,6 +2624,42 @@ ui.Rect? _laidOutIn(RenderBox b, RenderBox parent) {
   return offset & b.size;
 }
 
+/// Where box [b] is drawn on the screen when that is not its laid-out box: under a
+/// transform that turns or scales it (its bounds, turned), or cut in part by [clip]
+/// (what an ancestor clips it to). Null when it is drawn as laid out (a translation
+/// only, uncut, or wholly out of its clip).
+Map<String, Object>? paintedBox(RenderBox b, ui.Rect? clip) {
+  if (!b.attached || !b.hasSize) return null;
+  // A node's own motion turns what it draws, inside its box: the innermost
+  // box of the one-child chain under it (to the next node) is what is drawn.
+  RenderBox content = b;
+  RenderObject at = b;
+  while (true) {
+    final kids = <RenderObject>[];
+    at.visitChildren(kids.add);
+    if (kids.length != 1 || kids.single is NodeBox) break;
+    at = kids.single;
+    if (at is RenderBox && at.hasSize) content = at;
+  }
+  final m = content.getTransformTo(null);
+  final transformed = MatrixUtils.getAsTranslation(m) == null;
+  final drawn = MatrixUtils.transformRect(m, ui.Offset.zero & content.size);
+  if (!drawn.isFinite) return null;
+  final seen = clip == null ? drawn : drawn.intersect(clip);
+  final clipped = clip != null && (seen.width < drawn.width - 0.5 || seen.height < drawn.height - 0.5);
+  // A box scrolled wholly out of its view is laid out there and drawn nowhere: its box says where.
+  if (!transformed && (!clipped || seen.isEmpty)) return null;
+  final r =seen.width <= 0 || seen.height <= 0 ? ui.Rect.fromLTWH(seen.left, seen.top, 0, 0) : seen;
+  return {
+    'x': r.left.round(),
+    'y': r.top.round(),
+    'w': double.parse(r.width.toStringAsFixed(1)),
+    'h': double.parse(r.height.toStringAsFixed(1)),
+    if (transformed) 'transformed': true,
+    if (clipped) 'clipped': true,
+  };
+}
+
 ui.Rect _rectOf(RenderBox b) {
   final o = b.localToGlobal(ui.Offset.zero);
   return o & b.size;
@@ -2617,7 +2689,7 @@ ui.Rect _rectOf(RenderBox b) {
 
 /// A step target's `@` part (`@2`, `@increment`, `@option:Alaska`,
 /// `@2026-11-23`).
-final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|option:.*|\d{4}-\d{2}-\d{2})$');
+final _partSuffix = RegExp(r'@(\d+|increment|decrement|thumb|thumb-end|prefix|suffix|option:.*|\d{4}-\d{2}-\d{2})$');
 
 const _pointerSteps = {'tap', 'double-tap', 'long-press', 'right-click', 'hover', 'drag'};
 
@@ -2725,11 +2797,21 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (inWidget && o is RenderSemanticsGestureHandler && o.onTap != null) return true;
       if (o is RenderEditable) return true;
     }
-    return false;
+    // A control of the SDK's own, in no node (a toast's button): it acts itself.
+    return control != null && inWidget;
   }
 
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String target, String verb) async {
+    // A point (`150,345`) is no target: a step names what a person sees, a
+    // node, so it still reaches it when the layout moves.
+    if (RegExp(r'^\s*-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?\s*$').hasMatch(target)) {
+      return (
+        null,
+        '--$verb $target: a step names a node, not a point on the screen: its id (--dump-layout lists every node\'s id and box), '
+            '<id>#<n> for the n-th copy a list repeats, <call>/<id> for a node inside a component. Give the row an id to name it by.',
+      );
+    }
     // An inline calendar has one node but many dates: name the ISO day.
     final datePart = RegExp(r'^(.*)@(\d{4}-\d{2}-\d{2})$').firstMatch(target);
     if (datePart != null) {
@@ -2754,7 +2836,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     // (`@decrement`, `@increment`), a slider's thumb (`@thumb`, a range's
     // upper `@thumb-end`), an option of a dropdown (`@option:Alaska`; the
     // dropdown is opened first when it is closed).
-    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|option:(.+))$').firstMatch(target);
+    final named = RegExp(r'^(.*)@(increment|decrement|thumb|thumb-end|prefix|suffix|option:(.+))$').firstMatch(target);
     if (named != null) {
       final id = named[1]!, what = named[2]!;
       final found = _locate(binding, id);
@@ -2764,6 +2846,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final box = found.box!;
       final parts = _partNames(box);
       String none() => '--$verb $target: "$id" has no part "@$what"${parts.isEmpty ? ' (it has no named parts)' : '; its parts: ${parts.join(', ')}'}.';
+      // A text field's prefix or suffix icon that has reactions (a password's
+      // eye): pressed where it is drawn, in the field, so the field keeps the
+      // focus as it does on a device (a button beside the field takes it).
+      if (what == 'prefix' || what == 'suffix') {
+        final field = _firstIn<RenderTextField>(box);
+        final slot = field?.affixTarget(prefix: what == 'prefix');
+        if (field == null || slot == null) return (null, none());
+        await centerInView(box);
+        return (field.localToGlobal(field.affixTarget(prefix: what == 'prefix')!.center), null);
+      }
       if (what == 'increment' || what == 'decrement') {
         final field = _firstIn<RenderTextField>(box);
         if (field == null || !(field.decoration.prefix?.button ?? false)) return (null, none());
@@ -2865,7 +2957,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           names.isNotEmpty
               ? '--$verb $target: "$id" has no part @$n; its parts: ${names.join(', ')}.'
               : '--$verb $target: "$id" has no parts to name with @: @<n> is for a segmented button, a tab bar and a navigation bar; '
-                  'a number field has @decrement and @increment, a slider @thumb, a dropdown @option:<label>, an inline calendar @<yyyy-MM-dd> '
+                  'a number field has @decrement and @increment, a text field\'s icon with reactions @prefix or @suffix, a slider @thumb, a dropdown @option:<label>, an inline calendar @<yyyy-MM-dd> '
                   '(--dump-layout lists each node\'s "parts"). Tap it with --$verb $id.',
         );
       }
@@ -2927,17 +3019,21 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (lines.length > 1) {
         return (null, '--$verb $id: ${lines.length} lines of the overlay open show "$id": give the one meant an id (MenuItem#id "…").');
       }
-      // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`).
+      // A button of the built-in confirm dialog (`confirmOk`, `confirmCancel`)
+      // or of a toast (`toastAction`, `toastClose`), by its id or by what it
+      // says (`--tap Undo` for a toast's actionLabel).
       for (final b in _builtIns(binding)) {
         if (b.id == id) return (b.box.localToGlobal(b.box.size.center(ui.Offset.zero)), null);
       }
+      final labelled = [for (final b in _builtIns(binding)) if (_builtInLabel(b.box)?.toLowerCase() == id.trim().toLowerCase()) b];
+      if (labelled.length == 1) return (labelled.single.box.localToGlobal(labelled.single.box.size.center(ui.Offset.zero)), null);
     }
     if (box == null) {
       return (
         null,
         found.problem!.startsWith(_notShownHere)
             ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.'
-            : _withCandidates(binding, id, '--$verb $id: ${found.problem}.'),
+            : '${_withCandidates(binding, id, '--$verb $id: ${found.problem}.')}${_builtInsShown(binding)}',
       );
     }
     var at = reachable(box);
@@ -2960,12 +3056,23 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
             'Tap the node that has the reaction, or give this one a "click" reaction.',
       );
     }
+    if (over == null) {
+      return (null, '--$verb $id: nothing at the node\'s place takes pointer events (it is hidden, or drawn under something that is not a node).');
+    }
+    // The other copies of a node a list repeats that nothing covers: the one
+    // a person would press (a card under a pinned header, its next copy not).
+    final path = box.tree.pathOf(box.id, box.instance);
+    final open = [
+      for (final o in _boxes(binding))
+        if (!identical(o, box) && o.id == box.id && identical(o.tree, box.tree) && o.tree.pathOf(o.id, o.instance) == path && _shown(o) && reachable(o) != null)
+          _stepName(binding, o),
+    ];
+    final order = _drawnOver(box, over);
     return (
       null,
-      over == null
-          ? '--$verb $id: nothing at the node\'s place takes pointer events (it is hidden, or drawn under something that is not a node).'
-          : '--$verb $id: the node is covered by "${over.id}" (${over.node?.type}) wherever it shows; nothing was ${verb == 'tap' ? 'tapped' : 'hovered'}. '
-              'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.',
+      '--$verb $id: the node is covered by "${over.id}" (${over.node?.type}) wherever it shows; nothing was ${verb == 'tap' ? 'tapped' : 'hovered'}. '
+          '${order ?? 'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.'}'
+          '${open.isEmpty ? '' : ' Not covered: ${open.take(4).join(', ')}.'}',
     );
   }
 
@@ -3007,18 +3114,23 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'drag':
       // To a point (dx,dy from where it is pressed) or onto another node.
       // `,hold` after the distance: not let go (see [_held]).
-      final hold = RegExp(r',\s*hold\s*$').hasMatch(step.value ?? '');
-      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*hold\s*)?$').firstMatch(step.value ?? '');
+      // `,press=<ms>`: the finger rests that long before it moves (a hold
+      // reaction, then a drag on the same pointer: a reaction picker).
+      final pressed = RegExp(r',\s*press\s*=\s*(\d+)\s*(?=,|$)').firstMatch(step.value ?? '');
+      final pressMs = pressed == null ? null : int.parse(pressed[1]!);
+      final value = pressed == null ? step.value : step.value!.replaceRange(pressed.start, pressed.end, '');
+      final hold = RegExp(r',\s*hold\s*$').hasMatch(value ?? '');
+      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*(?:,\s*hold\s*)?$').firstMatch(value ?? '');
       ui.Offset? onto;
       if (by == null) {
-        if ((step.value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
-        final (t, problem) = await pointAt(step.value!.trim(), 'drag');
+        if ((value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
+        final (t, problem) = await pointAt(value!.trim(), 'drag');
         if (t == null) return problem!.replaceFirst('--drag ', '--drag ${step.target}=');
         onto = t;
       }
       final (from, problem) = await pointAt(step.target, 'drag');
       if (from == null) return problem;
-      if (onto != null) onto = (await pointAt(step.value!.trim(), 'drag')).$1 ?? onto;
+      if (onto != null) onto = (await pointAt(value!.trim(), 'drag')).$1 ?? onto;
       final to = onto ?? from + ui.Offset(double.parse(by![1]!), double.parse(by[2]!));
       final source = _boxOf(binding, step.target);
       await _unfocusFieldOutside(tester, source);
@@ -3039,13 +3151,19 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         ownHeld = ownHeld || _descendants(source).any(holds);
       }
       final g = await tester.startGesture(from);
-      if (held || ownHeld) await tester.pump(const Duration(milliseconds: 700));
+      // Resting before it moves: `,press=<ms>`, else a long press's time for
+      // a drag that starts on one. Frame by frame, as a device draws while
+      // the finger is down (a hold reaction fires on its own clock).
+      final rest = pressMs ?? (held || ownHeld ? 700 : 0);
+      for (var t = 0; t < rest; t += 16) {
+        await tester.pump(Duration(milliseconds: math.min(16, rest - t)));
+      }
       // Each move is a frame later than the one before, and says so: a
       // pointer that crosses the distance in a fifth of a second and lifts
       // is a swipe (events with no times have no speed, and no swipe fires).
       const moves = 12;
       for (var i = 1; i <= moves; i++) {
-        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!, timeStamp: Duration(milliseconds: 16 * i));
+        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!, timeStamp: Duration(milliseconds: rest + 16 * i));
         await tester.pump(const Duration(milliseconds: 16));
       }
       if (hold) {
@@ -3053,7 +3171,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         await tester.pump(const Duration(milliseconds: 300));
         return null;
       }
-      await g.up(timeStamp: const Duration(milliseconds: 16 * moves));
+      await g.up(timeStamp: Duration(milliseconds: rest + 16 * moves));
       return null;
     case 'long-press':
       // A finger (or a mouse button) held on the node past the long-press
@@ -3411,6 +3529,32 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   return 'Unknown step ${step.kind}.';
 }
 
+/// Why [over] covers [box] when both are in one node (a Stack's children, an
+/// image beside an invisible button): the child holding [over] comes after
+/// the one holding [box], so it is drawn on top and takes the press there, on
+/// a device too. Null when they are in no node together or [over] comes first.
+String? _drawnOver(NodeBox box, NodeBox over) {
+  NodeBox? common;
+  for (RenderObject? p = box.parent; p != null && common == null; p = p.parent) {
+    if (p is NodeBox && _isInside(over, p)) common = p;
+  }
+  if (common == null) return null;
+  String? childToward(NodeBox b) {
+    NodeBox? last;
+    for (RenderObject? p = b; p != null && !identical(p, common); p = p.parent) {
+      if (p is NodeBox) last = p;
+    }
+    return last?.id;
+  }
+
+  final mine = childToward(box), theirs = childToward(over);
+  final kids = common.node?.children ?? const <String>[];
+  if (mine == null || theirs == null || mine == theirs) return null;
+  final i = kids.indexOf(mine), j = kids.indexOf(theirs);
+  if (i < 0 || j < i) return null;
+  return '"$theirs" comes after "$mine" in "${common.id}" (${common.node?.type}), so it is drawn over it and takes the press there, as on a device. Put "$mine" after "$theirs" (the last child is on top), or tap "${over.id}" if that is what was meant.';
+}
+
 /// The first render object of type [T] in [box] (it or under it).
 T? _firstIn<T>(RenderObject box) {
   T? found;
@@ -3486,6 +3630,7 @@ List<String> _partNames(NodeBox b) {
     final RenderItemBar bar => [for (var i = 0; i < bar.itemRects.length; i++) '@$i'],
     final RenderSegmentedButton s => [for (var i = 0; i < s.segmentRects.length; i++) '@$i'],
     final RenderTextField f when f.decoration.prefix?.button ?? false => const ['@decrement', '@increment'],
+    final RenderTextField f => [if (f.affixTarget(prefix: true) != null) '@prefix', if (f.affixTarget(prefix: false) != null) '@suffix'],
     final RenderSlider s => s.isRange ? const ['@thumb', '@thumb-end'] : const ['@thumb'],
     final RenderDropdown d => [for (final l in d.spec.labels) '@option:$l'],
     RenderCalendar() => const ['@<yyyy-MM-dd>'],
@@ -3980,7 +4125,9 @@ List<RuntimeIssue> _check(
     }
     if (node.type == 'text') {
       final p = _descendants(b).whereType<RenderParagraph>().firstOrNull;
-      if (p == null || !p.hasSize) continue;
+      // A text that changed since the last frame (a stream's next words) is
+      // measured at the next one: reading it now asserts (!debugNeedsLayout).
+      if (p == null || !p.hasSize || p.debugNeedsLayout) continue;
       final text = p.text.toPlainText();
       if (text.trim().isEmpty) continue;
       final short = text.length > 30 ? '${text.substring(0, 30)}...' : text;
@@ -4207,7 +4354,35 @@ String? _zeroSizeMessage(NodeBox b, bool horizontal, String Function(NodeBox) na
 const _builtInTargets = {
   'confirmOk': ValueKey<String>('codelessly-confirm-ok'),
   'confirmCancel': ValueKey<String>('codelessly-confirm-cancel'),
+  // A showToast's button (its actionLabel) and its close (showClose).
+  'toastAction': ValueKey<String>('codelessly-toast-action'),
+  'toastClose': ValueKey<String>('codelessly-toast-close'),
 };
+
+/// What a built-in target says: its text, else its control's label (a toast's
+/// button draws its label itself).
+String? _builtInLabel(RenderBox box) {
+  final text = _paragraphText(box);
+  if (text != null && text.trim().isNotEmpty) return text.trim();
+  for (final o in _descendants(box)) {
+    if (o is LabeledControl) {
+      for (final l in o.labels) {
+        if (l.text.trim().isNotEmpty) return l.text.trim();
+      }
+    }
+  }
+  return null;
+}
+
+/// The built-in targets on screen as a step names them, for a step that
+/// named none: `toastAction ("Undo")`.
+String _builtInsShown(WidgetsBinding binding) {
+  final shown = [
+    for (final b in _builtIns(binding))
+      if (_builtInLabel(b.box) case final String l) '${b.id} ("$l")' else b.id,
+  ];
+  return shown.isEmpty ? '' : ' Over the page, the SDK\'s own controls: ${shown.join(', ')} (--tap <that id>, or its label).';
+}
 
 /// Each built-in target on screen: its id, its element and its box.
 List<({String id, Element element, RenderBox box})> _builtIns(WidgetsBinding binding) {

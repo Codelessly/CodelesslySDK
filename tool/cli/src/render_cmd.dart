@@ -15,7 +15,7 @@ import 'outline.dart';
 /// Render options that take a value (so their value is not a document).
 const renderValued = {
   '--out', '--sizes', '--screen', '--fonts', '--theme', '--tap', '--double-tap', '--long-press', '--right-click', '--wheel', '--pinch', '--drag', '--hover', '--focus', '--key', '--type',
-  '--set', '--stage', '--frames', '--now', '--screen-timeout', '--scroll', '--navigate', '--wait', '--label', '--state', '--compare', '--compare-map', '--design-system',
+  '--set', '--stage', '--frames', '--now', '--clock', '--screen-timeout', '--scroll', '--navigate', '--wait', '--label', '--state', '--compare', '--compare-map', '--design-system',
   '--component', '--props', '--slots', '--image-map', '--pick-file',
 };
 
@@ -33,6 +33,15 @@ const renderValued = {
     }
   }
   return (docs, out);
+}
+
+/// Render [args] with `--dump-layout` where every run reads it: before the first `--state` (what comes after one is
+/// that state's own; added at the end it was the last state's only, and the others had no layout).
+List<String> withDumpLayout(List<String> args) {
+  final first = args.indexOf('--state');
+  final common = first < 0 ? args : args.sublist(0, first);
+  if (common.contains('--dump-layout')) return args;
+  return [...common, '--dump-layout', if (first >= 0) ...args.sublist(first)];
 }
 
 /// Draws a contact sheet of [inputs] into [out] through the render harness (the render server when it is up).
@@ -62,7 +71,7 @@ Future<int> renderMain(List<String> argv) async {
     stderr.writeln('--out <dir> is required (where the PNGs and diagnostics.json go).');
     return 2;
   }
-  if (outline && !args.contains('--dump-layout')) args.add('--dump-layout');
+  if (outline) args.replaceRange(0, args.length, withDumpLayout(args));
   // The outline is of this invocation's captures, not those earlier runs left in --out.
   final before = snapshotOf(out);
   final code = await runInherited(renderScript, args);

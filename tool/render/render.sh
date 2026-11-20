@@ -68,7 +68,7 @@ for a in "$@"; do
         # A table (a .json file) is a path too.
         case "$key" in *.json) key="$(abs "$key")" ;; esac
         args+=("$key=$dir")
-      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|stage|scroll|drag|navigate|wait|frames|now|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|long-press|right-click|wheel|pinch|hover|focus|key|type|set|stage|scroll|drag|navigate|wait|frames|now|clock|screen-timeout|label|state|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"
