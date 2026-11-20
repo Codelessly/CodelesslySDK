@@ -17,7 +17,7 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
-import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction;
+import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction, HapticKind, kDefaultHoldMs;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -151,6 +151,22 @@ class TreeReactions implements NodeInteractions {
       // finger hands the gesture to the pinch.
       ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
       ..holdMs = n.actions.firstWhere((r) => r.trigger.type == TriggerType.hold, orElse: () => n.actions.first).trigger.holdMs
+      // A long press held for its own time (holdMs written), and the point a
+      // long press or a hold becomes the node's (commitMs).
+      ..longPressMs = switch (n.actions.where((r) => r.trigger.type == TriggerType.longPress).firstOrNull?.trigger.holdMs) {
+        final ms? when ms != api.kDefaultHoldMs && ms > 0 => ms,
+        _ => null,
+      }
+      ..commitMs = n.actions
+              .where((r) => (r.trigger.type == TriggerType.longPress || r.trigger.type == TriggerType.hold) && r.trigger.commitMs > 0)
+              .firstOrNull
+              ?.trigger
+              .commitMs ??
+          0
+      ..haptics = {
+        for (final r in n.actions.reversed)
+          if (r.trigger.haptic != null) r.trigger.type: r.trigger.haptic!,
+      }
       ..repeatDelayMs = n.actions.where((r) => r.trigger.type == TriggerType.click && r.trigger.repeat).firstOrNull?.trigger.holdMs
       ..repeatIntervalMs = n.actions.where((r) => r.trigger.type == TriggerType.click && r.trigger.repeat).firstOrNull?.trigger.effectiveIntervalMs
       ..visibleFraction = viewport ? n.actions.firstWhere((r) => _isViewport(r.trigger.type)).trigger.visibleFraction : null
@@ -675,6 +691,59 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   int holdMs = 1200;
 
+  int? _longPressMs;
+
+  /// How long a long press is held (its trigger's holdMs); null: the
+  /// platform's.
+  int? get longPressMs => _longPressMs;
+  set longPressMs(int? v) {
+    if (v == _longPressMs) return;
+    _longPressMs = v;
+    _longPress?.dispose();
+    _longPress = null;
+  }
+
+  int _commitMs = 0;
+
+  /// From this many ms after the press, a long press or a hold is the
+  /// node's: letting go no longer cancels it, nothing else takes the press.
+  /// 0: none.
+  int get commitMs => _commitMs;
+  set commitMs(int v) {
+    if (v == _commitMs) return;
+    _commitMs = v;
+    _longPress?.dispose();
+    _longPress = null;
+  }
+
+  /// The buzz of each trigger that has one ([Trigger.haptic]): at the
+  /// commit point of a long press or a hold that has one, else as it fires.
+  Map<TriggerType, api.HapticKind> haptics = const {};
+
+  static void _buzz(api.HapticKind kind) {
+    unawaited(switch (kind) {
+      api.HapticKind.selection => HapticFeedback.selectionClick(),
+      api.HapticKind.light => HapticFeedback.lightImpact(),
+      api.HapticKind.medium => HapticFeedback.mediumImpact(),
+      api.HapticKind.heavy => HapticFeedback.heavyImpact(),
+      api.HapticKind.vibrate => HapticFeedback.vibrate(),
+    });
+  }
+
+  /// The haptic of [t] when it fires (not one buzzed at a commit point).
+  void _buzzOnFire(TriggerType t) {
+    final kind = haptics[t];
+    if (kind == null) return;
+    if (_commitMs > 0 && (t == TriggerType.longPress || t == TriggerType.hold)) return;
+    _buzz(kind);
+  }
+
+  /// The commit point's buzz: a long press's, else a hold's.
+  void _buzzOnCommit() {
+    final kind = haptics[TriggerType.longPress] ?? haptics[TriggerType.hold];
+    if (kind != null) _buzz(kind);
+  }
+
   /// A click with `repeat: true` repeats after this delay at this interval.
   /// Null disables repetition; the short-tap click is unchanged.
   int? repeatDelayMs;
@@ -716,7 +785,10 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   void Function(TriggerType type, Json event)? onTrigger;
 
   bool _has(TriggerType t) => _triggers.contains(t);
-  void _fire(TriggerType t, [Json event = const {}]) => onTrigger?.call(t, event);
+  void _fire(TriggerType t, [Json event = const {}]) {
+    _buzzOnFire(t);
+    onTrigger?.call(t, event);
+  }
 
   // --- the keyboard: a press target ---------------------------------------------
 
@@ -913,9 +985,11 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   TapGestureRecognizer? _tap;
   DoubleTapGestureRecognizer? _doubleTap;
-  LongPressGestureRecognizer? _longPress;
+  GestureRecognizer? _longPress;
   PanGestureRecognizer? _pan;
   Timer? _hold;
+  Timer? _holdCommit;
+  bool _holdCommitted = false;
   Offset? _holdStart;
 
   Json _where(Offset local, Offset global) {
@@ -970,7 +1044,21 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         ..onDoubleTap = () => _fire(TriggerType.doubleTap, at ?? const {});
     }
     if (_longPress == null && _has(TriggerType.longPress)) {
-      _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPress = () => _fire(TriggerType.longPress);
+      final ms = _longPressMs;
+      _longPress = _commitMs > 0
+          // Held to its commit point, the press is the node's: the reaction
+          // runs at its end whether the finger stays or not.
+          ? (_CommittedHoldRecognizer(
+              debugOwner: this,
+              commit: Duration(milliseconds: _commitMs),
+              hold: Duration(milliseconds: ms ?? kLongPressTimeout.inMilliseconds),
+            )
+            ..onCommit = _buzzOnCommit
+            ..onHeld = () {
+              if (attached) _fire(TriggerType.longPress);
+            })
+          : (LongPressGestureRecognizer(debugOwner: this, duration: ms == null ? null : Duration(milliseconds: ms))
+            ..onLongPress = () => _fire(TriggerType.longPress));
     }
     final swipes = TriggerType.swipes.any(_has) || _has(TriggerType.dragStart) || _has(TriggerType.drag) || _has(TriggerType.dragEnd);
     if (_pan == null && swipes) {
@@ -1035,6 +1123,8 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     _pan = null;
     _hold?.cancel();
     _hold = null;
+    _holdCommit?.cancel();
+    _holdCommit = null;
   }
 
   Map<String, Object?> _pointerScope(PointerEvent event) => {
@@ -1105,21 +1195,36 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
       if (_has(TriggerType.hold)) {
         _holdStart = event.position;
         _hold?.cancel();
+        _holdCommit?.cancel();
+        _holdCommitted = false;
         _hold = Timer(Duration(milliseconds: holdMs), () {
           _hold = null;
-          _fire(TriggerType.hold);
+          _holdCommit?.cancel();
+          if (attached) _fire(TriggerType.hold);
         });
+        if (_commitMs > 0 && _commitMs < holdMs) {
+          // From here letting go or moving no longer cancels the hold.
+          _holdCommit = Timer(Duration(milliseconds: _commitMs), () {
+            _holdCommit = null;
+            _holdCommitted = true;
+            if (!_has(TriggerType.longPress)) _buzzOnCommit();
+          });
+        }
       }
     } else if (event is PointerMoveEvent) {
       if (_repeatStart case final start? when (event.position - start).distance > kTouchSlop) _stopRepeat();
       final start = _holdStart;
-      if (_hold != null && start != null && (event.position - start).distance > kTouchSlop) {
+      if (_hold != null && !_holdCommitted && start != null && (event.position - start).distance > kTouchSlop) {
+        _hold?.cancel();
+        _hold = null;
+        _holdCommit?.cancel();
+      }
+    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
+      if (!_holdCommitted) {
         _hold?.cancel();
         _hold = null;
       }
-    } else if (event is PointerUpEvent || event is PointerCancelEvent) {
-      _hold?.cancel();
-      _hold = null;
+      _holdCommit?.cancel();
       if (_has(TriggerType.pointerUp)) _fire(TriggerType.pointerUp, _pointerScope(event));
     } else if (event is PointerScrollEvent && _has(TriggerType.wheel)) {
       _fire(TriggerType.wheel, {
@@ -1302,6 +1407,59 @@ bool triggerWhenHolds(String when, ActionContext context) {
     value = readPath(context.scope, t) ?? context.expressions.evaluate('\${= $t}', context.scope);
   }
   return value == true || value == 1 || value == 'true' || value == '1';
+}
+
+/// A long press with a commit point ([Trigger.commitMs]): held to [commit]
+/// it wins the arena (a scroll can no longer take the press) and [onCommit]
+/// runs (its buzz); [onHeld] runs at [hold], whether the finger is still
+/// down or not. Let go, or moved past the slop, before [commit]: nothing.
+class _CommittedHoldRecognizer extends PrimaryPointerGestureRecognizer {
+  _CommittedHoldRecognizer({super.debugOwner, required this.commit, required this.hold})
+      : super(deadline: commit, preAcceptSlopTolerance: kTouchSlop, postAcceptSlopTolerance: null);
+
+  final Duration commit, hold;
+  VoidCallback? onCommit;
+  VoidCallback? onHeld;
+  Timer? _rest;
+
+  @override
+  void didExceedDeadline() {
+    resolve(GestureDisposition.accepted);
+    onCommit?.call();
+    final left = hold - commit;
+    _rest?.cancel();
+    if (left <= Duration.zero) {
+      onHeld?.call();
+      return;
+    }
+    _rest = Timer(left, () {
+      _rest = null;
+      onHeld?.call();
+    });
+  }
+
+  @override
+  void handlePrimaryPointer(PointerEvent event) {
+    // Let go before the commit point: not a long press.
+    if ((event is PointerUpEvent || event is PointerCancelEvent) && state == GestureRecognizerState.possible) {
+      resolve(GestureDisposition.rejected);
+    }
+  }
+
+  @override
+  void dispose() {
+    _rest?.cancel();
+    _rest = null;
+    super.dispose();
+  }
+
+  // Winning the arena by default (no other member) is not the commit: the
+  // deadline is (as Flutter's long press).
+  @override
+  void acceptGesture(int pointer) {}
+
+  @override
+  String get debugDescription => 'committed hold';
 }
 
 /// A drag reaction is a one-finger gesture: a second finger landing before

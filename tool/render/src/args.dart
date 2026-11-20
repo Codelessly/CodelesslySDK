@@ -205,7 +205,8 @@ Options:
   --double-tap <nodeId>   Tap the node twice in quick succession (a double tap, a
                           double click: a photo's zoom).
   --long-press <nodeId>   Hold a finger on the node, then lift (a longPress
-                          reaction, a context menu on touch).
+                          reaction, a context menu on touch). =<ms> holds that
+                          long (default 700): --long-press bubble#3=900.
   --right-click <nodeId>  Click the node with a mouse's secondary button (a
                           secondaryClick reaction, a context menu).
   --reload                Close the app and start it again on the same screen
@@ -216,7 +217,11 @@ Options:
   --pinch <nodeId>=<scale>    Two fingers on the node, spread to <scale> times as far
                           apart (2 zooms in, 0.5 out).
   --wait <ms>             Let time pass (animations, delays, toasts).
-  --unfocus               Take the focus from the focused field (no caret in the
+  --frames <ms,...>       Capture what the step before started, in flight: one
+                          PNG at each time (ms after that step, which does not
+                          settle first), <png name>-f<n>-<ms>ms.png, n the burst (--frames
+                          0,100,200,335). Steps go on after the last one.
+  --unfocus              Take the focus from the focused field (no caret in the
                           capture; its blur/unfocus reactions run).
   --key <key>             Press a key on what has the focus: ArrowLeft, ArrowRight,
                           ArrowUp, ArrowDown, Enter, Escape, Tab, Space, Home, End,
@@ -261,7 +266,7 @@ the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
 the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait) run in the order given.
+Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait, --frames) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -355,7 +360,7 @@ RenderArgs parseArgs(List<String> argv) {
         steps.add(const Step('unfocus', ''));
       case '--reload':
         steps.add(const Step('reload', ''));
-      case '--tap' || '--double-tap' || '--long-press' || '--right-click' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
+      case '--tap' || '--double-tap' || '--long-press' || '--right-click' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key' || '--frames':
         steps.add(Step(a.substring(2), next(i++, a)));
       case '--set' || '--scroll' || '--type' || '--drag' || '--wheel' || '--pinch':
         final v = next(i++, a);

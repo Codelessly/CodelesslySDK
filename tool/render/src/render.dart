@@ -808,7 +808,46 @@ Future<void> _renderAll(
 
       // 4. Interactions, in order.
       final skipped = <String>[];
-      for (final step in args.steps) {
+      for (var stepIndex = 0; stepIndex < args.steps.length; stepIndex++) {
+        final step = args.steps[stepIndex];
+        // --frames 0,100,335: captures in flight, each that many ms after the
+        // step before it (which does not settle first), as a camera filming
+        // what the step started: a flight, a transition, an entrance.
+        if (step.kind == 'frames') {
+          final times = [for (final t in step.target.split(',')) int.tryParse(t.trim())];
+          if (times.isEmpty || times.any((t) => t == null || t < 0) || !_ascending(times.cast<int>())) {
+            issue(RuntimeIssue('interaction_failed', 'error', '--frames ${step.target}: give ascending times in ms, from 0 (--frames 0,100,200,335).',
+                screen: label, size: sizeName));
+            continue;
+          }
+          // The n-th --frames of the run names its PNGs (-f1-0100ms.png), so
+          // a second burst (the return) keeps the first's.
+          final burst = args.steps.take(stepIndex + 1).where((s) => s.kind == 'frames').length;
+          var at = 0;
+          for (final t in times.cast<int>()) {
+            // Frame by frame (16 ms), as a device draws.
+            while (at < t) {
+              final dt = math.min(16, t - at);
+              await tester.pump(Duration(milliseconds: dt));
+              at += dt;
+            }
+            final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}'
+                '${args.label == null ? '' : '-${_fileSafe(args.label!)}'}-f$burst-${'$t'.padLeft(4, '0')}ms.png';
+            final file = '${args.out}/$name';
+            final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+            await tester.runAsync(() async {
+              final image = await ro.toImage(pixelRatio: 1);
+              final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+              image.dispose();
+              File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
+            });
+            report.images.add(file);
+          }
+          final framesNext = stepIndex + 1 < args.steps.length && args.steps[stepIndex + 1].kind == 'frames';
+          if (!framesNext) await _settle(tester);
+          collect();
+          continue;
+        }
         // --reload: the app is closed and started again on the same screen,
         // with what it kept on the device (and nothing else: every variable
         // not marked saved starts from its declared value).
@@ -893,7 +932,13 @@ Future<void> _renderAll(
             issue(RuntimeIssue('interaction_failed', 'error', problem, screen: label, size: sizeName));
           }
         }
-        await _settle(tester);
+        // Filmed next (--frames): what the step started is caught from its
+        // first frame, not after a settle.
+        if (stepIndex + 1 < args.steps.length && args.steps[stepIndex + 1].kind == 'frames') {
+          await tester.pump();
+        } else {
+          await _settle(tester);
+        }
         collect();
         hear('$step');
       }
@@ -1140,6 +1185,14 @@ Future<void> _renderAll(
       codelessly.dispose();
     }
   }
+}
+
+/// Whether [times] never go back (a `--frames` list).
+bool _ascending(List<int> times) {
+  for (var i = 1; i < times.length; i++) {
+    if (times[i] < times[i - 1]) return false;
+  }
+  return true;
 }
 
 /// The mouse `--hover` steps move, while a capture is made.
@@ -2912,10 +2965,15 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'long-press':
       // A finger (or a mouse button) held on the node past the long-press
       // time, then lifted: a `longPress` reaction, a context menu on touch.
-      final (point, problem) = await pointAt(step.target, 'long-press');
+      // `--long-press bubble=900`: held that long (ms) before the lift; 700
+      // without (past Flutter's long press, not an 800 ms hold's).
+      final held = RegExp(r'^(.*)=(\d+)$').firstMatch(step.target);
+      final target = held?.group(1) ?? step.target;
+      final holdMs = held == null ? 700 : int.parse(held.group(2)!);
+      final (point, problem) = await pointAt(target, 'long-press');
       if (point == null) return problem;
       var at = point;
-      final pressed = _boxOf(binding, step.target);
+      final pressed = _boxOf(binding, target);
       // A control inside the node that acts as a finger lands (a slider
       // takes its value there) would act too: hold where none is.
       bool controlUnder(ui.Offset p) {
@@ -2949,14 +3007,18 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
           o is RenderEditable);
       if (!holds) {
         warn('long_press_no_reaction',
-            '--long-press ${step.target}: nothing at the node reacts to a long press (no "longPress" reaction, onLongPress or menu=), so the hold ends as a tap does: '
+            '--long-press $target: nothing at the node reacts to a long press (no "longPress" reaction, onLongPress or menu=), so the hold ends as a tap does: '
                 '${reactsToTap(path) ? 'its tap reactions ran' : 'nothing happened'}.',
-            step.target.split('#').first);
+            target.split('#').first);
       }
       await _unfocusFieldOutside(tester, pressed);
       final g = await tester.startGesture(at);
-      await tester.pump(const Duration(milliseconds: 700));
-      await g.up(timeStamp: const Duration(milliseconds: 700));
+      // Frame by frame, as a device draws while the finger is down: what
+      // the hold starts (a lift at its end) runs on its own clock.
+      for (var t = 0; t < holdMs; t += 16) {
+        await tester.pump(Duration(milliseconds: math.min(16, holdMs - t)));
+      }
+      await g.up(timeStamp: Duration(milliseconds: holdMs));
       return null;
     case 'right-click':
       // A mouse's secondary button pressed and released on the node: a
