@@ -839,8 +839,8 @@ class FormulaEvaluator {
     ),
     FormulaFunctionDoc(
       'concat',
-      'concat(list or item, ...)',
-      'concat([record.art], sleeves) or list1 + list2',
+      'concat(list or item, ...), or concat(text, ...) for a text',
+      'concat([record.art], sleeves) or list1 + list2; concat("Hi ", name) → "Hi Ada"',
     ),
     FormulaFunctionDoc('sqrt', 'sqrt(value)', 'sqrt(16) → 4'),
     FormulaFunctionDoc('pow', 'pow(base, exponent)', 'pow(2, 10) → 1024'),
@@ -3250,10 +3250,14 @@ final Map<String, _Function> _functions = {
   },
   'unique': _unique,
   'groupBy': _groupBy,
-  'concat': (a) => [
-    for (final value in a)
-      if (value is Iterable) ...value else ?value,
-  ],
+  // Texts and no list (`concat("It is ", plan, " now")`): the text they make,
+  // as a spreadsheet's CONCAT; otherwise the list of them all.
+  'concat': (a) => !a.any((v) => v is Iterable) && a.any((v) => v is String)
+      ? a.map(FormulaEvaluator.stringify).join()
+      : [
+          for (final value in a)
+            if (value is Iterable) ...value else ?value,
+        ],
   // A list: `other` is a list of items to leave out, or one item
   // (`without(held, 64)`), as concat and append take either. A map: the map
   // without those keys (one key, or a list of keys).

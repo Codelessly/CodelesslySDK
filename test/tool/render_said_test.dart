@@ -326,4 +326,23 @@ void main() {
       expect(said(report, 'control_heights_differ'), isEmpty, reason: '${report.diagnostics}');
     });
   });
+
+  testWidgets('an image whose path is worked out as the page runs and names no file: image_failed', (tester) async {
+    Map<String, Object?> image(String formula) => {
+          'type': 'box',
+          'layout': {'width': 40, 'height': 40},
+          'decoration': {
+            'fills': [
+              {'type': 'image', 'image': {'url': '', 'fit': 'cover'}},
+            ],
+          },
+          'bind': {'decoration.fills[0].image.url': formula},
+        };
+    final report = await render(tester, {
+      'missing': image(r'${= "images/" + "none" + ".png"}'),
+    });
+    final failed = said(report, 'image_failed');
+    expect(failed.map((d) => '$d'), [allOf(contains('images/none.png'), contains('worked out as the page runs'), contains('no such file'))]);
+    expect(failed.single['severity'], 'error');
+  });
 }

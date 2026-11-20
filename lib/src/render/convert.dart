@@ -148,7 +148,13 @@ TextStyle textStyle(api.TextStyle style, [api.TextStyle? inherited]) {
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
     fontSize: style.fontSize,
-    color: style.foreground == null ? style.color?.flutter : null,
+    // A foreground paint: a solid one is the glyphs' color; a gradient is
+    // laid over glyphs drawn opaque (a text node masks them with it).
+    color: switch (style.foreground) {
+      null => style.color?.flutter,
+      final f when f.isGradient && f.stops.length > 1 => const Color(0xFFFFFFFF),
+      final f => (f.type == api.PaintType.solid ? f.effectiveColor : null)?.flutter ?? style.color?.flutter,
+    },
     letterSpacing: style.letterSpacing ?? 0,
     height: style.height,
     decoration: switch (style.decoration) {

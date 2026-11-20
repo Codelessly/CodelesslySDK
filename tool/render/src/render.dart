@@ -38,6 +38,8 @@ import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSe
 import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/paint/image_fill.dart' show imageUrlOf;
+import 'package:codelessly_sdk/src/render/paint/node_paint.dart' show RenderNodePaint;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 import 'package:codelessly_sdk/src/runtime/expressions/formula.dart' show FormulaEvaluator;
@@ -411,6 +413,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // An SVG family no font file has is drawn in the next one, or the site's.
   final hadFamilies = {for (final f in faces) f.family.toLowerCase()};
   SvgFonts.isAvailable = (family) => hadFamilies.contains(family.toLowerCase());
+  // The image paths said already as the documents are prepared: the run's
+  // own check ([_check]) does not say them again.
+  final failedImages = <String>{};
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.
@@ -429,6 +434,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     }
     for (final img in p.images) {
       if (img.status == 'failed') {
+        failedImages.add(img.url.trim());
         issue(RuntimeIssue('image_failed', 'error', 'Image ${img.url}: ${img.detail}.', nodeId: img.nodeId, file: e.key, path: img.path));
       } else if (img.status == 'network') {
         issue(RuntimeIssue('image_network', 'warning',
@@ -542,14 +548,14 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     if (alone.isEmpty) {
       await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
           components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
-          unusableFamilies: unusableFamilies);
+          unusableFamilies: unusableFamilies, failedImages: failedImages);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
           report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
-          unusableFamilies: unusableFamilies);
+          unusableFamilies: unusableFamilies, failedImages: failedImages);
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
@@ -626,6 +632,7 @@ Future<void> _renderAll(
   Map<String, Set<String>> svgUsers = const {},
   String? siteDir,
   Set<String> unusableFamilies = const {},
+  Set<String> failedImages = const {},
 }) async {
   // 3. Which screens.
   final screens = _screens(published, docs, args.screens, (s) => issue(s),
@@ -1080,7 +1087,7 @@ Future<void> _renderAll(
       // its text is measured, checked and drawn in it, not in the fallback.
       await _fontsSettled(tester, fetcher);
       await layoutSettled(tester);
-      for (final i in _check(binding, published, docs, fileOfNode, label, sizeName, faces)) {
+      for (final i in _check(binding, published, docs, fileOfNode, label, sizeName, faces, failedImages: failedImages)) {
         issue(i);
       }
       for (final m in fetcher.misses) {
@@ -3933,8 +3940,9 @@ List<RuntimeIssue> _check(
   Map<String, String> fileOfNode,
   String screen,
   String size,
-  List<FontFace> faces,
-) {
+  List<FontFace> faces, {
+  Set<String> failedImages = const {},
+}) {
   final out = <RuntimeIssue>[];
   final boxes = _boxes(binding);
   // The glyphs a family has: its regular face's (else Roboto's).
@@ -3956,6 +3964,32 @@ List<RuntimeIssue> _check(
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
     return out;
+  }
+  // An image whose path is worked out as the page runs (`Image
+  // url={folder + name}`): the files the run inlines are checked as it
+  // prepares them, this one only here, where it did not draw.
+  final unloaded = <String>{};
+  void images(RenderObject o) {
+    if (o is RenderNodePaint) {
+      for (final f in o.decoration.fills) {
+        final url = imageUrlOf(f)?.trim();
+        // (A path written out that names no file was said as the document
+        // was prepared, with its fix: not said twice.)
+        if (url == null || url.isEmpty || !f.visible || (Uri.tryParse(url)?.hasScheme ?? true) || o.imageFor(url) != null || failedImages.contains(url) || !unloaded.add(url)) continue;
+        NodeBox? owner;
+        for (RenderObject? p = o.parent; p != null && owner == null; p = p.parent) {
+          if (p is NodeBox) owner = p;
+        }
+        out.add(RuntimeIssue('image_failed', 'error',
+            'Image "$url" (its path worked out as the page runs) did not draw: ${o.imageFailed(url) ? 'there is no such file in the site\'s folder (paths are relative to the folder with site.json)' : 'it was still loading when the capture was taken'}.',
+            nodeId: owner?.id, screen: screen, size: size));
+      }
+    }
+    o.visitChildren(images);
+  }
+
+  for (final v in binding.renderViews) {
+    images(v);
   }
   final layouts = published.bundle.layouts;
   api.Node? nodeOf(String id) {

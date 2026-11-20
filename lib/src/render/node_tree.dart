@@ -1408,11 +1408,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     if (deco is! RenderDecoratedBox) return false;
     final current = deco.decoration;
     if (current is! BoxDecoration) return false;
+    // A border drawn over the content (an inside stroke of a node that holds
+    // some: _shell's strokesOver) is that layer's, not the decoration's: it
+    // takes the new color there, or the old one stayed drawn over the box.
+    final over = _objects['overStroke'];
+    final strokesOver = over is RenderNodePaint && over.attached;
+    if (strokesOver) over.decoration = nd;
     deco.decoration = BoxDecoration(
       boxShadow: current.boxShadow,
       borderRadius: current.borderRadius,
       color: after.fill,
-      border: after.border,
+      border: strokesOver ? null : after.border,
     );
     _node = n;
     _applied = n;
@@ -2647,6 +2653,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         ..configure(tw, plainText(span), animates: tree.animates, textDefault: n.behaviors.defaultTextStyle));
     }
     if (n.prop(TextProps.live)) chain.add(_obtain<_LiveTextSemantics>('liveText', _LiveTextSemantics.new));
+    // `style.foreground`, a gradient: the glyphs (drawn opaque by
+    // textStyle) take the paint across the text's box.
+    final inherited = n.behaviors.defaultTextStyle;
+    final foreground = (inherited == null ? n.prop(TextProps.style) : inherited.merge(n.prop(TextProps.style))).foreground;
+    if (foreground != null && foreground.visible && foreground.isGradient && foreground.stops.length > 1) {
+      Shader shader(Rect b) => RenderNodePaint.paintFor(foreground, b).shader!;
+      chain.add(_obtain<RenderShaderMask>('textForeground', () => RenderShaderMask(shaderCallback: shader))
+        ..shaderCallback = shader
+        ..blendMode = BlendMode.srcIn);
+    }
     // A word is never broken across lines: where its box is narrower than
     // its longest word, the text is drawn smaller, then cut (text_box.dart).
     if (n.prop(TextProps.maxLines) != 1 && !n.prop(TextProps.scaleDown) && n.behaviors.typewriter == null) {
