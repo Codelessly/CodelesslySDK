@@ -7,7 +7,8 @@ final class Step {
   const Step(this.kind, this.target, [this.value]);
 
   /// tap, double-tap, long-press, right-click, hover, focus, unfocus, key,
-  /// type, set, stage, scroll, drag, wheel, pinch, navigate, reload or wait.
+  /// type, set, stage, scroll, drag, wheel, pinch, navigate, reload, keyboard
+  /// or wait.
   final String kind;
   final String target;
   final String? value;
@@ -41,6 +42,8 @@ final class RenderArgs {
     this.imageMap = const {},
     this.pickFiles = const [],
     this.googleFonts = true,
+    this.insets = const [0, 0, 0, 0],
+    this.textScale,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -117,6 +120,16 @@ final class RenderArgs {
   /// still read).
   final bool googleFonts;
 
+  /// `--insets`: the device's safe area, `[top, right, bottom, left]` in
+  /// logical pixels (a status bar, a home indicator), read as
+  /// `screen.insets`. None by default.
+  final List<double> insets;
+
+  /// `--text-scale`: the device's text size setting (1.3), read as
+  /// `screen.textScale`, as in a host that lets layouts follow it up to
+  /// that factor. Null: 1.
+  final double? textScale;
+
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
         inputs: inputs,
@@ -142,6 +155,8 @@ final class RenderArgs {
         imageMap: imageMap,
         pickFiles: pickFiles,
         googleFonts: googleFonts,
+        insets: insets,
+        textScale: textScale,
       );
 }
 
@@ -214,6 +229,15 @@ Options:
                           with the screen's time, as a device's clock does: a
                           countdown to a deadline ticks through --wait 1200.
                           The same in every run. (Not with --now.)
+  --insets <top>,<bottom> The device's safe area in px, read as screen.insets
+                          (or <top>,<right>,<bottom>,<left>): a phone's status
+                          bar and home indicator, --insets 47,34. Default none.
+  --text-scale <factor>   The device's text size setting (1.3), read as
+                          screen.textScale, as in a host that lets layouts
+                          follow it (the nodes' text keeps its written size).
+  --keyboard <px>         A step: the soft keyboard opens, px tall (0 closes
+                          it), read as screen.keyboard; the home indicator's
+                          inset goes under it. --focus composer --keyboard 336.
   --screen-timeout <seconds>   The most real time one screen at one size may
                           take (default 120): past it the screen is an error
                           (screen_timeout) and the run goes on to the next.
@@ -303,7 +327,7 @@ A node written inside a defined word (a site's components/*.txt, a
 dictionary word) is reached by the id written there: --tap editorBack for
 IconButton#editorBack in EditorBar (expanded as editorBack_editorBar1), or
 editorBar1/editorBack for one call's when several are on screen.
-Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --stage, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --wait, --frames) run in the order given.
+Steps (--tap, --double-tap, --long-press, --right-click, --hover, --focus, --unfocus, --key, --type, --set, --stage, --scroll, --drag, --wheel, --pinch, --navigate, --reload, --keyboard, --wait, --frames) run in the order given.
 ''';
 
 /// The arguments in the file render.sh writes for the harness: each ended by
@@ -331,6 +355,8 @@ RenderArgs parseArgs(List<String> argv) {
   final imageMap = <String, String>{};
   final pickFiles = <String>[];
   var googleFonts = true;
+  var insets = const <double>[0, 0, 0, 0];
+  double? textScale;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -406,6 +432,22 @@ RenderArgs parseArgs(List<String> argv) {
         final seconds = double.tryParse(v);
         if (seconds == null || seconds <= 0) throw FormatException('--screen-timeout takes a number of seconds (120), got "$v".');
         screenTimeout = Duration(milliseconds: (seconds * 1000).round());
+      case '--insets':
+        final v = next(i++, a);
+        final n = [for (final p in v.split(',')) double.tryParse(p.trim())];
+        if ((n.length != 2 && n.length != 4) || n.any((x) => x == null || x < 0)) {
+          throw FormatException('--insets takes <top>,<bottom> or <top>,<right>,<bottom>,<left> in px (47,34), got "$v".');
+        }
+        insets = n.length == 2 ? [n[0]!, 0, n[1]!, 0] : n.cast<double>();
+      case '--text-scale':
+        final v = next(i++, a);
+        textScale = double.tryParse(v);
+        if (textScale == null || textScale <= 0) throw FormatException('--text-scale takes a factor (1.3), got "$v".');
+      case '--keyboard':
+        final v = next(i++, a);
+        final px = double.tryParse(v);
+        if (px == null || px < 0) throw FormatException('--keyboard takes the keyboard\'s height in px (336; 0 closes it), got "$v".');
+        steps.add(Step('keyboard', v));
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
       case '--reload':
@@ -453,6 +495,8 @@ RenderArgs parseArgs(List<String> argv) {
     imageMap: imageMap,
     pickFiles: pickFiles,
     googleFonts: googleFonts,
+    insets: insets,
+    textScale: textScale,
   );
 }
 

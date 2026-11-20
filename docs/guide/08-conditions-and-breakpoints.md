@@ -79,6 +79,9 @@ Layouts read the size class in expressions:
 | `screen.orientation`, `screen.isPortrait`, `screen.isLandscape` | Orientation |
 | `screen.brightness`, `screen.isDark` | The platform's brightness (`screen.dark` is the same as `screen.isDark`). For the mode the layout's colors follow, read `theme.isDark` ([chapter 11](11-theming-and-fonts.md#dark-mode)) |
 | `screen.breakpoints` | The project's breakpoints: `[{id, name, minWidth}]` |
+| `screen.insets.top`, `.right`, `.bottom`, `.left` | The safe area in logical pixels (a status bar, a notch, a home indicator): Flutter's `MediaQuery.padding`. A side the keyboard covers has none. A `SafeArea` your app puts around the layout consumes them (the layout reads 0) |
+| `screen.keyboard` | How much of the screen's bottom the soft keyboard covers, 0 while it is closed (`MediaQuery.viewInsets.bottom`). A bar pinned to the bottom rides above it and clears the home indicator with one gap: `${= screen.keyboard + screen.insets.bottom}` |
+| `screen.textScale` | The device's text size setting, up to `CodelesslyConfig.maxTextScaleFactor` (default 1, so 1 unless you raise it) |
 | `screen.modal`, `screen.sheet` | Whether the screen is shown as a modal (dialog or sheet), and as a bottom sheet: leave room for a sheet's drag handle with `${= screen.sheet ? 28 : 14}` |
 | `screen.url` | The address of the page as shown: in a browser its URL; in an app the location its route was opened with (`/trip/coast`, what a link into the app opens), or empty when it has none. A dialog or sheet has its page's |
 | `screen.backdrop` | Whether the app draws backdrop screens right beneath this screen (`canvas.setRoute backdrop`): hide the screen's own background there with `${= !screen.backdrop}` and keep it for the design board |

@@ -1,0 +1,544 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF8FAFC"
+     }
+    ]
+   },
+   "children": [
+    "column2",
+    "header",
+    "thread",
+    "composerBar",
+    "keyboardRoom"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 0
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "layout.height": "${screen.insets.top}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 56,
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "column3",
+    "column4"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 18.0,
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   },
+   "children": [
+    "column3Text"
+   ]
+  },
+  "column3Text": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "RL",
+    "style": {
+     "fontSize": 14.0,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Robin Lee"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "color": "#FF9CA3AF"
+    },
+    "text": "keyboard ${screen.keyboard} · insets ${screen.insets.top}/${screen.insets.bottom} · text ${screen.textScale}"
+   }
+  },
+  "thread": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "flex": 1,
+    "padding": [
+     16,
+     16,
+     16,
+     16
+    ],
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${messages}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "spacer1",
+    "column5",
+    "spacer2"
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${item.me}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     12,
+     8,
+     12,
+     8
+    ],
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 16,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.me ? \"#FF2563EB\" : \"#FFFFFFFF\"}",
+    "decoration.strokes[0].color": "${= item.me ? \"#FF2563EB\" : \"#FFE5E7EB\"}"
+   },
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.text}",
+    "style": {
+     "fontSize": 15,
+     "color": "#FF111827"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.me ? \"#FFFFFFFF\" : \"#FF111827\"}"
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !item.me}"
+   }
+  },
+  "composerBar": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     8,
+     12,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "composer",
+    "send"
+   ]
+  },
+  "composer": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "flex": 1,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "",
+     "hintText": "Message Robin"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${draft}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "draft",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "send": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "send"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "messages",
+       "value": "${= append(messages, {\"me\": true, \"text\": draft})}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "draft",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "keyboardRoom": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 0
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "layout.height": "${= screen.keyboard + screen.insets.bottom}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "draft",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "messages",
+    "type": "list",
+    "value": [
+     {
+      "me": false,
+      "text": "How did the exposure go today?"
+     },
+     {
+      "me": true,
+      "text": "Better than yesterday. I stayed with it for ten minutes."
+     },
+     {
+      "me": false,
+      "text": "That is real progress. What did you notice when the urge peaked?"
+     },
+     {
+      "me": true,
+      "text": "It dropped on its own after a while."
+     }
+    ]
+   }
+  ]
+ }
+}

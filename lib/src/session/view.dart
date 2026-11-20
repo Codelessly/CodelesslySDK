@@ -11,7 +11,7 @@ import 'package:codelessly_api/core.dart' as api show TextStyle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide NavigationMode;
 
-import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox;
+import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox, deviceEdgesOf;
 
 import '../app/theme.dart' show themeValues;
 import '../render/control_theme.dart' show ThemeTokensScope;
@@ -295,6 +295,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     if (mq != null) {
       final screen = {
         ...screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark),
+        ...deviceEdgesOf(mq),
         'url': pageUrlOf(context),
       };
       if (!jsonEquality.equals(screen, _values['screen'])) _values.set('screen', screen);
