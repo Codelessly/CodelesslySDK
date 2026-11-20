@@ -23,6 +23,24 @@ void main() {
     expect(styled, {'topInset': 6, 'fontFamily': 'Roboto'});
   });
 
+  test('a chart\'s family written empty is none of its own: the default one', () {
+    final prepared = prepare({
+      'nodes': {
+        'b': {
+          'type': 'barChart',
+          'props': {'labelFontFamily': ''},
+        },
+        'm': {
+          'type': 'barChart',
+          'props': {'labelFontFamily': 'JetBrains Mono'},
+        },
+      },
+    }, dir: '.', defaultFamily: 'Roboto', codepoints: const {});
+    final nodes = prepared.json['nodes']! as Map;
+    expect(((nodes['b'] as Map)['props'] as Map)['labelFontFamily'], 'Roboto');
+    expect(((nodes['m'] as Map)['props'] as Map)['labelFontFamily'], 'JetBrains Mono');
+  });
+
   test('a family the style names is kept', () {
     final own = (nodeOf({
       'style': {'fontFamily': 'Inter'},

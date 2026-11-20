@@ -887,7 +887,14 @@ class GraphStyleSpec {
     this.topInset = 0,
     this.ink = const Color(0xFF111827),
     this.palette = graphPalette,
+    this.tooltip = const Color(0xFFFFFFFF),
+    this.tooltipText = const Color(0xFF111827),
+    this.tooltipBorder = const Color(0x1F000000),
   });
+
+  /// A tooltip: its ground (a surface over the graph), its text and the
+  /// line round it.
+  final Color tooltip, tooltipText, tooltipBorder;
 
   /// A figure written large (the one in a donut's hole).
   final Color ink;
@@ -915,6 +922,9 @@ class GraphStyleSpec {
         fontFamily: j['fontFamily'] is String ? j['fontFamily']! as String : null,
         topInset: _d(j['topInset'], 0),
         ink: graphColor(j['ink'], const Color(0xFF111827)),
+        tooltip: graphColor(j['tooltip'], const Color(0xFFFFFFFF)),
+        tooltipText: graphColor(j['tooltipText'], const Color(0xFF111827)),
+        tooltipBorder: graphColor(j['tooltipBorder'], const Color(0x1F000000)),
         palette: _l(j['palette']).isEmpty
             ? graphPalette
             : [for (final c in _l(j['palette'])) graphColor(c, const Color(0xFF2962FF))],
@@ -932,6 +942,9 @@ class GraphStyleSpec {
         if (fontFamily != null) 'fontFamily': fontFamily,
         'topInset': topInset,
         'ink': _hex(ink),
+        'tooltip': _hex(tooltip),
+        'tooltipText': _hex(tooltipText),
+        'tooltipBorder': _hex(tooltipBorder),
         if (!identical(palette, graphPalette)) 'palette': [for (final c in palette) _hex(c)],
       };
 }
@@ -952,13 +965,14 @@ const graphPalette = [
 /// The legend: a key for each named mark (its color and its name), or in a
 /// polar pane for each slice (its color, its label and its share).
 class GraphLegendSpec {
-  const GraphLegendSpec({this.show = 'auto', this.position = 'auto', this.values = true});
+  const GraphLegendSpec({this.show = 'none', this.position = 'auto', this.values = true});
 
-  /// `auto`: drawn when there is more than one thing to tell apart and
-  /// there is room: under a plot with two or more named marks; beside
-  /// labeled slices in a graph wide enough that the ring keeps at least
-  /// three quarters of its height (slices in a narrower graph have none).
-  /// `always`, or `none`.
+  /// `none` (a graph has no legend unless it asks). `auto`: drawn when
+  /// there is more than one thing to tell apart and there is room: under a
+  /// plot with two or more named marks; beside labeled slices in a graph
+  /// wide enough that the ring keeps at least three quarters of its height
+  /// (slices in a narrower graph have none). `always`: whenever there is a
+  /// key to draw (slices in a narrower graph: under them).
   final String show;
 
   /// `bottom`, `top` (a line of keys, wrapped, in the middle) or `right` (a
@@ -974,7 +988,7 @@ class GraphLegendSpec {
     final j = _m(v);
     final show = j['show'];
     return GraphLegendSpec(
-      show: show is bool ? (show ? 'always' : 'none') : _s(show, 'auto'),
+      show: show is bool ? (show ? 'always' : 'none') : _s(show, 'none'),
       position: _s(j['position'], 'auto'),
       values: _b(j['values'], true),
     );
@@ -1023,8 +1037,8 @@ class GraphSelectionSpec {
   final double dot;
 
   /// Whether a tooltip is drawn, its first line ([title]: a row field,
-  /// empty for the x label) and its colors (null: the style's tag and its
-  /// text).
+  /// empty for the x label) and its colors (null: the style's tooltip and
+  /// its text).
   final bool tooltip;
   final String title;
   final Color? tooltipFill, tooltipText;

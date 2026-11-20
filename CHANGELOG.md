@@ -1,58 +1,50 @@
 ## 40.2.0
 
-Charts look finished with nothing more than their data: labels that never touch, round figures on the axis, series
-in colors told apart, a legend, a tooltip. Needs codelessly_api 40.2.0.
+Charts drawn right whatever they are written with: labels that never touch, a smooth line that keeps to its values,
+series told apart, a tooltip that reads on its page. A node that leaves a key out draws as it did; the look of the
+notation's chart words is keys they write (codelessly_api 40.2.0, which this needs).
 
-### Behaviour changes (read before upgrading)
+### Drawn right, for every graph and chart
 
-- **A graph draws a legend** when it has two or more named marks (under the plot), or labeled slices in a box wide
-  enough that the ring keeps at least three quarters of its height (beside them). `legend: {"show": "none"}` (or
-  `legend=false` on a `chart`) is the graph as it was. A square donut is unchanged.
-- **Marks that write no color take the palette's colors in turn**, the first the color every such mark had
-  (`#2962FF`): two unnamed lines were one blue, and are now told apart. An area and the line along its top share a
-  color. Slices with no colors of their own take them too (they were all one color).
-- **A graph on a page takes the theme's colors where its style says nothing**: the grid and the labels in the
-  surface's quiet colors, a tag and a tooltip as an inverted surface, the marks in the theme's series colors. A
-  `graph` node drew a fixed light style whatever the theme, so its grid was lost on a dark page.
-- **The labels under a plot never touch, and the first and the last are always written.** Where all do not fit,
-  every second, third… is written from the first, and the last takes the place of one it would run into. Before,
-  each label that ran into the one before it was dropped, so the first of a line chart and the last of most were
-  missing. A fitted view with no `tickEvery` has a tick on those rows.
+- **The labels under a plot never touch.** They are measured: where all do not fit, every second, third… from the
+  first is written, evenly apart; the step ends on the last label where a step near the smallest does, and where
+  none does the last is left out rather than set at an odd gap. Before, each label that ran into the one before it
+  was dropped, so the first of a line chart was missing and the gaps were uneven. A fitted view with no `tickEvery`
+  has its ticks on those rows.
+- **Long labels are cut before they are thinned away.** Where thinning alone would write fewer than half of them,
+  each (or every second) is cut with an ellipsis to the room between two, while that room holds about seven letters.
 - **A smooth line keeps to its values.** `curved` marks are drawn as a monotone curve: between two points the line
   stays between them. The curve it replaces rose above peaks and dipped below troughs the data did not have.
-- **`chart`, `barChart` and `lineChart` select what is under the pointer and show a tooltip** unless the node says
-  not (`selectOnHover`, `tooltip`, `scrubEnabled`: see codelessly_api 40.2.0). A line chart also draws a line up
-  the plot through the row under the pointer.
+- **Series with no color are told apart.** A `chart`'s series that write none take the theme's series colors in
+  turn (`colors.chart1`, `chart2`… where the theme names them, else its primary followed by colors of other hues
+  as light and as strong as it; a theme with no primary starts from `#2563EB`); they were all one green. A donut's
+  rows that give no color, and a graph's marks that write none, take them the same way (an area and the line along
+  its top share one); a graph's were all `#2962FF`.
+- **A graph on a page takes the theme's colors where its style says nothing**: the grid, the labels, a crosshair's
+  tag and the tooltip. A `graph` node drew a fixed light style whatever the theme, so its grid was lost on a dark
+  page.
+- **A tooltip is a surface with a hairline round it and a soft shadow**, in the surface's ink; it was an inverted
+  box. It stays over the panes: beside the pointer on the side that has the room, never over a legend or out of the
+  graph. One mark with no `name` writes its value alone (it wrote the row field's name), and a graph too small to
+  hold a tooltip draws none.
+- **Bars side by side are each at most the widest a bar is drawn** (`maxBarWidth`); the group was that wide
+  together.
+- `tool/codelessly render` draws a `graph` node's labels, and a chart's whose family is written empty, in the
+  render's default family; a graph whose style named no family drew boxes for letters.
 
-### Charts
+### Keys, off unless written (codelessly_api 40.2.0)
 
-- **A `chart`'s scale is rounded out to its grid lines**, so the top and the bottom of the plot are labeled lines
-  (a line chart of 12 to 31 runs from 10 to 40); its decimals are those its step has, and ten thousand and more is
-  written `20K`.
-- **A `chart`'s series are in the theme's series colors**: `colors.chart1`, `chart2`… where the theme names them,
-  else its primary followed by colors of other hues as light and as strong as it. Two series with no color were
-  the same green.
-- **Line series have a dot on each point** when there are 12 or fewer, and stand a little inside the plot, so the
-  first and the last are whole. **Area series fade** to the foot of the plot.
-- **Bars of several series are each at most `maxBarWidth` wide** (a `chart`'s is 36): a group of two was 36 wide
-  together. A `chart` now reads its `maxBarWidth`.
-- **A donut** draws its legend (its labels and shares) beside it where its box is wider than high, writes its total
-  in its hole when it has a `centerLabel` (the selected slice's value and label while one is selected), and takes
-  the theme's series colors for rows that give none.
-- **A `lineChart`** with no `yTicks` has four round lines with their figures where its `plotPadding` keeps room
-  left of the plot (24 or more), on a scale rounded out to them.
-- **A `barChart` with `gridValues`** chooses round grid lines over its largest value and labels each.
-
-### The graph
-
-- `legend`, `style.palette`, `style.ink`, `x.inset`, `y.nice`, a mark's `dots`, `center` and `centerLabel` (see
-  codelessly_api 40.2.0). `GraphEngine.legend` is the legend as laid out, `GraphEngine.xLabels` the labels that are
-  written, `graphPalette` the colors a graph uses when neither its marks nor its style say.
-- A selection's tooltip with no colors of its own is the style's `tag` and `tagText`. A tooltip that names one mark
-  with no `name` writes its value alone (it wrote the row field's name), and a graph too small to hold its tooltip
-  draws none.
-- `tool/codelessly render` draws a `graph` node's labels in the render's default family; a graph whose style named
-  no family drew boxes for letters.
+- **`chart`**: `legend`, `roundScale` (the scale rounded out to its grid lines, never leaving more than a third of
+  the plot empty over the highest value; its figures have the decimals of its step, a thousand and more a
+  separator, ten thousand and more written `20K`), `dots`, `cursorLine`, `plotInset`, `maxBarWidth`, a series'
+  `fade`, and for a donut `legend` (its labels and shares beside the ring where its box has the room, else under
+  it) and `centerLabel` (its total in its hole; the selected slice's value and label while one is selected).
+- **`lineChart`**: `gridValues` (round lines with their figures where `plotPadding` keeps 24 or more left of the
+  plot), `cursorLine`, `tooltip`. **`barChart`**: `gridValues`, `tooltip`.
+- **`graph`**: `legend`, `style.palette`, `style.ink`, `style.tooltip`, `tooltipText`, `tooltipBorder`, `x.inset`,
+  `y.nice`, a mark's `dots`, `center` and `centerLabel`. `GraphEngine.legend` is the legend as laid out,
+  `GraphEngine.xLabels` the labels that are written, `graphPalette` the colors a graph uses when neither its marks
+  nor its style say.
 
 ## 40.1.0
 

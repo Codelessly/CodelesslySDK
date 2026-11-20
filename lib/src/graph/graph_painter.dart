@@ -117,10 +117,10 @@ class GraphPainter {
     }
     final axis = engine.xAxisRect;
     if (!_spec.x.labels || axis.height <= 0 || _spec.panes.every((p) => p.polar)) return;
-    // The labels that stand apart (GraphEngine.xLabels): the first and the
-    // last, and as many between as fit.
-    for (final (_, label, left) in engine.xLabels) {
-      final tp = _text(label, _style.text, _style.fontSize);
+    // The labels that stand apart (GraphEngine.xLabels), a long one cut to
+    // its room.
+    for (final (_, label, left, width) in engine.xLabels) {
+      final tp = _text(label, _style.text, _style.fontSize, maxWidth: width.isFinite ? width : null);
       tp.paint(canvas, Offset(left, axis.top + math.max(2.0, math.min(6.0, axis.height - tp.height))));
     }
   }
@@ -248,7 +248,7 @@ class GraphPainter {
     under?.paint(canvas, Offset(center.dx - under.width / 2, center.dy - height / 2 + figure.height));
   }
 
-  /// A figure in few characters: 1,234 as it is, 12,400 as 12.4K.
+  /// A figure in few characters: 1,234 with its separator, 12,400 as 12.4K.
   String _compact(double v) {
     final a = v.abs();
     String short(double n, String unit) {
@@ -260,8 +260,8 @@ class GraphPainter {
     if (a >= 1e6) return short(v / 1e6, 'M');
     if (a >= 1e4) return short(v / 1e3, 'K');
     final r = v.roundToDouble();
-    if ((v - r).abs() < 1e-9) return r.toInt().toString();
-    return v.toStringAsFixed(a < 10 ? 2 : 1);
+    if ((v - r).abs() < 1e-9) return graphGrouped(r.toInt().toString());
+    return graphGrouped(v.toStringAsFixed(a < 10 ? 2 : 1));
   }
 
   /// A slice from [start] turning [sweep] (radians, clockwise from the top).
@@ -383,8 +383,8 @@ class GraphPainter {
     final row = engine.rows[sel.index];
     final title = s.title.isEmpty ? engine.xLabel(sel.index) : '${row[s.title] ?? ''}';
     final font = _style.fontSize + 1;
-    final tooltipText = s.tooltipText ?? _style.tagText, tooltipFill = s.tooltipFill ?? _style.tag;
-    final titleText = title.isEmpty ? null : _text(title, tooltipText.withValues(alpha: 0.72), font - 1);
+    final tooltipText = s.tooltipText ?? _style.tooltipText, tooltipFill = s.tooltipFill ?? _style.tooltip;
+    final titleText = title.isEmpty ? null : _text(title, tooltipText.withValues(alpha: tooltipText.a * 0.64), font - 1);
     final polar = _spec.panes[sel.pane].polar;
     final total = rows.fold(0.0, (a, r) => a + r.$3);
     final lines = <(Color?, TextPainter, TextPainter)>[
@@ -415,18 +415,29 @@ class GraphPainter {
     final pointer = engine.pointer;
     final anchor = pointer ?? engine.selectionAnchor;
     if (anchor == null) return;
+    // Beside the pointer, on the side that has the room, and kept over the
+    // panes: never over a legend or the labels under the plot, never out
+    // of the graph.
+    final within = engine.tooltipBounds;
     var left = anchor.dx + 14, top = pointer == null ? anchor.dy + 6 : anchor.dy + 14;
-    if (left + w > size.width) left = anchor.dx - 14 - w;
-    if (top + h > size.height) top = anchor.dy - 14 - h;
-    left = left.clamp(0.0, math.max(0.0, size.width - w)).toDouble();
-    top = top.clamp(0.0, math.max(0.0, size.height - h)).toDouble();
+    if (left + w > within.right) left = anchor.dx - 14 - w;
+    if (top + h > within.bottom) top = anchor.dy - 14 - h;
+    left = left.clamp(within.left, math.max(within.left, within.right - w)).toDouble();
+    top = top.clamp(within.top, math.max(within.top, within.bottom - h)).toDouble();
+    // A surface with a line round it, lifted by a soft shadow.
     final box = RRect.fromRectAndRadius(Rect.fromLTWH(left, top, w, h), const Radius.circular(8));
     canvas.drawRRect(
         box.shift(const Offset(0, 2)),
         Paint()
-          ..color = const Color(0x33000000)
+          ..color = const Color(0x1F000000)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6));
     canvas.drawRRect(box, Paint()..color = tooltipFill);
+    canvas.drawRRect(
+        box.deflate(0.5),
+        Paint()
+          ..color = _style.tooltipBorder
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1);
     var y = top + pad;
     if (titleText != null) {
       titleText.paint(canvas, Offset(left + pad, y));

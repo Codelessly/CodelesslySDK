@@ -103,6 +103,21 @@ class GraphLegendLayout {
   static const dot = 8.0, dotGap = 6.0;
 }
 
+/// A number as written, with a comma between its thousands: `1234.5` as
+/// `1,234.5`.
+String graphGrouped(String number) {
+  final negative = number.startsWith('-');
+  final digits = negative ? number.substring(1) : number;
+  final dot = digits.indexOf('.');
+  final whole = dot < 0 ? digits : digits.substring(0, dot);
+  final out = StringBuffer();
+  for (var i = 0; i < whole.length; i++) {
+    if (i > 0 && (whole.length - i) % 3 == 0) out.write(',');
+    out.write(whole[i]);
+  }
+  return '${negative ? '-' : ''}$out${dot < 0 ? '' : digits.substring(dot)}';
+}
+
 class GraphEngine extends ChangeNotifier {
   GraphEngine(GraphSpec spec, {List<Json> data = const [], Json? view}) : _spec = spec {
     viewport = GraphViewport(barSpacing: spec.x.barSpacing, rightOffset: spec.x.rightOffset);
@@ -156,6 +171,10 @@ class GraphEngine extends ChangeNotifier {
   double get _top => spec.style.topInset + (legend?.top ?? 0);
   double get _panesHeight => math.max(0, size.height - spec.x.axisHeight - _top - (legend?.bottom ?? 0));
 
+  /// Where a tooltip is kept: over the panes, clear of a legend and of the
+  /// labels under the plot.
+  Rect get tooltipBounds => Rect.fromLTRB(0, legend?.top ?? 0, bodyRight, math.max(legend?.top ?? 0, _panesBottom));
+
   /// The right edge of the panes and their axes: the graph's, less a
   /// legend beside them.
   double get bodyRight => math.max(0, size.width - (legend?.right ?? 0));
@@ -208,11 +227,15 @@ class GraphEngine extends ChangeNotifier {
   GraphLegendLayout? _legend;
   bool _legendDone = false;
 
-  double textWidth(String text, double fontSize, {FontWeight? weight}) => (TextPainter(
+  /// A text's width as the graph writes it; with a [maxWidth], as cut to
+  /// it with an ellipsis.
+  double textWidth(String text, double fontSize, {FontWeight? weight, double? maxWidth}) => (TextPainter(
         text: TextSpan(
             text: text, style: TextStyle(fontSize: fontSize, fontFamily: spec.style.fontFamily, fontWeight: weight)),
         textDirection: TextDirection.ltr,
-      )..layout())
+        maxLines: maxWidth == null ? null : 1,
+        ellipsis: maxWidth == null ? null : '\u2026',
+      )..layout(maxWidth: maxWidth ?? double.infinity))
           .width;
 
   GraphLegendLayout? _layoutLegend() {
@@ -570,8 +593,10 @@ class GraphEngine extends ChangeNotifier {
     // A fitted view that names no step: the rows whose labels stand apart,
     // the first and the last among them.
     if (spec.x.fit != 'none' && spec.x.tickEvery == null) {
+      // (They are the view's labels as they are: not thinned again.)
       final end = math.max(count, spec.x.slots ?? count) - 1;
-      return [for (final l in _thin([for (var i = 0; i <= end; i++) i])) l.$1];
+      final labels = _labels = _thin([for (var i = 0; i <= end; i++) i]);
+      return [for (final l in labels) l.$1];
     }
     var step = spec.x.tickEvery ?? 1;
     if (spec.x.tickEvery == null) {
@@ -599,16 +624,32 @@ class GraphEngine extends ChangeNotifier {
     ];
   }
 
-  /// The x ticks whose labels are written, each with its text and where it
-  /// starts: all of them where they stand apart, else every second, third…
-  /// from the first, whichever is the most that do, and the last, which
-  /// takes the place of one before it that it would run into. The first and
-  /// the last are always written, and no two touch.
-  List<(num, String, double)> get xLabels => _labels ??= _thin(xTicks);
-  List<(num, String, double)>? _labels;
+  /// The x ticks whose labels are written, each with its text, where it
+  /// starts and the width it is cut to (infinite: written whole).
+  ///
+  /// All of them where they stand apart. Where they do not, every second,
+  /// third… from the first, the smallest step at which they do; a step
+  /// that also ends on the last label is taken in its place when there is
+  /// one below twice it, so the labels are evenly apart from the first to
+  /// the last. Where there is none the last is left out: an even row of
+  /// labels, never an odd gap before the last.
+  ///
+  /// Long labels are cut before they are thinned away: where that step
+  /// would write fewer than half of them, each (or every second) is cut
+  /// with an ellipsis to the room between two labels, while that room
+  /// holds a few letters.
+  List<(num, String, double, double)> get xLabels {
+    final ticks = xTicks;
+    return _labels ??= _thin(ticks);
+  }
+
+  List<(num, String, double, double)>? _labels;
+
+  /// The least width a label is cut to: about seven letters.
+  static const _cutTo = 44.0;
 
   /// Those of [ticks] whose labels are written (see [xLabels]).
-  List<(num, String, double)> _thin(List<num> ticks) {
+  List<(num, String, double, double)> _thin(List<num> ticks) {
     const apart = 8.0;
     final size = spec.style.fontSize;
     // No more are measured than could ever stand apart (a label and its
@@ -619,38 +660,56 @@ class GraphEngine extends ChangeNotifier {
       final stride = (ticks.length / most).ceil();
       ticks = [for (var i = 0; i < ticks.length - 1; i += stride) ticks[i], ticks.last];
     }
+    // Each label: its tick, its text, its middle and its width.
     final all = <(num, String, double, double)>[];
     for (final t in ticks) {
       final x = xOf(t);
       if (x < plotLeft - 0.5 || x > plotRight + 0.5) continue;
       final label = xTickText(t);
       if (label.isEmpty) continue;
-      final w = textWidth(label, size);
-      final left = (x - w / 2).clamp(0.0, math.max(0.0, bodyRight - w)).toDouble();
-      all.add((t, label, left, left + w));
+      all.add((t, label, x, textWidth(label, size)));
     }
     final n = all.length;
-    List<(num, String, double)> pick(Iterable<int> at) => [for (final i in at) (all[i].$1, all[i].$2, all[i].$3)];
+    double leftOf(int i, double w) => (all[i].$3 - w / 2).clamp(0.0, math.max(0.0, bodyRight - w)).toDouble();
+    List<(num, String, double, double)> pick(Iterable<int> at) =>
+        [for (final i in at) (all[i].$1, all[i].$2, leftOf(i, all[i].$4), double.infinity)];
     bool fits(List<int> at) {
       for (var i = 1; i < at.length; i++) {
-        if (all[at[i]].$3 < all[at[i - 1]].$4 + apart) return false;
+        final before = at[i - 1];
+        if (leftOf(at[i], all[at[i]].$4) < leftOf(before, all[before].$4) + all[before].$4 + apart) return false;
       }
       return true;
     }
 
-    if (n < 2) return pick([for (var i = 0; i < n; i++) i]);
-    for (var step = 1; step < n; step++) {
-      final at = [for (var i = 0; i < n; i += step) i];
-      if (!fits(at)) continue;
-      if (at.last == n - 1) return pick(at);
-      // The last, in place of those before it that it would run into.
-      while (at.length > 1 && all[n - 1].$3 < all[at.last].$4 + apart) {
-        at.removeLast();
-      }
-      at.add(n - 1);
-      if (fits(at)) return pick(at);
+    List<int> every(int step) => [for (var i = 0; i < n; i += step) i];
+    if (n < 2) return pick(every(1));
+    var step = 1;
+    while (step < n && !fits(every(step))) {
+      step++;
     }
-    return pick(fits([0, n - 1]) ? [0, n - 1] : [0]);
+    if (step == 1) return pick(every(1));
+    if (step >= n) return pick(fits([0, n - 1]) ? [0, n - 1] : [0]);
+    // Fewer than half would be written: cut them to their room instead,
+    // all of them or every second, while the room holds a few letters.
+    if (step > 2) {
+      for (final s in const [1, 2]) {
+        if (s >= n) break;
+        final room = (all[s].$3 - all[0].$3).abs() - apart;
+        if (room < _cutTo) continue;
+        return [
+          for (final i in every(s))
+            () {
+              final w = all[i].$4 <= room ? all[i].$4 : textWidth(all[i].$2, size, maxWidth: room);
+              return (all[i].$1, all[i].$2, leftOf(i, w), all[i].$4 <= room ? double.infinity : room);
+            }(),
+        ];
+      }
+    }
+    // A step that ends on the last label, when one near this one does.
+    for (var s = step; s < step * 2 && s < n; s++) {
+      if ((n - 1) % s == 0 && fits(every(s))) return pick(every(s));
+    }
+    return pick(every(step));
   }
 
   /// The round step (1, 2 or 5 times a power of ten) that cuts [span] into
@@ -668,6 +727,38 @@ class GraphEngine extends ChangeNotifier {
       }
     }
     return best;
+  }
+
+  /// [lo] to [hi] rounded out to a round step, and the step: the one whose
+  /// lines are nearest [parts] in number among those that leave no more
+  /// than a third of the stretch empty above the highest value (or under
+  /// the lowest); of two as near, the one that leaves less.
+  (double, double, double) _roundOut(double lo, double hi, int parts) {
+    final mag = math.pow(10, (math.log((hi - lo) / parts) / math.ln10).floor()).toDouble();
+    (double, double, double)? best;
+    var least = double.infinity;
+    // 2.5 only where its lines are whole numbers (25, 250).
+    for (final m in [0.5, 1.0, 2.0, if (mag >= 10) 2.5, 5.0, 10.0, 20.0]) {
+      final step = m * mag;
+      final a = (lo / step + 1e-9).floor() * step, b = (hi / step - 1e-9).ceil() * step;
+      if (!(b > a)) continue;
+      final empty = math.max(b - hi, lo - a) / (b - a);
+      final score = (((b - a) / step).round() - parts).abs() + (empty > 1 / 3 + 1e-9 ? 100 : 0) + empty;
+      if (score < least) {
+        least = score;
+        best = (a, b, step);
+      }
+    }
+    return best ?? (lo, hi, _evenStep(hi - lo, parts));
+  }
+
+  // The step each rounded scale was rounded out to, by pane.
+  final _steps = <int, double>{};
+
+  /// The step of a pane's rounded scale.
+  double _stepOf(int pane) {
+    final (lo, hi) = yDomain(pane);
+    return (yAuto(pane) ? _steps[pane] : null) ?? _evenStep(hi - lo, spec.panes[pane].y.ticks);
   }
 
   /// A round step no smaller than [raw]: 1, 2 or 5 times a power of ten.
@@ -759,17 +850,9 @@ class GraphEngine extends ChangeNotifier {
       return (lo - pad, hi + pad);
     }
     if (y.nice && y.tickValues.isEmpty && y.ticks > 0) {
-      // Out to the ticks: the step is chosen again for the wider stretch
-      // until it holds.
-      var a = lo, b = hi;
-      for (var k = 0; k < 4; k++) {
-        final step = _evenStep(b - a, y.ticks);
-        final na = (lo / step + 1e-9).floor() * step, nb = (hi / step - 1e-9).ceil() * step;
-        if (na == a && nb == b) break;
-        a = na;
-        b = nb;
-      }
-      return (a, b > a ? b : a + 1);
+      final (a, b, step) = _roundOut(lo, hi, y.ticks);
+      _steps[pane] = step;
+      return (a, b);
     }
     final span = hi - lo;
     // Bars stand on zero: no room under it.
@@ -855,7 +938,7 @@ class GraphEngine extends ChangeNotifier {
     if (base == null) {
       final span = hi - lo;
       if (!(span > 0) || !span.isFinite || y.ticks <= 0) return const [];
-      final step = y.nice ? _evenStep(span, y.ticks) : _niceStep(span / y.ticks);
+      final step = y.nice ? _stepOf(pane) : _niceStep(span / y.ticks);
       // Whole steps, so a tick is 0.3 and never 0.30000000000000004.
       return [for (var k = (lo / step - 1e-9).ceil(); k * step <= hi + step * 1e-9; k++) k * step];
     }
@@ -899,14 +982,16 @@ class GraphEngine extends ChangeNotifier {
     // On a scale rounded out to its ticks, as many decimals as its step
     // has: ticks of 0.5 are never written 0, 1, 1, 2.
     var decimals = y.decimals;
-    if (y.nice && y.tickValues.isEmpty) {
-      final (lo, hi) = yDomain(pane);
-      final step = _evenStep(hi - lo, y.ticks);
+    if (y.nice && y.tickValues.isEmpty && y.ticks > 0) {
+      final step = _stepOf(pane);
       while (decimals < 6 && (step * math.pow(10, decimals)).roundToDouble() != _trim(step * math.pow(10, decimals))) {
         decimals++;
       }
     }
-    return value.toStringAsFixed(decimals);
+    final written = value.toStringAsFixed(decimals);
+    // A thousand and more with its separator, where the figures are the
+    // graph's own to write (a rounded scale, a share of a whole).
+    return (y.nice || spec.panes[pane].polar) && a >= 1000 ? graphGrouped(written) : written;
   }
 
   double _trim(double v) => (v * 1e6).roundToDouble() / 1e6;
@@ -1252,6 +1337,7 @@ class GraphEngine extends ChangeNotifier {
 
   void _changed() {
     _domains.clear();
+    _steps.clear();
     _legendDone = false;
     _labels = null;
     _ticks = null;

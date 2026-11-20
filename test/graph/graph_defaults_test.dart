@@ -6,9 +6,10 @@ import 'package:flutter/rendering.dart' show OffsetLayer;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// What a graph does for itself when its spec says nothing: the labels that
-// fit under it, the colors of marks that write none, its legend, a scale
-// rounded out to its ticks, a smooth line that keeps to its values.
+// What a graph does for itself (the labels that fit under it, the colors of
+// marks that write none, a smooth line that keeps to its values, where its
+// tooltip is), and what it does when its spec asks: a legend, a scale
+// rounded out to its ticks, dots, the total in an arc's hole.
 
 List<Json> rowsOf(int n) => [
       for (var i = 0; i < n; i++) {'k': 'row ${i + 1}', 'a': 10 + i, 'b': 5 + i},
@@ -82,37 +83,72 @@ void main() {
       expect([for (final l in e.xLabels) l.$2], ['row 1', 'row 2', 'row 3']);
     });
 
-    test('where they would touch, every n-th: the first and the last are kept and no two touch', () {
-      final e = engine(plot(), rowsOf(24));
-      final labels = e.xLabels;
-      expect(labels.length, lessThan(24));
-      expect(labels.length, greaterThan(2));
-      expect(labels.first.$2, 'row 1');
-      expect(labels.last.$2, 'row 24');
-      for (var i = 1; i < labels.length; i++) {
-        final before = labels[i - 1];
-        final end = before.$3 + e.textWidth(before.$2, e.spec.style.fontSize);
-        expect(labels[i].$3, greaterThanOrEqualTo(end + 8), reason: '${before.$2} runs into ${labels[i].$2}');
+    test('where they would touch, every n-th from the first, evenly apart, and no two touch', () {
+      List<int> places(GraphEngine e) => [for (final l in e.xLabels) l.$1.toInt()];
+      void even(GraphEngine e) {
+        final labels = e.xLabels, at = places(e);
+        expect(at.first, 0);
+        expect(at.length, greaterThan(2));
+        for (var i = 1; i < labels.length; i++) {
+          final before = labels[i - 1];
+          final end = before.$3 + e.textWidth(before.$2, e.spec.style.fontSize);
+          expect(labels[i].$3, greaterThanOrEqualTo(end + 8), reason: '${before.$2} runs into ${labels[i].$2}');
+          // Every step is the first one: never an odd gap, before the last or anywhere.
+          expect(at[i] - at[i - 1], at[1] - at[0]);
+        }
+        expect(labels.first.$3, greaterThanOrEqualTo(0));
+        expect(labels.last.$3 + e.textWidth(labels.last.$2, e.spec.style.fontSize), lessThanOrEqualTo(400));
       }
-      // The ones between are a whole step apart (the last may stand nearer).
-      final places = [for (final l in labels) l.$1.toInt()];
-      final step = places[1] - places[0];
-      for (var i = 2; i < places.length - 1; i++) {
-        expect(places[i] - places[i - 1], step);
-      }
-      // None is cut by the graph's edges.
-      expect(labels.first.$3, greaterThanOrEqualTo(0));
-      expect(labels.last.$3 + e.textWidth(labels.last.$2, e.spec.style.fontSize), lessThanOrEqualTo(400));
+
+      // 25 rows: a step near the smallest that fits ends on the last label, and is the one taken.
+      final ends = engine(plot(), rowsOf(25));
+      even(ends);
+      expect(places(ends).last, 24);
+      // 24 rows: no step does (23 has no divisor), so the last is left out and the row of labels stays even.
+      final odd = engine(plot(), rowsOf(24));
+      even(odd);
+      expect(places(odd).last, lessThan(23));
+      expect(23 - places(odd).last, lessThan(places(odd)[1]));
     });
 
-    test('thousands of rows: the first and the last are still written, and few are measured', () {
+    test('long labels are cut to their room before more than half are thinned away', () {
+      const names = ['Pancakes', 'Omelette', 'Granola bowl', 'Roast chicken', 'Mushroom risotto', 'Fish tacos', 'Chocolate cake', 'Lemon sorbet'];
+      final rows = [
+        for (final (i, n) in names.indexed) {'k': n, 'a': 10 + i},
+      ];
+      final e = engine(plot(), rows);
+      final labels = e.xLabels;
+      // Thinning alone would write two or three of the eight: every second
+      // is written instead, the long ones cut to the room between two.
+      expect([for (final l in labels) l.$2], ['Pancakes', 'Granola bowl', 'Mushroom risotto', 'Chocolate cake']);
+      final room = e.xOf(2) - e.xOf(0) - 8;
+      for (var i = 0; i < labels.length; i++) {
+        final whole = e.textWidth(labels[i].$2, e.spec.style.fontSize);
+        expect(labels[i].$4, whole <= room ? double.infinity : closeTo(room, 0.001), reason: labels[i].$2);
+        if (i > 0) {
+          final before = labels[i - 1];
+          final width = e.textWidth(before.$2, e.spec.style.fontSize, maxWidth: before.$4.isFinite ? before.$4 : null);
+          expect(labels[i].$3, greaterThanOrEqualTo(before.$3 + width + 8 - 0.001));
+        }
+      }
+      expect(labels.where((l) => l.$4.isFinite), isNotEmpty);
+      // Room for a letter or two only: they are thinned, whole, as before.
+      final tight = engine(plot(), rows, const Size(200, 200));
+      expect(tight.xLabels.every((l) => l.$4 == double.infinity), isTrue);
+      expect(tight.xLabels.length, lessThan(4));
+    });
+
+    test('thousands of rows: few are measured, and the labels written are evenly apart from the first', () {
       final e = engine(plot(x: {'fit': 'points'}, marks: [{'type': 'line', 'y': 'a'}]), rowsOf(5000));
       final watch = Stopwatch()..start();
       final labels = e.xLabels;
       expect(watch.elapsedMilliseconds, lessThan(500));
       expect(labels.first.$2, 'row 1');
-      expect(labels.last.$2, 'row 5000');
       expect(labels.length, inInclusiveRange(2, 12));
+      final at = [for (final l in labels) l.$1.toInt()];
+      for (var i = 2; i < at.length; i++) {
+        expect(at[i] - at[i - 1], at[1] - at[0]);
+      }
     });
 
     test('a fitted view with a step of its own keeps its first label where it is whole, or where the view keeps room at its ends', () {
@@ -195,13 +231,15 @@ void main() {
   });
 
   group('the legend', () {
+    const auto = {'show': 'auto'};
+
     final two = [
       {'type': 'bar', 'y': 'a', 'name': 'Web'},
       {'type': 'bar', 'y': 'b', 'name': 'Store'},
     ];
 
     test('two named marks: a key for each under the plot, which gives it the room', () {
-      final e = engine(plot(marks: two), rowsOf(4), const Size(600, 300));
+      final e = engine(plot(marks: two, legend: auto), rowsOf(4), const Size(600, 300));
       final legend = e.legend!;
       expect(legend.position, 'bottom');
       expect([for (final k in legend.keys) (k.label, k.color)], [('Web', graphPalette[0]), ('Store', graphPalette[1])]);
@@ -218,11 +256,17 @@ void main() {
       expect((legend.keys[0].box.left + legend.keys[1].box.right) / 2, closeTo(300, 0.5));
     });
 
-    test('nothing to tell apart, or told not to: none, and the plot keeps the whole graph', () {
-      final one = engine(plot(marks: [two[0]]), rowsOf(4), const Size(600, 300));
+    test('not asked for, nothing to tell apart, or told not to: none, and the plot keeps the whole graph', () {
+      // A graph has no legend unless its spec asks for one.
+      final unasked = engine(plot(marks: two), rowsOf(4), const Size(600, 300));
+      expect(unasked.spec.legend.show, 'none');
+      expect(unasked.legend, isNull);
+      expect(unasked.xAxisRect.bottom, 300);
+      expect(engine(ring(), shares(), const Size(600, 200)).legend, isNull);
+      final one = engine(plot(marks: [two[0]], legend: auto), rowsOf(4), const Size(600, 300));
       expect(one.legend, isNull);
       expect(one.xAxisRect.bottom, 300);
-      final unnamed = engine(plot(marks: [
+      final unnamed = engine(plot(legend: auto, marks: [
         {'type': 'bar', 'y': 'a'},
         {'type': 'bar', 'y': 'b'},
       ]), rowsOf(4), const Size(600, 300));
@@ -231,7 +275,7 @@ void main() {
         expect(engine(plot(marks: two, legend: off), rowsOf(4), const Size(600, 300)).legend, isNull);
       }
       // An area and the line along its top are one key.
-      final filled = engine(plot(marks: [
+      final filled = engine(plot(legend: auto, marks: [
         {'type': 'area', 'y': 'a', 'name': 'Web'},
         {'type': 'line', 'y': 'a', 'name': 'Web'},
       ]), rowsOf(4), const Size(600, 300));
@@ -241,11 +285,11 @@ void main() {
     });
 
     test('top and right are where the spec says', () {
-      final top = engine(plot(marks: two, legend: {'position': 'top'}), rowsOf(4), const Size(600, 300));
+      final top = engine(plot(marks: two, legend: {'show': 'auto', 'position': 'top'}), rowsOf(4), const Size(600, 300));
       expect(top.legend!.position, 'top');
       expect(top.plotRect(0).top, closeTo(top.legend!.top, 0.001));
       expect(top.xAxisRect.bottom, 300);
-      final right = engine(plot(marks: two, legend: {'position': 'right'}), rowsOf(4), const Size(600, 300));
+      final right = engine(plot(marks: two, legend: {'show': 'auto', 'position': 'right'}), rowsOf(4), const Size(600, 300));
       expect(right.legend!.position, 'right');
       expect(right.bodyRight, lessThan(600));
       expect(right.plotRight, closeTo(right.bodyRight, 0.001));
@@ -254,7 +298,7 @@ void main() {
     });
 
     test('slices: their labels and shares beside them where the ring keeps the graph\'s height', () {
-      final e = engine(ring(), shares(), const Size(600, 200));
+      final e = engine(ring(legend: auto), shares(), const Size(600, 200));
       final legend = e.legend!;
       expect(legend.position, 'right');
       expect([for (final k in legend.keys) (k.label, k.value)], [('Rent', '60%'), ('Food', '25%'), ('Other', '15%')]);
@@ -267,11 +311,11 @@ void main() {
         expect(k.box.left, greaterThan(200));
         expect(k.box.right, lessThanOrEqualTo(600));
       }
-      expect(engine(ring(legend: {'values': false}), shares(), const Size(600, 200)).legend!.keys.first.value, '');
+      expect(engine(ring(legend: {'show': 'auto', 'values': false}), shares(), const Size(600, 200)).legend!.keys.first.value, '');
     });
 
     test('slices in a graph no wider than high keep all of it: no legend unless the spec says one', () {
-      final e = engine(ring(), shares(), const Size(200, 200));
+      final e = engine(ring(legend: auto), shares(), const Size(200, 200));
       expect(e.legend, isNull);
       expect(e.arcGeometry(0, e.spec.panes.single.marks.single).$1, const Offset(100, 100));
       final always = engine(ring(legend: {'show': 'always'}), shares(), const Size(200, 300));
@@ -279,13 +323,13 @@ void main() {
       expect(always.arcGeometry(0, always.spec.panes.single.marks.single).$1.dy, lessThan(150));
       // A little wider than high: beside, the ring keeping three quarters
       // of the height or more.
-      final near = engine(ring(), shares(), const Size(330, 220));
+      final near = engine(ring(legend: auto), shares(), const Size(330, 220));
       expect(near.legend!.position, 'right');
       final outer = near.arcGeometry(0, near.spec.panes.single.marks.single).$2;
       expect(outer * 2, inInclusiveRange(165, 220));
       expect(near.legend!.keys.first.box.left, greaterThan(outer * 2));
       // Slices with no labels have nothing to list.
-      expect(engine(ring(), [for (final r in shares()) {'value': r['value']}], const Size(600, 200)).legend, isNull);
+      expect(engine(ring(legend: {'show': 'always'}), [for (final r in shares()) {'value': r['value']}], const Size(600, 200)).legend, isNull);
     });
   });
 
@@ -299,7 +343,7 @@ void main() {
       ];
       final e = engine(plot(marks: line, y: {'domain': 'data', 'nice': true, 'ticks': 4}), rows);
       final (lo, hi) = e.yDomain(0);
-      expect((lo, hi), (10.0, 40.0));
+      expect((lo, hi), (10.0, 35.0));
       expect(e.yTicks(0).first, lo);
       expect(e.yTicks(0).last, hi);
       // Without it the fitted values and their margins.
@@ -323,6 +367,53 @@ void main() {
             {'k': 'b', 'a': 27300},
           ]);
       expect([for (final t in large.yTicks(0)) large.yLabel(0, t)], ['0', '10K', '20K', '30K']);
+    });
+
+    test('never more than a third of the plot is left empty over the highest value', () {
+      for (final ticks in [3, 4, 5]) {
+        for (var top = 1.0; top < 60000; top = top < 200 ? top + 1 : top * 1.07) {
+          final e = engine(plot(y: {'domain': 'data', 'nice': true, 'ticks': ticks}), [
+            {'k': 'a', 'a': top * 0.4},
+            {'k': 'b', 'a': top},
+          ]);
+          final (lo, hi) = e.yDomain(0);
+          expect(lo, 0);
+          expect(hi, greaterThanOrEqualTo(top));
+          expect((hi - top) / hi, lessThanOrEqualTo(1 / 3 + 1e-6), reason: 'top $top of $hi with $ticks ticks');
+          // Every line of the scale is a tick, the first and the last among them.
+          final lines = e.yTicks(0);
+          expect((lines.first, lines.last), (lo, hi), reason: 'top $top');
+          expect(lines.length, inInclusiveRange(3, 8), reason: 'top $top with $ticks ticks: $lines');
+        }
+      }
+      // 101 at four lines is 0 to 125 by 25, not 0 to 150.
+      final e = engine(plot(y: {'domain': 'data', 'nice': true, 'ticks': 4}), [
+        {'k': 'a', 'a': 101},
+      ]);
+      expect(e.yDomain(0), (0.0, 125.0));
+      expect(e.yTicks(0), [0, 25, 50, 75, 100, 125]);
+    });
+
+    test('a thousand and more is written with its separator, on a rounded scale and for a share of a whole', () {
+      expect(graphGrouped('1234'), '1,234');
+      expect(graphGrouped('-1234567.5'), '-1,234,567.5');
+      expect(graphGrouped('999'), '999');
+      final rounded = engine(plot(y: {'domain': 'data', 'nice': true, 'ticks': 4}), [
+        {'k': 'a', 'a': 1200},
+        {'k': 'b', 'a': 7400},
+      ]);
+      expect([for (final t in rounded.yTicks(0)) rounded.yLabel(0, t)], ['0', '2,000', '4,000', '6,000', '8,000']);
+      expect(rounded.yLabel(0, 7400), '7,400');
+      // A scale that is not the graph's to round writes its values as they are.
+      final plain = engine(plot(y: {'domain': 'data'}), [
+        {'k': 'a', 'a': 7400},
+      ]);
+      expect(plain.yLabel(0, 7400), '7400');
+      final share = engine(ring(), [
+        {'label': 'Rent', 'value': 2600},
+        {'label': 'Food', 'value': 1400},
+      ]);
+      expect(share.yLabel(0, 2600), '2,600');
     });
 
     test('bars with nothing to show yet stand on zero', () {
@@ -399,7 +490,7 @@ void main() {
 
     testWidgets('a legend\'s keys are dots in their marks\' colors', (tester) async {
       final spec = {
-        ...plot(marks: [
+        ...plot(legend: const {'show': 'auto'}, marks: [
           {'type': 'bar', 'y': 'a', 'name': 'A', 'color': '#FFFF0000'},
           {'type': 'bar', 'y': 'b', 'name': 'B', 'color': '#FF00FF00'},
         ]),
@@ -435,18 +526,63 @@ void main() {
       expect(await pixel(tester, plain, at), const Color(0xFFFFFFFF));
     });
 
-    testWidgets('a tooltip with no colors of its own is the style\'s tag', (tester) async {
+    testWidgets('a tooltip is a surface with a line round it, in the style\'s colors', (tester) async {
       final spec = {
         ...plot(),
         'selection': {'on': 'hover'},
-        'style': {'background': '#FFFFFFFF', 'tag': '#FF123456', 'tagText': '#FF123456', 'grid': '#00000000'},
+        'style': {
+          'background': '#FFFFFFFF',
+          'tooltip': '#FF123456',
+          'tooltipText': '#FF123456',
+          'tooltipBorder': '#FFFF0000',
+          'tag': '#FF00FF00',
+          'grid': '#00000000',
+        },
       };
       final graph = await show(tester, spec, rowsOf(3), const Size(400, 200));
       graph.engine.select({'index': 0});
       await tester.pump();
       final anchor = graph.engine.selectionAnchor!;
-      // The box hangs under and right of the pinned row's top.
+      // The box hangs under and right of the pinned row's top: its ground
+      // inside, its line along its left edge.
       expect(await pixel(tester, graph, anchor + const Offset(24, 16)), const Color(0xFF123456));
+      expect(await pixel(tester, graph, anchor + const Offset(14, 20)), const Color(0xFFFF0000));
+    });
+
+    testWidgets('a tooltip stays over the panes: never over the legend or the labels under the plot', (tester) async {
+      final spec = {
+        ...plot(legend: const {'show': 'auto'}, marks: [
+          {'type': 'bar', 'y': 'a', 'name': 'A', 'color': '#FFFF0000'},
+          {'type': 'bar', 'y': 'b', 'name': 'B', 'color': '#FF00FF00'},
+        ]),
+        'selection': {'on': 'hover'},
+        'style': {'background': '#FFFFFFFF', 'tooltip': '#FF123456', 'tooltipText': '#FF123456', 'tooltipBorder': '#FF123456'},
+      };
+      // A short graph: its tooltip is nearly as high as its panes.
+      final graph = await show(tester, spec, rowsOf(3), const Size(600, 150));
+      final e = graph.engine;
+      final legend = e.legend!;
+      expect(e.tooltipBounds.bottom, e.plotRect(0).bottom);
+      expect(e.tooltipBounds.bottom, lessThan(legend.keys.first.box.top));
+      // The pointer low in the plot, at the last row: the box would hang
+      // over the labels and the legend, and past the right edge.
+      e.hover(Offset(e.xOfRow(2), e.plotRect(0).bottom - 2));
+      await tester.pump();
+      expect(e.selection?.index, 2);
+      Offset dot(Rect box) => Offset(box.left + 4, box.center.dy);
+      expect(await pixel(tester, graph, dot(legend.keys[0].box)), const Color(0xFFFF0000));
+      expect(await pixel(tester, graph, dot(legend.keys[1].box)), const Color(0xFF00FF00));
+      // Nothing of it under the panes or outside the graph: the row under
+      // the plot's foot holds none of its ground.
+      for (var x = 2.0; x < 600; x += 7) {
+        expect(await pixel(tester, graph, Offset(x, e.plotRect(0).bottom + 3)), isNot(const Color(0xFF123456)), reason: 'x $x');
+      }
+      // It is drawn, inside the panes.
+      var seen = false;
+      for (var x = 2.0; x < 600 && !seen; x += 5) {
+        seen = await pixel(tester, graph, Offset(x, e.plotRect(0).bottom - 30)) == const Color(0xFF123456);
+      }
+      expect(seen, isTrue);
     });
   });
 }

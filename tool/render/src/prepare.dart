@@ -99,7 +99,9 @@ Prepared prepare(Json doc, {required String dir, String? docDir, required String
 /// with the default family when absent.
 void _labelStyles(WidgetSpec spec, Json props, String family) {
   for (final def in spec.props) {
-    if (props.containsKey(def.key)) continue;
+    // A family written empty is none of the node's own: the default too.
+    final unnamed = def.key.endsWith('FontFamily') && props[def.key] == '';
+    if (props.containsKey(def.key) && !unnamed) continue;
     if (def.type.name == 'ButtonStyle') {
       props[def.key] = {'textStyle': {'fontFamily': family}};
     } else if (def.type.name == 'TextStyle' && spec.type != TextProps.spec.type && def.key != 'style') {
