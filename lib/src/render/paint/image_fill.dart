@@ -463,6 +463,7 @@ void paintImageFill(Canvas canvas, RRect rrect, api.Paint p, ImageClient client)
       ..translate(0, rect.center.dy * 2)
       ..scale(1, -1);
   }
+  final slice = img.centerSlice;
   paintLoaded(
     canvas,
     rect,
@@ -474,12 +475,15 @@ void paintImageFill(Canvas canvas, RRect rrect, api.Paint p, ImageClient client)
     colorFilter: filter,
     opacity: p.opacity,
     flipX: img.flipX,
+    centerSlice: slice == null ? null : Rect.fromLTWH(slice[0], slice[1], slice[2], slice[3]),
   );
   canvas.restore();
 }
 
 /// Paints [loaded] in [rect] by [fit] and [alignment]: a raster image with
-/// Flutter's `paintImage`, an SVG as its picture.
+/// Flutter's `paintImage`, an SVG as its picture. With a [centerSlice] (in
+/// the image's logical pixels) a raster image is drawn in nine parts filling
+/// [rect], its corners at their own size (Flutter's `centerSlice`).
 void paintLoaded(
   Canvas canvas,
   Rect rect,
@@ -491,17 +495,25 @@ void paintLoaded(
   ColorFilter? colorFilter,
   double opacity = 1,
   bool flipX = false,
+  Rect? centerSlice,
 }) {
   if (rect.isEmpty) return;
   if (loaded.image case final info?) {
+    final pixelScale = info.scale * (scale <= 0 ? 1 : scale);
+    // The middle inside the picture (its logical size), else none: a slice
+    // past its edge would ask Skia for parts it hasn't.
+    final logical = Offset.zero & Size(info.image.width / pixelScale, info.image.height / pixelScale);
+    final slice = centerSlice == null ? null : logical.intersect(centerSlice);
+    final sliced = slice != null && !slice.isEmpty;
     paintImage(
       canvas: canvas,
       rect: rect,
       image: info.image,
-      scale: info.scale * (scale <= 0 ? 1 : scale),
-      fit: fit,
+      scale: pixelScale,
+      centerSlice: sliced ? slice : null,
+      fit: sliced ? BoxFit.fill : fit,
       alignment: alignment,
-      repeat: repeat,
+      repeat: sliced ? ImageRepeat.noRepeat : repeat,
       colorFilter: colorFilter,
       opacity: opacity.clamp(0.0, 1.0),
       flipHorizontally: flipX,
