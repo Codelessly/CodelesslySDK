@@ -48,7 +48,11 @@ in colors told apart, a legend, a tooltip. Needs codelessly_api 40.2.0.
 - `legend`, `style.palette`, `style.ink`, `x.inset`, `y.nice`, a mark's `dots`, `center` and `centerLabel` (see
   codelessly_api 40.2.0). `GraphEngine.legend` is the legend as laid out, `GraphEngine.xLabels` the labels that are
   written, `graphPalette` the colors a graph uses when neither its marks nor its style say.
-- A selection's tooltip with no colors of its own is the style's `tag` and `tagText`.
+- A selection's tooltip with no colors of its own is the style's `tag` and `tagText`. A tooltip that names one mark
+  with no `name` writes its value alone (it wrote the row field's name), and a graph too small to hold its tooltip
+  draws none.
+- `tool/codelessly render` draws a `graph` node's labels in the render's default family; a graph whose style named
+  no family drew boxes for letters.
 
 ## 40.1.0
 
