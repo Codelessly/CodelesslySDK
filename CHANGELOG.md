@@ -46,6 +46,20 @@ notation's chart words is keys they write (codelessly_api 40.2.0, which this nee
   `GraphEngine.xLabels` the labels that are written, `graphPalette` the colors a graph uses when neither its marks
   nor its style say.
 
+### Layout, formulas and the render tool
+
+- **A negative `x` or `y` on a child of a Stack that hugs holds**: the child hangs out by that much.
+- **A fill child with no size of its own, under a Stack sized from its children, takes its content's size.** It was
+  0 wide.
+- **A flex child's `minWidth` is kept** when its Row squeezes.
+- **Setting a map or list variable to null gives null.** It gave `{}` or `[]`.
+- **`matches` and `regexReplace` read leading inline flags** (`(?i)`, `(?s)`, `(?m)`, `(?u)`); a pattern that
+  fails is reported.
+- **The expand says** a null variable with no type that a formula reads by a field, and notes a site expanded at
+  the default width of 1440.
+- **The render says** `zero_size` with why, `icon_smaller_than_size`, `control_heights_differ` (controls of
+  different heights in one Row), and why a text's box is 0 wide.
+
 ## 40.1.0
 
 Needs codelessly_api 40.1.0.
