@@ -610,6 +610,7 @@ class _BoxReactions {
     // A key that types text goes to a focused text field, not a shortcut.
     if (!meta && !keys.isAltPressed && typesText(character) && _textFieldFocused()) return false;
     var handled = false;
+    bool? focused;
     for (final r in n.actions) {
       if (r.trigger.type != type) continue;
       // A held key's repeats reach only keyDown reactions that ask for them.
@@ -624,6 +625,8 @@ class _BoxReactions {
           character: character, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) {
         continue;
       }
+      // A control of one's own takes its keys only while it has the focus.
+      if (r.trigger.focused && !(focused ??= _hasFocusInside())) continue;
       if (r.trigger.when.trim().isNotEmpty && !triggerWhenHolds(r.trigger.when, owner.contextFor(box))) continue;
       handled = true;
     }
@@ -637,9 +640,18 @@ class _BoxReactions {
         'meta': meta,
         'repeat': repeat,
         'typing': typing,
+        'focused': focused ??= _hasFocusInside(),
       },
     });
     return true;
+  }
+
+  /// Whether the keyboard focus is on this node or on a control inside it.
+  bool _hasFocusInside() {
+    for (RenderObject? at = ControlFocusScope.focusedScope?.focused?.owner; at != null; at = at.parent) {
+      if (identical(at, box)) return true;
+    }
+    return false;
   }
 
   /// Whether this node is on the overlay that holds the keyboard
