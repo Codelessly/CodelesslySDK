@@ -74,7 +74,28 @@ abstract final class FlightRegistry {
     list.add(_FlightRecord(rect, DateTime.now(), null));
   }
 
+  static bool _following = false;
+
+  /// After each frame is laid out and drawn, the boxes still attached are
+  /// read where they are on screen: a scroll moves a box without painting
+  /// it again, and a box that goes then flies from where it was last on
+  /// screen, not where it was last painted.
+  static void _follow() {
+    if (_following) return;
+    _following = true;
+    // Added after the renderer's own callback: runs once the frame is drawn.
+    SchedulerBinding.instance.addPersistentFrameCallback((_) {
+      for (final list in _records.values) {
+        for (final r in list) {
+          final place = r.owner?._place;
+          if (place != null) r.rect = place;
+        }
+      }
+    });
+  }
+
   static void _paint(RenderFlightBox box, String key, Rect rect) {
+    _follow();
     final list = _records[key] ??= [];
     final mine = list.where((r) => r.owner == box).firstOrNull;
     if (mine == null) {
@@ -118,7 +139,8 @@ abstract final class FlightRegistry {
       if (r.owner != null && r.owner!.isShowing) continue;
       if (best == null || r.time.isAfter(best.time)) best = r;
     }
-    return best?.rect;
+    // A holder still attached (hidden) is read where it is now.
+    return best?.owner?._place ?? best?.rect;
   }
 
   /// Where a node with [key] would fly from now (tests).
@@ -174,6 +196,17 @@ class RenderFlightBox extends RenderPose {
       node = node.parent;
     }
     return true;
+  }
+
+  /// Its layout place on screen now (global), not where its flight draws
+  /// it; null when it is not laid out in the tree (or collapsed to nothing).
+  Rect? get _place {
+    if (!attached || !hasSize || size.isEmpty) return null;
+    try {
+      return localToGlobal(Offset.zero) & size;
+    } catch (_) {
+      return null;
+    }
   }
 
   void _placedAt(Rect rect, Rect? from) {

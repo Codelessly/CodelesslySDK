@@ -498,7 +498,14 @@ abstract final class HeroLifts {
     HeroMarks.onLiftChange = _schedule;
     // A screen that starts closing changes no mark: while lifted marks are
     // on screen, each frame looks again (after it is drawn).
+    // Runs after the frame is laid out and drawn (the renderer's callback is
+    // added first): each lifted node's place is recorded for a flight back
+    // from it once it has gone, however it got there (a scroll moves a row
+    // without painting it again).
     SchedulerBinding.instance.addPersistentFrameCallback((_) {
+      for (final m in HeroMarks.allLifted) {
+        m.notePlace();
+      }
       if (_front.isNotEmpty || _lifts.isNotEmpty) _schedule(frame: false);
     });
   }
@@ -561,7 +568,9 @@ abstract final class HeroLifts {
       tag: tag,
       from: from,
       to: to,
-      start: start ?? from.lastRect,
+      // Only a turn-round has a fixed start: else the node it leaves is read
+      // where it is on screen, every frame ([_Lift._at]).
+      start: start,
       duration: Duration(milliseconds: f != null && f.duration > 0 ? f.duration : 300),
       curve: f?.curve ?? AnimationCurve.easeInOut,
       back: !out,
@@ -584,7 +593,7 @@ class _Lift {
   final String tag;
   final RenderHeroMark from, to;
 
-  /// Where it starts (global) when [from] is gone or it turns round.
+  /// Where it starts (global) when it turns round from a lift in the air.
   final Rect? start;
   final Duration duration;
   final AnimationCurve curve;
@@ -615,12 +624,12 @@ class _Lift {
 
   /// Where it is at the clock's [t], both ends where they are now.
   Rect? _at(double t) {
-    final b = start ?? _live(from) ?? from.lastRect;
-    final e = _live(to);
-    if (b == null || e == null) return null;
     // A turn-round starts where it was drawn; else the place it leaves is
-    // followed (a list scrolling under it).
-    final begin = start != null ? b : (_live(from) ?? b);
+    // followed where it is now (a list scrolling under it), and once that
+    // node has gone, where it was at the end of its last frame.
+    final begin = start ?? _live(from) ?? from.lastRect;
+    final e = _live(to);
+    if (begin == null || e == null) return null;
     return Rect.lerp(begin, e, _progress(t));
   }
 

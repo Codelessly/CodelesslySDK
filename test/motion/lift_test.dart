@@ -182,6 +182,75 @@ void main() {
     expect(markOf(p).liftShown, isTrue);
   });
 
+  testWidgets('the first lift after a scroll starts where the row is now, not where it was last painted', (tester) async {
+    // The row has a layer of its own (a large blurred shadow), so a scroll
+    // moves that layer without painting the row again.
+    final p = NodeTree(DocumentSource(LayoutDocument.fromJson({
+      'schema': 3,
+      'roots': ['r'],
+      'nodes': {
+        'r': {
+          'type': 'column',
+          'props': {'scrollable': true, 'crossAxisAlignment': 'start'},
+          'layout': {'width': 400, 'height': 800},
+          'children': ['a', 'b', 'c', 'h', 'd', 'e', 'f', 'g', 'i', 'j', 'k'],
+        },
+        for (final id in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'i', 'j', 'k'])
+          id: {
+            'type': 'box',
+            'layout': {'width': 400, 'height': 100},
+          },
+        'h': {
+          ...box({'width': 200, 'height': 60}),
+          'decoration': {
+            'fills': [
+              {'color': '#FFF1F5F9'},
+            ],
+            'radius': 12,
+            'effects': [
+              {'type': 'dropShadow', 'color': '#40000000', 'blurRadius': 24, 'visible': true},
+            ],
+          },
+        },
+      },
+    })));
+    final o = overlay();
+    addTearDown(p.dispose);
+    addTearDown(o.dispose);
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(400, 800);
+    addTearDown(tester.view.reset);
+    final nav = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400, 800)),
+      child: MaterialApp(navigatorKey: nav, home: show(p)),
+    ));
+    await tester.pump();
+    RenderObject? scroll;
+    void visit(RenderObject o) {
+      if (scroll == null && o.runtimeType.toString() == 'RenderDesignScroll') scroll = o;
+      o.visitChildren(visit);
+    }
+
+    visit(p.boxOf('r')!);
+    (scroll! as dynamic).jumpTo(150.0);
+    await tester.pump();
+    final home = markOf(p);
+    final onScreen = MatrixUtils.transformRect(home.getTransformTo(null), Offset.zero & home.size);
+    expect(onScreen.top, closeTo(150, 1));
+
+    nav.currentState!.push(over(o));
+    await tester.pump();
+    await tester.pump();
+    expect(HeroLifts.flying, isTrue);
+    final start = HeroLifts.rectOf('m7')!;
+    expect(start.top, closeTo(onScreen.top, 1), reason: 'from the row\'s place on screen');
+    expect(start.left, closeTo(onScreen.left, 1));
+    await tester.pumpAndSettle();
+    nav.currentState!.pop();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('closing the overlay mid-flight turns the node round from where it is drawn', (tester) async {
     final (p, o, nav) = await pump(tester);
     nav.currentState!.push(over(o));

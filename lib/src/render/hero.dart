@@ -173,9 +173,20 @@ class RenderHeroMark extends RenderProxyBox {
     return identical(shown.lastOrNull ?? all.lastOrNull, this);
   }
 
-  /// Where it was last laid out on screen (global), for a flight back from
-  /// a node that has gone.
+  /// Where it was on screen (global) at the end of the last frame it was
+  /// attached in ([notePlace]), for a flight back from a node that has gone.
+  /// Not read for a node still on screen: a scroll can move it without a
+  /// paint, so its place is read where it is ([rectIn]).
   Rect? lastRect;
+
+  /// Records where it is on screen now in [lastRect]: called once a frame is
+  /// laid out and drawn (app/ui/hero_flights.dart's lifts).
+  void notePlace() {
+    if (!attached || !hasSize) return;
+    final r = rectIn(null);
+    if (r != null) lastRect = r;
+  }
+
   /// What its flight draws (`Hero.flightShuttleBuilder`).
   api.HeroFlightShuttle flightShuttle = api.HeroFlightShuttle.standard;
   api.HeroPlaceholder placeholder = api.HeroPlaceholder.none;
@@ -232,11 +243,6 @@ class RenderHeroMark extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (flies == api.HeroFlies.lift && hasSize) {
-      try {
-        lastRect = MatrixUtils.transformRect(getTransformTo(null), Offset.zero & size);
-      } catch (_) {}
-    }
     if (_flying || !liftShown) return;
     final source = _source;
     final c = child;
