@@ -4,7 +4,9 @@ library;
 
 export 'context.dart';
 export 'feature.dart';
-export 'handlers.dart' show delayMilliseconds, sourceFiles;
+// handleAction: a host's own handler for a core type (one that records a
+// toast, say) runs the built-in one after it.
+export 'handlers.dart' show delayMilliseconds, handleAction, sourceFiles;
 export 'node_values.dart';
 export 'app_events.dart';
 export 'capture.dart' show BoundaryFinder, CaptureRegistry, captureImage;
