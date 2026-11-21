@@ -30,6 +30,7 @@ import '../runtime/http_image_loader.dart';
 import '../widgets/tree.dart';
 import 'shown.dart';
 import 'ui_session.dart';
+import '../app/view_host.dart';
 
 /// Shows [session]'s canvas [canvas] (default: its first root that has
 /// arrived) and keeps it up to date as ops apply: each op re-applies only
@@ -471,7 +472,7 @@ class _SessionUi extends NavigatorActionUi {
   bool closeModal(Object? result) {
     if (super.closeModal(result)) return true;
     if (_openModals <= 0 || !view.mounted) return false;
-    final navigator = Navigator.maybeOf(view.context);
+    final navigator = maybeViewNavigatorOf(view.context);
     if (navigator == null || !navigator.canPop()) return false;
     navigator.pop(result);
     return true;

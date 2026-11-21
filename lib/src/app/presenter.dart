@@ -21,6 +21,7 @@ import 'backdrop_screens.dart';
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
 import 'viewport.dart';
+import 'view_host.dart';
 
 /// Shows a project's layouts above the host app ([Codelessly.presenter]).
 ///
@@ -178,7 +179,7 @@ class CodelesslyPresenter {
 
   NavigatorState? _navigatorFor(_Pending p) {
     final c = p.context;
-    if (c != null && c.mounted) return Navigator.maybeOf(c, rootNavigator: true);
+    if (c != null && c.mounted) return maybeViewNavigatorOf(c, rootNavigator: true);
     return navigator;
   }
 
@@ -481,7 +482,7 @@ class _CodelesslyPresenterHostState extends State<CodelesslyPresenterHost> {
     final keyed = widget.navigatorKey?.currentState;
     if (keyed != null) return keyed;
     if (!mounted) return null;
-    final above = Navigator.maybeOf(context, rootNavigator: true);
+    final above = maybeViewNavigatorOf(context, rootNavigator: true);
     if (above != null) return above;
     NavigatorState? found;
     void visit(Element e) {

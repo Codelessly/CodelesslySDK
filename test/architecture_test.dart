@@ -200,6 +200,9 @@ const widgetImportRatchet = {
   'src/app/ui/presentation_scope.dart',
   'src/app/ui/route_transition.dart',
   'src/app/ui/toast.dart',
+  // A view's own navigator and overlay (a host adapter, added for a view
+  // embedded in a panel of a larger app).
+  'src/app/view_host.dart',
   'src/app/viewport.dart',
   'src/features/media/embedded_player_native.dart',
   'src/features/media/embedded_player_web.dart',

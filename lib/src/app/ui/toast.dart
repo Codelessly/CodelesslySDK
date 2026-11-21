@@ -14,6 +14,7 @@ import '../../render/paint/icon_names.dart';
 import '../../render/paint/shell_constants.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
+import '../view_host.dart';
 
 /// What a show toast action shows, its text and bindings already evaluated
 /// where the action ran (the chain may navigate away right after).
@@ -153,7 +154,7 @@ abstract final class CodelesslyToast {
   /// Shows [request]'s toast over [context]. False when there's no overlay
   /// to show it in.
   static bool show(BuildContext context, ToastRequest request) {
-    final overlay = ToastOverlayScope.maybeOf(context) ?? Overlay.maybeOf(context, rootOverlay: true);
+    final overlay = ToastOverlayScope.maybeOf(context) ?? maybeViewOverlayOf(context, rootOverlay: true);
     if (overlay == null) return false;
     final action = request.action;
     final theme = FeedbackTheme.of(context);

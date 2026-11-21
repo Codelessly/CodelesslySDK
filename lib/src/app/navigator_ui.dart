@@ -36,6 +36,7 @@ import '../render/controls/focus.dart' show ControlFocusLayer;
 import '../render/node_view.dart' show ControlFocusLayerScope;
 import '../render/paint/shell_constants.dart';
 import '../runtime/actions/ui.dart';
+import 'view_host.dart';
 
 /// Builds the route that shows screen [destination] (a canvas or layout id)
 /// opened with [params]; null for a screen that doesn't exist.
@@ -55,7 +56,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   @override
   bool get popoverOnTop {
     final c = _context;
-    final navigator = c == null ? null : Navigator.maybeOf(c);
+    final navigator = c == null ? null : maybeViewNavigatorOf(c);
     if (navigator == null) return false;
     Route<dynamic>? top;
     navigator.popUntil((r) {
@@ -99,13 +100,13 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   @override
   void hoverAnchorExit(Rect anchor) {
     final c = _context;
-    if (c != null) _hoverCards[Navigator.of(c)]?.anchorExit(anchor);
+    if (c != null) _hoverCards[viewNavigatorOf(c)]?.anchorExit(anchor);
   }
 
   @override
   Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) async {
     final c = _context;
-    final navigator = c == null ? null : Navigator.maybeOf(c);
+    final navigator = c == null ? null : maybeViewNavigatorOf(c);
     if (navigator == null) return;
     _hoverCards[navigator]?.dismiss();
     var mode = action.mode;
@@ -144,7 +145,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
     // A banner: over everything, no barrier, one at a time (ui/banner.dart).
     if (action.presentation == ModalPresentation.banner) {
       final content = (sheetModal ?? modal)?.call(action.to, params);
-      final overlay = ToastOverlayScope.maybeOf(c) ?? Overlay.maybeOf(c, rootOverlay: true);
+      final overlay = ToastOverlayScope.maybeOf(c) ?? maybeViewOverlayOf(c, rootOverlay: true);
       if (content == null || overlay == null) return null;
       final inherited = InheritedTheme.captureAll(
           c, Localizations.override(context: c, child: PageLocationScope(location: pageLocationOf(c), child: content)));
@@ -189,7 +190,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
       api.ModalAnchor.none => action.presentation == ModalPresentation.popover ? RevealAnchor.lastTrigger ?? pointer : null,
     };
     if (action.hoverCard && anchor != null && !sheet) {
-      final navigator = Navigator.of(c);
+      final navigator = viewNavigatorOf(c);
       final session = _hoverCards[navigator] ??= _HoverCardSession(navigator);
       return session.open(c, modalContent, anchor: anchor, action: action);
     }
@@ -235,7 +236,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
   bool closeModal(Object? result) {
     final c = _context;
     if (c == null) return false;
-    final hover = _hoverCards[Navigator.of(c)];
+    final hover = _hoverCards[viewNavigatorOf(c)];
     if (hover != null && hover.isOpen) {
       hover.dismiss(result);
       return true;
@@ -248,7 +249,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi, Po
     final route = ModalRoute.of(c);
     bool isModal(Route<Object?>? r) => r is PopupRoute || (r is CodelesslyRouteTransitionRoute && r.modal);
     if (route == null || !isModal(route)) return false;
-    final navigator = Navigator.of(c);
+    final navigator = viewNavigatorOf(c);
     if (!route.isCurrent) {
       // This modal is already closing (an earlier `close` of the same chain
       // closed it): the next `close` closes the modal it was over, as
@@ -413,7 +414,7 @@ Future<Object?> showScreenModal(
   final sheet = presentation == ModalPresentation.bottomSheet || (presentation == ModalPresentation.adaptive && narrow);
   if (routeTransition != null) {
     final fullScreen = presentation == ModalPresentation.fullScreen;
-    return Navigator.of(context).push<Object?>(CodelesslyRouteTransitionRoute<Object?>(
+    return viewNavigatorOf(context).push<Object?>(CodelesslyRouteTransitionRoute<Object?>(
       modal: true,
       transition: routeTransition,
       anchor: RevealAnchor(tap: RevealAnchor.lastTap),
@@ -441,7 +442,7 @@ Future<Object?> showScreenModal(
   // A bottom sheet with none of those: the plain one.
   final plainSheet = sheet && !presented;
   if (presented || plainSheet) {
-    return Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
+    return viewNavigatorOf(context).push<Object?>(PresentationRoute<Object?>(
       plainSheet: plainSheet,
       context: context,
       presentation: sheet ? ModalPresentation.bottomSheet : presentation,
@@ -463,7 +464,7 @@ Future<Object?> showScreenModal(
   }
   if (presentation == ModalPresentation.fullScreen) {
     final project = CodelesslyPageTransitionsScope.maybeOf(context);
-    return Navigator.of(context).push<Object?>(CodelesslyPageRoute.of<Object?>(
+    return viewNavigatorOf(context).push<Object?>(CodelesslyPageRoute.of<Object?>(
       transitions: project?.transitions,
       fill: project?.fill,
       fullscreenDialog: true,
@@ -573,7 +574,7 @@ Future<Object?> showAnchoredModal(
   bool popover = false,
   double enterScale = 1,
 }) {
-  final navigator = Navigator.of(context);
+  final navigator = viewNavigatorOf(context);
   final overlay = navigator.overlay?.context.findRenderObject();
   final local = overlay is RenderBox && overlay.attached
       ? Rect.fromPoints(overlay.globalToLocal(anchor.topLeft), overlay.globalToLocal(anchor.bottomRight))

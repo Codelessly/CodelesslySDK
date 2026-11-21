@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'backdrop_screens.dart';
 import 'codelessly.dart';
 import 'codelessly_widget.dart';
+import 'view_host.dart';
 
 /// Marks the widgets of an overlay screen.
 ///
@@ -56,7 +57,7 @@ abstract final class CodelesslyOverlayHost {
     CodelesslyWidget? template,
   }) {
     if (!context.mounted || OverlayScreenScope.of(context) || BackdropScreenScope.of(context)) return;
-    final overlay = Navigator.maybeOf(context)?.overlay;
+    final overlay = maybeViewNavigatorOf(context)?.overlay;
     if (overlay == null) return;
     final hosts = _hosts[overlay] ??= {};
     final host = hosts[codelessly] ??= _OverlayHost(overlay, codelessly, template, () => hosts.remove(codelessly));

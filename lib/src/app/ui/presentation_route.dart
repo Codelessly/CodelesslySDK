@@ -16,6 +16,7 @@ import '../../render/layout/design_scroll.dart' show ScrollDragGate;
 import '../../render/node_view.dart';
 import '../../render/paint/shell_constants.dart';
 import '../../runtime/actions/ui.dart' show SheetStop;
+import '../view_host.dart';
 
 /// The width below which an adaptive modal with no breakpoint of its own is
 /// a bottom sheet: the project's second breakpoint's min width (a sheet on
@@ -53,8 +54,8 @@ Future<T?> showShellDialog<T>({
   double? enterScale,
   Offset? scaleOrigin,
 }) {
-  final navigator = Navigator.of(context);
-  final themes = InheritedTheme.capture(from: context, to: navigator.context);
+  final navigator = viewNavigatorOf(context);
+  final themes = InheritedTheme.capture(from: context, to: viewThemesTo(context, navigator.context));
   final direction = Directionality.of(context);
   final media = MediaQuery.maybeOf(context);
   return navigator.push<T>(_ShellDialogRoute<T>(
@@ -133,7 +134,7 @@ class PresentationRoute<T> extends PopupRoute<T> {
     super.settings,
   })  : presentation = resolvePresentation(presentation, MediaQuery.maybeSizeOf(context)?.width, sheetBelowWidth: sheetBelowWidth),
         _barrierLabel = barrierDismissLabel(context),
-        _themes = InheritedTheme.capture(from: context, to: Navigator.of(context).context);
+        _themes = InheritedTheme.capture(from: context, to: viewThemesTo(context, viewNavigatorOf(context).context));
 
   static const enterDuration = Duration(milliseconds: 320);
   static const exitDuration = Duration(milliseconds: 200);

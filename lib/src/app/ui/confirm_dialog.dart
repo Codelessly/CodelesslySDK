@@ -17,6 +17,7 @@ import 'feedback_icon.dart';
 import 'feedback_theme.dart';
 import 'presentation_route.dart';
 import 'toast.dart';
+import '../view_host.dart';
 
 /// What a confirm action asks, its text and bindings already evaluated
 /// where it ran.
@@ -298,7 +299,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
       ));
 
   if (presentation != ModalPresentation.dialog) {
-    final answer = await Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
+    final answer = await viewNavigatorOf(context).push<Object?>(PresentationRoute<Object?>(
       context: context,
       presentation: presentation,
       barrierDismissible: action.barrierDismissible,

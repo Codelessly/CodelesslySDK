@@ -193,6 +193,7 @@ export 'src/app/ui/route_transition.dart'
         RouteDragDismiss,
         TransitionPhysics,
         TransitionSideView;
+export 'src/app/view_host.dart' show CodelesslyViewHost, maybeViewNavigatorOf, maybeViewOverlayOf, viewNavigatorOf, viewThemesTo;
 export 'src/app/ui/toast.dart'
     show CodelesslyToast, ToastBelowRoute, ToastOverlayScope, ToastRequest;
 export 'src/runtime/actions/actions.dart';
