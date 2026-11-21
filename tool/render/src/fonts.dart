@@ -255,11 +255,18 @@ List<FontFace> declaredFonts(List<FontFamily> families, String siteDir, List<Dec
 /// Flutter app on Android and on the web, used for text that names no
 /// family), the MaterialIcons font and Roboto Mono (what `monospace` and
 /// `Text.mono` draw in), all from the Flutter SDK.
-List<FontFace> defaultFonts(String flutterRoot) => scanFonts([
-      '$flutterRoot/bin/cache/artifacts/material_fonts',
-      for (final dir in _robotoMonoDirs)
-        if (Directory('$flutterRoot/$dir').existsSync()) '$flutterRoot/$dir',
-    ]);
+List<FontFace> defaultFonts(String flutterRoot) => [
+      ..._defaultFonts.putIfAbsent(
+          flutterRoot,
+          () => scanFonts([
+                '$flutterRoot/bin/cache/artifacts/material_fonts',
+                for (final dir in _robotoMonoDirs)
+                  if (Directory('$flutterRoot/$dir').existsSync()) '$flutterRoot/$dir',
+              ])),
+    ];
+
+/// Flutter's own font files do not change while a process runs: read once (a render server's every run asks).
+final Map<String, List<FontFace>> _defaultFonts = {};
 
 /// Where the Flutter SDK keeps Roboto Mono (DevTools' copy).
 const _robotoMonoDirs = ['bin/cache/dart-sdk/bin/resources/devtools/assets/fonts/Roboto_Mono'];
@@ -454,17 +461,22 @@ class DirectoryFontFetcher implements FontFetcher {
     // The engine keeps the first file registered for a face for the process's life: a later run (the render
     // server's) giving that face another file would still be drawn with the first one.
     final key = '${font.family.toLowerCase()}|${font.weight}|${font.italic}';
+    final bytes = File(face.path).readAsBytesSync();
+    // The same file at another place (each agent's own copy of a site, with its own copy of the fonts) is the
+    // same face: told by what the file holds, not by where it is.
+    final stamp = fontFileStamp(bytes);
     final before = engineFiles[key];
     if (before == null) {
-      engineFiles[key] = face.path;
-    } else if (before != face.path) {
-      engineConflicts.add('${font.family} ${font.weight}${font.italic ? ' italic' : ''}: ${face.path} after $before');
+      engineFiles[key] = (path: face.path, stamp: stamp);
+    } else if (before.path != face.path && before.stamp != stamp) {
+      engineConflicts.add('${font.family} ${font.weight}${font.italic ? ' italic' : ''}: ${face.path} after ${before.path}');
     }
-    return File(face.path).readAsBytesSync();
+    return bytes;
   }
 
-  /// Process-wide: the file the engine was given for each face (`family|weight|italic`), across runs.
-  static final Map<String, String> engineFiles = {};
+  /// Process-wide: the file the engine was given for each face (`family|weight|italic`), across runs, and what
+  /// tells its content ([fontFileStamp]).
+  static final Map<String, ({String path, String stamp})> engineFiles = {};
 
   /// Faces this process was asked to draw with a file other than the one the engine already has for them (a
   /// family first drawn in Roboto, missing, then given its own file): the drawing is the first file's. The render
@@ -472,12 +484,43 @@ class DirectoryFontFetcher implements FontFetcher {
   static final List<String> engineConflicts = [];
 }
 
+/// What tells one font file's content from another's without reading it all again: its length and a hash of
+/// its first and last 4096 bytes and of every 251st byte between.
+String fontFileStamp(Uint8List bytes) {
+  var h = 0x811c9dc5;
+  void add(int b) => h = ((h ^ b) * 0x01000193) & 0xFFFFFFFF;
+  final n = bytes.length, edge = n < 4096 ? n : 4096;
+  for (var i = 0; i < edge; i++) {
+    add(bytes[i]);
+  }
+  for (var i = edge; i < n - edge; i += 251) {
+    add(bytes[i]);
+  }
+  for (var i = n - edge < edge ? edge : n - edge; i < n; i++) {
+    add(bytes[i]);
+  }
+  return '$n:${h.toRadixString(16)}';
+}
+
+/// A font file as these tables know it: its path, and its size and time (a file written again at the same path,
+/// by another run of a render server, is another file).
+String fontFileKey(String path) => _fileKeys.putIfAbsent(path, () {
+      final stat = FileStat.statSync(path);
+      return '$path|${stat.size}|${stat.modified.microsecondsSinceEpoch}';
+    });
+
+/// Asked once per run ([forgetFontFiles] at its start): a check asks for every text it reads.
+final Map<String, String> _fileKeys = {};
+
+/// A run starts: the font files are looked at again.
+void forgetFontFiles() => _fileKeys.clear();
+
 final Map<String, int> _latinScores = {};
 
 /// How much of Latin text font file [path] covers: each printable ASCII
 /// character counts 100, each other character up to U+024F (Latin-1 and
 /// Latin Extended) 1.
-int latinScore(String path) => _latinScores.putIfAbsent(path, () {
+int latinScore(String path) => _latinScores.putIfAbsent(fontFileKey(path), () {
       final cov = fontCoverage(path);
       if (cov == null) return 0;
       var n = 0;
@@ -489,7 +532,11 @@ int latinScore(String path) => _latinScores.putIfAbsent(path, () {
 
 /// Material icon names → their MaterialIcons font codepoints (Flutter's
 /// `codepoints` file).
-Map<String, int> materialCodepoints(String flutterRoot) {
+Map<String, int> materialCodepoints(String flutterRoot) => _codepoints.putIfAbsent(flutterRoot, () => Map.unmodifiable(_readCodepoints(flutterRoot)));
+
+final Map<String, Map<String, int>> _codepoints = {};
+
+Map<String, int> _readCodepoints(String flutterRoot) {
   final f = File('$flutterRoot/bin/cache/artifacts/material_fonts/codepoints');
   if (!f.existsSync()) return const {};
   final out = <String, int>{};

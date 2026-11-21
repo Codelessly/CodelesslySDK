@@ -181,7 +181,7 @@ String? siblingApi(String sdk) {
 }
 
 /// Whether nothing the render server runs changed since it started: no file or folder of the SDK's lib/ and
-/// tool/render/, its pubspecs, or the sibling API's lib/ and pubspec is newer than its `ready` file (render.sh's
+/// tool/render/, its pubspecs, the server itself (tool/cli/src/pool.dart), or the sibling API's lib/ and pubspec is newer than its `ready` file (render.sh's
 /// `find ... -newer`).
 bool serverIsCurrent(String sdk, String? api, File ready) {
   final DateTime since;
@@ -202,7 +202,7 @@ bool serverIsCurrent(String sdk, String? api, File ready) {
       if (newer(e.path)) return false;
     }
   }
-  for (final f in ['$sdk/pubspec.yaml', '$sdk/pubspec_overrides.yaml', if (api != null) '$api/pubspec.yaml']) {
+  for (final f in ['$sdk/pubspec.yaml', '$sdk/pubspec_overrides.yaml', '$sdk/tool/cli/src/pool.dart', if (api != null) '$api/pubspec.yaml']) {
     if (newer(f)) return false;
   }
   return true;
@@ -337,7 +337,7 @@ class _LeftToTheScript implements Exception {
 /// render.sh says before it goes on to render the usual way); else the exit status.
 Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, CommandTimings? timings) async {
   final sdk = sdkRoot.path.replaceAll(r'\', '/');
-  final server = '$sdk/build/.render-server';
+  final server = renderServerDir;
   final ready = File('$server/ready'), pidFile = File('$server/pid'), portFile = File('$server/port');
   if (!ready.existsSync() || !pidFile.existsSync() || !portFile.existsSync()) return null;
   final prepared = prepareRenderArgs(argv);
@@ -385,16 +385,21 @@ Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, Comma
     // One argument after another, each ended by a NUL: an argument may hold a newline.
     File(argsFile).writeAsStringSync(args.map((a) => '$a\u0000').join());
     err.writeln('Rendering with $version, the render server (pid $serverPid).');
-    socket.setOption(SocketOption.tcpNoDelay, true);
-    socket.write('$token $argsFile\n');
-    var answered = false;
-    try {
-      await socket.flush();
-      answered = (await utf8.decoder.bind(socket).join()).contains('done');
-    } on Object {
-      // The server went away: said below.
-    }
+    final answer = await askRender(socket, token, argsFile, onQueued: (place) {
+      err.writeln('The render server\'s workers are all busy: this run waits its turn (place $place in the queue).');
+    });
+    final answered = answer == 'done';
     timings?.lap('render');
+    if (answer != null && answer.startsWith('busy ')) {
+      final at = answer.split(' ');
+      err.writeln('The render server is busy: ${at[1]} runs wait already, which is its limit (tool/codelessly serve --queue <n> sets another). '
+          'Not rendered: ask again in a moment.');
+      return 2;
+    }
+    if (answer != null && answer.startsWith('failed ')) {
+      err.writeln(answer.substring(7));
+      return 2;
+    }
     final retry = File('$argsFile.retry'), status = File('$argsFile.status');
     if (retry.existsSync()) {
       err.writeln('The render server had other files registered for fonts this run draws (${retry.readAsLinesSync().firstOrNull ?? ''}); '
@@ -418,6 +423,29 @@ Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, Comma
       // Left behind: a dot folder in --out.
     }
   }
+}
+
+/// One render asked of the render server over [socket]: the arguments in [argsFile]. Returns its last word:
+/// `done` (the report, the status and the timings are beside the arguments file), `busy <queued> <limit>` (its
+/// queue is full: not rendered), `failed <why>`, or null when the server went away. [onQueued] is told the run's
+/// place in the queue when it has to wait for a worker.
+Future<String?> askRender(Socket socket, String token, String argsFile, {void Function(int place)? onQueued}) async {
+  String? last;
+  try {
+    socket.setOption(SocketOption.tcpNoDelay, true);
+    socket.write('$token run $argsFile\n');
+    await socket.flush();
+    await for (final line in utf8.decoder.bind(socket).transform(const LineSplitter())) {
+      if (line.startsWith('queued ')) {
+        onQueued?.call(int.tryParse(line.substring(7)) ?? 1);
+      } else if (line.isNotEmpty) {
+        last = line;
+      }
+    }
+  } on Object {
+    // The server went away: no word.
+  }
+  return last;
 }
 
 /// Waits (10 s at most) until the server that handed a run back no longer listens, then clears its folder, as

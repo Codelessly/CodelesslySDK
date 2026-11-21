@@ -49,6 +49,7 @@ import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderT
 
 import 'args.dart';
 import 'compare.dart';
+import 'fan.dart';
 import 'fonts.dart';
 import 'google_fonts.dart';
 import 'prepare.dart';
@@ -155,9 +156,189 @@ final class RenderReport {
   /// The screen a capture's run started on, by the capture's file name,
   /// when the capture is named after another (a screen navigated to).
   final Map<String, String> startedOn = {};
+
+  /// `--layout-only`: the layout files written (no picture is), in order.
+  final List<String> layouts = [];
+
+  /// The comparisons of a report made from several workers' records ([mergeFanRun]): each as the diagnostics
+  /// file lists it and as the report says it.
+  final List<({api.Json json, String summary})> mergedComparisons = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
+
+/// One worker's part in one run of a request several workers render (src/fan.dart): which captures are its to
+/// render, and what each gave, written as the capture's record.
+final class FanRun {
+  FanRun(this.dir, this.run, this.worker, {this.onEstimate});
+
+  final FanDir dir;
+  final int run;
+  final String worker;
+
+  /// Called once with the number of captures the run has, when this worker is the first to know it.
+  final void Function(int cells)? onEstimate;
+
+  /// How many captures the run has when that is known before its first screen (`--component`: its previews).
+  int? knownCells;
+
+  /// The next capture's number: every worker counts the run's captures in the same order.
+  int _next = 0;
+
+  /// This worker takes no more captures: the server asked it to make way, or it cannot draw the run as a worker
+  /// of its own would (a font it has another file for).
+  bool stopped = false;
+
+  /// How many captures this worker rendered.
+  int rendered = 0;
+
+  bool _estimated = false, _solo = false;
+  int? _cell;
+
+  /// The diagnostics said before the first capture, and between captures (by the capture they came before).
+  final List<api.Json> _pre = [];
+  final Map<String, List<api.Json>> _heads = {};
+  late List<api.Json> _section = _pre;
+  List<int> _marks = const [];
+  Set<String> _missingBefore = const {};
+  Map<String, String> _startedBefore = const {};
+
+  /// A diagnostic, kept with the part of the run it was said in ([key]: what makes it the same as another).
+  void issue(String key, api.Json json) => _section.add({'k': key, 'j': json});
+
+  /// A group of captures starts (the site's screens, or one component alone): what is said before its first
+  /// capture is kept with that capture's number.
+  void beginSegment() => _section = _heads.putIfAbsent('$_next', () => []);
+
+  /// The group has [cells] captures; [shareable]: they may be rendered at the same time by several workers.
+  void segment(int cells, {required bool shareable}) {
+    if (!shareable) {
+      _solo = true;
+      dir.markSolo(run);
+    }
+    if (_estimated) return;
+    _estimated = true;
+    final had = dir.estimate(run) != null;
+    dir.writeEstimate(run, knownCells ?? cells);
+    if (!had) onEstimate?.call(knownCells ?? cells);
+  }
+
+  /// Whether the next capture is this worker's to render (it claimed it). Counts it either way.
+  bool begin(RenderReport report, ComponentRegistry? components) {
+    final cell = _next++;
+    _section = _heads.putIfAbsent('$_next', () => []);
+    if (stopped || dir.recorded(run, cell)) return false;
+    // One after another: only when the one before is rendered.
+    if ((_solo || dir.solo(run)) && cell > 0 && !dir.recorded(run, cell - 1)) return false;
+    if (dir.yieldAsked(worker) || DirectoryFontFetcher.engineConflicts.isNotEmpty) {
+      stopped = true;
+      return false;
+    }
+    if (!dir.claim(run, cell, worker)) return false;
+    _cell = cell;
+    _section = [];
+    _marks = [
+      report.images.length, report.comparisons.length, report.downloads.length, report.clipboard.length,
+      report.focus.length, report.announcements.length, report.layouts.length,
+    ];
+    _startedBefore = {...report.startedOn};
+    _missingBefore = _missingOf(components);
+    return true;
+  }
+
+  static Set<String> _missingOf(ComponentRegistry? components) => {
+        if (components != null)
+          for (final e in components.missing.entries)
+            for (final path in e.value) '${e.key}\u0001$path',
+      };
+
+  /// The capture [begin] gave this worker is rendered and its files are written: its record.
+  void end(RenderReport report, ComponentRegistry? components) {
+    final cell = _cell!;
+    _cell = null;
+    final said = _section;
+    _section = _heads.putIfAbsent('$_next', () => []);
+    if (DirectoryFontFetcher.engineConflicts.isNotEmpty) {
+      // Drawn with another run's font file: not this capture's picture. Another worker renders it.
+      stopped = true;
+      dir.unclaim(run, cell);
+      return;
+    }
+    rendered++;
+    dir.writeRecord(run, cell, {
+      'worker': worker,
+      'diagnostics': said,
+      'images': report.images.sublist(_marks[0]),
+      'comparisons': [for (final c in report.comparisons.sublist(_marks[1])) {'json': c.toJson(), 'summary': c.summary()}],
+      'downloads': report.downloads.sublist(_marks[2]),
+      'clipboard': report.clipboard.sublist(_marks[3]),
+      'focus': report.focus.sublist(_marks[4]),
+      'announcements': report.announcements.sublist(_marks[5]),
+      'layouts': report.layouts.sublist(_marks[6]),
+      'startedOn': {
+        for (final e in report.startedOn.entries)
+          if (_startedBefore[e.key] != e.value) e.key: e.value,
+      },
+      'missing': [
+        for (final m in _missingOf(components))
+          if (!_missingBefore.contains(m)) m.split('\u0001'),
+      ],
+    });
+  }
+
+  /// The walk is over (every capture was counted): what it found outside the captures, for the report.
+  void finishWalk() {
+    dir.writeWalk(run, {'total': _next, 'pre': _pre, 'heads': {for (final e in _heads.entries) if (e.value.isNotEmpty) e.key: e.value}});
+  }
+}
+
+/// The report of [run], which several workers rendered, from their records in order: what one worker rendering
+/// every capture one after another reports. Writes the run's diagnostics file ([args] are the run's).
+RenderReport mergeFanRun(FanDir dir, int run, RenderArgs args) {
+  final walk = dir.walk(run)!;
+  final total = (walk['total'] as num).toInt();
+  final heads = (walk['heads'] as Map?) ?? const {};
+  final report = RenderReport();
+  final seen = <String>{};
+  void say(Object? issues) {
+    for (final i in (issues as List?) ?? const []) {
+      if (seen.add('${(i as Map)['k']}')) report.diagnostics.add((i['j'] as Map).cast<String, Object?>());
+    }
+  }
+
+  List<api.Json> maps(Object? list) => [for (final m in (list as List?) ?? const []) (m as Map).cast<String, Object?>()];
+  final missing = <String, Set<String>>{};
+  say(walk['pre']);
+  for (var cell = 0; cell < total; cell++) {
+    say(heads['$cell']);
+    final r = dir.record(run, cell)!;
+    say(r['diagnostics']);
+    report.images.addAll(((r['images'] as List?) ?? const []).cast<String>());
+    report.layouts.addAll(((r['layouts'] as List?) ?? const []).cast<String>());
+    for (final c in maps(r['comparisons'])) {
+      report.mergedComparisons.add((json: (c['json'] as Map).cast<String, Object?>(), summary: '${c['summary']}'));
+    }
+    report.downloads.addAll(maps(r['downloads']));
+    report.clipboard.addAll(maps(r['clipboard']));
+    report.focus.addAll(maps(r['focus']));
+    report.announcements.addAll(maps(r['announcements']));
+    report.startedOn.addAll(((r['startedOn'] as Map?) ?? const {}).map((k, v) => MapEntry('$k', '$v')));
+    for (final m in (r['missing'] as List?) ?? const []) {
+      missing.putIfAbsent('${(m as List)[0]}', () => {}).add('${m[1]}');
+    }
+  }
+  say(heads['$total']);
+  for (final e in missing.entries) {
+    for (final path in e.value) {
+      final i = _componentMissing(e.key, path);
+      if (seen.add('${i.key}|${i.screen}|${i.size}')) report.diagnostics.add(i.toJson());
+    }
+  }
+  return _finish(report, args);
+}
+
+RuntimeIssue _componentMissing(String type, String path) =>
+    RuntimeIssue('component_missing', 'error', 'Call "$path" renders $type, which no component document of the site defines.', nodeId: path);
 
 /// Saves a `downloadFile` action's file under `<out>/downloads/<capture>/`
 /// (a headless run has no save dialog), and lists it in the report.
@@ -227,12 +408,27 @@ String _jsonError(Object e, String text) {
 }
 
 /// Runs the command in a widget test.
-Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? flutterRoot}) async {
+///
+/// With [fan] the run is one several workers render (src/fan.dart): this one renders the captures it claims and
+/// writes each one's record; no diagnostics file is written and the report returned is not the run's
+/// ([mergeFanRun] makes that).
+Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? flutterRoot, FanRun? fan}) async {
   final report = RenderReport();
   final seen = <String>{};
+  // A family asked for by name in an earlier run of this process (the render server's) is asked for again: this
+  // run's own files answer.
+  FontDemand.forgetAsked();
+  forgetFontFiles();
+  RenderReport finish() {
+    if (fan == null) return _finish(report, args);
+    fan.finishWalk();
+    return report;
+  }
+
   // Before the documents are prepared (their images inlined); cleared when the run ends.
   renderImageMap = args.imageMap;
   void issue(RuntimeIssue i) {
+    if (fan != null) return fan.issue('${i.key}|${i.screen}|${i.size}', i.toJson());
     if (seen.add('${i.key}|${i.screen}|${i.size}')) report.diagnostics.add(i.toJson());
   }
 
@@ -246,7 +442,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final inputs = site.inputs;
   if (inputs.isEmpty) {
     issue(RuntimeIssue('no_documents', 'error', 'No .json documents at ${args.inputs.join(', ')}.'));
-    return _finish(report, args);
+    return finish();
   }
 
   // 1. Parse.
@@ -325,7 +521,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   final textFamily = switch (themeJson?['fontFamily']) { final String f when f.trim().isNotEmpty => f, _ => 'Roboto' };
-  if (docs.isEmpty) return _finish(report, args);
+  if (docs.isEmpty) return finish();
   _themeNames(docs, manifest?.theme ?? api.ThemeTokens.none, issue);
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
@@ -355,17 +551,12 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     for (final family in const ['Roboto', 'Material Icons']) {
       final files = [for (final f in faces) if (f.family == family) f.path];
       if (files.isEmpty) continue;
-      final loader = FontLoader(family == 'Material Icons' ? 'MaterialIcons' : family);
-      for (final p in files) {
-        loader.addFont(Future.value(File(p).readAsBytesSync().buffer.asByteData()));
-      }
-      await loader.load();
+      await _registerOnce(family == 'Material Icons' ? 'MaterialIcons' : family, files);
     }
     // The symbols the default fonts lack (← → ↑ ↓ ↵ ⌘ ✓), from the system's
     // symbol font: every style falls back to it, as a device's text does.
     if (symbolFont case final path?) {
-      final loader = FontLoader(symbolFamily)..addFont(Future.value(File(path).readAsBytesSync().buffer.asByteData()));
-      await loader.load();
+      await _registerOnce(symbolFamily, [path]);
       FontDemand.symbolFallback = const [symbolFamily];
     }
   });
@@ -388,20 +579,20 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   ];
   if (args.componentsAll && aloneTypes.isEmpty) {
     issue(RuntimeIssue('unknown_screen_arg', 'error', '--components-all: no component documents in ${args.inputs.join(', ')}.'));
-    return _finish(report, args);
+    return finish();
   }
   for (final type in aloneTypes) {
     final def = docs.values.where((d) => isComponentJson(d) && api.readMap(d[api.kWidgetKey])?['type'] == type).firstOrNull;
     if (def == null) {
       issue(RuntimeIssue('unknown_screen_arg', 'error', '--component $type: no component of that type in ${args.inputs.join(', ')}.'));
-      return _finish(report, args);
+      return finish();
     }
     try {
       final slots = args.slots == null || type != args.component ? null : jsonDecode(File(args.slots!).readAsStringSync()) as api.Json;
       alone.addAll(componentPages(type, def, props: type == args.component ? args.props : null, slots: slots));
     } catch (e) {
       issue(RuntimeIssue('invalid_json', 'error', '--props or --slots: ${_firstLine('$e')}'));
-      return _finish(report, args);
+      return finish();
     }
   }
   for (final a in alone) {
@@ -551,22 +742,25 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
   try {
+    if (alone.isNotEmpty) fan?.knownCells = [for (final a in alone) a.width != null && a.height != null ? 1 : args.sizes.length].fold<int>(0, (a, b) => a + b);
     if (alone.isEmpty) {
-      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
+      fan?.beginSegment();
+      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, fan: fan,
           components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
           unusableFamilies: unusableFamilies, failedImages: failedImages);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
+      fan?.beginSegment();
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
+          report, fan: fan, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir,
           unusableFamilies: unusableFamilies, failedImages: failedImages);
     }
-    for (final e in components.missing.entries) {
+    // (Of a run several workers render: said from their records, [mergeFanRun].)
+    for (final e in fan != null ? const <MapEntry<String, Set<String>>>[] : components.missing.entries) {
       for (final path in e.value) {
-        issue(RuntimeIssue('component_missing', 'error', 'Call "$path" renders ${e.key}, which no component document of the site defines.',
-            nodeId: path));
+        issue(_componentMissing(e.key, path));
       }
     }
   } finally {
@@ -584,7 +778,35 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   }
   tester.view.reset();
   tester.platformDispatcher.clearTextScaleFactorTestValue();
-  return _finish(report, args);
+  return finish();
+}
+
+/// What this process gave the engine for each family registered up front, in order: each file by what it holds
+/// ([fontFileStamp]). The engine keeps every file it is given for the process's life.
+final Map<String, List<String>> _registeredFonts = {};
+final Map<String, String> _fontStamps = {};
+
+/// Registers [files] as [family] with the engine, each file once in the process's life: a render server's later
+/// runs give the same files again, and the engine kept each copy (some megabytes a run, and the time to read
+/// them). A file the family did not have yet is added. When the engine has a file for the family from an earlier
+/// run that this run does not give, this run is not drawn as one of its own would be: said in
+/// [DirectoryFontFetcher.engineConflicts], as for a face fetched with another file.
+Future<void> _registerOnce(String family, List<String> files) async {
+  final stamps = [
+    for (final p in files) _fontStamps.putIfAbsent(fontFileKey(p), () => fontFileStamp(File(p).readAsBytesSync())),
+  ];
+  final had = _registeredFonts.putIfAbsent(family, () => []);
+  if (had.any((s) => !stamps.contains(s))) {
+    DirectoryFontFetcher.engineConflicts.add('$family: other files than ${files.join(', ')} from an earlier run');
+  }
+  final fresh = [for (var i = 0; i < files.length; i++) if (!had.contains(stamps[i])) i];
+  if (fresh.isEmpty) return;
+  final loader = FontLoader(family);
+  for (final i in fresh) {
+    loader.addFont(Future.value(File(files[i]).readAsBytesSync().buffer.asByteData()));
+    had.add(stamps[i]);
+  }
+  await loader.load();
 }
 
 /// Says once, as one `font_missing` error, every font file site.json declares
@@ -634,6 +856,7 @@ Future<void> _renderAll(
   DirectoryFontFetcher fetcher,
   void Function(RuntimeIssue) issue,
   RenderReport report, {
+  FanRun? fan,
   ComponentRegistry? components,
   Map<String, List<String>> fontUsers = const {},
   Map<String, Set<String>> svgUsers = const {},
@@ -653,9 +876,15 @@ Future<void> _renderAll(
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
   final timings = RenderTimings.current;
+  // Several screens with steps may end on one page and write one file name: such captures follow one another.
+  fan?.segment(screens.length * args.sizes.length, shareable: args.steps.isEmpty || screens.length <= 1);
   for (final screen in screens) {
     final label = _screenName(published, docs, screen);
     for (final size in args.sizes) {
+      // Of a run several workers render: only the captures this one claims.
+      if (fan != null && !fan.begin(report, components)) continue;
+      // A fresh app: what a reaction ran once for (its onceKey) in an earlier capture runs again in this one.
+      CodelesslyActions.resetOnceKeys();
       timings.lap('setup');
       final sizeName = '${size.width.round()}x${size.height.round()}';
       exporter
@@ -904,6 +1133,7 @@ Future<void> _renderAll(
         timeLimit();
         controller.dispose();
         codelessly.dispose();
+        fan?.end(report, components);
         continue;
       }
 
@@ -937,13 +1167,17 @@ Future<void> _renderAll(
                 '${args.label == null ? '' : '-${_fileSafe(args.label!)}'}-f$burst-${'$t'.padLeft(4, '0')}ms.png';
             final file = '${args.out}/$name';
             final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-            await tester.runAsync(() async {
-              final image = await ro.toImage(pixelRatio: 1);
-              final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-              image.dispose();
-              File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
-            });
-            report.images.add(file);
+            if (args.layoutOnly) {
+              report.layouts.add(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'));
+            } else {
+              await tester.runAsync(() async {
+                final image = await ro.toImage(pixelRatio: 1);
+                final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
+                image.dispose();
+                File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
+              });
+              report.images.add(file);
+            }
             // With --dump-layout, each frame's boxes too (an outline per frame).
             if (args.dumpLayout) {
               File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
@@ -1190,7 +1424,10 @@ Future<void> _renderAll(
       // browser page's), which the document does not choose. Counted on the capture's own pixels (the PNG read
       // back and decoded for it cost as much again as writing it).
       double? bare;
-      if (page == null || !page.attached) {
+      if (args.layoutOnly) {
+        // `--layout-only`: the layout and the checks, no picture (nothing is drawn to an image or encoded).
+        report.layouts.add(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'));
+      } else if (page == null || !page.attached) {
         bare = await tester.runAsync<double?>(() async {
           final image = await ro.toImage(pixelRatio: 1);
           timings.lap('capture');
@@ -1210,7 +1447,7 @@ Future<void> _renderAll(
         bare = share;
         timings.lap('full page');
       }
-      report.images.add(file);
+      if (!args.layoutOnly) report.images.add(file);
       if (bare != null && bare >= 0.02) {
         final canvasId = published.layoutOfCanvas.keys.firstWhere((c) => published.layoutOfCanvas[c] == screen, orElse: () => '');
         issue(RuntimeIssue('transparent_background', 'warning',
@@ -1220,7 +1457,7 @@ Future<void> _renderAll(
             nodeId: canvasId.isEmpty ? null : canvasId, screen: label, size: sizeName,
             file: canvasId.isEmpty ? null : fileOfNode[canvasId]));
       }
-      if (args.compare case final String reference) {
+      if (args.compare case final String reference when !args.layoutOnly) {
         final found = referenceFor(file, reference, map: args.compareMap);
         if (found.file == null) {
           issue(RuntimeIssue('compare_failed', 'warning',
@@ -1322,6 +1559,7 @@ Future<void> _renderAll(
       controller.dispose();
       codelessly.dispose();
       timings.lap('teardown');
+      fan?.end(report, components);
     }
   }
 }
@@ -4021,11 +4259,11 @@ List<RuntimeIssue> _check(
         ? face
         : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
     if (used == null) return null;
-    final own = _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
+    final own = _coverage.putIfAbsent(fontFileKey(used.path), () => fontCoverage(used.path));
     // What the symbol font every style falls back to draws.
     final symbols = FontDemand.symbolFallback.isEmpty ? null : systemSymbolFont();
     if (symbols == null || own == null) return own;
-    return _coverage.putIfAbsent('${used.path}+$symbols', () => {...own, ...?fontCoverage(symbols)});
+    return _coverage.putIfAbsent('${fontFileKey(used.path)}+${fontFileKey(symbols)}', () => {...own, ...?fontCoverage(symbols)});
   }
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
@@ -4688,7 +4926,9 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     'errors': report.errors,
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
+    if (report.layouts.isNotEmpty) 'layouts': [for (final i in report.layouts) i.split('/').last],
     if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
+    if (report.mergedComparisons.isNotEmpty) 'comparisons': [for (final c in report.mergedComparisons) c.json],
     if (report.downloads.isNotEmpty) 'downloads': report.downloads,
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     if (report.focus.isNotEmpty) 'focus': report.focus,
@@ -4718,8 +4958,14 @@ String formatReport(RenderReport report) {
   for (final i in report.images) {
     b.writeln('wrote $i');
   }
+  for (final i in report.layouts) {
+    b.writeln('wrote $i');
+  }
   for (final c in report.comparisons) {
     b.writeln(c.summary());
+  }
+  for (final c in report.mergedComparisons) {
+    b.writeln(c.summary);
   }
   for (final d in report.downloads) {
     b.writeln('downloaded ${d['file']} (${d['bytes']} bytes, ${d['mimeType']}) [screen ${d['screen']} ${d['size']}]');

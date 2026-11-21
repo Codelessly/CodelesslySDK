@@ -83,6 +83,10 @@ abstract final class FontDemand {
   static void Function(String family, int weight, bool italic)? handler;
   static final Set<String> _asked = {};
 
+  /// Forgets which families were asked for, so each is asked for again: for a process that shows one app after
+  /// another, each with its own font files (the render command's server), whose handler must be asked too.
+  static void forgetAsked() => _asked.clear();
+
   /// Whether a family's characters beyond a browser's `latin` subset come as
   /// a family of their own ([glyphFamily]), which every style using the
   /// family falls back to. Set by the app's font loader on the web.

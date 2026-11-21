@@ -29,6 +29,7 @@ final class RenderArgs {
     this.fontDirs = const [],
     this.label,
     this.dumpLayout = false,
+    this.layoutOnly = false,
     this.component,
     this.componentsAll = false,
     this.props,
@@ -63,6 +64,10 @@ final class RenderArgs {
 
   /// Also write each capture's node boxes (`<png name>.layout.json`).
   final bool dumpLayout;
+
+  /// `--layout-only`: the layout files and the diagnostics, no picture: nothing is drawn to an image or encoded,
+  /// and what reads the picture is not done (`--compare`, the share with nothing painted behind it).
+  final bool layoutOnly;
 
   /// Render this component alone (its type), not the site's pages.
   final String? component;
@@ -142,6 +147,7 @@ final class RenderArgs {
         fontDirs: fontDirs,
         label: label,
         dumpLayout: dumpLayout,
+        layoutOnly: layoutOnly,
         component: component,
         componentsAll: componentsAll,
         props: props,
@@ -313,6 +319,11 @@ Options:
                           from a fresh start; what comes before the first
                           --state is every state's. One Flutter start for all.
   --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h) and the text it shows.
+  --layout-only           Write the layout files (as --dump-layout) and the diagnostics, and no picture:
+                          nothing is drawn to an image or encoded, so a run costs less. What reads
+                          the picture is not done: --compare, transparent_background. For "how does
+                          this lay out?" asked often; tool/codelessly render --layout-only --outline
+                          prints the boxes.
   --component <Type>      Render one component of the site alone: once per preview
                           (at its size), or with --props at each size.
   --components-all        Render every component of the site alone, each once per
@@ -351,7 +362,7 @@ RenderArgs parseArgs(List<String> argv) {
   final screens = <String>[];
   final steps = <Step>[];
   final fonts = <String>[];
-  var fullPage = false, dumpLayout = false, componentsAll = false, modals = false;
+  var fullPage = false, dumpLayout = false, layoutOnly = false, componentsAll = false, modals = false;
   String? label, component, props, slots, compare, theme;
   DateTime? now, clock;
   var screenTimeout = const Duration(seconds: 120);
@@ -389,6 +400,8 @@ RenderArgs parseArgs(List<String> argv) {
         modals = true;
       case '--dump-layout':
         dumpLayout = true;
+      case '--layout-only':
+        layoutOnly = true;
       case '--fonts':
         fonts.add(next(i++, a));
       case '--label':
@@ -485,7 +498,8 @@ RenderArgs parseArgs(List<String> argv) {
     steps: steps,
     fontDirs: fonts,
     label: label,
-    dumpLayout: dumpLayout,
+    dumpLayout: dumpLayout || layoutOnly,
+    layoutOnly: layoutOnly,
     component: component,
     componentsAll: componentsAll,
     props: props,

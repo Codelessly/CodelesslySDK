@@ -63,7 +63,15 @@ final Directory sdkRoot = () {
   return Directory.current;
 }();
 
-String get renderScript => '${sdkRoot.path}/tool/render/render.sh';
+/// The render server's folder (its address, its state, its logs): `build/.render-server` of the checkout, or the
+/// folder `$CODELESSLY_RENDER_SERVER` names (a second server on one checkout, with a folder of its own: tests).
+String get renderServerDir {
+  final env = Platform.environment['CODELESSLY_RENDER_SERVER'];
+  if (env != null && env.isNotEmpty) return env.replaceAll(r'\', '/');
+  return '${sdkRoot.path.replaceAll(r'\', '/')}/build/.render-server';
+}
+
+String get renderScript =>'${sdkRoot.path}/tool/render/render.sh';
 String get serveScript => '${sdkRoot.path}/tool/render/serve.sh';
 
 /// The environment a shell script is started with on Windows: Git Bash's runtime expands the arguments it is given

@@ -99,8 +99,14 @@ class GoogleFontCache {
         failed.add(family);
         return null;
       }
+      // Whole or not at all: another worker of the render server may read the cache as this one writes it.
       file.parent.createSync(recursive: true);
-      file.writeAsBytesSync(sfnt);
+      final tmp = File('${file.path}.$pid.tmp')..writeAsBytesSync(sfnt);
+      try {
+        tmp.renameSync(file.path);
+      } on FileSystemException {
+        if (tmp.existsSync()) tmp.deleteSync(); // Another worker kept the same file first.
+      }
       fetched++;
     }
     final read = readFontFace(file.readAsBytesSync());
