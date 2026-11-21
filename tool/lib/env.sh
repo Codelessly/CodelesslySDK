@@ -273,6 +273,39 @@ _codelessly_commit_of() {
   return 0
 }
 
+# codelessly_build_cli <command shown in the help>
+# Compiles the Dart commands (tool/cli) to build/codelessly_cli when it is missing or older than their sources,
+# under a lock so concurrent first calls compile once. Flutter's dart compiles them; no other dependency.
+codelessly_build_cli() {
+  local exe="$sdk/build/codelessly_cli"
+  _codelessly_cli_stale "$exe" || return 0
+  [ -n "${dart_bin:-}" ] || codelessly_find_flutter "${1:-tool/codelessly <command>}" || return 2
+  mkdir -p "$sdk/build"
+  (
+    exec 8>"$sdk/build/.codelessly_cli.lock"
+    command -v flock >/dev/null 2>&1 && flock 8
+    if _codelessly_cli_stale "$exe"; then
+      echo "Compiling the toolkit's commands (tool/cli, once per change)..." >&2
+      log="$(mktemp)"
+      if ! "$dart_bin" compile exe "$sdk/tool/cli/codelessly.dart" -o "$exe.tmp" > "$log" 2>&1; then
+        cat "$log" >&2; rm -f "$log"; exit 2
+      fi
+      rm -f "$log"
+      mv "$exe.tmp" "$exe"
+    fi
+  ) || return 2
+}
+
+# Whether a source of the commands (tool/cli, and what they share with the render harness) is newer than <exe>.
+_codelessly_cli_stale() {
+  [ -x "$1" ] || return 0
+  local f
+  for f in "$sdk"/tool/cli/*.dart "$sdk"/tool/cli/*/*.dart "$sdk"/tool/cli/*/*/*.dart "$sdk"/tool/render/src/fan.dart; do
+    [ "$f" -nt "$1" ] && return 0
+  done
+  return 1
+}
+
 # codelessly_take_lock
 # One flutter test harness at a time per SDK checkout: flutter test rewrites
 # the checkout's build/ as it starts. Waits for a run already going.

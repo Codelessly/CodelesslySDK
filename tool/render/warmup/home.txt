@@ -1,0 +1,69 @@
+state volume=50
+state email=""
+state notify=true
+state qty=2
+state choice="okay"
+state rows=[{"name":"Ada","role":"Engineer","done":0.8},{"name":"Grace","role":"Admiral","done":0.4},{"name":"Linus","role":"Maintainer","done":0.6},{"name":"Margaret","role":"Director","done":1}]
+Column gap=16 pad=24 fill=#FFF7F7F9
+  Row between middle
+    Column gap=4
+      Text.pageTitle "Overview"
+      Text.bodySecondary "Everything the team shipped this week, {length(rows)} people"
+    Row gap=8
+      Button.outline "Export"
+      Button "New report" onTap={toast "Created"}
+  Grid cols=3 gap=12
+    Card gap=8
+      Text.caption "Revenue"
+      Text.heading1 "$48,210"
+      Badge.success "+12%"
+    Card gap=8
+      Text.caption "Orders"
+      Text.heading1 "1,204"
+      Progress 0.6
+    Card gap=8
+      Text.caption "Returning"
+      Row gap=12 middle
+        Ring 0.72
+        Text.strong "72%"
+  Card gap=12
+    Text.sectionTitle "Team"
+    each row in rows
+      Row gap=12 middle
+        Icon "person"
+        Column gap=2
+          Text.strong "{row.name}"
+          Text.muted "{row.role}"
+        Spacer grow
+        Progress {row.done}
+        Badge.neutral "{round(row.done*100,0)}%"
+    Divider
+    Row gap=8
+      ChoiceChip "Great" onTap={choice="great"}
+      ChoiceChip "Okay" onTap={choice="okay"}
+      FilterChip "Poor" onTap={choice="poor"}
+      if choice!=""
+        Text.muted "You chose {choice}."
+  Card gap=12
+    Text.sectionTitle "Settings"
+    Slider @volume min=0 max=100
+    Input "Email" "you@example.com" @email
+    Toggle "Notifications" @notify
+    Checkbox "Weekly digest" @notify
+    Select items=["Daily","Weekly","Monthly"]
+    SegmentedButton items=["Day","Week","Month"]
+    Row gap=8 middle
+      Button.outline "-" onTap={qty=max(1,qty-1)}
+      Text.strong "{qty}"
+      Button.outline "+" onTap={qty=qty+1}
+      Spacer grow
+      IconButton "settings"
+      Button.destructive "Reset"
+  Card gap=12
+    Text.sectionTitle "This week"
+    BarChart values=[3,5,4,6,2,7,5] labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+    LineChart values=[10,12,11,14,13,17,16]
+  Box fill=#FF1F2937 radius=12 pad=16 gap=8
+    Text "Dark block" color=#FFFFFFFF size=18 weight=700
+    Text.mono "render --layout-only" color=#FFCBD5E1
+    ListTile "Open the docs" "tool/README.md"

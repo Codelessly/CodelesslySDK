@@ -4,8 +4,7 @@
 // hold a newline: [argsFromFile]) and writes the
 // report next to the PNGs; render.sh prints it and exits with its status.
 //
-// With CODELESSLY_RENDER_SERVE=<dir> it is the render server instead
-// (tool/render/serve.sh): it stays up and renders each request dropped in
+// With CODELESSLY_RENDER_SERVE=<dir> it serves instead: it stays up and renders each request dropped in
 // <dir> (a `<id>.req` file holding the path of an arguments file, as above),
 // one after another, writing that file's `.report` and `.status`. A run then
 // costs the rendering alone, not Flutter's start (about 5 s). It writes
@@ -14,6 +13,16 @@
 // listens on a socket of this machine (<dir>/port: the port and a token): a
 // line `<token> <arguments file>` is a request, answered `done` when the run
 // is over, so the caller neither looks for request files nor waits in steps.
+//
+// The render server (tool/render/serve.sh, tool/cli/src/pool.dart) runs several of these, each a worker in a
+// process of its own (CODELESSLY_RENDER_WORKER names it), and hands them requests over that socket in two more
+// forms: `<token> lead <arguments file>` (render the request, with whatever other workers the server sends to
+// help, and write its report) and `<token> help <arguments file>` (render captures of a request another worker
+// leads). src/fan.dart describes how the workers of one request share it. Those are answered with one line,
+// `<verdict> <resident bytes> <captures rendered>[ bye]`: `done` (the report is written), `yield` (the server
+// asked this worker to make way: the request goes on later, from where it is), `left` (a helper has no more to
+// do) or `retry` (this worker has another file registered for a font the request draws: another worker must
+// render it); `bye` when the worker takes no further request.
 //
 // Every run also writes `<arguments file>.timings`: where its time went, one
 // line (src/timings.dart), which the command prints with --timings.
@@ -25,6 +34,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'src/args.dart';
+import 'src/fan.dart';
 import 'src/fonts.dart';
 import 'src/google_fonts.dart' show renderUsesGoogleFonts;
 import 'src/sheet.dart';
@@ -97,6 +107,86 @@ Future<void> _renderRuns(WidgetTester tester, List<String> lines, String argsFil
   status.writeAsStringSync('$worst');
 }
 
+/// A request of the render server's, which this worker leads ([lead]) or helps with: the captures of its runs
+/// this worker is first to claim are rendered (src/fan.dart); the leader waits for every capture's record and
+/// writes the report, the timings and the status, as [_renderOne] does. Returns the verdict and how many
+/// captures this worker rendered.
+Future<(String, int)> _fanRequest(WidgetTester tester, String argsFile, String worker, {required bool lead}) async {
+  final lines = argsFromFile(File(argsFile).readAsStringSync());
+  // What one worker does alone, as ever: a contact sheet, and arguments that do not parse (said in the report).
+  List<RenderArgs>? runs;
+  if (!lines.contains('--sheet')) {
+    try {
+      runs = [for (final run in stateRuns(lines)) parseArgs(run)];
+    } on FormatException {
+      runs = null;
+    }
+  }
+  if (runs == null) {
+    if (!lead) return ('left', 0);
+    await _renderOne(tester, argsFile);
+    return ('done', 0);
+  }
+  final timings = RenderTimings.current = RenderTimings();
+  final dir = FanDir.of(argsFile)..create();
+  var rendered = 0;
+  while (true) {
+    // The request's folder is gone: its client left (it takes the folder with it), and nobody reads a report.
+    if (!dir.exists) return ('left', rendered);
+    var progress = false, complete = true;
+    for (var r = 0; r < runs.length; r++) {
+      final at = dir.state(r);
+      final total = at.total;
+      if (total != null && at.recorded >= total) continue;
+      complete = false;
+      final known = total ?? at.estimate;
+      final bool join;
+      if (known == null) {
+        // Nobody prepared it yet; one who is preparing it says how many captures it has in a moment.
+        join = at.entered == 0;
+      } else if (at.solo) {
+        // One capture after another: only when nobody is on it.
+        join = at.claimed == at.recorded && (at.recorded < known || total == null);
+      } else {
+        // Captures nobody claimed; or all are rendered and no walk said so (its worker stopped first).
+        join = at.claimed < known || (lead && total == null && at.claimed == at.recorded);
+      }
+      if (!join) continue;
+      dir.enter(r, worker);
+      final fan = FanRun(dir, r, worker);
+      await runRender(tester, runs[r], fan: fan);
+      rendered += fan.rendered;
+      // What a run left for the test to find is that run's.
+      tester.takeException();
+      progress = true;
+      if (fan.stopped) {
+        if (DirectoryFontFetcher.engineConflicts.isNotEmpty) return ('retry', rendered);
+        return (lead ? 'yield' : 'left', rendered);
+      }
+    }
+    if (complete) break;
+    // A helper leaves when nothing is left to claim; the leader waits for the captures others are on.
+    if (!lead && !progress) return ('left', rendered);
+    if (!progress) await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 4)));
+  }
+  if (!lead) return ('left', rendered);
+  timings.lap('gather');
+  final reports = StringBuffer();
+  var worst = 0;
+  for (var r = 0; r < runs.length; r++) {
+    final report = mergeFanRun(dir, r, runs[r]);
+    if (runs.length > 1) reports.writeln('== state ${runs[r].label}');
+    reports.write(formatReport(report));
+    if (report.errors > 0) worst = 1;
+  }
+  File('$argsFile.report').writeAsStringSync('$reports');
+  File('$argsFile.timings').writeAsStringSync('${timings.line}\n');
+  File('$argsFile.status.tmp')
+    ..writeAsStringSync('$worst')
+    ..renameSync('$argsFile.status');
+  return ('done', rendered);
+}
+
 /// A contact sheet job (`render.sh --sheet <file.png> --out <dir> [--sheet-height n] [--sheet-columns n]
 /// [--sheet-title text] [--sheet-base dir] <png | dir>...`): the captures on one image (src/sheet.dart).
 Future<void> _sheetOne(WidgetTester tester, List<String> lines, String argsFile) async {
@@ -126,16 +216,26 @@ Future<void> _sheetOne(WidgetTester tester, List<String> lines, String argsFile)
   File('$argsFile.status.tmp').writeAsStringSync(made == null ? '1' : '0');
 }
 
+/// A request: who asked (null: a request file), how (`lead` or `help` from the render server, else a run of its
+/// own) and the arguments file.
+typedef _Asked = ({Socket? socket, String? role, String argsFile});
+
 Future<void> _serve(WidgetTester tester, String dir) async {
   final idle = Duration(seconds: int.tryParse(Platform.environment['CODELESSLY_RENDER_IDLE'] ?? '') ?? 1800);
+  final worker = Platform.environment['CODELESSLY_RENDER_WORKER'] ?? 'w$pid';
   final stop = File('$dir/stop');
   // Requests also come over a socket on this machine (tool/cli's render: no shell, no polling): one line, the
   // token then the arguments file; answered with one line when the run is over. `port` holds the port and the
   // token, which only who can read this checkout's build/ knows.
-  final asked = <(Socket, String)>[];
+  final asked = <_Asked>[];
   var wake = Completer<void>();
   final token = [for (var i = 0; i < 16; i++) Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0')].join();
   final listener = await tester.runAsync(() async {
+    // A worker of the render server ends with it: the server holds this process's input open, and is gone when
+    // it closes.
+    if (Platform.environment['CODELESSLY_RENDER_WORKER_STDIN'] == '1') {
+      stdin.listen((_) {}, onDone: () => exit(0), onError: (Object _) => exit(0));
+    }
     try {
       final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
       server.listen((socket) {
@@ -152,7 +252,9 @@ Future<void> _serve(WidgetTester tester, String dir) async {
             socket.destroy();
             return;
           }
-          asked.add((socket, line.substring(token.length + 1)));
+          final rest = line.substring(token.length + 1);
+          final role = RegExp(r'^(lead|help) ').firstMatch(rest)?[1];
+          asked.add((socket: socket, role: role, argsFile: role == null ? rest : rest.substring(role.length + 1)));
           if (!wake.isCompleted) wake.complete();
         }, onError: (_) => socket.destroy(), cancelOnError: true);
       }, onError: (_) {});
@@ -167,16 +269,22 @@ Future<void> _serve(WidgetTester tester, String dir) async {
   var served = 0;
   while (true) {
     // Wait on the real clock (the test's own is fake) for a request, the stop file or the idle limit.
-    final next = await tester.runAsync<(Socket?, String)?>(() async {
+    final next = await tester.runAsync<_Asked?>(() async {
       final since = DateTime.now();
-      while (!stop.existsSync() && DateTime.now().difference(since) < idle) {
+      var looked = DateTime.fromMillisecondsSinceEpoch(0);
+      while (DateTime.now().difference(since) < idle) {
         if (asked.isNotEmpty) return asked.removeAt(0);
-        final reqs = Directory(dir).listSync().whereType<File>().where((f) => f.path.endsWith('.req')).toList()
-          ..sort((a, b) => a.path.compareTo(b.path));
-        if (reqs.isNotEmpty) {
-          final argsFile = reqs.first.readAsStringSync().trim();
-          reqs.first.deleteSync();
-          return (null, argsFile);
+        // The stop file and the request files are looked for every 40 ms; a request over the socket wakes at once.
+        if (DateTime.now().difference(looked).inMilliseconds >= 40) {
+          looked = DateTime.now();
+          if (stop.existsSync()) return null;
+          final reqs = Directory(dir).listSync().whereType<File>().where((f) => f.path.endsWith('.req')).toList()
+            ..sort((a, b) => a.path.compareTo(b.path));
+          if (reqs.isNotEmpty) {
+            final argsFile = reqs.first.readAsStringSync().trim();
+            reqs.first.deleteSync();
+            return (socket: null, role: null, argsFile: argsFile);
+          }
         }
         if (wake.isCompleted) wake = Completer<void>();
         await Future.any([wake.future, Future<void>.delayed(const Duration(milliseconds: 40))]);
@@ -184,13 +292,13 @@ Future<void> _serve(WidgetTester tester, String dir) async {
       return null;
     });
     if (next == null) break;
-    final (socket, argsFile) = next;
+    final (:socket, :role, :argsFile) = next;
     // The socket's caller is told when the run is over, whatever came of it (it reads the files then).
-    Future<void> answer() async {
+    Future<void> answer(String line) async {
       if (socket == null) return;
       await tester.runAsync(() async {
         try {
-          socket.write('done\n');
+          socket.write('$line\n');
           await socket.flush();
           await socket.close();
         } catch (_) {
@@ -200,40 +308,69 @@ Future<void> _serve(WidgetTester tester, String dir) async {
     }
 
     var stopServing = false;
+    var verdict = 'done';
+    var rendered = 0;
     try {
-      await _renderOne(tester, argsFile);
+      if (role == null) {
+        await _renderOne(tester, argsFile);
+      } else {
+        (verdict, rendered) = await _fanRequest(tester, argsFile, worker, lead: role == 'lead');
+      }
       if (DirectoryFontFetcher.engineConflicts.isNotEmpty) {
         // A face this run needs is registered with another file from an earlier run, and the engine cannot forget
         // it: this run's capture is not what a run of its own draws. Hand it back and stop serving.
-        for (final ext in const ['.status', '.report']) {
-          final f = File('$argsFile$ext');
-          if (f.existsSync()) f.deleteSync();
+        if (role == null) {
+          for (final ext in const ['.status', '.report']) {
+            final f = File('$argsFile$ext');
+            if (f.existsSync()) f.deleteSync();
+          }
+          File('$argsFile.retry').writeAsStringSync('${DirectoryFontFetcher.engineConflicts.join('\n')}\n');
+        } else {
+          // (The render server gives the request to another worker, and starts one in this one's place.)
+          verdict = 'retry';
+          stderr.writeln('Worker $worker stops: it has other files registered for fonts this run draws '
+              '(${DirectoryFontFetcher.engineConflicts.join('; ')}).');
         }
-        File('$argsFile.retry').writeAsStringSync('${DirectoryFontFetcher.engineConflicts.join('\n')}\n');
         stopServing = true;
       }
     } catch (e, s) {
       // A run that throws answers with the error, and the server stops: what it threw in the middle of (a build,
       // a layout) can leave the widget tree it keeps half torn down, and every later run would draw on that
       // (duplicate GlobalKeys, detached render objects, screens that never load). The next run starts afresh.
-      File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n'
-          'The render server stopped after it: the next run starts from a fresh Flutter.\n');
-      File('$argsFile.status').writeAsStringSync('2');
+      if (role == 'help') {
+        // (A helper's: the capture it was on goes back to the request's leader, which says what it comes to.)
+        stderr.writeln('Worker $worker failed on a capture of $argsFile and stops: $e\n$s');
+        verdict = 'left';
+      } else {
+        File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n'
+            'The render server stopped after it: the next run starts from a fresh Flutter.\n');
+        File('$argsFile.status').writeAsStringSync('2');
+        verdict = 'done';
+      }
       stopServing = true;
     }
+    String line() => role == null ? 'done' : '$verdict ${ProcessInfo.currentRss} $rendered${stopServing ? ' bye' : ''}';
     if (stopServing) {
       // No further request is taken: said before the caller is answered, so its next run does not ask.
       _closeDoor(dir);
-      await answer();
+      await answer(line());
       break;
     }
     // Whatever a run left for the test to find is that run's, not the next one's.
     tester.takeException();
     File('$dir/served').writeAsStringSync('${++served}\n');
-    await answer();
     // The next run gets a sound tree: an empty frame builds and lays out without an error. A run whose failure
     // (a framework assertion in a build) left it broken ends the server rather than the next run's capture.
-    if (!await renderTreeSound(tester)) {
+    // (A worker of the render server looks before it answers, so the server knows it takes no more.)
+    if (role != null && !await renderTreeSound(tester)) {
+      stderr.writeln('Worker $worker stops: run $served left the widget tree broken.');
+      stopServing = true;
+      _closeDoor(dir);
+      await answer(line());
+      break;
+    }
+    await answer(line());
+    if (role == null && !await renderTreeSound(tester)) {
       stderr.writeln('The render server stopped: run $served left the widget tree broken; the next run starts afresh.');
       break;
     }
@@ -241,8 +378,8 @@ Future<void> _serve(WidgetTester tester, String dir) async {
   _closeDoor(dir);
   await tester.runAsync(() async {
     await listener?.close();
-    for (final (socket, _) in asked) {
-      socket.destroy();
+    for (final a in asked) {
+      a.socket?.destroy();
     }
   });
 }

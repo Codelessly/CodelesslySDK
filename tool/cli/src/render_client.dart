@@ -385,16 +385,21 @@ Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, Comma
     // One argument after another, each ended by a NUL: an argument may hold a newline.
     File(argsFile).writeAsStringSync(args.map((a) => '$a\u0000').join());
     err.writeln('Rendering with $version, the render server (pid $serverPid).');
-    socket.setOption(SocketOption.tcpNoDelay, true);
-    socket.write('$token $argsFile\n');
-    var answered = false;
-    try {
-      await socket.flush();
-      answered = (await utf8.decoder.bind(socket).join()).contains('done');
-    } on Object {
-      // The server went away: said below.
-    }
+    final answer = await askRender(socket, token, argsFile, onQueued: (place) {
+      err.writeln('The render server\'s workers are all busy: this run waits its turn (place $place in the queue).');
+    });
+    final answered = answer == 'done';
     timings?.lap('render');
+    if (answer != null && answer.startsWith('busy ')) {
+      final at = answer.split(' ');
+      err.writeln('The render server is busy: ${at[1]} runs wait already, which is its limit (tool/codelessly serve --queue <n> sets another). '
+          'Not rendered: ask again in a moment.');
+      return 2;
+    }
+    if (answer != null && answer.startsWith('failed ')) {
+      err.writeln(answer.substring(7));
+      return 2;
+    }
     final retry = File('$argsFile.retry'), status = File('$argsFile.status');
     if (retry.existsSync()) {
       err.writeln('The render server had other files registered for fonts this run draws (${retry.readAsLinesSync().firstOrNull ?? ''}); '
@@ -418,6 +423,29 @@ Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, Comma
       // Left behind: a dot folder in --out.
     }
   }
+}
+
+/// One render asked of the render server over [socket]: the arguments in [argsFile]. Returns its last word:
+/// `done` (the report, the status and the timings are beside the arguments file), `busy <queued> <limit>` (its
+/// queue is full: not rendered), `failed <why>`, or null when the server went away. [onQueued] is told the run's
+/// place in the queue when it has to wait for a worker.
+Future<String?> askRender(Socket socket, String token, String argsFile, {void Function(int place)? onQueued}) async {
+  String? last;
+  try {
+    socket.setOption(SocketOption.tcpNoDelay, true);
+    socket.write('$token run $argsFile\n');
+    await socket.flush();
+    await for (final line in utf8.decoder.bind(socket).transform(const LineSplitter())) {
+      if (line.startsWith('queued ')) {
+        onQueued?.call(int.tryParse(line.substring(7)) ?? 1);
+      } else if (line.isNotEmpty) {
+        last = line;
+      }
+    }
+  } on Object {
+    // The server went away: no word.
+  }
+  return last;
 }
 
 /// Waits (10 s at most) until the server that handed a run back no longer listens, then clears its folder, as

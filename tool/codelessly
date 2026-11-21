@@ -20,8 +20,10 @@
 #                                                  the issues and the words that stood in as placeholders, as JSON
 #                                                  (notation.sh validate)
 #   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
-#   tool/codelessly serve [--stop|--status]        keep the renderer running: a render costs its drawing (a page at one
-#                                                  size: a third of a second), not Flutter's start (5 s)
+#   tool/codelessly serve [--workers n] [--stop|--status]   keep the renderer running: a render costs its drawing (a
+#                                                  page at one size: a third of a second), not Flutter's start (5 s),
+#                                                  and separate agents' renders run at the same time, one a worker
+#   tool/codelessly bench --site <site folder>     how many layouts and captures a second the render server gives
 #   tool/codelessly mcp                            all of the above as an MCP server (stdio), for any agent
 #
 # `tool/codelessly <command> --help` describes each.
@@ -43,7 +45,7 @@ cli_exe="$sdk/build/codelessly_cli"
 cli_stale() {
   [ -x "$cli_exe" ] || return 0
   local f
-  for f in "$sdk"/tool/cli/*.dart "$sdk"/tool/cli/*/*.dart "$sdk"/tool/cli/*/*/*.dart; do
+  for f in "$sdk"/tool/cli/*.dart "$sdk"/tool/cli/*/*.dart "$sdk"/tool/cli/*/*/*.dart "$sdk"/tool/render/src/fan.dart; do
     [ "$f" -nt "$cli_exe" ] && return 0
   done
   return 1
@@ -51,27 +53,13 @@ cli_stale() {
 run_cli() {
   if cli_stale; then
     . "$sdk/tool/lib/env.sh"
-    codelessly_find_flutter "tool/codelessly $cmd" || exit 2
-    mkdir -p "$sdk/build"
-    (
-      exec 8>"$sdk/build/.codelessly_cli.lock"
-      command -v flock >/dev/null 2>&1 && flock 8
-      if cli_stale; then
-        echo "Compiling the toolkit's commands (tool/cli, once per change)..." >&2
-        log="$(mktemp)"
-        if ! "$dart_bin" compile exe "$sdk/tool/cli/codelessly.dart" -o "$cli_exe.tmp" > "$log" 2>&1; then
-          cat "$log" >&2; rm -f "$log"; exit 2
-        fi
-        rm -f "$log"
-        mv "$cli_exe.tmp" "$cli_exe"
-      fi
-    ) || exit 2
+    codelessly_build_cli "tool/codelessly $cmd" || exit 2
   fi
   CODELESSLY_SDK="$sdk" exec "$cli_exe" "$@"
 }
 
 case "$cmd" in
-  docs|flatten|outline|sheet|states|render|mcp) run_cli "$cmd" "$@" ;;
+  docs|flatten|outline|sheet|states|render|mcp|bench) run_cli "$cmd" "$@" ;;
   notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
   # The notation's commands by their own names too (`tool/codelessly expand <site>`), as tool/codelessly notation <command>.
   expand|print|apply|prompt|vocabulary) exec "$sdk/tool/notation/notation.sh" "$cmd" "$@" ;;
@@ -128,5 +116,5 @@ case "$cmd" in
     [ $ok = 1 ] && exit 0 || exit 1
     ;;
   help|-h|--help) sed -n '2,/^set -u/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//' ;;
-  *) echo "Unknown command: $cmd. The commands: doctor, docs, flatten, render, outline, states, sheet, notation (its expand, print, apply, prompt also by name), validate, replay, serve, mcp; tool/codelessly help describes each." >&2; exit 2 ;;
+  *) echo "Unknown command: $cmd. The commands: doctor, docs, flatten, render, outline, states, sheet, notation (its expand, print, apply, prompt also by name), validate, replay, serve, bench, mcp; tool/codelessly help describes each." >&2; exit 2 ;;
 esac
