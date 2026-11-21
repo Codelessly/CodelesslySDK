@@ -1064,14 +1064,38 @@ class RenderTree {
     _listenForFonts();
     // A call renders as its definition's root, in its instance.
     if (components != null) (id, instance) = _rendersAt(id, instance);
+    return _obtain(id, instance, slot, null);
+  }
+
+  /// [obtain] for box [by], which places the node among its children under
+  /// [into]. Null when the node's box is held somewhere else and [by] is not
+  /// held as the document says ([_held]): [by] then waits ([_waiting]).
+  NodeBox? _take(String id, Slot slot, Object? instance, NodeBox by, RenderObject into) {
+    _listenForFonts();
+    if (components != null) (id, instance) = _rendersAt(id, instance);
+    final existing = _boxes[keyOf(id, instance)];
+    if (existing != null && existing.parent != null && !identical(existing.parent, into) && !identical(existing, by) && !_held(by)) {
+      _waiting.add(by);
+      return null;
+    }
+    return _obtain(id, instance, slot, by);
+  }
+
+  NodeBox _obtain(String id, Object? instance, Slot slot, NodeBox? by) {
     final key = keyOf(id, instance);
     final existing = _boxes[key];
     if (existing != null) {
-      _orphans.remove(existing);
+      existing._takenBy = by;
+      if (_orphans.remove(existing) && _waiting.isNotEmpty) {
+        // Taken again: what it and the boxes in it were told meanwhile is
+        // applied now (its own with the slot it is given).
+        if (_waiting.contains(existing)) existing._slot = slot;
+        _applyWaiting();
+      }
       existing._setSlot(slot);
       return existing;
     }
-    final box = NodeBox._(this, id, slot, instance);
+    final box = NodeBox._(this, id, slot, instance).._takenBy = by;
     _boxes[key] = box;
     box._subscribe();
     box._apply();
@@ -1102,6 +1126,163 @@ class RenderTree {
     box._releaseSubtree();
   }
 
+  // --- boxes that are not where the document has them (yet) -------------------
+  //
+  // The boxes hear of an edit one by one (in the order they were first
+  // made, not the document's), each placing its node's children. A box whose
+  // node moved sits where it was until its old holder is told and lets go of
+  // it, or its new holder takes it; a node that moved into a grid's cell or a
+  // list's item is taken only when that is laid out. Meanwhile it hears of
+  // its own node. Were it to place that node's children from where it sits,
+  // it would take boxes away from where they belong: a box of an item's old
+  // content reaches the list itself through the node's new children, makes a
+  // copy of it in its own item, and that copy takes the real list's items,
+  // which are then released with it at the end of the frame. So:
+  //
+  //  - a box in something that was let go of ([orphan]) does not apply what
+  //    it is told until it is taken again ([_letGo]);
+  //  - a box takes a box that another holds only when it is itself held as
+  //    the document says, all the way up ([_held]); else it waits;
+  //  - the boxes that wait ([_waiting]) apply once a box is taken again or
+  //    placed, and never when they are released instead.
+
+  /// The boxes that were told of a change and could not apply all of it
+  /// where they sat.
+  final Set<NodeBox> _waiting = {};
+  bool _waitingPass = false;
+  bool _waitingPassSoon = false;
+
+  /// Whether [box] is in something that was let go of and not taken again.
+  bool _letGo(NodeBox box) {
+    if (_orphans.isEmpty) return false;
+    RenderObject top = box;
+    while (top.parent != null) {
+      top = top.parent!;
+    }
+    return top is NodeBox && _orphans.contains(top);
+  }
+
+  /// Whether [box] is held as the document says, by every box above it: none
+  /// was let go of, and each still has the one under it ([NodeBox._has]). A
+  /// box being placed (taken, not put in yet) is under the box that takes it.
+  bool _held(NodeBox box) {
+    var child = box;
+    RenderObject at = box;
+    for (var i = 0; i < 100000; i++) {
+      final up = at.parent;
+      if (up == null) {
+        if (at is! NodeBox) return true;
+        if (_orphans.contains(at)) return false;
+        final by = at._takenBy;
+        if (by == null) return true;
+        if (!by._has(at)) return false;
+        child = by;
+        at = by;
+        continue;
+      }
+      if (up is NodeBox) {
+        if (!up._has(child)) return false;
+        child = up;
+      }
+      at = up;
+    }
+    return false;
+  }
+
+  /// Has the boxes that wait apply, once what is being placed now is.
+  void _applyWaitingSoon() {
+    if (_waiting.isEmpty || _waitingPass || _waitingPassSoon) return;
+    _waitingPassSoon = true;
+    scheduleMicrotask(() {
+      _waitingPassSoon = false;
+      if (!_disposed) _applyWaiting();
+    });
+  }
+
+  void _applyWaiting() {
+    // One pass: a box that still cannot apply waits for the next placement.
+    if (_waitingPass) return;
+    _waitingPass = true;
+    try {
+      for (final b in _waiting.toList()) {
+        if (b._released || !identical(_boxes[b.key], b)) {
+          _waiting.remove(b);
+        } else if (!_letGo(b)) {
+          _waiting.remove(b);
+          b._applied = null;
+          b._apply();
+        }
+      }
+    } finally {
+      _waitingPass = false;
+    }
+  }
+
+  /// How many holders may still be told to place their children again this
+  /// frame after [clearWayFor] took a box from one on a guess.
+  int _replaceBudget = _kReplaceBudget;
+  static const int _kReplaceBudget = 64;
+
+  /// Makes it safe to place [box] under [under] (a container of the box
+  /// that is taking it, or what holds it in an island); false when it
+  /// cannot be placed there at all.
+  ///
+  /// The boxes hear of an edit one by one, each placing its node's children.
+  /// After an edit that put a node under one that was inside it, the inner
+  /// node's box can be told first: it sits where it was (a node that moved
+  /// into a grid's cell or a list's item is placed there when that is laid
+  /// out, later), so the box it now takes is still above it. Placing that
+  /// box under it would close the render tree into a ring, and every walk
+  /// of a ring (its depths, its layout, its paint) never ends. So before
+  /// [box] is placed, the box on the way up to it that its holder no longer
+  /// has leaves that holder, as an orphan: its new holder takes it, or it is
+  /// released with the frame.
+  bool clearWayFor(NodeBox box, RenderObject under) {
+    // The boxes from [under] up to [box], innermost first.
+    final way = <NodeBox>[];
+    RenderObject? at = under;
+    while (at != null && !identical(at, box)) {
+      if (at is NodeBox) way.add(at);
+      at = at.parent;
+    }
+    if (at == null) return true;
+    // [under] is part of [box] itself: a box is not placed in itself.
+    if (way.isEmpty) return false;
+    NodeBox? leaves;
+    for (var i = 0; i < way.length && leaves == null; i++) {
+      final holder = i + 1 < way.length ? way[i + 1] : box;
+      if (!holder._has(way[i])) leaves = way[i];
+    }
+    // No holder on the way is known to have let go (a call's root, what a
+    // slot passes: their holders are of another document): the innermost
+    // leaves.
+    leaves ??= way.first;
+    NodeBox? holder;
+    for (RenderObject? p = leaves.parent; p != null && holder == null; p = p.parent) {
+      if (p is NodeBox) holder = p;
+    }
+    leaves.detachFromParent();
+    // Held by something that cannot let go of it: [box] stays where it is.
+    if (leaves.parent != null) return false;
+    orphan(leaves);
+    // The holder it left places its children again once the edit is told:
+    // that puts the box back if it is that holder's still (a node drawn
+    // under one that is not its parent in the document).
+    if (holder != null && _replaceBudget > 0) {
+      if (_replaceBudget == _kReplaceBudget) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => _replaceBudget = _kReplaceBudget, debugLabel: 'RenderTree.replaceBudget');
+      }
+      _replaceBudget--;
+      final again = holder;
+      scheduleMicrotask(() {
+        if (_disposed || again._released || !identical(_boxes[again.key], again)) return;
+        again._applied = null;
+        again._apply();
+      });
+    }
+    return true;
+  }
+
   /// The trees not disposed, oldest first: a screen's, and each overlay's
   /// over it (a menu's, a dialog's).
   static final List<RenderTree> _live = [];
@@ -1122,6 +1303,7 @@ class RenderTree {
     }
     _boxes.clear();
     _orphans.clear();
+    _waiting.clear();
     _states.clear();
     _animated.clear();
     islands.dispose();
@@ -1245,6 +1427,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       };
   final Set<RenderBox> _retiredObjects = {};
   bool _released = false;
+
+  /// The box that is taking this one to place it among its children, from
+  /// when it takes it until it has put it in (RenderTree._held).
+  NodeBox? _takenBy;
   _Container? _container;
 
   bool _hidden = false;
@@ -1740,6 +1926,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
   void _apply({(BoundNode?,)? given}) {
     if (tree._fontsPending) {
       tree._afterFonts.add(this);
+      return;
+    }
+    if (tree._letGo(this)) {
+      tree._waiting.add(this);
       return;
     }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
@@ -3121,9 +3311,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         tree._placed(cid, inst, shown);
       }
       for (final (pid, pinstance) in shown) {
-      final box = tree.obtain(pid, childSlot, instance: pinstance);
+      // Not a box another holds while this one is not where the document
+      // has it (RenderTree._take): this box then waits.
+      final box = tree._take(pid, childSlot, pinstance, this, container);
+      if (box == null) continue;
+      box._takenBy = null;
       if (identical(box, this) || !placed.add(box)) continue;
       if (box.parent != container) {
+        // Never a box this one is inside (RenderTree.clearWayFor).
+        if (!tree.clearWayFor(box, container)) continue;
         if (box.parent != null) box.detachFromParent();
         container.insert(box, after: after);
       } else if (container.childBefore(box) != after) {
@@ -3140,6 +3336,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       if (extra is NodeBox) tree.orphan(extra);
       extra = next;
     }
+    tree._applyWaitingSoon();
   }
 
   void _releaseContainerChildren() {
@@ -3335,6 +3532,18 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     }
   }
 
+  /// Whether [other], a box held under this one, is still this node's to
+  /// hold as far as the document says: not when this node is gone, nor when
+  /// [other]'s node (of the same document) is gone or under another node.
+  /// A box of another document (a call's root, what a slot passes) is taken
+  /// to be.
+  bool _has(NodeBox other) {
+    if (source.node(id) == null) return false;
+    if (!identical(other.source, source)) return true;
+    if (source.node(other.id) == null) return false;
+    return source.parentOf(other.id) == id;
+  }
+
   void detachFromParent() {
     switch (parent) {
       case final _Container c:
@@ -3360,6 +3569,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
       }
     }
     _unsubscribe();
+    tree._waiting.remove(this);
+    _takenBy = null;
     tree.interactions?.released(this);
     _releaseLinkTaps();
     for (final h in _islands.values) {

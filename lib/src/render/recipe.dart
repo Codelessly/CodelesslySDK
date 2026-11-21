@@ -135,6 +135,8 @@ class _RenderNodeChild extends RenderProxyBox with RenderObjectWithLayoutCallbac
   void _hold(NodeBox box) {
     final old = child;
     if (identical(old, box)) return;
+    // Never a box this one is inside (RenderTree.clearWayFor).
+    if (!box.tree.clearWayFor(box, this)) return;
     if (box.parent != null) box.detachFromParent();
     child = box;
     if (old is NodeBox) old.tree.orphan(old);

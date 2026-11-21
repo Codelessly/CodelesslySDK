@@ -150,7 +150,9 @@ void main() {
       {'op': 'remove', 'ids': ['note']}
     ]);
     await tester.pump();
-    expect(NodeBox.debugApplyCounts.keys.toSet(), {'page', 'title', 'body', 'cta', 'note'});
+    // The removed node's box was let go of by its parent: it applies nothing
+    // more and is released with the frame.
+    expect(NodeBox.debugApplyCounts.keys.toSet(), {'page', 'title', 'body', 'cta'});
     expect(_boxes(tester, session).containsKey('note'), isFalse);
   });
 
