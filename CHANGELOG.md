@@ -1,3 +1,42 @@
+## 41.1.0
+
+A view can be given a box as its whole world, views can share variables, and the command-line tools answer in a
+fraction of a second once the render server is up. One fault in how a view follows an edited document is fixed
+(codelessly_api 41.1.0, which this needs).
+
+### Fixed
+
+- **A view no longer hangs when a document is rewritten under it.** Where an edit put a node under one that had
+  been inside it (a text rewritten line by line, so that its nodes take other ids), the view's boxes could close
+  into a ring and the app stopped answering with a stack overflow. A box now leaves its old place before it is put
+  in its new one.
+- **Sorting and filtering by dates is faster.** A text read as a date is remembered for a moment instead of being
+  parsed again at every comparison; a list sorted by date laid out in about a third of the time on Windows.
+
+### New
+
+- **`CodelesslyViewHost`**: a view's box as its whole world. Wrapped round a `CodelesslyView`, what the page opens
+  stays in the box: a dialog is centred in it, a sheet rises from its bottom edge and is as wide as it, a drawer
+  slides in from its side, the barrier dims the box alone, a toast shows in it, and a press outside the box reaches
+  the app. For a view shown in a panel or a preview. Without a host a view opens over the app, as before.
+  Drag-and-drop proxies are not confined yet.
+- **`CodelesslyView(shared:)`**: a scope of variables placed around the view's own, so that several views (the
+  pages of one app) read and write the same values.
+- **The design pass** says how it ended: nothing to change, could not run (with the model's error), cut off, or
+  the operations it kept and the ones it left out. One rejected operation no longer refuses the whole answer, and a
+  new warning is a note.
+
+### `tool/codelessly`
+
+- **Fast when warm.** With the render server up (`tool/codelessly serve`), `render`, `states` and `sheet` ask it
+  over a local socket and start no other program: one page at one size in about 0.3 s (it was 3.4 s), six pages at
+  three sizes in about 3 s (it was 10 to 17 s). `expand` and the other notation commands run from a compiled
+  program rebuilt when their sources change: a site in about 0.35 s (it was 6 s). A cold run works as before.
+- **`--timings`** (or `CODELESSLY_TIMINGS=1`) prints the milliseconds of each phase.
+- **On Windows** the tool writes a package path Dart can read (it wrote one starting `/c/`, which `flutter pub
+  get` could not find).
+- **`doctor`** exits successfully when rendering works, and says what QuickJS is needed for and how to build it.
+
 ## 41.0.0
 
 A major version: several things draw or behave differently, most of them fixes to what was drawn wrong. Read
