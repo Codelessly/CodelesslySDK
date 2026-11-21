@@ -14,7 +14,7 @@ import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListReorder, ListViewProps, Node, ReorderPlaceholder, ReorderStart, TriggerType;
 import 'package:flutter/gestures.dart' show ImmediateMultiDragGestureRecognizer;
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart' show CustomSemanticsAction, SemanticsService;
+import 'package:flutter/rendering.dart' show CustomSemanticsAction, PaintingContext, RenderProxyBox, SemanticsService;
 import 'package:flutter/services.dart';
 
 import '../render/convert.dart';
@@ -273,6 +273,63 @@ Widget decorateReorderProxy(Widget child, Animation<double> animation, ListReord
   );
 }
 
+/// Places the row lifted out of a reorderable list in an overlay that is
+/// drawn scaled (a host's box fitted into a smaller one). Flutter's list
+/// places it at the pointer's distance from the overlay's corner on screen,
+/// less where the row is held ([grab], in the row's units): right only where
+/// the overlay's units are the screen's. This draws it where the pointer is
+/// in the overlay's own units, and where it lands likewise ([animation]
+/// runs back while it does). In an overlay that is only moved (an app's) it
+/// changes nothing.
+class _ProxyInOverlay extends SingleChildRenderObjectWidget {
+  const _ProxyInOverlay({required this.grab, required this.animation, required super.child});
+
+  final Offset grab;
+  final Animation<double> animation;
+
+  @override
+  _RenderProxyInOverlay createRenderObject(BuildContext context) =>
+      _RenderProxyInOverlay(grab, animation, Overlay.maybeOf(context)?.context.findRenderObject());
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderProxyInOverlay renderObject) => renderObject
+    ..grab = grab
+    ..animation = animation
+    ..overlay = Overlay.maybeOf(context)?.context.findRenderObject();
+}
+
+class _RenderProxyInOverlay extends RenderProxyBox {
+  _RenderProxyInOverlay(this.grab, this.animation, this.overlay);
+
+  Offset grab;
+  Animation<double> animation;
+  RenderObject? overlay;
+
+  /// How far from where the list placed it the row is drawn.
+  Offset get _shift {
+    final overlay = this.overlay;
+    if (overlay is! RenderBox || !overlay.attached || !attached) return Offset.zero;
+    if (MatrixUtils.getAsTranslation(overlay.getTransformTo(null)) != null) return Offset.zero;
+    // Where the list placed it, in the overlay.
+    final placed = MatrixUtils.transformPoint(getTransformTo(overlay), Offset.zero);
+    // How much of that is the held row's place (the rest, as it lands, is
+    // the place it lands in, which the list measured on screen).
+    final landing = animation.status == AnimationStatus.reverse || animation.status == AnimationStatus.dismissed;
+    final held = grab * (landing ? Curves.easeOut.transform(animation.value) : 1.0);
+    final wanted = overlay.globalToLocal(overlay.localToGlobal(Offset.zero) + placed + held) - held;
+    return wanted - placed;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) => super.paint(context, offset + _shift);
+
+  @override
+  void applyPaintTransform(RenderBox child, Matrix4 transform) {
+    final s = _shift;
+    if (s != Offset.zero) transform.translateByDouble(s.dx, s.dy, 0, 1);
+  }
+}
+
 /// A reorderable list (Flutter's `ReorderableListView`) of a list's items:
 /// picked up by its handle, a long press or any press, as its reorder's
 /// start says; with the keyboard (Alt and the arrows) when it allows.
@@ -327,6 +384,10 @@ class _ReorderListViewState extends State<ReorderListView> {
   ProvidedItem _proxyInstance(int index) =>
       ProvidedItem('dragged', _r.b.instance, _node.id, _rowKey(widget.items, index));
 
+  /// Where the pointer went down on the row it lifts, from the row's top
+  /// left.
+  Offset _grab = Offset.zero;
+
   Widget _proxy(int index) {
     final instance = _proxyInstance(index);
     _r.binder?.provideItem(_r.b.source, instance, index: index, item: widget.items.elementAtOrNull(index));
@@ -361,8 +422,10 @@ class _ReorderListViewState extends State<ReorderListView> {
         autoScrollerVelocityScalar: model?.autoScroll == false ? 0.001 : null,
         // The dragged row is drawn with boxes of its own (the row's stay
         // in the list), in its nodes' `dragged` state.
-        proxyDecorator: (child, index, animation) => decorateReorderProxy(
-            _proxy(index), animation, model),
+        proxyDecorator: (child, index, animation) => _ProxyInOverlay(
+            grab: _grab,
+            animation: animation,
+            child: decorateReorderProxy(_proxy(index), animation, model)),
         onReorderStart: (index) {
           _setDragged(_r, widget.itemId, _proxyInstance(index), true);
           _r.fire(TriggerType.dragStart.name, event: {'index': index, 'item': widget.items.elementAtOrNull(index)});
@@ -405,6 +468,8 @@ class _ReorderListViewState extends State<ReorderListView> {
               child: _rowNode(_r, widget.itemId, widget.items, index),
             ),
           );
+          // Where the row is held, from its top left ([_ProxyInOverlay]).
+          child = Listener(onPointerDown: (event) => _grab = event.localPosition, child: child);
           switch (model?.start) {
             case ReorderStart.longPress:
               child = ReorderableDelayedDragStartListener(index: index, enabled: !locked, child: child);
@@ -547,8 +612,8 @@ class KeyboardReorderItem extends StatelessWidget {
               if (index > 0) CustomSemanticsAction(label: vertical ? 'Move up' : 'Move left'): () => _move(context, -1),
               if (index < count - 1)
                 CustomSemanticsAction(label: vertical ? 'Move down' : 'Move right'): () => _move(context, 1),
-              if (onTransfer != null) CustomSemanticsAction(label: 'Move to previous list'): () => onTransfer!(-1),
-              if (onTransfer != null) CustomSemanticsAction(label: 'Move to next list'): () => onTransfer!(1),
+              if (onTransfer != null) const CustomSemanticsAction(label: 'Move to previous list'): () => onTransfer!(-1),
+              if (onTransfer != null) const CustomSemanticsAction(label: 'Move to next list'): () => onTransfer!(1),
             }
           : null,
       child: Focus(

@@ -120,7 +120,14 @@ export 'package:codelessly_api/codelessly_api.dart'
 // way: their element is an IslandOwnerElement and their render object mixes
 // in IslandParent.
 export 'src/render/islands.dart'
-    show IslandEnvironment, IslandHost, IslandOwnerElement, IslandParent;
+    show
+        FloatingOverlay,
+        FloatingOverlayScope,
+        IslandEnvironment,
+        IslandHost,
+        IslandOwnerElement,
+        IslandParent,
+        floatingOverlayOf;
 export 'src/render/contracts.dart'
     hide
         BoundNode,

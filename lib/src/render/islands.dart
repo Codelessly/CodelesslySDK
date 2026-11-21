@@ -412,6 +412,39 @@ BuildContext? islandContextOf(RenderObject object) {
   return null;
 }
 
+/// The overlay what the nodes under it float is shown in (a dragged node's
+/// copy), when that is not the overlay around them: a host that makes a box
+/// of the app the whole world of its view puts one of these round the view
+/// (the app shell's `CodelesslyViewHost`). The layers under the app ask
+/// [floatingOverlayOf], and know nothing of the host.
+class FloatingOverlayScope extends InheritedWidget {
+  const FloatingOverlayScope({super.key, required this.overlay, required super.child});
+
+  /// The overlay now, or null while there is none (it is not built yet).
+  final OverlayState? Function() overlay;
+
+  @override
+  bool updateShouldNotify(FloatingOverlayScope oldWidget) => false;
+}
+
+/// Where what floats over the nodes at a context is shown: [overlay];
+/// [themesTo], the context the themes round the nodes are captured up to for
+/// it (`InheritedTheme.capture`'s `to`); and whether the overlay is a host's
+/// box ([confined]), outside which there is nothing of the view.
+typedef FloatingOverlay = ({OverlayState overlay, BuildContext themesTo, bool confined});
+
+/// The overlay what the nodes at [context] float is shown in: the
+/// [FloatingOverlayScope]'s around it, else the nearest [Overlay]; null when
+/// there is none.
+FloatingOverlay? floatingOverlayOf(BuildContext context) {
+  final scope = context.getElementForInheritedWidgetOfExactType<FloatingOverlayScope>();
+  final hosted = scope == null ? null : (scope.widget as FloatingOverlayScope).overlay();
+  // The scope is around both the nodes and its overlay, which is beside them.
+  if (hosted != null && hosted.mounted) return (overlay: hosted, themesTo: scope!, confined: true);
+  final overlay = Overlay.maybeOf(context);
+  return overlay == null ? null : (overlay: overlay, themesTo: overlay.context, confined: false);
+}
+
 /// The element of a widget that shows node boxes ([NodeView], [NodeChild]):
 /// it owns the islands under its render object as its children, one per
 /// island, each in the slot of its [IslandHost].
