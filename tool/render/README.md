@@ -336,7 +336,7 @@ another folder, for a second server on the checkout (the tests' own).
 **It renders in parallel.** Flutter's engine renders on one thread of a process, so the server is one address and
 several workers behind it, each the harness in a headless engine process of its own (`tool/cli/src/pool.dart`).
 `serve.sh --workers <n>` says how many: by default half the machine's processors, no more than half its memory
-holds at a gigabyte each, 16 at most (8 on a machine of 16 processors and 16 GB); `--workers 1` renders one request
+holds at a gigabyte each, 8 at most; `--workers 1` renders one request
 after another. The harness is compiled once (`build/render_pool/harness.dill`, again when the SDK or the API
 changed) and every worker runs that file, so a worker starts in about a second and none of them rewrites `build/`;
 each renders a small site (`tool/render/warmup/`) before it takes a request, so the first real one is not the slow

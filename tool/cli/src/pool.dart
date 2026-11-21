@@ -50,7 +50,7 @@ int defaultWorkers({int? processors, int? memoryMb}) {
   return min(min(cores, fits), maxDefaultWorkers);
 }
 
-const maxDefaultWorkers = 16;
+const maxDefaultWorkers = 8;
 
 /// The machine's memory in megabytes, or null when it cannot be told.
 int? totalMemoryMb() {

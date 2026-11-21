@@ -13,7 +13,7 @@
 # process of its own (rendering runs on one thread of a process): requests from separate agents are rendered at
 # the same time, one on each worker, and a request of many captures is shared among the workers that are idle
 # (tool/cli/src/pool.dart, tool/render/src/fan.dart). --workers says how many: by default half the processors, no
-# more than half the machine's memory holds at a gigabyte each, 16 at most; --workers 1 renders one request after
+# more than half the machine's memory holds at a gigabyte each, 8 at most; --workers 1 renders one request after
 # another, as before there were workers. A worker is replaced by a fresh one when it holds more than --recycle-mb
 # megabytes (1024), when it stops, or when a request took longer than --request-timeout seconds (1200) on it.
 # More than --queue requests waiting (256) are refused with a line saying so.

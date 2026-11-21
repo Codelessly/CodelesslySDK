@@ -9,9 +9,9 @@ import '../../tool/cli/src/pool.dart';
 import '../../tool/render/src/fan.dart';
 
 void main() {
-  test('the default number of workers: half the processors, what half the memory holds at a gigabyte each, 16 at most', () {
-    expect(defaultWorkers(processors: 32, memoryMb: 128 * 1024), 16);
-    expect(defaultWorkers(processors: 64, memoryMb: 512 * 1024), 16);
+  test('the default number of workers: half the processors, what half the memory holds at a gigabyte each, 8 at most', () {
+    expect(defaultWorkers(processors: 32, memoryMb: 128 * 1024), 8);
+    expect(defaultWorkers(processors: 64, memoryMb: 512 * 1024), 8);
     expect(defaultWorkers(processors: 16, memoryMb: 16 * 1024), 8);
     expect(defaultWorkers(processors: 16, memoryMb: 8 * 1024), 4);
     expect(defaultWorkers(processors: 8, memoryMb: 16 * 1024), 4);
