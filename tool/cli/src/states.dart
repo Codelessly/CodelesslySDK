@@ -7,11 +7,13 @@
 // `summary.json` (worst first), `<out>/sheet.png` (one row per state) and each state's captures, diagnostics,
 // compare images and layout dumps in `<out>/<state>/`. It exits 1 when any state has errors (or matches its
 // reference less than `minMatch`), else 0. The manifest's format: `_doc` below.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'common.dart';
 import 'outline.dart';
+import 'pool.dart' show askServer;
 import 'render_client.dart';
 import 'render_cmd.dart' show sheet;
 
@@ -106,14 +108,29 @@ Future<int> statesMain(List<String> argv) async {
   } else {
     stdout.writeln('Cold: the render server did not start (tool/codelessly serve says why); Flutter starts for each state.');
   }
+  // With the render server, as many states at a time as it has workers (Flutter started for each: one at a time).
+  var parallel = 1;
+  if (!cold) {
+    try {
+      final status = await askServer('status');
+      if (status != null && status.startsWith('{')) parallel = ((jsonDecode(status) as Map)['workerCount'] as num?)?.toInt() ?? 1;
+    } on FormatException {
+      // Not told: one at a time.
+    }
+  }
+  Future<void>? looking;
   try {
-    return await _renderStates(states, a, m, manifestFile, out, docs, common, refs, minMatch, ignore, () async {
-      // A server this run started that stopped (a run broke its tree, or the code changed): started again.
-      if (owned && !await serverUp()) {
+    return await _renderStates(states, a, m, manifestFile, out, docs, common, refs, minMatch, ignore, parallel: parallel, () async {
+      // A server this run started that stopped (a run broke its tree, or the code changed): started again (once,
+      // whichever of the states about to render find it gone).
+      if (!owned) return;
+      await (looking ??= () async {
+        if (await serverUp()) return;
         stdout.writeln(await startServer()
             ? '(the render server had stopped; started a new one)'
             : '(the render server had stopped and did not start again: the next states start Flutter each)');
-      }
+      }()
+          .whenComplete(() => looking = null));
     });
   } finally {
     if (owned) await runCaptured(serveScript, const ['--stop']);
@@ -124,7 +141,7 @@ Future<int> statesMain(List<String> argv) async {
 bool renderedWarm(String log) => log.contains(', the render server (pid ');
 
 Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File manifestFile, String out, List<String> docs,
-    List<String> common, Object? refs, double? minMatch, Set<String> ignore, Future<void> Function() beforeState) async {
+    List<String> common, Object? refs, double? minMatch, Set<String> ignore, Future<void> Function() beforeState, {int parallel = 1}) async {
   final base = manifestFile.parent.path;
   final results = <Map<String, Object?>>[];
   String line(Map d) {
@@ -135,8 +152,9 @@ Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File
   // Problems of the site itself (site.json: a declared font file or the design system not there), met before any
   // screen: every state has them. Said once, first, not again in each state's list; still counted in each state.
   final siteProblems = <String>{};
-  for (final s in states) {
-    await beforeState();
+  // One state's render and what it came to. The states are rendered [parallel] at a time (each is a request of
+  // its own, and the render server's workers render them at the same moment) and said in the manifest's order.
+  Future<({Map<String, Object?> result, List<Map> ofSite, String line})> one(Map s) async {
     final name = '${s['name']}';
     final sdir = '$out/$name';
     Directory(sdir).createSync(recursive: true);
@@ -226,13 +244,9 @@ Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File
       File('$sdir/outline.txt').writeAsStringSync(text.toString());
     }
     final ofSite = [for (final d in diags) if (isSiteProblem(d)) d];
-    for (final d in ofSite) {
-      final text = '${d['severity']} ${d['code']}: ${d['message']}';
-      if (siteProblems.add(text)) stdout.writeln('site $text');
-    }
     final logText = log.toString();
     final warm = renderedWarm(logText);
-    results.add({
+    final result = <String, Object?>{
       'state': name,
       'status': status,
       'failed': failed,
@@ -247,11 +261,41 @@ Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File
       'problems': [for (final d in [...errors, ...warnings].where((d) => !isSiteProblem(d)).take(12)) line(d)],
       if (ofSite.isNotEmpty) 'siteProblems': ofSite.length,
       'log': hasDiagnostics || logText.isEmpty ? null : logText.substring(logText.length > 1500 ? logText.length - 1500 : 0),
-    });
+    };
     final match = worst == null ? 'no reference' : '${(worst * 100).toStringAsFixed(1)}% match';
-    stdout.writeln('${failed ? 'FAIL' : 'ok  '} ${name.padRight(32)} ${errors.length} errors, ${warnings.length} warnings, '
-        '$match (${results.last['seconds']}s, ${warm ? 'warm' : 'cold'})');
+    return (
+      result: result,
+      ofSite: ofSite,
+      line: '${failed ? 'FAIL' : 'ok  '} ${name.padRight(32)} ${errors.length} errors, ${warnings.length} warnings, '
+          '$match (${result['seconds']}s, ${warm ? 'warm' : 'cold'})',
+    );
   }
+
+  final outcomes = [for (final _ in states) Completer<({Map<String, Object?> result, List<Map> ofSite, String line})>()];
+  var next = 0;
+  Future<void> lane() async {
+    while (next < states.length) {
+      final i = next++;
+      try {
+        await beforeState();
+        outcomes[i].complete(await one(states[i]));
+      } on Object catch (e, s) {
+        outcomes[i].completeError(e, s);
+      }
+    }
+  }
+
+  final lanes = [for (var k = 0; k < parallel.clamp(1, states.length); k++) lane()];
+  for (final outcome in outcomes) {
+    final o = await outcome.future;
+    for (final d in o.ofSite) {
+      final text = '${d['severity']} ${d['code']}: ${d['message']}';
+      if (siteProblems.add(text)) stdout.writeln('site $text');
+    }
+    results.add(o.result);
+    stdout.writeln(o.line);
+  }
+  await Future.wait(lanes);
 
   results.sort((x, y) {
     if (x['failed'] != y['failed']) return x['failed'] == true ? -1 : 1;
