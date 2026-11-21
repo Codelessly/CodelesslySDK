@@ -8,10 +8,15 @@
 // keeps it or puts the plain UI back.
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart';
 
 import 'ui_session.dart';
+
+/// One thing an operation did that a restyle must not: its kind in a few
+/// words (`hides a node`) and the sentence said of it.
+typedef _Fault = ({String kind, String message});
 
 /// What the design agent is asked, one round of it.
 final class DesignRequest {
@@ -151,8 +156,12 @@ final class DesignOutcome {
   /// Why the pass was cut short (the UI was replaced under it).
   final String? interrupted;
 
-  /// The operations of the kept answer that were rejected and left out, as
-  /// reported (the rest of the answer was kept).
+  /// The operations of the kept answer that were left out, as reported (the
+  /// rest of the answer was kept): `Operation N was rejected (…): …` for one
+  /// that could not be applied, `Operation N was left out (hides a node): …`
+  /// for one that would change what the UI says, does or shows
+  /// ([DesignPass.changedMeaning], [DesignPass.restyleFaults]). N counts the
+  /// answer's operations from 1.
   final List<String> rejected;
 
   /// The operations the kept answer applied (the rejected ones left out):
@@ -280,7 +289,11 @@ A fast model has just written this UI from plain parts (rows, columns, texts, th
 WHAT MUST NOT CHANGE
 - What it says: every text, number and label, and every binding ("bind", "\${…}" in a value), stays as it is. Do not rewrite copy.
 - What it does: every "actions" list, every variable, every node id and every node's type. Do not remove a node that shows content or takes input${blocks.isEmpty ? '' : ', unless a block takes its place and carries what it said and did'}.
-- The order of its content, unless the layout needs it.
+- What it shows and takes: do not hide a node ("visible": false, a "visible" binding added, changed or removed, an opacity near 0) and do not disable one ("enabled": false, "disabled": true, "readOnly": true).
+- The order of its content. Wrapping nodes in a new row, column or box keeps it: set the wrapper at the index of the first node it takes, then move the nodes into it in their order.
+- A color or style that follows a value: a binding under "decoration.", "layout." or "props.style" whose "\${…}" reads anything but the theme (a status color, a selected fill) keeps reading it, and a node keeps its "states". Its colors may change; it must not become a constant.
+- Text stays readable: a font size of 10 or larger, and a contrast of at least 3:1 between a text's color and the fill behind it.
+An operation that breaks one of these is left out and the rest of your answer is applied.
 
 WHAT YOU MAY CHANGE
 - Layout: padding, spacing, alignment, sizes (a number, {"hug": n}, {"fill": n}).
@@ -391,24 +404,39 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
       // Someone else changed the UI while the agent worked: its answer is
       // for a UI that is gone.
       if (!identical(session.document, base)) return cutShort('The UI changed while it was being restyled.');
-      final result = session.apply(ops, author: author);
-      // A rejected operation is left out and said; the rest of the answer
-      // stands, as long as what the UI says and does is as it was (the
-      // check below reads the result, whatever was left out of it).
+      final placed = {
+        for (final t in blocks)
+          if (session.designSystem?.components[t] != null) t,
+      };
+      // Each operation is tried on a copy first: one that is rejected, or
+      // that changes what the UI says, does or shows, is left out and said;
+      // the rest of the answer stands. The order of the content is judged
+      // on the whole answer (a wrap may change it for a step); when it is
+      // wrong, the operations are tried again and each one that changes the
+      // order is left out.
+      var screened = _screen(before, ops, placed, strictOrder: false);
+      if (_orderFault(before, before, screened.document) != null) screened = _screen(before, ops, placed, strictOrder: true);
+      final keep = screened.kept;
+      final result = keep.isEmpty ? null : session.apply([for (final i in keep) ops[i]], author: author);
+      final dropped = {
+        for (final i in result?.rejected ?? const <int>[]) keep[i],
+      };
       final rejected = [
-        for (final d in result.diagnostics)
-          if (result.rejected.contains(d.op)) 'Operation ${d.op + 1} was rejected (${d.code} at ${d.path}): ${d.message}',
+        ...screened.leftOut,
+        if (result != null)
+          for (final d in result.diagnostics)
+            if (result.rejected.contains(d.op)) 'Operation ${keep[d.op] + 1} was rejected (${d.code} at ${d.path}): ${d.message}',
       ];
       final applied = [
-        for (var i = 0; i < ops.length; i++)
-          if (!result.rejected.contains(i)) ops[i],
+        for (final i in keep)
+          if (!dropped.contains(i)) ops[i],
       ];
+      // The net under the screening: the result as a whole, whatever was
+      // left out of it.
       problems = [
         if (applied.isEmpty) ...rejected,
-        ...changedMeaning(before, session.document, blocks: {
-          for (final t in blocks)
-            if (session.designSystem?.components[t] != null) t,
-        }),
+        ...changedMeaning(before, session.document, blocks: placed),
+        ...restyleFaults(before, session.document, theme: session.theme),
       ];
       if (problems.isEmpty && check != null) {
         try {
@@ -527,10 +555,323 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
   /// its texts and values as a block's prop (a text may be carried in
   /// pieces, by several props), each of its data bindings as a block's
   /// binding, each of its reactions' actions under a block's event.
-  static List<String> changedMeaning(LayoutDocument before, LayoutDocument after, {Set<String> blocks = const {}}) {
-    final out = <String>[];
+  static List<String> changedMeaning(LayoutDocument before, LayoutDocument after, {Set<String> blocks = const {}}) =>
+      _capped(_meaning(before, after, blocks: blocks));
+
+  /// What a restyle must not do to what the UI shows and did, between
+  /// [before] and [after], beyond [changedMeaning]:
+  ///
+  /// * hide a node: `visible: false` where it was shown, a `visible` binding
+  ///   added, changed or removed, an opacity of 0.05 or less where it was
+  ///   more, a new node that is hidden around nodes that were there;
+  /// * disable a node: `props.enabled: false`, `props.disabled: true` or
+  ///   `props.readOnly: true` where it was not;
+  /// * reorder the content (with [order]): the nodes of [before] that hold
+  ///   no children and are no row, column, box, stack, divider or spacer
+  ///   come in the order they had (wrapping them in new nodes keeps it);
+  /// * drop a style that follows a value: a binding or a written `${…}`
+  ///   under `decoration.`, `layout.` or `props.style` that read anything
+  ///   but the theme is gone, a constant, or reads the theme alone; a state
+  ///   of the node's `states` is gone;
+  /// * make a text unreadable: a font size under 10 where it was 10 or more
+  ///   or unset; its color against the nearest solid fill behind it under
+  ///   3:1 where it was not, when both colors are known (theme names are
+  ///   read from [theme], light; a bound color or fill is not known).
+  ///
+  /// Empty when it did none of these.
+  static List<String> restyleFaults(LayoutDocument before, LayoutDocument after, {ThemeTokens? theme, bool order = true}) => _capped([
+        ..._restyle(before, after, theme),
+        if (order)
+          if (_orderFault(before, before, after) case final String moved) (kind: 'reorders content', message: moved),
+      ]);
+
+  static List<String> _capped(List<_Fault> faults) {
+    final out = [for (final f in faults) f.message];
+    return out.length > 12 ? [...out.take(12), '(${out.length - 12} more of the same kind)'] : out;
+  }
+
+  /// Tries [ops] one at a time on a copy of [before]: the indexes of those
+  /// to apply, what is said of each of the others, and the copy with the
+  /// kept ones applied. With [placed] (blocks the pass may put in), a node
+  /// that goes is judged on the whole answer instead ([changedMeaning]).
+  /// With [strictOrder], an operation that changes the order of the content
+  /// is left out too.
+  ({List<int> kept, List<String> leftOut, LayoutDocument document}) _screen(LayoutDocument before, List<Object?> ops, Set<String> placed,
+      {required bool strictOrder}) {
+    var doc = before;
+    final kept = <int>[], leftOut = <String>[];
+    for (var i = 0; i < ops.length; i++) {
+      final r = applyOps(doc, [ops[i]],
+          catalog: session.catalog,
+          profile: session.profile,
+          check: session.check,
+          author: author,
+          protectRoots: session.protectRoots && doc.roots.isNotEmpty);
+      if (r.rejected.isNotEmpty || r.appliedOps.isEmpty) {
+        final why = [
+          for (final d in r.diagnostics)
+            if (d.error) 'Operation ${i + 1} was rejected (${d.code} at ${d.path}): ${d.message}',
+        ];
+        leftOut.addAll(why.isEmpty ? ['Operation ${i + 1} was rejected: it could not be read as an edit operation.'] : why);
+        continue;
+      }
+      final faults = [
+        ..._meaning(before, r.document, removals: placed.isEmpty),
+        ..._restyle(before, r.document, session.theme),
+        if (strictOrder)
+          if (_orderFault(before, doc, r.document) case final String moved) (kind: 'reorders content', message: moved),
+      ];
+      if (faults.isNotEmpty) {
+        final kinds = {for (final f in faults) f.kind}.join('; ');
+        final said = [for (final f in faults.take(4)) f.message, if (faults.length > 4) '(${faults.length - 4} more of the same kind)'].join(' ');
+        leftOut.add('Operation ${i + 1} was left out ($kinds): $said');
+        continue;
+      }
+      kept.add(i);
+      doc = r.document;
+    }
+    return (kept: kept, leftOut: leftOut, document: doc);
+  }
+
+  static const _wrappers = {'row', 'column', 'box', 'stack', 'divider', 'spacer'};
+
+  /// The content of [before] (its nodes that hold no children and are no
+  /// wrapper) that [a] and [b] both show, when [b] shows it in another
+  /// order than [a]: what to say of it. Null when the order is the same.
+  static String? _orderFault(LayoutDocument before, LayoutDocument a, LayoutDocument b) {
+    if (identical(a, b)) return null;
+    List<String> content(LayoutDocument d) {
+      final out = <String>[], seen = <String>{};
+      void visit(String id) {
+        final n = d[id];
+        if (n == null || !seen.add(id)) return;
+        final old = before[id];
+        if (old != null && !_wrappers.contains(old.type) && old.type != 'canvas' && old.childIds.isEmpty && n.childIds.isEmpty) out.add(id);
+        n.childIds.forEach(visit);
+      }
+
+      d.roots.forEach(visit);
+      return out;
+    }
+
+    final inA = content(a), inB = content(b);
+    final both = inA.toSet().intersection(inB.toSet());
+    final sa = [for (final id in inA) if (both.contains(id)) id], sb = [for (final id in inB) if (both.contains(id)) id];
+    for (var i = 0; i < sa.length; i++) {
+      if (sa[i] != sb[i]) {
+        return 'The order of the content changed: "${sb[i]}" now comes before "${sa[i]}". The pass must not reorder what the UI shows '
+            '(to wrap nodes, set the wrapper at the index of the first node it takes, then move the nodes into it in their order).';
+      }
+    }
+    return null;
+  }
+
+  /// [restyleFaults] less the order, each with its kind.
+  static List<_Fault> _restyle(LayoutDocument before, LayoutDocument after, ThemeTokens? theme) {
+    final out = <_Fault>[];
+    if (identical(before, after)) return out;
+    final nodesWas = readMap(before.toJson()['nodes']) ?? const {}, nodesNow = readMap(after.toJson()['nodes']) ?? const {};
+    void hides(String m) => out.add((kind: 'hides a node', message: m));
+    bool holdsOld(String id, Set<String> seen) =>
+        seen.add(id) && (after[id]?.childIds ?? const <String>[]).any((c) => nodesWas.containsKey(c) || holdsOld(c, seen));
+    double opacity(Json n) => n['opacity'] is num ? (n['opacity']! as num).toDouble() : 1;
+    final light = theme?.forBrightness(dark: false);
+    for (final e in nodesNow.entries) {
+      final id = e.key;
+      final b = readMap(e.value) ?? const {}, a = readMap(nodesWas[id]);
+      final bindB = readMap(b['bind']) ?? const {};
+      if (a == null) {
+        // A wrapper the pass put in must not hide what it wraps.
+        final how = b['visible'] == false
+            ? 'visible: false'
+            : (bindB['visible'] != null ? 'a "visible" binding' : (opacity(b) <= _faint ? 'opacity ${opacity(b)}' : null));
+        if (how != null && holdsOld(id, {})) {
+          hides('The new node "$id" would hide the nodes inside it ($how). The pass must not hide what the UI shows.');
+        }
+        continue;
+      }
+      final bindA = readMap(a['bind']) ?? const {};
+      // Hidden.
+      if (b['visible'] == false && a['visible'] != false) {
+        hides('Node "$id" would be hidden (visible: false). The pass must not hide what the UI shows.');
+      }
+      if ('${bindA['visible']}' != '${bindB['visible']}') {
+        hides('The "visible" binding of node "$id" ${bindA['visible'] == null ? 'was added' : (bindB['visible'] == null ? 'was removed' : 'changed')}. '
+            'The pass must not change when a node is shown.');
+      }
+      if (opacity(b) <= _faint && opacity(a) > _faint) {
+        hides('Node "$id" would be hidden (opacity ${opacity(b)}). The pass must not hide what the UI shows.');
+      }
+      // Disabled.
+      final pa = readMap(a['props']) ?? const {}, pb = readMap(b['props']) ?? const {};
+      for (final (key, off) in const [('enabled', false), ('disabled', true), ('readOnly', true)]) {
+        if (pb[key] == off && pa[key] != off) {
+          out.add((
+            kind: 'disables a node',
+            message: 'Node "$id" would be disabled ("$key": $off). The pass must not disable what the UI lets its user do.',
+          ));
+        }
+      }
+      // A style that followed a value.
+      final looksB = _looks(b);
+      for (final l in _looks(a).entries) {
+        if (!readsValue(l.value)) continue;
+        final still = looksB.entries.any((n) => _under(n.key, l.key) && readsValue(n.value));
+        if (still) continue;
+        final now = looksB[l.key];
+        out.add((
+          kind: 'drops a style that follows a value',
+          message: 'Node "$id" no longer has its ${l.key} follow a value: it was ${l.value} and ${now == null ? 'is now fixed' : 'is now $now'}. '
+              'The pass must keep a color or style that follows a value following it.',
+        ));
+      }
+      final statesB = readMap(b['states']) ?? const {};
+      for (final s in (readMap(a['states']) ?? const {}).keys) {
+        if (statesB[s] == null) {
+          out.add((
+            kind: 'drops a style that follows a value',
+            message: 'Node "$id" lost the style of its "$s" state. The pass must keep a style that follows a state.',
+          ));
+        }
+      }
+      // Readable text.
+      if (a['type'] != 'text' || b['type'] != 'text') continue;
+      void unreadable(String m) => out.add((kind: 'makes text unreadable', message: m));
+      final sa = readMap(pa['style'])?['fontSize'], sb = readMap(pb['style'])?['fontSize'];
+      if (sb is num && sb < 10 && !(sa is num && sa < 10) && !bindB.containsKey('props.style.fontSize') && !bindB.containsKey('props.style')) {
+        unreadable('Node "$id" would not be readable: its font size would be $sb. A text\'s font size must stay 10 or larger.');
+      }
+      final rb = _contrastOf(after, nodesNow, id, light);
+      if (rb != null && rb.ratio < 3) {
+        final ra = _contrastOf(before, nodesWas, id, light);
+        if (ra == null || ra.ratio >= 3) {
+          unreadable('Node "$id" would not be readable: its text in ${_hex(rb.ink)} on ${_hex(rb.ground)} (the fill of "${rb.on}") has a contrast of '
+              '${rb.ratio.toStringAsFixed(2)}:1. A text must keep at least 3:1 against the fill behind it.');
+        }
+      }
+    }
+    return out;
+  }
+
+  /// The opacity at or under which a node is not seen.
+  static const _faint = 0.05;
+
+  /// Whether [expression] (a binding, or a value with `${…}` in it) reads a
+  /// value other than the theme: a variable, an item's field, a parameter.
+  /// `${theme.colors.tile}` and a constant do not.
+  static bool readsValue(String expression) {
+    for (final m in RegExp(r'\$\{([^}]*)\}').allMatches(expression)) {
+      final body = m[1]!.replaceAll(RegExp('"[^"]*"|\'[^\']*\''), ' ');
+      for (final name in RegExp(r'(?<![\w.])[A-Za-z_]\w*').allMatches(body)) {
+        if (const {'true', 'false', 'null', 'theme'}.contains(name[0])) continue;
+        // A function's name reads nothing; what it is given may.
+        if (body.substring(name.end).trimLeft().startsWith('(')) continue;
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// The expressions a node's looks are written with, by path: its bindings
+  /// under decoration, layout and text style, and each `${…}` written as a
+  /// value there.
+  static Map<String, String> _looks(Json node) {
+    final out = <String, String>{};
+    for (final b in (readMap(node['bind']) ?? const {}).entries) {
+      final k = b.key;
+      if (b.value != null && (k.startsWith('decoration') || k.startsWith('layout') || k.startsWith('props.style'))) out[k] = '${b.value}';
+    }
+    void walk(Object? v, String path) {
+      if (v is String && v.contains(r'${')) out.putIfAbsent(path, () => v);
+      if (v is Map) v.forEach((k, x) => walk(x, '$path.$k'));
+      if (v is List) {
+        for (var i = 0; i < v.length; i++) {
+          walk(v[i], '$path[$i]');
+        }
+      }
+    }
+
+    walk(node['decoration'], 'decoration');
+    walk(node['layout'], 'layout');
+    walk(readMap(node['props'])?['style'], 'props.style');
+    return out;
+  }
+
+  /// Whether paths [a] and [b] are the same or one holds the other
+  /// (`decoration.fills` and `decoration.fills[0].color`).
+  static bool _under(String a, String b) {
+    if (a == b) return true;
+    final (short, long) = a.length < b.length ? (a, b) : (b, a);
+    return long.startsWith(short) && (long[short.length] == '.' || long[short.length] == '[');
+  }
+
+  /// The contrast of text node [id] in [doc]: its color over the nearest
+  /// solid fill behind it (its own, or an ancestor's). Null when either is
+  /// not known: bound, a gradient or image, a name [theme] does not have,
+  /// or no fill at all.
+  static ({double ratio, int ink, int ground, String on})? _contrastOf(LayoutDocument doc, Json nodes, String id, ThemeTokens? theme) {
+    int? argb(Object? v) {
+      if (v is! String || v.contains(r'${')) return null;
+      if (v.startsWith('#')) {
+        final h = v.substring(1);
+        return h.length == 6 ? int.tryParse('FF$h', radix: 16) : (h.length == 8 ? int.tryParse(h, radix: 16) : null);
+      }
+      return (theme?.color(v) ?? theme?.notationRole(v))?.value;
+    }
+
+    final node = readMap(nodes[id]) ?? const {};
+    if ((readMap(node['bind']) ?? const {}).keys.any((k) => _under(k, 'props.style.color'))) return null;
+    final style = readMap(readMap(node['props'])?['style']) ?? const {};
+    int? ink;
+    if (style['color'] != null) {
+      ink = argb(style['color']);
+    } else if (style['from'] case final String from) {
+      final c = theme?.textStyle(from)?.color;
+      ink = c == null ? null : (c.name == null ? c.value : argb(c.name));
+    }
+    if (ink == null) return null;
+    final seen = <String>{};
+    for (String? x = id; x != null && seen.add(x); x = doc.parentOf(x)) {
+      final n = readMap(nodes[x]);
+      if (n == null) return null;
+      if ((readMap(n['bind']) ?? const {}).keys.any((k) => _under(k, 'decoration.fills'))) return null;
+      for (final f in ((readMap(n['decoration'])?['fills'] as List?) ?? const []).reversed) {
+        final m = readMap(f);
+        if (m == null || m['visible'] == false) continue;
+        if (m['type'] != null && m['type'] != 'solid') return null;
+        final c = argb(m['color']);
+        if (c == null) return null;
+        // A tint lets what is behind it through: the fill behind it is the ground.
+        if ((c >>> 24) < 0xC0) continue;
+        final alpha = (ink >>> 24) / 255;
+        int mix(int shift) => (((ink! >> shift) & 0xFF) * alpha + ((c >> shift) & 0xFF) * (1 - alpha)).round();
+        final drawn = 0xFF000000 | (mix(16) << 16) | (mix(8) << 8) | mix(0);
+        final la = _luminance(drawn), lb = _luminance(c);
+        return (ratio: (math.max(la, lb) + 0.05) / (math.min(la, lb) + 0.05), ink: ink, ground: c, on: x);
+      }
+    }
+    return null;
+  }
+
+  static String _hex(int c) => '#${c.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+
+  static double _luminance(int c) {
+    double channel(int v) {
+      final s = v / 255;
+      return s <= 0.03928 ? s / 12.92 : math.pow((s + 0.055) / 1.055, 2.4).toDouble();
+    }
+
+    return 0.2126 * channel((c >> 16) & 0xFF) + 0.7152 * channel((c >> 8) & 0xFF) + 0.0722 * channel(c & 0xFF);
+  }
+
+  /// [changedMeaning], each with its kind and none left uncounted. Without
+  /// [removals], a node that is gone is not looked at.
+  static List<_Fault> _meaning(LayoutDocument before, LayoutDocument after, {Set<String> blocks = const {}, bool removals = true}) {
+    final out = <_Fault>[];
+    if (identical(before, after)) return out;
+    void add(String kind, String message) => out.add((kind: kind, message: message));
     final was = before.toJson(), now = after.toJson();
-    if (jsonEncode(was['variables']) != jsonEncode(now['variables'])) out.add('The variables changed. The pass must not change state.');
+    if (jsonEncode(was['variables']) != jsonEncode(now['variables'])) add('changes state', 'The variables changed. The pass must not change state.');
     final nodesNow = readMap(now['nodes']) ?? const {}, nodesWas = readMap(was['nodes']) ?? const {};
     // What the blocks the pass put in carry: their props' values, their
     // bindings' expressions, the actions under their events.
@@ -571,7 +912,8 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
       final type = a['type'];
       final pa = readMap(a['props']) ?? const {};
       if (b == null) {
-        if (const {'row', 'column', 'box', 'stack', 'divider', 'spacer'}.contains(type) && a['actions'] == null && _dataBinds(a['bind']).isEmpty) continue;
+        if (!removals) continue;
+        if (_wrappers.contains(type) && a['actions'] == null && _dataBinds(a['bind']).isEmpty) continue;
         final lost = <String>[
           for (final key in _saying)
             // A bound prop's written value is a placeholder: its binding is what must be carried.
@@ -583,28 +925,31 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
             if (!done.contains(jsonEncode(r['actions']))) 'its actions',
         ];
         if (blocks.isEmpty || said.isEmpty && bound.isEmpty && done.isEmpty) {
-          if (!const {'row', 'column', 'box', 'stack', 'divider', 'spacer'}.contains(type)) {
-            out.add('Node "${e.key}" ($type) is gone. The pass must not remove a node that shows content or takes input.');
+          if (!_wrappers.contains(type)) {
+            add('removes content', 'Node "${e.key}" ($type) is gone. The pass must not remove a node that shows content or takes input.');
           } else {
-            out.add('Node "${e.key}" ($type) is gone with its actions or bindings. The pass must not change what the UI does.');
+            add('removes what the UI does', 'Node "${e.key}" ($type) is gone with its actions or bindings. The pass must not change what the UI does.');
           }
         } else if (lost.isNotEmpty) {
-          out.add('Node "${e.key}" ($type) is gone and no block carries ${lost.toSet().join(', ')}. A block that takes a node\'s place must carry what it said and did.');
+          add('removes content',
+              'Node "${e.key}" ($type) is gone and no block carries ${lost.toSet().join(', ')}. A block that takes a node\'s place must carry what it said and did.');
         }
         continue;
       }
-      if (b['type'] != type) out.add('Node "${e.key}" changed type from $type to ${b['type']}. Keep every node\'s type.');
+      if (b['type'] != type) add('changes a node\'s type', 'Node "${e.key}" changed type from $type to ${b['type']}. Keep every node\'s type.');
       final pb = readMap(b['props']) ?? const {};
       for (final key in _saying) {
         if (jsonEncode(pa[key]) != jsonEncode(pb[key])) {
-          out.add('Node "${e.key}" no longer says what it said: its "$key" changed. The pass must not change what the UI says.');
+          add('changes what it says', 'Node "${e.key}" no longer says what it said: its "$key" changed. The pass must not change what the UI says.');
         }
       }
-      if (jsonEncode(a['actions']) != jsonEncode(b['actions'])) out.add('The actions of node "${e.key}" changed. The pass must not change what the UI does.');
+      if (jsonEncode(a['actions']) != jsonEncode(b['actions'])) {
+        add('changes what it does', 'The actions of node "${e.key}" changed. The pass must not change what the UI does.');
+      }
       final ba = _dataBinds(a['bind']), bb = _dataBinds(b['bind']);
-      if (jsonEncode(ba) != jsonEncode(bb)) out.add('The data bindings of node "${e.key}" changed. Keep every binding to a value as it is.');
+      if (jsonEncode(ba) != jsonEncode(bb)) add('changes a data binding', 'The data bindings of node "${e.key}" changed. Keep every binding to a value as it is.');
     }
-    return out.length > 12 ? [...out.take(12), '(${out.length - 12} more of the same kind)'] : out;
+    return out;
   }
 
   /// The props that are what a node says.

@@ -195,13 +195,14 @@ Card
       expect(jsonEncode(session.document.toJson()), plain);
     });
 
-    test('without blocks the same answer is refused: a node that takes input is gone', () async {
+    test('without blocks the removal in the same answer is left out: a node that takes input stays', () async {
       final session = UiSession(designSystem: await _cards());
       addTearDown(session.dispose);
       await session.applyNotation(Stream.value(card));
       final outcome = await DesignPass(session, design: (_) async => swap(session), maxRounds: 1).run();
-      expect(outcome.kept, isFalse);
-      expect(outcome.problems.join('\n'), contains('"go" (filledButton) is gone'));
+      expect(outcome.kept, isTrue);
+      expect(outcome.rejected.single, allOf(startsWith('Operation 2 was left out (removes content)'), contains('"go" (filledButton) is gone')));
+      expect(session.document['go'], isNotNull);
     });
 
     test('a block that drops the label, the actions or a bound text is refused, each named', () async {
@@ -325,6 +326,301 @@ Card
       expect(DesignPass.readAnswer('I would make the title larger.').problem, contains('holds no operations'));
       expect(DesignPass.readAnswer('```json\n{"changes": []}\n```').problem, contains('no "ops" list'));
       expect(DesignPass.readAnswer(42).problem, isNotNull);
+    });
+  });
+
+  group('an operation that changes what the UI says, does or shows is left out; the rest is kept', () {
+    const order = '''
+state status="late"
+state count=1
+Card
+  Text#title "Order"
+  Text#meta "Due today" color={status == "late" ? "#FFDC2626" : "#FF111827"}
+  Text#muted "Quiet" color=secondaryText size=12
+  Row#row
+    Button#less "-" onTap={count=count-1}
+    Text#n "{count}"
+    Button#more "+" onTap={count=count+1}
+''';
+    // A restyle that is allowed: the title in the theme's title style.
+    final good = _good[1];
+    Map<String, Object?> patch(String id, Map<String, Object?> patch) => {'op': 'patch', 'id': id, 'patch': patch};
+
+    Future<(UiSession, String)> card() async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(order));
+      expect(session.notationIssues, isEmpty);
+      return (session, jsonEncode(session.document.toJson()));
+    }
+
+    Future<DesignOutcome> run(UiSession session, List<Object?> ops) => DesignPass(session, design: (_) async => ops, maxRounds: 1).run();
+    Map<String, Object?> node(UiSession session, String id) => session.document[id]!.toJson();
+    Map<String, Object?> style(UiSession session, String id) => ((node(session, id)['props']! as Map)['style']! as Map).cast<String, Object?>();
+    // The valid operation of the answer was applied and the pass kept.
+    void keptGood(UiSession session, DesignOutcome outcome, {int ops = 1}) {
+      expect(outcome.kept, isTrue, reason: '${outcome.problems}');
+      expect(outcome.ops, ops);
+      expect(outcome.applied, contains(good));
+      expect(style(session, 'title')['from'], 'title');
+    }
+
+    test('hiding a node: visible false, an opacity of 0, a visible binding', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        patch('meta', {'visible': false}),
+        good,
+        patch('muted', {'opacity': 0}),
+        patch('n', {
+          'bind': {'visible': r'${count > 1}'},
+        }),
+      ]);
+      keptGood(session, outcome);
+      expect(outcome.rejected, hasLength(3));
+      expect(outcome.rejected[0],
+          'Operation 1 was left out (hides a node): Node "meta" would be hidden (visible: false). The pass must not hide what the UI shows.');
+      expect(outcome.rejected[1], allOf(startsWith('Operation 3 was left out (hides a node): Node "muted" would be hidden (opacity 0'), contains('must not hide')));
+      expect(outcome.rejected[2], allOf(startsWith('Operation 4 was left out (hides a node)'), contains('The "visible" binding of node "n" was added')));
+      expect(node(session, 'meta')['visible'], isNot(false));
+      expect(node(session, 'muted').containsKey('opacity'), isFalse);
+      expect(node(session, 'n').containsKey('bind'), isFalse);
+      expect(outcome.answers.single.rejected, outcome.rejected);
+    });
+
+    test('disabling a node', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        good,
+        patch('more', {
+          'props': {'enabled': false},
+        }),
+      ]);
+      keptGood(session, outcome);
+      expect(outcome.rejected.single, allOf(startsWith('Operation 2 was left out (disables a node): Node "more" would be disabled ("enabled": false)'), contains('must not disable')));
+      expect((node(session, 'more')['props']! as Map).containsKey('enabled'), isFalse);
+    });
+
+    test('reordering the content; a wrap that keeps the order is kept', () async {
+      final (session, plain) = await card();
+      final parent = session.document.parentOf('meta')!;
+      final moved = await run(session, [
+        good,
+        {'op': 'move', 'id': 'meta', 'parent': parent, 'index': 0},
+      ]);
+      keptGood(session, moved);
+      expect(moved.rejected.single,
+          allOf(startsWith('Operation 2 was left out (reorders content): The order of the content changed: "meta" now comes before "title"'), contains('must not reorder')));
+      expect(session.document[parent]!.children.take(2), ['title', 'meta']);
+
+      // Title and meta in a new row where they stood. The order is judged on
+      // the whole answer: after the first move meta is before title.
+      expect(session.undo(author: DesignPass.author), isTrue);
+      expect(jsonEncode(session.document.toJson()), plain);
+      final wrapped = await run(session, [
+        {
+          'op': 'set',
+          'id': 'head',
+          'parent': parent,
+          'index': 0,
+          'node': {
+            'type': 'row',
+            'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+          },
+        },
+        {'op': 'move', 'id': 'meta', 'parent': 'head'},
+        {'op': 'move', 'id': 'title', 'parent': 'head', 'index': 0},
+        good,
+      ]);
+      keptGood(session, wrapped, ops: 4);
+      expect(wrapped.rejected, isEmpty);
+      expect(session.document['head']!.children, ['title', 'meta']);
+      expect(session.document[parent]!.children.first, 'head');
+    });
+
+    test('removing a node that shows content or takes input', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        {'op': 'remove', 'id': 'more'},
+        good,
+      ]);
+      keptGood(session, outcome);
+      expect(outcome.rejected.single, allOf(startsWith('Operation 1 was left out (removes content): Node "more" (filledButton) is gone.'), contains('must not remove')));
+      expect(session.document['more'], isNotNull);
+      expect(session.document['row']!.children, ['less', 'n', 'more']);
+    });
+
+    test('changing what a text says', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        good,
+        patch('meta', {
+          'props': {'text': 'Overdue'},
+        }),
+      ]);
+      keptGood(session, outcome);
+      expect(outcome.rejected.single,
+          allOf(startsWith('Operation 2 was left out (changes what it says): Node "meta" no longer says what it said: its "text" changed.'), contains('must not change what the UI says')));
+      expect((node(session, 'meta')['props']! as Map)['text'], 'Due today');
+    });
+
+    test('dropping a color that follows a value; its colors may change, and a color that followed nothing may be restyled', () async {
+      final (session, _) = await card();
+      // How the notation writes it.
+      final was = (node(session, 'meta')['bind']! as Map)['props.style.color'];
+      expect(was, r'${= status == "late" ? "#FFDC2626" : "#FF111827"}');
+      final outcome = await run(session, [
+        good,
+        // A fixed gray in its place.
+        patch('meta', {
+          'bind': {'props.style.color': null},
+          'props': {
+            'style': {'color': 'secondaryText'},
+          },
+        }),
+        // The theme alone.
+        patch('meta', {
+          'bind': {'props.style.color': r'${theme.colors.secondaryText}'},
+        }),
+        // The same condition in other colors.
+        patch('meta', {
+          'bind': {'props.style.color': r'${= status == "late" ? "#FFB91C1C" : "#FF374151"}'},
+        }),
+        // A color no value drove, in a theme color.
+        patch('muted', {
+          'props': {
+            'style': {'color': 'primaryText'},
+          },
+        }),
+      ]);
+      keptGood(session, outcome, ops: 3);
+      expect(outcome.rejected, hasLength(2));
+      expect(
+          outcome.rejected[0],
+          allOf(
+            startsWith('Operation 2 was left out (drops a style that follows a value): Node "meta" no longer has its props.style.color follow a value'),
+            contains('status == "late"'),
+            contains('is now fixed'),
+            contains('must keep a color or style that follows a value'),
+          ));
+      expect(outcome.rejected[1], allOf(startsWith('Operation 3 was left out (drops a style that follows a value)'), contains(r'is now ${theme.colors.secondaryText}')));
+      expect((node(session, 'meta')['bind']! as Map)['props.style.color'], r'${= status == "late" ? "#FFB91C1C" : "#FF374151"}');
+      expect(style(session, 'meta').containsKey('color'), isFalse);
+      expect(style(session, 'muted')['color'], 'primaryText');
+
+      expect(DesignPass.readsValue(r'${= on ? "#FF2563EB" : "#FFE5E7EB"}'), isTrue);
+      expect(DesignPass.readsValue(r'${item.tone}'), isTrue);
+      expect(DesignPass.readsValue(r'${theme.radii.tile}'), isFalse);
+      expect(DesignPass.readsValue(r'${= coalesce(null, "#FF6B7280")}'), isFalse);
+      expect(DesignPass.readsValue('#FF6B7280'), isFalse);
+    });
+
+    test('a font size under 10', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        patch('muted', {
+          'props': {
+            'style': {'fontSize': 4},
+          },
+        }),
+        good,
+        patch('n', {
+          'props': {
+            'style': {'fontSize': 11},
+          },
+        }),
+      ]);
+      keptGood(session, outcome, ops: 2);
+      expect(outcome.rejected.single,
+          allOf(startsWith('Operation 1 was left out (makes text unreadable): Node "muted" would not be readable: its font size would be 4.'), contains('10 or larger')));
+      expect(style(session, 'muted')['fontSize'], 12);
+      expect(style(session, 'n')['fontSize'], 11);
+    });
+
+    test('a contrast under 3:1 against the fill behind; a readable color is kept, an unknown ground is not judged', () async {
+      final (session, _) = await card();
+      final outcome = await run(session, [
+        // Pale gray on the card's white.
+        patch('muted', {
+          'props': {
+            'style': {'color': '#FFE5E7EB'},
+          },
+        }),
+        good,
+        // A theme color that reads on it.
+        patch('n', {
+          'props': {
+            'style': {'color': 'secondaryText'},
+          },
+        }),
+      ]);
+      keptGood(session, outcome, ops: 2);
+      expect(
+          outcome.rejected.single,
+          allOf(
+            startsWith('Operation 1 was left out (makes text unreadable): Node "muted" would not be readable: its text in #FFE5E7EB on #FFFFFFFF'),
+            contains('has a contrast of 1.'),
+            contains('at least 3:1'),
+          ));
+      expect(style(session, 'muted')['color'], 'secondaryText');
+      expect(style(session, 'n')['color'], 'secondaryText');
+
+      api.LayoutDocument doc(String color, {String? fill}) => api.LayoutDocument.fromJson({
+            'schema': 3,
+            'roots': ['c'],
+            'nodes': {
+              'c': {
+                'type': 'canvas',
+                'children': ['t'],
+                if (fill != null)
+                  'decoration': {
+                    'fills': [
+                      {'color': fill},
+                    ],
+                  },
+              },
+              't': {
+                'type': 'text',
+                'props': {
+                  'text': 'Quiet',
+                  'style': {'color': color},
+                },
+              },
+            },
+          });
+      // No fill behind it: nothing to judge it against.
+      expect(DesignPass.restyleFaults(doc('#FF111827'), doc('#FFEEEEEE')), isEmpty);
+      expect(DesignPass.restyleFaults(doc('#FF111827', fill: '#FFFFFFFF'), doc('#FFEEEEEE', fill: '#FFFFFFFF')).single, contains('"t" would not be readable'));
+      // The fill behind it changed under it.
+      expect(DesignPass.restyleFaults(doc('#FF111827', fill: '#FFFFFFFF'), doc('#FF111827', fill: '#FF1F2937')).single, contains('on #FF1F2937 (the fill of "c")'));
+      // It was not readable before: not this restyle's doing.
+      expect(DesignPass.restyleFaults(doc('#FFEEEEEE', fill: '#FFFFFFFF'), doc('#FFE5E7EB', fill: '#FFFFFFFF')), isEmpty);
+      // A name the theme is not given is not known.
+      expect(DesignPass.restyleFaults(doc('#FF111827', fill: 'card'), doc('#FFEEEEEE', fill: 'card')), isEmpty);
+      expect(DesignPass.restyleFaults(doc('#FF111827', fill: 'card'), doc('#FFEEEEEE', fill: 'card'), theme: session.theme).single, contains('on #FFFFFFFF'));
+    });
+
+    test('an answer made only of such operations is refused with each reason, and the UI is as it was', () async {
+      final (session, plain) = await card();
+      final requests = <DesignRequest>[];
+      final outcome = await DesignPass(session, maxRounds: 2, design: (r) async {
+        requests.add(r);
+        return [
+          patch('meta', {'visible': false}),
+          patch('title', {
+            'props': {'text': 'Your order'},
+          }),
+          {'op': 'remove', 'id': 'less'},
+        ];
+      }).run();
+      expect((outcome.kept, outcome.endedBy, outcome.rounds), (false, 'refused', 2));
+      expect(outcome.problems, hasLength(3));
+      expect(outcome.problems[0], startsWith('Operation 1 was left out (hides a node)'));
+      expect(outcome.problems[1], allOf(startsWith('Operation 2 was left out (changes what it says)'), contains('no longer says what it said')));
+      expect(outcome.problems[2], allOf(startsWith('Operation 3 was left out (removes content)'), contains('"less" (filledButton) is gone')));
+      expect(requests[1].problems, outcome.problems);
+      expect(outcome.answers.map((a) => a.outcome), ['refused', 'refused']);
+      expect(jsonEncode(session.document.toJson()), plain);
+      expect(session.undo(author: DesignPass.author), isFalse);
     });
   });
 
