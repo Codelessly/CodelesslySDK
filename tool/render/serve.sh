@@ -4,16 +4,28 @@
 # tool/codelessly render use it whenever it is up and current; nothing else changes (same arguments, same report,
 # same files).
 #
-#   tool/render/serve.sh [--workers n] [--idle seconds] [--queue n] [--request-timeout seconds] [--recycle-mb n]
+#   tool/render/serve.sh [--workers n|auto] [--min-workers n] [--max-workers n] [--retire-after seconds]
+#                        [--idle seconds] [--queue n] [--request-timeout seconds] [--recycle-mb n]
 #                                           start it (in the background) and wait until it takes requests
-#   tool/render/serve.sh --status [--json]  is it up, since when, its workers, its queue, what it served and how fast
+#   tool/render/serve.sh --status [--json]  is it up, since when, its workers (how many, the limit now, the learned
+#                                           ceiling, the last scaling decision and why), its queue, what it served
 #   tool/render/serve.sh --stop             stop it, and its workers
+#   tool/render/serve.sh --help             this
 #
 # It is one address (build/.render-server/port) and several workers behind it, each Flutter's headless engine in a
 # process of its own (rendering runs on one thread of a process): requests from separate agents are rendered at
 # the same time, one on each worker, and a request of many captures is shared among the workers that are idle
-# (tool/cli/src/pool.dart, tool/render/src/fan.dart). --workers says how many: by default half the processors, no
-# more than half the machine's memory holds at a gigabyte each, 8 at most; --workers 1 renders one request after
+# (tool/cli/src/pool.dart, tool/render/src/fan.dart).
+#
+# How many workers: by default (--workers auto) it starts ONE and follows the load (tool/cli/src/autoscale.dart).
+# One client rendering one page at a time has one warm worker and pays for one engine (about 350 MB). When work
+# waits with no worker idle (requests queued, or captures of a request nobody took), workers are added in growing
+# steps (one for one request that waits; for a queue to 4, then 8, 12, 20, 32, 48, ...), each up in a second or
+# two, with no fixed top: what stops the growth is
+# a worker that does not start, free memory that would fall under a reserve (an eighth of the machine's, 0.5 to
+# 2 GB), or a raise that did not raise the work done per second (that level is then a ceiling for two minutes).
+# Workers idle for --retire-after seconds (60) are ended, down to one. --min-workers and --max-workers bound it
+# (no top by default). --workers n is that many from start to stop; --workers 1 renders one request after
 # another, as before there were workers. A worker is replaced by a fresh one when it holds more than --recycle-mb
 # megabytes (1024), when it stops, or when a request took longer than --request-timeout seconds (1200) on it.
 # More than --queue requests waiting (256) are refused with a line saying so.
@@ -41,6 +53,8 @@ stop_server() {
 }
 
 case "${1:-}" in
+  # (This file's own account of itself, above.)
+  --help|-h) sed -n '2,/^set -u/p' "${BASH_SOURCE[0]}" | sed -e '/^set -u/d' -e 's/^# //' -e 's/^#$//'; exit 0 ;;
   --stop) stop_server; echo "Render server stopped."; exit 0 ;;
   --status)
     if alive && [ -f "$dir/ready" ]; then
@@ -60,11 +74,15 @@ idle=1800
 while [ $# -gt 0 ]; do
   case "$1" in
     --idle) idle="${2:?--idle seconds}"; shift 2 ;;
-    --workers|--queue|--request-timeout|--recycle-mb|--recycle-after)
+    --workers)
+      [ $# -ge 2 ] || { echo "--workers needs a number, or auto." >&2; exit 2; }
+      case "$2" in auto) ;; ''|*[!0-9]*) echo "--workers takes a whole number, or auto (given \"$2\")." >&2; exit 2 ;; esac
+      pool_args+=("$1" "$2"); shift 2 ;;
+    --min-workers|--max-workers|--retire-after|--queue|--request-timeout|--recycle-mb|--recycle-after)
       [ $# -ge 2 ] || { echo "$1 needs a number." >&2; exit 2; }
       case "$2" in ''|*[!0-9]*) echo "$1 takes a whole number (given \"$2\")." >&2; exit 2 ;; esac
       pool_args+=("$1" "$2"); shift 2 ;;
-    *) echo "Unknown option $1. tool/render/serve.sh [--workers n] [--idle seconds] [--queue n] [--request-timeout seconds] [--recycle-mb n] | --status [--json] | --stop" >&2; exit 2 ;;
+    *) echo "Unknown option $1. tool/render/serve.sh [--workers n|auto] [--min-workers n] [--max-workers n] [--retire-after seconds] [--idle seconds] [--queue n] [--request-timeout seconds] [--recycle-mb n] | --status [--json] | --stop" >&2; exit 2 ;;
   esac
 done
 

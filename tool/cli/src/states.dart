@@ -108,12 +108,17 @@ Future<int> statesMain(List<String> argv) async {
   } else {
     stdout.writeln('Cold: the render server did not start (tool/codelessly serve says why); Flutter starts for each state.');
   }
-  // With the render server, as many states at a time as it has workers (Flutter started for each: one at a time).
+  // With the render server, as many states at a time as it says to send (its workers when their number is fixed;
+  // when it follows its load, what the machine's processors suggest, and it adds workers for them). Flutter
+  // started for each: one at a time.
   var parallel = 1;
   if (!cold) {
     try {
       final status = await askServer('status');
-      if (status != null && status.startsWith('{')) parallel = ((jsonDecode(status) as Map)['workerCount'] as num?)?.toInt() ?? 1;
+      if (status != null && status.startsWith('{')) {
+        final s = jsonDecode(status) as Map;
+        parallel = ((s['parallel'] ?? s['workerCount']) as num?)?.toInt() ?? 1;
+      }
     } on FormatException {
       // Not told: one at a time.
     }

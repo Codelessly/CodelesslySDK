@@ -23,6 +23,9 @@ const _fixtures = 'test/tool/fixtures';
 /// The folder of the server the commands of this test talk to (CODELESSLY_RENDER_SERVER).
 late String _server;
 
+/// Whether a server was started (so there is a folder to stop one in).
+bool _started = false;
+
 Map<String, String> get _env => {'CODELESSLY_RENDER_SERVER': _server};
 
 Future<ProcessResult> _bash(List<String> args, {Map<String, String>? environment}) =>
@@ -46,6 +49,7 @@ Future<Map<String, Object?>?> _status() async {
 /// Starts a server in a fresh folder; null when it is up, else why not.
 Future<String?> _serve(String dir, List<String> options) async {
   _server = dir;
+  _started = true;
   final r = await _bash(['tool/codelessly', 'serve', '--idle', '900', ...options]);
   if (r.exitCode != 0) return '${r.stderr}'.trim().split('\n').last;
   // Every worker up and through its warm-up, so what is measured and compared is the server at work.
@@ -59,7 +63,9 @@ Future<String?> _serve(String dir, List<String> options) async {
   return 'The render server\'s workers did not all come up.';
 }
 
-Future<void> _stop() => _bash(['tool/codelessly', 'serve', '--stop']);
+Future<void> _stop() async {
+  if (_started) await _bash(['tool/codelessly', 'serve', '--stop']);
+}
 
 /// The files a render left in [dir], by name (not the folders a command keeps for itself, whose names begin
 /// with a dot).
@@ -363,6 +369,156 @@ void main() {
       expect(rows.map((m) => m['clients']), [1, 4]);
       expect(rows.map((m) => m['requests']), [3, 12]);
       expect(rows.every((m) => m['failed'] == 0 && (m['layoutsPerSecond'] as num) > 0), isTrue, reason: '$rows');
+    });
+  });
+
+  // `serve` with no --workers: one worker, and more only while work waits (tool/cli/src/autoscale.dart, whose
+  // decisions test/tool/render_autoscale_test.dart tests on a clock of its own).
+  group('workers that follow the load', () {
+    /// `serve` as a person runs it, and nothing waited for after it returns.
+    Future<String?> serveNow(String dir, List<String> options, {Map<String, String> environment = const {}}) async {
+      await _stop();
+      _server = dir;
+      _started = true;
+      final r = await _bash(['tool/codelessly', 'serve', '--idle', '900', ...options], environment: {..._env, ...environment});
+      return r.exitCode == 0 ? null : '${r.stderr}'.trim().split('\n').last;
+    }
+
+    Map<String, Object?> scaling(Map<String, Object?> status) => (status['scaling'] as Map).cast<String, Object?>();
+
+    /// [clients] at once, each sending [args] again and again for [seconds].
+    Future<List<_Run>> load(String name, int clients, int seconds, List<String> args) async {
+      final until = DateTime.now().add(Duration(seconds: seconds));
+      final runs = <_Run>[];
+      await Future.wait([
+        for (var c = 0; c < clients; c++)
+          () async {
+            while (DateTime.now().isBefore(until)) {
+              runs.add(await _render('$root/$name/c$c', args));
+            }
+          }(),
+      ]);
+      return runs;
+    }
+
+    test('one client, one render after another: one worker, no request waits for a warm-up, nothing is shared', () async {
+      if (skip != null) return markTestSkipped(skip!);
+      final failed = await serveNow('$root/serverA', const []);
+      if (failed != null) return markTestSkipped('No render server could start here: $failed');
+      final atStart = (await _status())!;
+      expect((atStart['workers'] as List).length, 1, reason: 'serve starts one worker.');
+      expect(scaling(atStart)['mode'], 'auto');
+      // The requests a client sends right after `serve` returns, back to back.
+      final single = ['$root/sites/capture', '--screen', 'tools', '--sizes', '390x844', '--now', '2026-01-01T09:00:00Z', '--dump-layout', '--timings'];
+      final runs = [for (var i = 0; i < 8; i++) await _render('$root/lone/$i', single)];
+      for (final (i, r) in runs.indexed) {
+        expect(r.err, contains(', the render server (pid '), reason: 'request ${i + 1}');
+        expect(r.err, isNot(contains('waits its turn')), reason: 'Request ${i + 1} waited for the worker (a warm-up round?).');
+        // A request of one capture is one worker's run, as a render with no server: no shared folder to gather.
+        final timings = r.err.split('\n').firstWhere((l) => l.startsWith('timings: render'), orElse: () => '');
+        expect(timings, isNot(isEmpty));
+        expect(timings, isNot(contains('gather')), reason: timings);
+      }
+      // And it gives what a render with no server gives, file for file.
+      Directory('$root/none').createSync(recursive: true);
+      final cold = await _render('$root/lone/cold', single, environment: {'CODELESSLY_RENDER_SERVER': '$root/none'});
+      expect(cold.err, isNot(contains('the render server (pid')));
+      expect(runs.last.exit, cold.exit, reason: '${runs.last.said}\n${runs.last.err}');
+      expect(runs.last.said, cold.said);
+      expect(await _differ(runs.last.out, '$root/lone/cold'), isNull);
+      final s = (await _status())!;
+      final workers = (s['workers'] as List).cast<Map>();
+      expect(workers.length, 1, reason: 'One client rendering one page at a time needs one worker.');
+      expect(workers.single['requests'], 8);
+      expect(workers.single['warmupsLeft'], isNull, reason: 'The requests it rendered warmed it: no round is left to do.');
+      expect(scaling(s)['limit'], 1);
+      expect(scaling(s)['lastDecision'], isNull);
+      // A request of several captures still goes the shared way, and gives what it gave.
+      final two = await _render('$root/lone/two', [...jobs.first.args, '--timings']);
+      expect(two.err, contains('gather'));
+      if (refs['site'] != null) expect(two.said, refs['site']!.said);
+    });
+
+    test('requests that wait add workers; idle ones are ended, down to one; the status says why', () async {
+      if (skip != null) return markTestSkipped(skip!);
+      final failed = await serveNow('$root/serverB', const ['--retire-after', '4']);
+      if (failed != null) return markTestSkipped('No render server could start here: $failed');
+      var most = 1;
+      var watching = true;
+      final watch = () async {
+        while (watching) {
+          final s = await _status();
+          if (s != null && (s['workers'] as List).length > most) most = (s['workers'] as List).length;
+          await Future<void>.delayed(const Duration(milliseconds: 200));
+        }
+      }();
+      final runs = await load('up', 6, 8, jobs.first.args);
+      watching = false;
+      await watch;
+      for (final r in runs) {
+        expect(r.err, contains(', the render server (pid '));
+        if (refs['site'] != null) expect(r.said, refs['site']!.said);
+      }
+      expect(most, greaterThan(1), reason: 'Six clients kept waiting on one worker.');
+      final busy = (await _status())!;
+      expect(scaling(busy)['limit'], greaterThan(1));
+      expect('${(scaling(busy)['lastDecision'] as Map)['reason']}', contains('waiting with all'));
+      expect((busy['workers'] as List).where((w) => ((w as Map)['requests'] as int) > 0).length, greaterThan(1), reason: 'One worker rendered everything.');
+      final said = '${(await _bash(['tool/codelessly', 'serve', '--status'])).stdout}';
+      expect(said, contains(RegExp(r'Workers follow the load: limit \d+ now \(least 1, most not fixed\)')));
+      expect(said, contains(RegExp(r'Last scaling decision: [\d:]+ \d+ -> \d+: \d+ waiting with all \d+ busy')));
+      // Nothing asks: back to one worker.
+      Map<String, Object?>? s;
+      for (var i = 0; i < 150; i++) {
+        s = await _status();
+        if (s != null && (s['workers'] as List).length == 1) break;
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      }
+      expect((s!['workers'] as List).length, 1, reason: 'Idle workers were not ended: ${s['workers']}');
+      expect(scaling(s)['limit'], 1);
+      expect('${(scaling(s)['lastDecision'] as Map)['reason']}', contains('idle for 4 s'));
+      expect(s['workerRestarts'], 0, reason: 'A worker that was ended was started again.');
+      // The one that stayed renders; and a request of many captures brings workers back.
+      final r = await _render('$root/up/after', many);
+      if (refs['many'] != null) {
+        expect(r.said, refs['many']!.said);
+        expect(await _differ('$root/up/after', '$root/ref/many'), isNull);
+      }
+      expect(scaling((await _status())!)['limit'], greaterThan(1), reason: 'Twenty captures waited on one worker.');
+    });
+
+    test('a worker that does not start cuts the pool to what runs, and that level is remembered', () async {
+      if (skip != null) return markTestSkipped(skip!);
+      // (The first two workers start; none after them does.)
+      final failed = await serveNow('$root/serverC', const [], environment: {'CODELESSLY_RENDER_DEBUG_FAIL_START_FROM': '2'});
+      if (failed != null) return markTestSkipped('No render server could start here: $failed');
+      final runs = await load('fail', 8, 8, jobs.first.args);
+      for (final r in runs) {
+        expect(r.exit, lessThan(2), reason: '${r.said}\n${r.err}');
+        if (refs['site'] != null) expect(r.said, refs['site']!.said);
+      }
+      final s = (await _status())!;
+      expect((s['workers'] as List).length, 2);
+      final g = scaling(s);
+      expect(g['limit'], 2);
+      expect(g['refusals'], greaterThanOrEqualTo(1));
+      expect('${g['lastRefusal']}', contains('a worker did not start'));
+      expect(g['ceiling'], isNotNull, reason: 'The level that failed is not remembered: $g');
+      expect(g['ceiling'], lessThanOrEqualTo(4));
+      expect(s['failed'], 0);
+    });
+
+    test('--workers and its bounds are checked', () async {
+      if (skip != null) return markTestSkipped(skip!);
+      await _stop();
+      _server = '$root/serverD';
+      _started = true;
+      final bad = await _bash(['tool/codelessly', 'serve', '--workers', 'several']);
+      expect(bad.exitCode, 2);
+      expect('${bad.stderr}', contains('--workers takes a whole number, or auto'));
+      final help = await _bash(['tool/codelessly', 'serve', '--help']);
+      expect(help.exitCode, 0);
+      expect('${help.stdout}', allOf(contains('--workers n|auto'), contains('--min-workers'), contains('--max-workers'), contains('--retire-after')));
     });
   });
 }

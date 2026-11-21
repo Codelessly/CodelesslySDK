@@ -18,7 +18,9 @@
 // process of its own (CODELESSLY_RENDER_WORKER names it), and hands them requests over that socket in two more
 // forms: `<token> lead <arguments file>` (render the request, with whatever other workers the server sends to
 // help, and write its report) and `<token> help <arguments file>` (render captures of a request another worker
-// leads). src/fan.dart describes how the workers of one request share it. Those are answered with one line,
+// leads). src/fan.dart describes how the workers of one request share it. A third, `<token> solo <arguments file>`, is a
+// request of one capture, which nobody can help with: it is rendered as a run of its own, with no shared folder.
+// Those are answered with one line,
 // `<verdict> <resident bytes> <captures rendered>[ bye]`: `done` (the report is written), `yield` (the server
 // asked this worker to make way: the request goes on later, from where it is), `left` (a helper has no more to
 // do) or `retry` (this worker has another file registered for a font the request draws: another worker must
@@ -216,8 +218,8 @@ Future<void> _sheetOne(WidgetTester tester, List<String> lines, String argsFile)
   File('$argsFile.status.tmp').writeAsStringSync(made == null ? '1' : '0');
 }
 
-/// A request: who asked (null: a request file), how (`lead` or `help` from the render server, else a run of its
-/// own) and the arguments file.
+/// A request: who asked (null: a request file), how (`lead`, `help` or `solo` from the render server, else a run
+/// of its own) and the arguments file.
 typedef _Asked = ({Socket? socket, String? role, String argsFile});
 
 Future<void> _serve(WidgetTester tester, String dir) async {
@@ -253,7 +255,7 @@ Future<void> _serve(WidgetTester tester, String dir) async {
             return;
           }
           final rest = line.substring(token.length + 1);
-          final role = RegExp(r'^(lead|help) ').firstMatch(rest)?[1];
+          final role = RegExp(r'^(lead|help|solo) ').firstMatch(rest)?[1];
           asked.add((socket: socket, role: role, argsFile: role == null ? rest : rest.substring(role.length + 1)));
           if (!wake.isCompleted) wake.complete();
         }, onError: (_) => socket.destroy(), cancelOnError: true);
@@ -266,6 +268,10 @@ Future<void> _serve(WidgetTester tester, String dir) async {
     }
   });
   File('$dir/ready').writeAsStringSync('$pid\n');
+  // A worker the render server started on the compiled harness is reached over its socket alone and ends when
+  // the server closes its input: it waits for a request without looking for anything (seven idle workers that
+  // looked 25 times a second were 7 % of a core).
+  final pooled = Platform.environment['CODELESSLY_RENDER_WORKER_STDIN'] == '1';
   var served = 0;
   while (true) {
     // Wait on the real clock (the test's own is fake) for a request, the stop file or the idle limit.
@@ -274,6 +280,16 @@ Future<void> _serve(WidgetTester tester, String dir) async {
       var looked = DateTime.fromMillisecondsSinceEpoch(0);
       while (DateTime.now().difference(since) < idle) {
         if (asked.isNotEmpty) return asked.removeAt(0);
+        if (pooled) {
+          // (A new one each wait, made here on the real clock: one made on the test's own would not wake this.)
+          final woken = wake = Completer<void>();
+          final limit = Timer(idle - DateTime.now().difference(since), () {
+            if (!woken.isCompleted) woken.complete();
+          });
+          await woken.future;
+          limit.cancel();
+          continue;
+        }
         // The stop file and the request files are looked for every 40 ms; a request over the socket wakes at once.
         if (DateTime.now().difference(looked).inMilliseconds >= 40) {
           looked = DateTime.now();
@@ -313,6 +329,9 @@ Future<void> _serve(WidgetTester tester, String dir) async {
     try {
       if (role == null) {
         await _renderOne(tester, argsFile);
+      } else if (role == 'solo') {
+        await _renderOne(tester, argsFile);
+        rendered = 1;
       } else {
         (verdict, rendered) = await _fanRequest(tester, argsFile, worker, lead: role == 'lead');
       }
@@ -328,6 +347,13 @@ Future<void> _serve(WidgetTester tester, String dir) async {
         } else {
           // (The render server gives the request to another worker, and starts one in this one's place.)
           verdict = 'retry';
+          if (role == 'solo') {
+            // What this worker wrote is not the run's: the next worker writes it.
+            for (final ext in const ['.status', '.report']) {
+              final f = File('$argsFile$ext');
+              if (f.existsSync()) f.deleteSync();
+            }
+          }
           stderr.writeln('Worker $worker stops: it has other files registered for fonts this run draws '
               '(${DirectoryFontFetcher.engineConflicts.join('; ')}).');
         }
@@ -358,7 +384,9 @@ Future<void> _serve(WidgetTester tester, String dir) async {
     }
     // Whatever a run left for the test to find is that run's, not the next one's.
     tester.takeException();
-    File('$dir/served').writeAsStringSync('${++served}\n');
+    served++;
+    // (The render server counts what its workers served itself.)
+    if (!pooled) File('$dir/served').writeAsStringSync('$served\n');
     // The next run gets a sound tree: an empty frame builds and lays out without an error. A run whose failure
     // (a framework assertion in a build) left it broken ends the server rather than the next run's capture.
     // (A worker of the render server looks before it answers, so the server knows it takes no more.)

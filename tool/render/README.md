@@ -335,13 +335,37 @@ another folder, for a second server on the checkout (the tests' own).
 
 **It renders in parallel.** Flutter's engine renders on one thread of a process, so the server is one address and
 several workers behind it, each the harness in a headless engine process of its own (`tool/cli/src/pool.dart`).
-`serve.sh --workers <n>` says how many: by default half the machine's processors, no more than half its memory
-holds at a gigabyte each, 8 at most; `--workers 1` renders one request
-after another. The harness is compiled once (`build/render_pool/harness.dill`, again when the SDK or the API
+The harness is compiled once (`build/render_pool/harness.dill`, again when the SDK or the API
 changed) and every worker runs that file, so a worker starts in about a second and none of them rewrites `build/`;
 each renders a small site (`tool/render/warmup/`) before it takes a request, so the first real one is not the slow
 one. Where this Flutter has no `flutter_tester` to run directly, the workers are started with `flutter test`, one
 after another.
+
+**How many workers: it follows the load** (`--workers auto`, the default; `tool/cli/src/autoscale.dart`). `serve`
+starts one worker and returns. One client rendering one page at a time, which is nearly all use, has that one
+warm worker and pays for one engine (about 350 MB, 1 % of a core while idle), and nothing about its renders is
+shared, listed or polled: a request of one capture is rendered by one worker as a run of its own.
+
+- **More are added when work waits**: requests in the queue, or captures of a request nobody took, with no worker
+  idle for 150 ms. One waiting request adds one worker; a queue adds them in growing steps (to 4, then 8, 12, 20,
+  32, 48, 72, ...), each step once the workers of the one before are up (about 1.5 s) and, from 4 on, once the
+  work done per second at this level is measured. There is no fixed top: a queue of a thousand grows the pool for
+  as long as growing helps.
+- **What stops it is a signal, not a number.** A worker that does not start: the pool is cut to what runs. Free
+  memory that would fall under a reserve (an eighth of the machine's, 0.5 to 2 GB, at 400 MB a worker): the raise
+  is held, or made smaller. A raise that did not raise the work done per second by a fifth of what its workers
+  could add at best (past the cores, engines side by side only slow one another): it is taken back. The level
+  that was too many is remembered as a ceiling for two minutes; under it the pool tries half the gap; after it,
+  past it again (the machine's other load changes).
+- **Workers idle for a minute are ended**, the least used first, down to one (`--retire-after <seconds>`): a
+  minute keeps the pool through an agent's pauses between bursts, and a worker costs 1.5 s to start again
+  against about 350 MB to keep. The whole server still stops after `--idle`.
+- **A request never waits for a warm-up or a start.** A new worker is given requests from the moment it is up; a
+  request it renders counts as one of its six warm-up rounds; the worker a request would be given does its
+  rounds only once nobody has asked for a second, and gives a round up (at its next capture) when a request
+  comes; workers being started take no request, and a request goes to an idle warm worker first.
+- `--workers <n>` is that many from start to stop, as before (`--workers 1` renders one request after another);
+  `--min-workers <n>` and `--max-workers <n>` bound the automatic number (no top by default).
 
 - **Separate agents.** Each request is rendered by a worker of its own, at the same time as the others', and is a
   run of its own as ever: a new app, its site read afresh from its files, its `--now` or `--clock`, its sizes, its
@@ -356,7 +380,9 @@ after another.
   compares them file for file, and with a run without the server). Captures that depend on one another stay on
   one worker, in order: a screen's steps and its `--frames` are one capture; several screens with steps are
   rendered one after another; a contact sheet is one worker's. The PNGs are the engine's own encoding, byte for
-  byte what one worker writes. `tool/codelessly states` renders as many states at a time as there are workers.
+  byte what one worker writes. `tool/codelessly states` renders as many states at a time as the server says to
+  send (its workers when their number is fixed; half the processors, 8 at most, when it follows the load, which
+  adds the workers for them).
 - **Turns.** A request waits only when every worker is busy. Waiting requests take the workers that only help
   another request first; then a request that has rendered for a second makes way, after the capture it is on, for
   one that has had less of the workers' time, and goes on later from where it was: a single render asked during
@@ -369,14 +395,19 @@ after another.
   (1024; a warm worker holds about 340 MB, and 360 to 390 after a thousand captures), or
   after `--recycle-after <n>` requests (off by default).
 - **`serve.sh --status`** (`tool/codelessly serve --status`) prints the workers (busy, idle, requests, captures
-  and memory of each), the queue, the requests served, failed and refused, the latency (median, p95) and the
-  captures a second since it started; `--status --json` gives the same as JSON.
+  and memory of each), how their number is decided (the limit now, its bounds, the learned ceiling and until
+  when, the highest level that held, the free memory and the reserve, and the last scaling decision with its
+  reason), the queue, the requests served, failed and refused, the latency (median, p95) and the captures a
+  second since it started; `--status --json` gives the same as JSON (`scaling`: `mode`, `limit`, `min`, `max`,
+  `learned`, `ceiling`, `ceilingUntil`, `lastDecision` {`at`, `from`, `to`, `reason`}, `lastRefusal`, `rate`).
+  Every scaling decision is also a line of `server.log`.
 
 **How much it gives.** `tool/codelessly bench --site <site> [--shape layout|one|site|layout-site] [--clients 1,4,16]
 [--seconds 5]` starts that many clients at once, each with its own copy of the site, asking again and again as
 separate agents would, and prints the requests and the layouts or captures a second, the latency and the failures.
 On a 16-core, 32-thread desktop (a six-page site, pages of 40 to 120 KB of JSON; a quiet machine gives a little
-more), requests a second, with the median latency:
+more), requests a second, with the median latency, at a fixed number of workers (`--workers <n>`; a server that
+follows its load starts at the first row and moves down the table while that gives more):
 
 | Workers | `layout` (one page, one size, no picture) at 1 / 4 / 16 / 64 clients | `one` (with its picture) | `site` (6 pages × 3 sizes): captures a second | `layout-site`: layouts a second |
 |---|---|---|---|---|

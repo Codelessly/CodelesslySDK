@@ -1,7 +1,16 @@
 // The render server: one address, several workers.
 //
-//   codelessly_cli render-pool --dir <build/.render-server> --flutter <flutter command> [--workers n] [--idle s]
-//       [--queue n] [--request-timeout s] [--recycle-mb n] [--recycle-after n]
+//   codelessly_cli render-pool --dir <build/.render-server> --flutter <flutter command> [--workers n|auto]
+//       [--min-workers n] [--max-workers n] [--retire-after s] [--idle s] [--queue n] [--request-timeout s]
+//       [--recycle-mb n] [--recycle-after n]
+//
+// How many workers: by default (`--workers auto`) the server starts one and follows its load (autoscale.dart).
+// One client rendering one page at a time, which is nearly all use, has one warm worker and pays for one engine.
+// When work waits with no worker idle (requests in the queue, or captures of a request nobody took), workers are
+// added in growing steps, each up in about a second; what stops the growth is a signal, not a number: a worker
+// that does not start, free memory that would fall under a reserve, or a raise that did not raise the work done
+// per second (the level is then a ceiling for two minutes). Workers idle for a minute are ended, down to one.
+// `--workers n` is that many from start to stop.
 //
 // tool/render/serve.sh starts it (tool/codelessly serve). Rendering in Flutter's engine runs on one thread of one
 // process, so rendering in parallel is several processes: this one listens where the render command asks
@@ -34,45 +43,33 @@ import 'dart:io';
 import 'dart:math';
 
 import '../../render/src/fan.dart';
+import 'autoscale.dart';
 import 'common.dart';
+import 'memory.dart';
 
 /// What a worker may hold before it is replaced by a fresh one (when idle): the engine's memory grows with the
 /// captures it has made, about a megabyte each.
 const defaultRecycleMb = 1024;
 
-/// How many workers the server starts when none is asked for: half the processors (the other half are the same
-/// cores twice on most machines, and the agents asking need some), no more than half the machine's memory holds
-/// at [defaultRecycleMb] each, and no more than [maxDefaultWorkers].
-int defaultWorkers({int? processors, int? memoryMb}) {
-  final cores = max(1, (processors ?? Platform.numberOfProcessors) ~/ 2);
-  final memory = memoryMb ?? totalMemoryMb();
-  final fits = memory == null ? 4 : max(1, (memory * 0.5 / defaultRecycleMb).floor());
-  return min(min(cores, fits), maxDefaultWorkers);
+/// How many requests at a time a client that has many (tool/codelessly states) should send a server that
+/// follows its load: half the processors (the other half are the same cores twice on most machines, and the
+/// agents asking need some), 8 at most, within the server's own bounds. The server grows to render them.
+int parallelHint({int? processors, int least = 1, int? most}) {
+  var n = min(max(1, (processors ?? Platform.numberOfProcessors) ~/ 2), 8);
+  if (n < least) n = least;
+  if (most != null && n > most) n = most;
+  return n;
 }
 
-const maxDefaultWorkers = 8;
+/// The free memory a raise of the pool must leave: an eighth of the machine's, between half a gigabyte and two.
+int memoryReserveMb(int? totalMb) => totalMb == null ? 1024 : (totalMb ~/ 8).clamp(512, 2048);
 
-/// The machine's memory in megabytes, or null when it cannot be told.
-int? totalMemoryMb() {
-  try {
-    if (Platform.isLinux || Platform.isAndroid) {
-      final m = RegExp(r'MemTotal:\s+(\d+) kB').firstMatch(File('/proc/meminfo').readAsStringSync());
-      return m == null ? null : int.parse(m[1]!) ~/ 1024;
-    }
-    if (Platform.isMacOS) {
-      final r = Process.runSync('sysctl', ['-n', 'hw.memsize']);
-      final bytes = int.tryParse('${r.stdout}'.trim());
-      return bytes == null ? null : bytes ~/ (1024 * 1024);
-    }
-    if (Platform.isWindows) {
-      final r = Process.runSync('powershell', ['-NoProfile', '-NonInteractive', '-Command', '(Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory']);
-      final bytes = int.tryParse('${r.stdout}'.trim());
-      return bytes == null ? null : bytes ~/ (1024 * 1024);
-    }
-  } on Object {
-    // Not told here.
-  }
-  return null;
+/// What `--workers` says: a whole number (that many, from start to stop), or `auto` (null: follow the load).
+int? workersOption(String? value) {
+  if (value == null || value.trim().toLowerCase() == 'auto') return null;
+  final n = int.tryParse(value);
+  if (n == null || n < 1) throw UsageError('--workers takes a whole number, 1 or more, or auto (given "$value").');
+  return n;
 }
 
 enum _WorkerState { starting, idle, busy, gone }
@@ -94,13 +91,20 @@ class _Worker {
   bool asked = false;
   int served = 0, captures = 0, rss = 0;
 
-  /// The warm-up renders it still has to do before its code runs as fast as it will.
+  /// The warm-up renders it still has to do before its code runs as fast as it will (a request it renders
+  /// counts as one).
   int warmLeft = 0;
   bool leaving = false;
+
+  /// Ended once it is idle because the pool shrinks (not replaced by a fresh one).
+  bool retiring = false;
+
+  /// Since when it has had nothing to do.
+  DateTime idleSince = DateTime.now();
 }
 
 class _Job {
-  _Job(this.id, this.argsFile, this.client, {required this.v2, required this.runs, required this.shareable});
+  _Job(this.id, this.argsFile, this.client, {required this.v2, required this.runs, required this.shareable, this.single = false});
   final int id;
   final String argsFile;
   final Socket? client;
@@ -109,6 +113,16 @@ class _Job {
   /// How many runs it has (one, or one for each `--state`); whether other workers may help with it.
   final int runs;
   final bool shareable;
+
+  /// One capture, as far as its arguments say ([asksOneCapture]): one worker renders it with no shared folder,
+  /// and the server does not look for captures others could take.
+  final bool single;
+
+  /// The captures its workers said they rendered, and how many of them the autoscaler was told of already.
+  int rendered = 0, counted = 0;
+
+  /// The captures nobody took when the server last looked and had no idle worker to send.
+  int unmet = 0;
   late final FanDir dir = FanDir.of(argsFile);
   final DateTime arrived = DateTime.now();
   DateTime? firstStarted;
@@ -126,13 +140,17 @@ class _Job {
   String? verdict;
   Timer? timeout;
   bool warm = false;
+
+  /// A warm-up that is not given up for a waiting request (a new worker's first: most of what it compiles).
+  bool keep = false;
 }
 
 class _Pool {
   _Pool({
     required this.dir,
     required this.flutter,
-    required this.workerCount,
+    required this.fixedWorkers,
+    required this.policy,
     required this.idle,
     required this.maxQueue,
     required this.requestTimeout,
@@ -142,7 +160,22 @@ class _Pool {
 
   final String dir;
   final String flutter;
-  final int workerCount;
+
+  /// `--workers n`: that many from start to stop. Null (`--workers auto`, the default): the pool follows its
+  /// load (autoscale.dart), from [AutoscalePolicy.min] up, with no fixed top unless [AutoscalePolicy.max] is one.
+  final int? fixedWorkers;
+  final AutoscalePolicy policy;
+  late final Autoscaler _scaler = Autoscaler(policy);
+  late final AutoscaleState _scale = _scaler.start(DateTime.now());
+
+  bool get auto => fixedWorkers == null;
+
+  /// The workers the server should have now.
+  int get workerCount => fixedWorkers ?? _scale.limit;
+
+  /// For tests: workers from this number on do not start (`CODELESSLY_RENDER_DEBUG_FAIL_START_FROM`).
+  final int? _failStartFrom = int.tryParse(Platform.environment['CODELESSLY_RENDER_DEBUG_FAIL_START_FROM'] ?? '');
+
   final Duration idle;
   final int maxQueue;
   final Duration requestTimeout;
@@ -178,8 +211,9 @@ class _Pool {
     _warmSite = _writeWarmSite();
     _listener = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
     _listener!.listen(_accept, onError: (Object _) {});
-    log('Render server: ${_launch.how}, $workerCount worker${workerCount == 1 ? '' : 's'}, port ${_listener!.port}.');
-    // One worker first (the server takes requests as soon as it is up), then the others, a few at a time.
+    log('Render server: ${_launch.how}, ${auto ? 'workers follow the load (from ${policy.min}${policy.max == null ? '' : ' to ${policy.max}'})' : '$workerCount worker${workerCount == 1 ? '' : 's'}'}, port ${_listener!.port}.');
+    // One worker first (the server takes requests as soon as it is up), then any others asked for, a few at a
+    // time. A server that follows its load starts no other until work waits.
     final first = _spawn();
     final up = await first;
     if (!up) {
@@ -192,18 +226,28 @@ class _Pool {
       ..renameSync('$dir/port');
     File('$dir/ready').writeAsStringSync('$pid\n');
     _ready = true;
+    lastActivity = DateTime.now();
     unawaited(_spawnRest());
-    Timer.periodic(const Duration(milliseconds: 100), (_) => _housekeeping());
+    Timer.periodic(housekeepingEvery, (_) => _housekeeping());
     return _stopped.future;
   }
 
+  /// How often the server looks at what no event tells it: its stop file, request files, idle workers to end.
+  /// (A request over the socket, a worker's answer and a worker's end are events: nothing waits for this.)
+  static const housekeepingEvery = Duration(milliseconds: 250);
+
   final Completer<int> _stopped = Completer<int>();
+
+  int get _alive => workers.where((w) => w.state != _WorkerState.gone && !w.retiring).length;
+  /// The workers not up yet: their process is starting, or they are in the warm-up round they do first.
+  int get _starting =>
+      workers.where((w) => w.state == _WorkerState.starting || (w.state == _WorkerState.busy && w.job != null && w.job!.warm && w.job!.keep)).length;
 
   Future<void> _spawnRest() async {
     // (With `flutter test` one after another: each rewrites build/ as it starts.)
     final atOnce = _launch.direct ? 4 : 1;
-    while (!_stopping && workers.where((w) => w.state != _WorkerState.gone).length < workerCount) {
-      final missing = workerCount - workers.where((w) => w.state != _WorkerState.gone).length;
+    while (!_stopping && !_gaveUp && _alive < workerCount) {
+      final missing = workerCount - _alive;
       await Future.wait([for (var i = 0; i < min(atOnce, missing); i++) _spawn()]);
     }
   }
@@ -214,10 +258,14 @@ class _Pool {
     workers.add(w);
     Directory(w.dir).createSync(recursive: true);
     try {
+      if (_failStartFrom != null && _nextWorker > _failStartFrom) throw StateError('made to fail (CODELESSLY_RENDER_DEBUG_FAIL_START_FROM)');
       w.process = await _launch.start(w.id, w.dir, idle: idle + const Duration(minutes: 10));
     } on Object catch (e) {
       log('Worker ${w.id} could not be started: $e');
       w.state = _WorkerState.gone;
+      _startFailed('${w.id} could not be started');
+      // (Not at once again, whatever asks: what refused it is there for a moment more.)
+      await Future<void>.delayed(const Duration(milliseconds: 200));
       return false;
     }
     final out = File('${w.dir}.log').openWrite();
@@ -248,13 +296,43 @@ class _Pool {
     w.warmLeft = _warmSite == null ? 0 : warmRounds;
     w.state = _WorkerState.idle;
     // The first warm-up before it is given a request: what it compiles as it first renders is most of the cost.
-    if (w.warmLeft > 0) await _warm(w);
+    // (Its state says busy meanwhile, so no request is handed to it before the round is over.)
+    // (The server's first worker: whoever started the server asks next, so the quiet before a further round
+    // starts when this one is up.)
+    if (!_ready) lastActivity = DateTime.now().add(const Duration(minutes: 1));
+    if (w.warmLeft > 0) await _warm(w, first: true);
+    if (!_ready) lastActivity = DateTime.now();
+    if (w.state == _WorkerState.gone) return false;
+    w.idleSince = DateTime.now();
+    _startFailures = 0;
     log('Worker ${w.id} up (pid ${w.process!.pid}).');
+    // The workers of a raise are up: the rate at the new level is measured from here.
+    if (auto && _starting == 0) _scaler.landed(_scale, DateTime.now());
     _schedule();
-    return w.state != _WorkerState.gone;
+    return true;
   }
 
+  /// A worker did not start. A pool that follows its load takes that as the level's refusal (starting fewer is
+  /// the only thing that helps a machine that will not take another): cut to what runs, and remembered.
+  void _startFailed(String why) {
+    // (Workers that never come up are not started over and over.)
+    if (++_startFailures > workerCount * 3 + 10 && !_gaveUp) {
+      _gaveUp = true;
+      log('Workers keep failing to start: no more are started.');
+    }
+    if (!auto || !_ready) return;
+    final up = workers.where((w) => (w.state == _WorkerState.idle || w.state == _WorkerState.busy) && !w.retiring).length;
+    final change = _scaler.refused(_scale, DateTime.now(), running: up, kind: 'start_failure', why: why);
+    if (change != null) _applied(change);
+  }
+
+  int _startFailures = 0;
+
   static const warmRounds = 6;
+
+  /// How long nobody must have asked before the last free worker does a warm-up round (a client that sends one
+  /// request after another sends the next within a tenth of a second of the answer).
+  static const quietBeforeWarm = Duration(seconds: 1);
 
   /// A small site of the usual nodes, rendered by each new worker so the code a render runs is compiled before
   /// the first request (the engine runs it interpreted, then compiled as it proves hot).
@@ -268,14 +346,18 @@ class _Pool {
     return site.path;
   }
 
-  Future<void> _warm(_Worker w) async {
+  /// One warm-up round on [w]. A round after the [first] is given up for a request that waits: the worker stops
+  /// at the round's next capture (three a round).
+  Future<void> _warm(_Worker w, {bool first = false}) async {
     final out = '${w.dir}/warm';
     Directory(out).createSync(recursive: true);
     final argsFile = '$out/args';
     final fan = Directory('$argsFile.fan');
     if (fan.existsSync()) fan.deleteSync(recursive: true);
     File(argsFile).writeAsStringSync([_warmSite!, '--out', out, '--no-google-fonts', '--dump-layout'].map((a) => '$a\u0000').join());
-    final job = _Job(-1, argsFile, null, v2: false, runs: 1, shareable: false)..warm = true;
+    final job = _Job(-1, argsFile, null, v2: false, runs: 1, shareable: false)
+      ..warm = true
+      ..keep = first;
     w.warmLeft--;
     await _assign(w, job, 'lead');
   }
@@ -354,16 +436,18 @@ class _Pool {
       }
       return null;
     }
-    var runs = 1, shareable = true;
+    var runs = 1, shareable = true, single = false;
     try {
       final args = File(argsFile).readAsStringSync().split('\u0000');
+      if (args.isNotEmpty && args.last.isEmpty) args.removeLast();
       runs = max(1, args.where((a) => a == '--state').length);
       shareable = !args.contains('--sheet');
+      single = asksOneCapture(args);
     } on FileSystemException {
       _reply(socket, v2 ? 'failed The render server cannot read the request ($argsFile).' : 'failed');
       return null;
     }
-    final job = _Job(_nextJob++, argsFile, socket, v2: v2, runs: runs, shareable: shareable);
+    final job = _Job(_nextJob++, argsFile, socket, v2: v2, runs: runs, shareable: shareable, single: single);
     job.timeout = Timer(requestTimeout, () => _timedOut(job));
     waiting.add(job);
     _schedule();
@@ -371,31 +455,107 @@ class _Pool {
     return job;
   }
 
-  List<_Worker> get _idle => [for (final w in workers) if (w.state == _WorkerState.idle && !w.leaving) w];
+  List<_Worker> get _idle => [for (final w in workers) if (w.state == _WorkerState.idle && !w.leaving && !w.retiring) w];
 
   void _schedule() {
     if (_stopping) return;
     // Waiting requests first, the one that waited longest on the worker that is warmest.
     while (waiting.isNotEmpty) {
-      final idle = _idle..sort((a, b) => a.warmLeft != b.warmLeft ? a.warmLeft.compareTo(b.warmLeft) : b.served.compareTo(a.served));
+      final idle = _idle..sort(_warmestFirst);
       if (idle.isEmpty) break;
-      unawaited(_assign(idle.first, waiting.removeAt(0), 'lead'));
+      final job = waiting.removeAt(0);
+      unawaited(_assign(idle.first, job, job.single ? 'solo' : 'lead'));
     }
     if (waiting.isNotEmpty) {
       _makeWay();
     } else {
       _help();
-      // Nothing asks: the workers still to warm up do a round.
-      for (final w in _idle) {
-        if (w.warmLeft > 0 && active.isEmpty) unawaited(_warm(w).then((_) => _schedule()));
-      }
+      _warmIdle();
     }
-    final busy = waiting.isNotEmpty || (active.any((j) => !j.warm && j.shareable) && _idle.isNotEmpty);
-    if (busy && _tick == null) {
-      _tick = Timer.periodic(const Duration(milliseconds: 5), (_) => _schedule());
-    } else if (!busy && _tick != null) {
+    if (auto) _follow();
+    // Looked at again in a moment: while requests wait (a worker may be asked to make way), while idle workers
+    // could take captures of a request being rendered, and while a pool that follows its load has captures nobody
+    // took. Not for a request of one capture: nothing about it changes until its worker answers.
+    final shared = active.any((j) => !j.warm && j.shareable && !j.single);
+    final busy = waiting.isNotEmpty || (shared && (_idle.isNotEmpty || auto));
+    final every = waiting.isNotEmpty || (shared && _idle.isNotEmpty) ? const Duration(milliseconds: 5) : const Duration(milliseconds: 50);
+    if (_tick != null && (!busy || every != _tickEvery)) {
       _tick!.cancel();
       _tick = null;
+    }
+    if (busy && _tick == null) {
+      _tickEvery = every;
+      _tick = Timer.periodic(every, (_) => _schedule());
+    }
+  }
+
+  Duration _tickEvery = Duration.zero;
+
+  /// The worker a request is given first: the warmest, then the one that has served most (so one client's
+  /// requests keep to one worker, and the others' idle time runs on).
+  static int _warmestFirst(_Worker a, _Worker b) => a.warmLeft != b.warmLeft ? a.warmLeft.compareTo(b.warmLeft) : b.served.compareTo(a.served);
+
+  /// Nothing asks: the workers still to warm up do a round, all but the one a request would be given (the
+  /// warmest), so a request never finds every worker in a round. That last one does its rounds only once nobody
+  /// has asked for [quietBeforeWarm], and gives a round up when a request comes ([_makeWay]).
+  void _warmIdle() {
+    if (active.isNotEmpty) return;
+    final idle = _idle..sort(_warmestFirst);
+    while (idle.length > 1) {
+      final w = idle.removeLast();
+      if (w.warmLeft > 0) unawaited(_warm(w).then((_) => _schedule()));
+    }
+    if (idle.length == 1 && idle.first.warmLeft > 0 && DateTime.now().difference(lastActivity) >= quietBeforeWarm &&
+        !workers.any((w) => w.state == _WorkerState.busy && (w.job?.warm ?? false))) {
+      unawaited(_warm(idle.first).then((_) => _schedule()));
+    }
+  }
+
+  /// A pool that follows its load: the autoscaler is told where the pool stands, and what it decides is done.
+  void _follow() {
+    var demand = waiting.length;
+    for (final job in active) {
+      if (!job.warm && job.shareable && !job.single && job.verdict == null) demand += job.unmet;
+    }
+    // (A worker in a warm-up round is free for a request: it gives the round up.)
+    final free = _idle.length + workers.where((w) => w.state == _WorkerState.busy && (w.job?.warm ?? false) && !w.job!.keep).length;
+    final memory = demand > 0 && free == 0 ? machineMemory() : null;
+    final change = _scaler.tick(_scale, DateTime.now(), idle: free, starting: _starting, demand: demand, freeMb: memory?.freeMb);
+    if (change != null) _applied(change);
+  }
+
+  /// What the autoscaler decided: said in the log, and workers started or ended to match.
+  void _applied(AutoscaleChange change) {
+    if (change.to == change.from) {
+      log('Workers ${change.reason}.');
+      return;
+    }
+    log('Workers ${change.from} -> ${change.to}: ${change.reason}.');
+    if (change.to > change.from) {
+      unawaited(_spawnRest());
+      return;
+    }
+    // Fewer: those still starting first, then idle ones (the coldest first), then busy ones (each ends after
+    // the request it is on).
+    var over = _alive - change.to;
+    final order = [
+      ...workers.where((w) => w.state == _WorkerState.starting && !w.retiring),
+      ...(_idle..sort(_warmestFirst)).reversed,
+      ...workers.where((w) => w.state == _WorkerState.busy && !w.retiring && !w.leaving),
+    ];
+    for (final w in order) {
+      if (over <= 0) break;
+      over--;
+      _retire(w);
+    }
+  }
+
+  /// [w] is ended because the pool shrinks: now when it has nothing to do, else after the request it is on.
+  void _retire(_Worker w) {
+    w.retiring = true;
+    if (w.state != _WorkerState.busy || (w.job?.warm ?? false)) {
+      w.leaving = true;
+      _kill(w);
     }
   }
 
@@ -405,6 +565,14 @@ class _Pool {
   void _makeWay() {
     var need = waiting.length - workers.where((w) => w.state == _WorkerState.busy && w.asked).length;
     if (need <= 0) return;
+    // A warm-up round first: a request never waits for one to end (the worker stops at its next capture).
+    for (final w in workers) {
+      if (need <= 0) return;
+      if (w.state == _WorkerState.busy && !w.asked && w.job != null && w.job!.warm && !w.job!.keep) {
+        _askYield(w);
+        need--;
+      }
+    }
     final now = DateTime.now();
     final helpers = [for (final w in workers) if (w.state == _WorkerState.busy && w.role == 'help' && !w.asked) w];
     for (final w in helpers) {
@@ -431,23 +599,36 @@ class _Pool {
   }
 
   /// Idle workers help with the requests being rendered that have captures nobody took yet.
+  /// A pool that follows its load also notes, for each such request, the captures no idle worker was there for
+  /// ([_Job.unmet]: what more workers would take), and tells the autoscaler of the captures rendered meanwhile.
   void _help() {
     final idle = _idle..sort((a, b) => a.warmLeft.compareTo(b.warmLeft));
-    if (idle.isEmpty) return;
+    if (idle.isEmpty && !auto) return;
     final now = DateTime.now();
+    // (With no worker to send, the folders are looked at ten times a second, not two hundred.)
+    if (idle.isEmpty && now.difference(_lookedForUnmet).inMilliseconds < 100) return;
+    _lookedForUnmet = now;
     for (final job in active) {
-      if (idle.isEmpty) return;
-      if (job.warm || !job.shareable || job.leader == null || job.over || job.verdict != null) continue;
+      if (idle.isEmpty && !auto) return;
+      if (job.warm || !job.shareable || job.single || job.leader == null || job.over || job.verdict != null) {
+        job.unmet = 0;
+        continue;
+      }
       if (now.difference(job.lastHelper).inMilliseconds > 400) job.joining = 0;
-      var open = 0, unprepared = 0;
+      var open = 0, unprepared = 0, recorded = 0;
       for (var r = 0; r < job.runs; r++) {
         final at = job.dir.state(r);
+        recorded += at.recorded;
         final known = at.total ?? at.estimate;
         if (known == null) {
           if (at.entered == 0) unprepared++;
         } else if (!at.solo) {
           open += max(0, known - at.claimed);
         }
+      }
+      if (auto && recorded > job.counted) {
+        _scaler.progress(_scale, recorded - job.counted);
+        job.counted = recorded;
       }
       // (One run nobody prepared is the leader's next; a helper is worth its own preparing from two captures.)
       var want = max(0, unprepared - 1) + open ~/ 2 - job.joining;
@@ -458,8 +639,11 @@ class _Pool {
         want--;
         unawaited(_assign(w, job, 'help'));
       }
+      job.unmet = max(0, want);
     }
   }
+
+  DateTime _lookedForUnmet = DateTime.fromMillisecondsSinceEpoch(0);
 
   /// Hands [job] to [w] and deals with its answer.
   Future<void> _assign(_Worker w, _Job job, String role) async {
@@ -469,7 +653,7 @@ class _Pool {
       ..role = role
       ..asked = false
       ..since = DateTime.now();
-    if (role == 'lead') {
+    if (role != 'help') {
       job.leader = w;
       job.firstStarted ??= DateTime.now();
       if (!job.warm) active.add(job);
@@ -504,6 +688,9 @@ class _Pool {
         w.served++;
         w.captures += rendered;
         captures += rendered;
+        job.rendered += rendered;
+        // What it rendered for a request warmed it as a round of its own would.
+        if (w.warmLeft > 0 && rendered > 0) w.warmLeft--;
       }
     }
     final bye = lost || parts.contains('bye');
@@ -551,8 +738,16 @@ class _Pool {
     if (bye) {
       _gone(w, lost ? 'it did not answer' : 'it takes no more requests');
     } else {
-      w.state = _WorkerState.idle;
-      if (!job.warm && (w.rss > recycleBytes || w.served >= recycleAfter)) _recycle(w);
+      w
+        ..state = _WorkerState.idle
+        ..idleSince = DateTime.now();
+      if (w.retiring) {
+        // The pool shrank while it rendered: it ends here.
+        w.leaving = true;
+        _kill(w);
+      } else if (!job.warm && (w.rss > recycleBytes || w.served >= recycleAfter)) {
+        _recycle(w);
+      }
     }
     _schedule();
   }
@@ -571,6 +766,12 @@ class _Pool {
     job.over = true;
     active.remove(job);
     final verdict = job.verdict!;
+    // What it rendered that the autoscaler was not told of as it went (a request that captures nothing is one).
+    if (auto && !job.warm && verdict == 'done') {
+      final all = max(1, job.rendered);
+      if (all > job.counted) _scaler.progress(_scale, all - job.counted);
+      job.counted = all;
+    }
     if (verdict == 'done') {
       served++;
       _latencies.add(DateTime.now().difference(job.arrived).inMilliseconds);
@@ -640,17 +841,20 @@ class _Pool {
     w.state = _WorkerState.gone;
     _kill(w);
     if (_stopping) return;
+    if (w.retiring) {
+      // Ended because the pool shrank: none takes its place.
+      log('Worker ${w.id} ended (${w.served} requests).');
+      return;
+    }
     if (!w.leaving) log('Worker ${w.id} is gone: $why.');
+    if (was == _WorkerState.starting) _startFailed('${w.id}: $why');
     if (was != _WorkerState.starting || _ready) {
       restarts++;
-      // (A worker that never came up is not started over and over.)
-      if (was == _WorkerState.starting && restarts > workerCount * 3 + 10) {
-        log('Workers keep failing to start: no more are started.');
-        return;
-      }
       unawaited(_spawnRest());
     }
   }
+
+  bool _gaveUp = false;
 
   int _servedWritten = -1;
 
@@ -688,6 +892,28 @@ class _Pool {
       return;
     }
     _takeRequestFiles();
+    final now = DateTime.now();
+    if (auto) {
+      // Workers beyond the least that have had nothing to do for retireAfter are ended, the coldest first; the one
+      // a request would be given stays.
+      final idle = _idle..sort(_warmestFirst);
+      var alive = _alive;
+      var ended = 0;
+      for (final w in idle.skip(1).toList().reversed) {
+        if (alive - ended <= policy.min) break;
+        if (now.difference(w.idleSince) < policy.retireAfter) continue;
+        ended++;
+        _retire(w);
+      }
+      if (ended > 0) {
+        final change = _scaler.retired(_scale, now, to: alive - ended);
+        if (change != null) log('Workers ${change.from} -> ${change.to}: ${change.reason}.');
+      }
+      // (The autoscaler's ceiling and holds run out with the clock, not with an event.)
+      if (waiting.isNotEmpty || active.isNotEmpty) _follow();
+    }
+    // The last free worker's warm-up rounds start once nobody has asked for a moment.
+    if (active.isEmpty && waiting.isEmpty && workers.any((w) => w.state == _WorkerState.idle && w.warmLeft > 0)) _schedule();
     if (served != _servedWritten) {
       try {
         File('$dir/served').writeAsStringSync('$served\n');
@@ -752,6 +978,18 @@ class _Pool {
             },
       ],
       'workerCount': workerCount,
+      // How many requests at a time a client with many should send.
+      'parallel': auto ? parallelHint(least: policy.min, most: policy.max) : workerCount,
+      'scaling': {
+        'mode': auto ? 'auto' : 'fixed',
+        'min': auto ? policy.min : workerCount,
+        'max': auto ? policy.max : workerCount,
+        if (auto) ..._scale.toJson(DateTime.now()),
+        if (!auto) 'limit': workerCount,
+        if (auto) 'retireAfterSeconds': policy.retireAfter.inSeconds,
+        if (auto) 'memoryReserveMb': policy.reserveMb,
+        if (auto) 'freeMemoryMb': machineMemory()?.freeMb,
+      },
       'busy': workers.where((w) => w.state == _WorkerState.busy && !(w.job?.warm ?? false)).length,
       'idle': workers.where((w) => w.state == _WorkerState.idle).length,
       'queued': waiting.length,
@@ -929,7 +1167,10 @@ class _Launch {
 }
 
 Future<int> poolMain(List<String> argv) async {
-  final a = Args(argv, valued: {'--dir', '--flutter', '--workers', '--idle', '--queue', '--request-timeout', '--recycle-mb', '--recycle-after'});
+  final a = Args(argv, valued: {
+    '--dir', '--flutter', '--workers', '--min-workers', '--max-workers', '--retire-after', '--idle', '--queue', '--request-timeout', '--recycle-mb',
+    '--recycle-after',
+  });
   final dir = a['--dir'], flutter = a['--flutter'];
   if (dir == null || flutter == null) throw const UsageError('render-pool is started by tool/render/serve.sh (tool/codelessly serve).');
   int number(String option, int otherwise, {int least = 1}) {
@@ -940,10 +1181,26 @@ Future<int> poolMain(List<String> argv) async {
     return n;
   }
 
+  // `--workers n` is that many; without it (or `auto`) the pool follows its load, within --min-workers and
+  // --max-workers when given. (The machine's memory is read from the system itself, memory.dart: no process
+  // is started to learn it.)
+  final fixed = workersOption(a['--workers']);
+  final least = number('--min-workers', 1), most = a['--max-workers'] == null ? null : number('--max-workers', 1);
+  if (fixed != null && (a['--min-workers'] != null || a['--max-workers'] != null)) {
+    throw const UsageError('--min-workers and --max-workers bound --workers auto; --workers <n> is that many.');
+  }
+  if (most != null && most < least) throw UsageError('--max-workers ($most) is less than --min-workers ($least).');
   final pool = _Pool(
     dir: dir.replaceAll(r'\', '/'),
     flutter: flutter,
-    workerCount: number('--workers', defaultWorkers()),
+    fixedWorkers: fixed,
+    policy: AutoscalePolicy(
+      initial: least,
+      min: least,
+      max: most,
+      retireAfter: Duration(seconds: number('--retire-after', const AutoscalePolicy().retireAfter.inSeconds)),
+      reserveMb: fixed == null ? memoryReserveMb(readMemory()?.totalMb) : 1024,
+    ),
     idle: Duration(seconds: number('--idle', 1800)),
     maxQueue: number('--queue', 256, least: 0),
     requestTimeout: Duration(seconds: number('--request-timeout', 1200)),
@@ -970,6 +1227,18 @@ Future<String?> askServer(String what, {Duration timeout = const Duration(second
   }
 }
 
+/// How the number of workers is decided, for `serve --status`: the limit now, its bounds, what was learned and
+/// the last decision with its reason.
+String scalingLine(Map<String, Object?> g) {
+  if (g['mode'] != 'auto') return 'Workers: ${g['limit'] ?? '?'}, fixed (--workers ${g['limit'] ?? 'n'}); --workers auto follows the load.';
+  final last = (g['lastDecision'] as Map?)?.cast<String, Object?>();
+  final ceiling = g['ceiling'] == null ? 'no learned ceiling' : 'learned ceiling ${g['ceiling']} (until ${'${g['ceilingUntil']}'.substring(11, 19)})';
+  return 'Workers follow the load: limit ${g['limit']} now (least ${g['min']}, most ${g['max'] ?? 'not fixed'}), $ceiling, '
+      'highest that held ${g['learned'] ?? '-'}; idle ones end after ${g['retireAfterSeconds']} s; '
+      '${g['freeMemoryMb'] ?? '?'} MB of memory free (${g['memoryReserveMb']} MB kept free).\n'
+      'Last scaling decision: ${last == null ? 'none yet' : '${'${last['at']}'.substring(11, 19)} ${last['from']} -> ${last['to']}: ${last['reason']}'}.';
+}
+
 /// `tool/codelessly serve --status`'s second part: the workers, the queue, what was served and how fast.
 Future<int> poolStatusMain(List<String> argv) async {
   final answer = await askServer('status');
@@ -981,6 +1250,7 @@ Future<int> poolStatusMain(List<String> argv) async {
   final s = (jsonDecode(answer) as Map).cast<String, Object?>();
   final workers = (s['workers'] as List).cast<Map>();
   stdout.writeln('${workers.length} of ${s['workerCount']} workers up (${s['busy']} busy, ${s['idle']} idle); ${s['queued']} requests queued (limit ${s['queueLimit']}), ${s['rendering']} rendering.');
+  stdout.writeln(scalingLine((s['scaling'] as Map?)?.cast<String, Object?>() ?? const {}));
   stdout.writeln('${s['served']} requests served (${s['captures']} captures), ${s['failed']} failed, ${s['refusedBusy']} refused as busy; '
       'latency median ${s['medianMs'] ?? '-'} ms, p95 ${s['p95Ms'] ?? '-'} ms; ${s['capturesPerSecond']} captures a second since it started.');
   stdout.writeln('Workers restarted ${s['workerRestarts']} times (${s['workerCrashes']} stopped during a request, ${s['recycled']} replaced by a fresh one: past ${s['recycleMb']} MB, or --recycle-after); ${s['how']}.');
