@@ -21,16 +21,26 @@ import '../../render/play.dart' show FlightRegistry;
 abstract final class HeroRoutes {
   static final Expando<ModalRoute<Object?>> _routeOf = Expando('heroRoute');
 
-  /// [tree] shows in [route] now.
-  static void bind(RenderTree tree, ModalRoute<Object?>? route) {
+  static final Expando<NavigatorState? Function()> _hostOf = Expando('heroHost');
+
+  /// [tree] shows in [route] now; [host] reads the navigator of the
+  /// `CodelesslyViewHost` it is under, if any (the route is then the app's,
+  /// around the host; read when something flies: a host's navigator is built
+  /// after the screen under it).
+  static void bind(RenderTree tree, ModalRoute<Object?>? route, {NavigatorState? Function()? host}) {
     _routeOf[tree] = route;
+    _hostOf[tree] = host;
     FlightRegistry.leaving = leaving;
     HeroMarks.leaving = leaving;
     HeroLifts._install();
   }
 
-  /// The navigator [tree]'s screen shows in, when it is known.
-  static NavigatorState? navigatorOf(RenderTree tree) => _routeOf[tree]?.navigator;
+  /// The navigator what [tree]'s screen lifts is drawn in, when it is known:
+  /// its host's, else its route's.
+  static NavigatorState? navigatorOf(RenderTree tree) {
+    final host = _hostOf[tree]?.call();
+    return host != null && host.mounted ? host : _routeOf[tree]?.navigator;
+  }
 
   /// Whether [tree]'s route is closing (popped, its exit still playing) or
   /// gone: what it shows is on its way out.

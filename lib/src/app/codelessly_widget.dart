@@ -62,6 +62,7 @@ import 'page_transitions.dart';
 import 'persisted_variables.dart';
 import 'runtime.dart';
 import 'theme.dart';
+import 'view_host.dart' show CodelesslyViewHost;
 import 'viewport.dart';
 
 /// Wraps a loaded layout's widget, for extra control over how it shows.
@@ -1302,7 +1303,7 @@ class _LayoutViewState extends State<_LayoutView> {
   Widget build(BuildContext context) {
     final config = _codelessly.config;
     // Its shared elements fly from and to the route it shows in.
-    HeroRoutes.bind(_screen.tree, ModalRoute.of(context));
+    HeroRoutes.bind(_screen.tree, ModalRoute.of(context), host: () => mounted ? CodelesslyViewHost.navigatorOf(context) : null);
     // Back on top (the screen above it popped): report it again.
     if (ModalRoute.isCurrentOf(context) ?? true) WidgetsBinding.instance.addPostFrameCallback((_) => _reportRoute());
     Widget content = LayoutBuilder(builder: (context, constraints) {

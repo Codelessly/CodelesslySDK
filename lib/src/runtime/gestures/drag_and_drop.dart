@@ -442,7 +442,45 @@ class _SourceDrag implements Drag {
   Offset _position;
 
   /// The feedback's global top left.
-  Offset get offset => _position - session.feedbackAnchor;
+  Offset get offset {
+    final box = _scaledOverlay;
+    return box == null ? _position - session.feedbackAnchor : box.localToGlobal(_inOverlay(box));
+  }
+
+  /// The global center of the dragged node's box, where `drag.x` and
+  /// `drag.y` are measured (the pointer for a centered copy).
+  Offset get nodeCenter {
+    final box = _scaledOverlay;
+    final center = session.size.center(Offset.zero);
+    if (box == null) return session.nodeTopLeft(offset) + center;
+    return box.localToGlobal(_inOverlay(box) + session.feedbackAnchor - session.grab + center);
+  }
+
+  /// The overlay's box when it is drawn scaled or turned (a host's box
+  /// fitted into a smaller one): the pointer is then in other units than the
+  /// feedback, which is held by a point in its own. Null when the overlay is
+  /// only moved (an app's), where the two are the same.
+  RenderBox? get _scaledOverlay {
+    final box = _overlayBox;
+    if (box == null || !box.attached) return null;
+    return MatrixUtils.getAsTranslation(box.getTransformTo(null)) == null ? box : null;
+  }
+
+  /// The feedback's top left in the overlay [box], held by its anchor under
+  /// the pointer.
+  Offset _inOverlay(RenderBox box) => box.globalToLocal(_position) - session.feedbackAnchor;
+
+  /// Whether the overlay is a host's box ([FloatingOverlay.confined]).
+  bool _confined = false;
+
+  /// Whether the pointer is outside the box of the host the view is in: it
+  /// is then over nothing of the view (no target, no view to scroll), as
+  /// past the edge of a screen.
+  bool get _outsideHost {
+    final box = _overlayBox;
+    if (!_confined || box == null || !box.attached || !box.hasSize) return false;
+    return !(Offset.zero & box.size).contains(box.globalToLocal(_position));
+  }
 
   /// Whether a target took the drop (its group, `fullIf` and `acceptIf`
   /// allowed it), as opposed to the drag merely ending over one.
@@ -593,6 +631,7 @@ class _SourceDrag implements Drag {
 
   HitTestResult _hitTestAt(Offset globalPosition) {
     final result = HitTestResult();
+    if (_outsideHost) return result;
     final context = islandContextOf(source);
     final viewId =
         (context == null ? null : View.maybeOf(context))?.viewId ??
@@ -647,15 +686,18 @@ class _SourceDrag implements Drag {
   void _placeFeedback() {
     final box = _overlayBox;
     if (box == null || !box.attached) return;
-    _overlayAt.value = box.globalToLocal(offset);
+    _overlayAt.value = identical(box, _scaledOverlay) ? _inOverlay(box) : box.globalToLocal(offset);
   }
 
-  /// Shows the feedback in the app's overlay.
+  /// Shows the feedback in the overlay what the view floats is shown in:
+  /// its host's, else the app's.
   void showFeedback() {
     final context = islandContextOf(source);
-    final overlay = context == null ? null : Overlay.maybeOf(context);
+    final floating = context == null ? null : floatingOverlayOf(context);
     final box = source._box;
-    if (overlay == null || box == null) return;
+    if (floating == null || box == null) return;
+    final overlay = floating.overlay;
+    _confined = floating.confined;
     _overlayBox = overlay.context.findRenderObject() as RenderBox?;
     final model = source._model;
     final feedbackId = model.feedback.isNotEmpty && box.source.node(model.feedback) != null
@@ -730,7 +772,7 @@ class _SourceDrag implements Drag {
     }
     feedback = IgnorePointer(child: feedback);
     content = feedback;
-    final themes = InheritedTheme.capture(from: context!, to: overlay.context);
+    final themes = InheritedTheme.capture(from: context!, to: floating.themesTo);
     _placeFeedback();
     _entry = OverlayEntry(
       builder: (_) => ValueListenableBuilder<Offset>(
@@ -932,7 +974,11 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   void _springBack(Offset feedbackTopLeft) {
     final physics = _model.effectivePhysics;
     if (physics == null || !attached) return;
-    _returnFrom = feedbackTopLeft - localToGlobal(Offset.zero);
+    // In this node's own units: they are not the screen's when it is drawn
+    // scaled (a host's box fitted into a smaller one).
+    _returnFrom = MatrixUtils.getAsTranslation(getTransformTo(null)) == null
+        ? globalToLocal(feedbackTopLeft)
+        : feedbackTopLeft - localToGlobal(Offset.zero);
     _return = 0;
     _spring = SpringSimulation(springOf(physics), 0, 1, 0);
     _springStart = null;
@@ -1220,11 +1266,11 @@ class RenderDropTarget extends RenderProxyBox {
 
   bool _entered = false;
 
-  /// Sets where the dragged node's center is over this target, from the
-  /// global position of its top left.
-  bool _locate(DragSession session, Offset topLeft) {
+  /// Sets where the dragged node's center is over this target, from its
+  /// global position.
+  bool _locate(DragSession session, Offset center) {
     if (!attached || !hasSize) return false;
-    final local = globalToLocal(topLeft + session.size.center(Offset.zero));
+    final local = globalToLocal(center);
     final x = local.dx, y = local.dy;
     final fx = size.width > 0 ? (x / size.width).clamp(0.0, 1.0) : 0.0;
     final fy = size.height > 0 ? (y / size.height).clamp(0.0, 1.0) : 0.0;
@@ -1242,7 +1288,7 @@ class RenderDropTarget extends RenderProxyBox {
     if (!_takes(session.group)) return;
     final dnd = DragAndDrop.of(_box!.tree);
     final position = drag.offset + session.feedbackAnchor;
-    final moved = _locate(session, session.nodeTopLeft(drag.offset));
+    final moved = _locate(session, drag.nodeCenter);
     final oldOver = session.over;
     final oldBefore = session.rawBefore;
     final oldAccepted = session.accepted;
@@ -1294,7 +1340,7 @@ class RenderDropTarget extends RenderProxyBox {
     _entered = false;
     final session = drag.session;
     final dnd = DragAndDrop.of(_box!.tree);
-    _locate(session, session.nodeTopLeft(drag.offset));
+    _locate(session, drag.nodeCenter);
     // Let go before a move reached this target: judge the drop now.
     if (!identical(session.overTarget, this)) {
       session

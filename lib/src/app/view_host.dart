@@ -10,8 +10,13 @@
 // dialog centres in it, a sheet rises from its bottom edge and is as wide
 // as it, the barrier dims it alone, everything is clipped to it and scales
 // with it, and a press outside it reaches what is there.
-// (A drag's proxy is still drawn in the overlay around the view: the
-// drag code is under this layer.)
+// So is what moves over the view: the copy of a dragged node is drawn in
+// the host's overlay (the layers under this one find it through the
+// [FloatingOverlayScope] the host puts round the view), over everything the
+// view shows, and a drag outside the box is over nothing of the view. The
+// row lifted out of a reorderable list is drawn in an overlay of the host's
+// that is exactly the view (Flutter's lists draw it in the nearest overlay
+// around them), under what the view opens.
 //
 // The runtime asks [viewNavigatorOf] and [viewOverlayOf] wherever it asked
 // `Navigator.of` and `Overlay.of` (the root ones too): the host's when the
@@ -19,6 +24,8 @@
 // unchanged. Give the host the box's MediaQuery (its size) above it: the
 // routes read it.
 import 'package:flutter/widgets.dart';
+
+import '../render/islands.dart' show FloatingOverlayScope;
 
 /// Makes its box the world of the Codelessly views under it: see the
 /// library's comment. Its size is [child]'s.
@@ -43,15 +50,24 @@ class CodelesslyViewHost extends StatefulWidget {
 class _CodelesslyViewHostState extends State<CodelesslyViewHost> {
   final GlobalKey<NavigatorState> _navigator = GlobalKey<NavigatorState>(debugLabel: 'CodelesslyViewHost');
 
+  OverlayState? _overlay() => _navigator.currentState?.overlay;
+
   @override
   Widget build(BuildContext context) => _ViewHostScope(
         navigator: _navigator,
-        child: Stack(
+        child: FloatingOverlayScope(
+          // What the view's nodes float (a dragged node's copy) is shown in
+          // the host's overlay.
+          overlay: _overlay,
+          child: Stack(
           // The view sizes the host; what it opens is clipped to that box.
           fit: StackFit.passthrough,
           clipBehavior: Clip.hardEdge,
           children: [
-            widget.child,
+            // The nearest overlay around the view is the view's own box: a
+            // widget in it that floats something in the overlay around it
+            // (a reorderable list's lifted row) draws it there, clipped.
+            Overlay.wrap(alwaysSizeToContent: true, clipBehavior: Clip.hardEdge, child: widget.child),
             Positioned.fill(
               // The host's routes are no part of the app's hero flights.
               child: HeroControllerScope.none(
@@ -65,6 +81,7 @@ class _CodelesslyViewHostState extends State<CodelesslyViewHost> {
               ),
             ),
           ],
+          ),
         ),
       );
 }
