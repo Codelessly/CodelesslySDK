@@ -181,7 +181,7 @@ String? siblingApi(String sdk) {
 }
 
 /// Whether nothing the render server runs changed since it started: no file or folder of the SDK's lib/ and
-/// tool/render/, its pubspecs, or the sibling API's lib/ and pubspec is newer than its `ready` file (render.sh's
+/// tool/render/, its pubspecs, the server itself (tool/cli/src/pool.dart), or the sibling API's lib/ and pubspec is newer than its `ready` file (render.sh's
 /// `find ... -newer`).
 bool serverIsCurrent(String sdk, String? api, File ready) {
   final DateTime since;
@@ -202,7 +202,7 @@ bool serverIsCurrent(String sdk, String? api, File ready) {
       if (newer(e.path)) return false;
     }
   }
-  for (final f in ['$sdk/pubspec.yaml', '$sdk/pubspec_overrides.yaml', if (api != null) '$api/pubspec.yaml']) {
+  for (final f in ['$sdk/pubspec.yaml', '$sdk/pubspec_overrides.yaml', '$sdk/tool/cli/src/pool.dart', if (api != null) '$api/pubspec.yaml']) {
     if (newer(f)) return false;
   }
   return true;

@@ -106,6 +106,7 @@ site: navigation may name a canvas of another page.
 | `--image-map <url prefix>=<folder>` | Read network images whose URL starts with the prefix from the folder (the rest of the URL, decoded and without its query, is the file's path there) and inline them, as local paths are: `--image-map https://cdn.example.com/art/=assets/art`. For documents that name published image URLs whose files you have (a reference app's assets). A mapped URL with no file there is `image_failed`, naming the path. For URLs no prefix covers (a storage bucket's tokens), name a table instead: `--image-map asset_urls.json=assets/art`, a JSON object pairing each file (relative to the folder) with its URL, either way round, as an asset upload writes it; a URL also matches without its query. Repeatable. |
 | `--pick-file <path>` | The file a `pickFile` action (or a `cloudFiles` upload) picks when it opens the file chooser, which a headless run has not: `--pick-file fixtures/map.png --tap attach`. Repeatable (a `pickFile` with `multiple` takes them all, in order; one without takes the first). Without it nothing is picked, as when the person closes the chooser: the chain ends there. A `share` action has no share panel here either: the link (or the text) is copied, and listed under `copied to the clipboard`. |
 | `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`) and, for a node that draws text, the `text` it shows (what a value check reads). The node that has the keyboard focus has `"focused": true`. A built-in control's parts a step names with `@` are its `parts` (`@0`... for tabs and segments, `@decrement`/`@increment`, `@prefix`/`@suffix`, `@thumb`, `@option:<label>`, `@<yyyy-MM-dd>`). A node turned or scaled (a `motion` rotate or scale, its own or an ancestor's), or cut in part by a clip, also has `painted`: the part of the screen it is drawn in (`x`, `y`, `w`, `h`, with `transformed` and `clipped`), as the PNG shows it, where `x`... are its laid-out box; the outline says `(drawn at ...)`. |
+| `--layout-only` | The layout files (as `--dump-layout`: `<png name>.layout.json`) and the diagnostics, and no picture: nothing is drawn to an image or encoded, so a run costs less (most for whole pages and large sizes), and the report's `wrote` lines name the layout files, which the diagnostics file lists as `layouts`. What reads the picture is not done: `--compare` and the `transparent_background` check. For "how does this lay out?" asked often; `tool/codelessly render --layout-only --outline` prints the boxes. Many pages and sizes in one request cost far less each than a request apiece. |
 | `--design-system <folder>` | With one document: render it with that design system's blocks and theme (a card expanded from the notation with `--design-system`). The tool makes the one-page site for it under `<out>/.site`. |
 | `--component <Type>` | Render one component of the site alone: once per preview (at its size), else with its defaults at each size. |
 | `--props '<json>'` | With `--component`: its parameters, as a call's `props`, at each size. A `variable` parameter becomes a page variable of the same name. |
@@ -321,14 +322,77 @@ is gone. An overrides file of your own is never touched. Without a sibling, the 
 
 **The render server.** `tool/render/serve.sh` (or `tool/codelessly serve`) starts the harness once and keeps it
 running: every later run on the checkout is a request to it and skips Flutter's start (about 5 s), with the same
-arguments, report, files and exit status. A run then costs its drawing: a page at one size about a third of a
-second, six pages at three sizes under three, an overlay opened by a tap at two sizes about half a second (on a
-developer's machine, once the server has drawn anything). `tool/codelessly render` asks the server itself, over a
-socket on this machine (`build/.render-server/port` holds the port and a token), and starts no shell;
-`render.sh` asks over the same socket (a server without one is asked through a request file). It serves the code
-it started with: when the SDK's `lib/` or `tool/render/`, its pubspecs or the sibling `codelessly_api`'s `lib/`
-change after it started, the run stops it and renders the usual way. `serve.sh --status` and `--stop`; it stops by
-itself after `--idle` seconds without a request (default 1800). Its state and log are in `build/.render-server/`.
+arguments, report, files and exit status. A run then costs its drawing: a page at one size about a quarter of a
+second, six pages at three sizes about half a second (a second as whole pages; under three on one worker), an overlay opened by a tap at two sizes
+about half a second (on a developer's machine, once the server has drawn anything). `tool/codelessly render` asks the
+server itself, over a socket on this machine (`build/.render-server/port` holds the port and a token), and starts
+no shell; `render.sh` asks over the same socket (or, where it cannot open one, through a request file in that
+folder). It serves the code it started with: when the SDK's `lib/` or `tool/render/`, its pubspecs or the sibling
+`codelessly_api`'s `lib/` change after it started, the run stops it and renders the usual way. `serve.sh --status`
+and `--stop`; it stops by itself after `--idle` seconds without a request (default 1800). Its state and logs are
+in `build/.render-server/` (`server.log`, each worker's `w<n>.log`); `CODELESSLY_RENDER_SERVER=<folder>` names
+another folder, for a second server on the checkout (the tests' own).
+
+**It renders in parallel.** Flutter's engine renders on one thread of a process, so the server is one address and
+several workers behind it, each the harness in a headless engine process of its own (`tool/cli/src/pool.dart`).
+`serve.sh --workers <n>` says how many: by default half the machine's processors, no more than half its memory
+holds at a gigabyte each, 16 at most (8 on a machine of 16 processors and 16 GB); `--workers 1` renders one request
+after another. The harness is compiled once (`build/render_pool/harness.dill`, again when the SDK or the API
+changed) and every worker runs that file, so a worker starts in about a second and none of them rewrites `build/`;
+each renders a small site (`tool/render/warmup/`) before it takes a request, so the first real one is not the slow
+one. Where this Flutter has no `flutter_tester` to run directly, the workers are started with `flutter test`, one
+after another.
+
+- **Separate agents.** Each request is rendered by a worker of its own, at the same time as the others', and is a
+  run of its own as ever: a new app, its site read afresh from its files, its `--now` or `--clock`, its sizes, its
+  theme, its `--out`. A worker renders one capture at a time, so nothing of one request is in the engine while it
+  draws another's. What an engine process keeps for its life is the font files it was given: the same file at
+  another place (each agent's copy of a site) is the same font, and a request that needs another file for a face
+  the worker already has is given to another worker, the first being replaced by a fresh one.
+- **One request of many captures** (screens × sizes, the states of `--state`) is led by one worker and shared
+  with the workers that are idle (`src/fan.dart`): each capture is rendered by the first worker to claim it, and
+  the leader makes the report from every capture's record in order. The report, the diagnostics file, the files
+  and the exit status are those of one worker rendering them one after another (`test/tool/render_parallel_test.dart`
+  compares them file for file, and with a run without the server). Captures that depend on one another stay on
+  one worker, in order: a screen's steps and its `--frames` are one capture; several screens with steps are
+  rendered one after another; a contact sheet is one worker's. The PNGs are the engine's own encoding, byte for
+  byte what one worker writes. `tool/codelessly states` renders as many states at a time as there are workers.
+- **Turns.** A request waits only when every worker is busy. Waiting requests take the workers that only help
+  another request first; then a request that has rendered for a second makes way, after the capture it is on, for
+  one that has had less of the workers' time, and goes on later from where it was: a single render asked during
+  a job of a hundred captures is answered in about a second, not after it. More than `--queue <n>` requests
+  waiting (256) are refused at once: the command says `The render server is busy` and exits 2 (`render.sh`
+  renders the usual way instead). A request that takes longer than `--request-timeout <seconds>` (1200) fails
+  with a line saying so, and the workers on it are replaced.
+- **Workers are replaced** when they stop (the request they were on is given to another worker once; a second
+  stop fails it with a line naming the worker's log), when they hold more than `--recycle-mb <n>` megabytes
+  (1024; a warm worker holds about 340 MB, and 360 to 390 after a thousand captures), or
+  after `--recycle-after <n>` requests (off by default).
+- **`serve.sh --status`** (`tool/codelessly serve --status`) prints the workers (busy, idle, requests, captures
+  and memory of each), the queue, the requests served, failed and refused, the latency (median, p95) and the
+  captures a second since it started; `--status --json` gives the same as JSON.
+
+**How much it gives.** `tool/codelessly bench --site <site> [--shape layout|one|site|layout-site] [--clients 1,4,16]
+[--seconds 5]` starts that many clients at once, each with its own copy of the site, asking again and again as
+separate agents would, and prints the requests and the layouts or captures a second, the latency and the failures.
+On a 16-core, 32-thread desktop (a six-page site, pages of 40 to 120 KB of JSON; a quiet machine gives a little
+more), requests a second, with the median latency:
+
+| Workers | `layout` (one page, one size, no picture) at 1 / 4 / 16 / 64 clients | `one` (with its picture) | `site` (6 pages × 3 sizes): captures a second | `layout-site`: layouts a second |
+|---|---|---|---|---|
+| 1 | 7.0 (142 ms) / 7.4 / 7.4 / 7.4 (6.9 s) | 6.6 / 6.6 / 6.9 / 6.8 | 8.8 / 8.6 / 8.4 at 1 / 4 / 16 | 10.8 / 10.0 / 9.8 |
+| 2 | 6.1 / 10.6 / 9.7 / 11.7 | 6.5 / 11.9 / 12.9 / 12.9 | 15.2 / 12.6 / 9.0 | 10.6 / 15.0 / 17.9 |
+| 4 | 6.7 / 22.8 (169 ms) / 23.4 / 23.5 | 6.7 / 22.6 / 23.1 / 21.2 | 24.7 / 30.0 / 29.3 | 30.8 / 37.7 / 36.8 |
+| 8 | 6.7 / 22.5 / 37.7 (414 ms) / 38.4 | 6.8 / 22.5 / 38.4 / 37.8 | 36.5 / 46.7 / 49.8 / 51.8 at 64 | 40.0 / 54.8 / 62.2 / 60.8 |
+| 16 | 6.7 (147 ms) / 21.3 (183 ms) / 39.3 (387 ms) / 41.2 (1.5 s) | 6.7 / 22.3 / 40.3 / 45.9 | 36.6 / 52.1 / 68.3 / 65.8 | 39.5 / 66.1 / 80.9 / 73.7 |
+
+Before there were workers, the same machine gave 5.8 requests a second however many asked (16 clients waited
+2.7 s each), and a request of six whole pages (`--full-page`) at three sizes took 2.5 s; it takes 0.6 to 1.1 s now (half a second
+without `--full-page`). What limits it is the processor: each engine is a debug build that runs the SDK's code compiled as it
+goes, a page costs about 150 ms of one core, and engines side by side slow one another (a page takes 150 ms on one
+busy worker, 210 on each of eight, 390 on each of sixteen), so past eight workers more of them add little for
+single pages and still add for requests of many captures. A request's fixed cost (reading and publishing the
+site, about 50 ms) is paid once however many captures it has: ask for the pages and sizes you want in one request.
 `tool/codelessly states` uses it by default: with none up it starts one for the manifest and stops it at the end
 (one already up is used and left running); its first line says which, and each state's line ends `warm` or
 `cold`; `--cold` starts Flutter for each state instead. Each run on the server is still its own: a new app, the

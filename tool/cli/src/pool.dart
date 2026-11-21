@@ -19,6 +19,8 @@
 //                                   wait, then `done`, `busy <queued> <limit>` (the queue is full) or
 //                                   `failed <why>`
 //   <token> status                  where the server stands, as JSON
+//   <dir>/<id>.req                  a file holding the path of an arguments file: a render asked without a socket,
+//                                   answered by its report and status files alone
 //   <token> stop                    stop
 //
 // A request is led by one worker, which writes its report; while other workers are idle and no request waits,
@@ -191,7 +193,7 @@ class _Pool {
     File('$dir/ready').writeAsStringSync('$pid\n');
     _ready = true;
     unawaited(_spawnRest());
-    Timer.periodic(const Duration(milliseconds: 250), (_) => _housekeeping());
+    Timer.periodic(const Duration(milliseconds: 100), (_) => _housekeeping());
     return _stopped.future;
   }
 
@@ -317,7 +319,8 @@ class _Pool {
     }, cancelOnError: true);
   }
 
-  void _reply(Socket socket, String line) {
+  void _reply(Socket? socket, String line) {
+    if (socket == null) return;
     try {
       socket.write('$line\n');
       socket.flush().then((_) => socket.close()).catchError((Object _) => socket.destroy());
@@ -334,7 +337,7 @@ class _Pool {
     }
   }
 
-  _Job? _enqueue(String argsFile, Socket socket, {required bool v2}) {
+  _Job? _enqueue(String argsFile, Socket? socket, {required bool v2}) {
     lastActivity = DateTime.now();
     if (_stopping) {
       _reply(socket, v2 ? 'failed The render server is stopping.' : 'stopping');
@@ -347,7 +350,7 @@ class _Pool {
       if (v2) {
         _reply(socket, 'busy ${waiting.length} $maxQueue');
       } else {
-        socket.destroy();
+        socket?.destroy();
       }
       return null;
     }
@@ -578,7 +581,18 @@ class _Pool {
     }
     lastActivity = DateTime.now();
     final client = job.client;
-    if (client == null) return;
+    if (client == null) {
+      // A request left as a file is answered by its files alone: one that failed gets them here.
+      if (verdict != 'done' && !job.warm) {
+        try {
+          File('${job.argsFile}.report').writeAsStringSync('${verdict.replaceFirst('failed ', '')}\n');
+          File('${job.argsFile}.status').writeAsStringSync('2');
+        } on FileSystemException {
+          // Its folder is gone: so is who asked.
+        }
+      }
+      return;
+    }
     // (render.sh's form: `done`, or the connection closed without it, and it renders the usual way.)
     if (verdict == 'done' || job.v2) {
       _reply(client, verdict);
@@ -638,6 +652,30 @@ class _Pool {
     }
   }
 
+  int _servedWritten = -1;
+
+  /// Requests left in the server's folder as files (`<id>.req`, holding the path of an arguments file: what
+  /// render.sh writes where it cannot open a socket), the oldest first, while the queue has room for them.
+  void _takeRequestFiles() {
+    final List<File> requests;
+    try {
+      requests = [for (final f in Directory(dir).listSync().whereType<File>()) if (f.path.endsWith('.req')) f]..sort((a, b) => a.path.compareTo(b.path));
+    } on FileSystemException {
+      return;
+    }
+    for (final f in requests) {
+      if (waiting.length >= maxQueue && (_idle.isEmpty || waiting.isNotEmpty)) return;
+      final String argsFile;
+      try {
+        argsFile = f.readAsStringSync().trim();
+        f.deleteSync();
+      } on FileSystemException {
+        continue; // Being written: the next look.
+      }
+      _enqueue(argsFile, null, v2: false);
+    }
+  }
+
   void _housekeeping() {
     if (_stopping) return;
     if (File('$dir/stop').existsSync()) {
@@ -649,10 +687,14 @@ class _Pool {
       unawaited(_shutdown());
       return;
     }
-    try {
-      File('$dir/served').writeAsStringSync('$served\n');
-    } on FileSystemException {
-      // The folder is gone: stopping.
+    _takeRequestFiles();
+    if (served != _servedWritten) {
+      try {
+        File('$dir/served').writeAsStringSync('$served\n');
+        _servedWritten = served;
+      } on FileSystemException {
+        // The folder is gone: stopping.
+      }
     }
     if (workers.every((w) => w.state == _WorkerState.gone) && _ready) {
       log('No worker is left and none starts: stopping.');
@@ -941,7 +983,7 @@ Future<int> poolStatusMain(List<String> argv) async {
   stdout.writeln('${workers.length} of ${s['workerCount']} workers up (${s['busy']} busy, ${s['idle']} idle); ${s['queued']} requests queued (limit ${s['queueLimit']}), ${s['rendering']} rendering.');
   stdout.writeln('${s['served']} requests served (${s['captures']} captures), ${s['failed']} failed, ${s['refusedBusy']} refused as busy; '
       'latency median ${s['medianMs'] ?? '-'} ms, p95 ${s['p95Ms'] ?? '-'} ms; ${s['capturesPerSecond']} captures a second since it started.');
-  stdout.writeln('Workers restarted ${s['workerRestarts']} times (${s['workerCrashes']} stopped during a request, ${s['recycled']} replaced past ${s['recycleMb']} MB); ${s['how']}.');
+  stdout.writeln('Workers restarted ${s['workerRestarts']} times (${s['workerCrashes']} stopped during a request, ${s['recycled']} replaced by a fresh one: past ${s['recycleMb']} MB, or --recycle-after); ${s['how']}.');
   for (final w in workers) {
     stdout.writeln('  ${'${w['id']}'.padRight(5)} pid ${'${w['pid']}'.padRight(7)} ${'${w['state']}'.padRight(8)} ${'${w['requests']}'.padLeft(6)} requests ${'${w['captures']}'.padLeft(7)} captures '
         '${'${w['memoryMb']}'.padLeft(5)} MB${w['request'] == null ? '' : '  on request ${w['request']}'}${w['warmupsLeft'] == null ? '' : '  (warming up)'}');

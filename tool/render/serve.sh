@@ -21,7 +21,8 @@
 # It stops by itself after --idle seconds without a request (default 1800). It serves the code it started with:
 # when the SDK's lib/ or tool/render/, its pubspecs or the sibling codelessly_api's lib/ change after it started,
 # render.sh stops it and renders the usual way (start it again to serve the new code). Its state is in
-# build/.render-server/ (log in server.log, each worker's in w<n>.log).
+# build/.render-server/ (log in server.log, each worker's in w<n>.log); CODELESSLY_RENDER_SERVER=<folder> names another
+# folder (a second server on the checkout, with a folder of its own: rm -rf'd when it stops).
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sdk="$(cd "$here/../.." && pwd)"

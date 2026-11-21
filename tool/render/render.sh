@@ -145,7 +145,7 @@ server_alive() {
   [ -n "$server_pid" ] && kill -0 "$server_pid" 2>/dev/null
 }
 if [ -f "$server/ready" ] && server_alive; then
-  changed="$(find "$sdk/lib" "$sdk/tool/render" "$sdk/pubspec.yaml" "$sdk/pubspec_overrides.yaml" ${api:+"$api/lib" "$api/pubspec.yaml"} \
+  changed="$(find "$sdk/lib" "$sdk/tool/render" "$sdk/tool/cli/src/pool.dart" "$sdk/pubspec.yaml" "$sdk/pubspec_overrides.yaml" ${api:+"$api/lib" "$api/pubspec.yaml"} \
     -newer "$server/ready" -print -quit 2>/dev/null)"
   if [ -n "$changed" ]; then
     echo "The render server serves older code (${changed#$sdk/} changed since it started): stopping it; rendering the usual way. tool/render/serve.sh starts it again." >&2

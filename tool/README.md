@@ -31,7 +31,8 @@ One entry point for the authoring loop. `tool/codelessly help` lists the command
 | `sheet <png \| dir>... --out <png>` | Captures on one labelled image, one row per state, narrowest size first. | Showing a model (or a person) many captures at once. |
 | `notation prompt|expand|print|apply`\|expand\|apply` | The compact authoring notation ([notation/notation.sh](notation/notation.sh)): the prompt a model gets, a notation text expanded to a document, a document printed back as the notation, ops applied to a document. A file in a site's folder is expanded with the site's components (its `components/*.txt` and those `site.json` lists), variables and theme; `notation expand <site folder>` expands the whole site, components first (also `tool/codelessly expand <site folder>`; each of these commands by its own name). A `.txt` that `site.json` lists is never written over: its JSON goes beside it, and the expand says to list that. `--dictionary <folder>` (or `CODELESSLY_DICTIONARY`, or a site's `"dictionary"`) reads a folder of definitions after the site's own. | Generating UI with a model in the notation instead of JSON. |
 | `replay <stream.jsonl> --out <dir>` | A recorded `ui_apply` stream replayed headless: video, contact sheet, metrics ([stream/README.md](stream/README.md)). | Working on streaming generative UI. |
-| `serve [--stop\|--status]` | Keeps the renderer running in the background ([render/serve.sh](render/serve.sh)), so every `render` and `states` run on this checkout skips Flutter's start: about 1 s a run instead of about 6. It serves the code it started with; after a change to the SDK or the API it is stopped and runs go the usual way until it is started again. Stops after 30 idle minutes. | Any session that will render more than a few times. The MCP server starts it by itself. |
+| `serve [--workers n] [--stop\|--status]` | Keeps the renderer running in the background ([render/serve.sh](render/serve.sh)), so every `render` and `states` run on this checkout skips Flutter's start, and renders in parallel: one address, several workers behind it (by default half the processors, fewer on a machine with little memory, 16 at most; `--workers 1` renders one request after another). Requests from separate agents render at the same time, each its own (its site, its clock, its fonts, its output folder); a request of many captures is shared among the idle workers and reports as one run does. `--status` says the workers, the queue, what was served and how fast. It serves the code it started with; after a change to the SDK or the API it is stopped and runs go the usual way until it is started again. Stops after 30 idle minutes. | Any session that will render more than a few times, and any number of agents rendering on one machine. The MCP server starts it by itself. |
+| `bench --site <site>` | How much the render server gives: C clients at once (`--clients 1,4,16`), each with its own copy of the site, asking again and again for `--seconds` (`--shape layout`: one page at one size with `--layout-only`; `one`: with its picture; `site`: every page at three sizes; `layout-site`: that without pictures). Prints requests and layouts or captures a second, the latency (median, p95, longest) and the failures. | Choosing `--workers` for a machine; seeing what a change did to the renderer's speed. |
 | `mcp` | All of the above as an MCP server on stdio: `codelessly_docs`, `codelessly_render` (report, outline and PNGs in one answer), `codelessly_flatten`, `codelessly_states`. | Giving any MCP client (Claude Code, an IDE agent, your own) the render loop as tool calls. |
 
 Register the MCP server with a client, e.g. a project's `.mcp.json`:
@@ -44,7 +45,7 @@ A typical session:
 
 ```sh
 tool/codelessly doctor --warm
-tool/codelessly serve                                  # keep the renderer up: a render costs its drawing
+tool/codelessly serve                                  # keep the renderer up: a render costs its drawing; renders run in parallel
 tool/codelessly docs                                   # what's where
 tool/codelessly docs "a row that becomes a column"     # the section for a need
 tool/codelessly render site/ --out out/ --outline      # problems, boxes, texts; PNGs in out/
@@ -52,14 +53,18 @@ tool/codelessly render site/ --out out/ --screen contact --tap submit --label er
 tool/codelessly states states.json                     # every state vs its reference: out/states/summary.md
 ```
 
-Speed: with `serve` running, a render costs its drawing: about a third of a second for a page at one size, under
-three seconds for six pages at three sizes; `expand` of a six-page site takes about a third of a second too.
+Speed: with `serve` running, a render costs its drawing: about a quarter of a second for a page at one size, about
+half a second for six pages at three sizes (their captures shared among the workers; under three seconds on one
+worker); `expand` of a six-page site takes about a third of a second. `render --layout-only` writes the layout
+files and the diagnostics and no picture, for "how does this lay out?" asked often. Several agents share one
+server, each request its own: [render/README.md](render/README.md) has what a 16-core machine gave and how to
+measure another (`tool/codelessly bench`).
 Without the server a render first starts Flutter (about 5 seconds once the harness is compiled; the first after an
 SDK change takes 20 to 60 seconds, `doctor --warm` does it up front). The commands are compiled once per change of
 their sources (`tool/cli`, and the notation's with `codelessly_api`'s `lib/`: ten to twenty seconds, said as it
 happens). `--timings` on `render` or a notation command (or `CODELESSLY_TIMINGS=1`) prints each phase's
-milliseconds on stderr. Runs on one checkout take turns (a lock in `build/`, or the server's queue); use git
-worktrees for runs in parallel.
+milliseconds on stderr. Without the server, runs on one checkout take turns (a lock in `build/`); with it they
+render at the same time, and more requests than it has workers wait in its queue, each in turn by what it has had.
 
 ## Every tool here
 
@@ -68,9 +73,9 @@ worktrees for runs in parallel.
 | Path | What | Docs |
 |---|---|---|
 | `codelessly` | The entry point above. | this file |
-| `cli/` | The entry point's commands, in Dart: `codelessly.dart` (the dispatcher) and `src/` (`docs`, `flatten`, `outline`, `states`, `render_cmd` (render with `--outline`/`--sheet`, and `sheet`), `mcp`). `tool/codelessly` compiles them to `build/codelessly_cli` when they change (about 3 s, once); they need nothing but Flutter's Dart. `test/tool/cli_test.dart` tests them. | each file's header |
+| `cli/` | The entry point's commands, in Dart: `codelessly.dart` (the dispatcher) and `src/` (`docs`, `flatten`, `outline`, `states`, `render_cmd` (render with `--outline`/`--sheet`, and `sheet`), `mcp`, `pool` (the render server: its workers, its queue), `bench`). `tool/codelessly` compiles them to `build/codelessly_cli` when they change (about 3 s, once); they need nothing but Flutter's Dart. `test/tool/cli_test.dart` tests them. | each file's header |
 | `lib/env.sh` | Shared by every launcher: finds Flutter, points the SDK at the sibling `codelessly_api` (a `pubspec_overrides.yaml` marked as written by the tools), resolves dependencies when stale, the per-checkout lock. | its header |
-| `render/` | The render command: `render.sh` (launcher), `serve.sh` (the render server), `render_harness.dart` (the `flutter test` entry, one run or the server's loop), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
+| `render/` | The render command: `render.sh` (launcher), `serve.sh` (the render server), `render_harness.dart` (the `flutter test` entry: one run, or a worker of the server), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare, `fan.dart`: one request shared among workers), `warmup/` (the site each new worker renders first). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
 | `notation/` | The compact notation's tools: `prompt.dart`, `expand.dart`, `print.dart`, `apply.dart`, launched by `notation.sh`. | `notation.sh` header |
 
 ### Measuring generative UI (research)
