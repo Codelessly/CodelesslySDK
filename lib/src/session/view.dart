@@ -19,7 +19,7 @@ import '../render/components.dart' show ComponentRegistry, componentInstanceOf;
 import '../render/source.dart' show NodeSource;
 import '../render/contracts.dart' show ImageBytesLoader;
 import '../render/node_tree.dart' show NodeBox, ResponsiveWidth;
-import '../runtime/contracts.dart' show CodelesslyServices;
+import '../runtime/contracts.dart' show CodelesslyServices, ValueScope;
 import '../render/node_view.dart';
 import '../app/navigator_ui.dart';
 import '../runtime/actions/actions.dart';
@@ -53,9 +53,16 @@ class CodelesslyView extends StatefulWidget {
     this.data = const {},
     this.handlers = const {},
     this.services,
+    this.shared,
   });
 
   final UiSession session;
+
+  /// A scope around this view's own variables: what the UI reads and sets
+  /// by a name its document does not declare is read from and set in it
+  /// (an app's variables, a [VariableScope] several views of the app's
+  /// screens are given: a value one screen sets, another shows). Null: none.
+  final ValueScope? shared;
 
   /// The canvas to show; null: the session's first root.
   final String? canvas;
@@ -104,7 +111,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 
   void _create() {
     _session = widget.session;
-    _values = ValuesScope({if (widget.data.isNotEmpty) 'data': widget.data});
+    _values = ValuesScope({if (widget.data.isNotEmpty) 'data': widget.data}, widget.shared);
     _scope = VariableScope(const [], parent: _values);
     _themed = ThemedSource(_session, _session.theme);
     _nodeValues = SessionValues(_themed);
@@ -256,7 +263,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   @override
   void didUpdateWidget(CodelesslyView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!identical(oldWidget.session, widget.session)) {
+    if (!identical(oldWidget.session, widget.session) || !identical(oldWidget.shared, widget.shared)) {
       _dispose();
       _stack.clear();
       _declared = const {};
