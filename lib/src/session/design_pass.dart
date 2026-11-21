@@ -36,29 +36,142 @@ final class DesignRequest {
 
 /// Restyles the UI of [request]: its edit operations as a list, as
 /// `{"ops": [...]}`, or as text holding one of those (in a json fence or
-/// bare). Null when it has nothing to change. The host shows the agent the
+/// bare), or a [DesignAnswer] around one of those. Null, an empty list or
+/// `{"ops": []}` when it has nothing to change. The host shows the agent the
 /// UI as a picture too when it can (the view's render in light and dark).
+///
+/// A call that throws ends the pass as one that could not run
+/// ([DesignOutcome.error]); a [DesignPassInterrupted] ends it as cut short
+/// ([DesignOutcome.interrupted]).
 typedef DesignAgent = Future<Object?> Function(DesignRequest request);
+
+/// An agent's answer with what the host knows of it beyond its text.
+final class DesignAnswer {
+  const DesignAnswer(this.value, {this.cutOff = false});
+
+  /// The answer as a [DesignAgent] gives it.
+  final Object? value;
+
+  /// Whether the model stopped at its output limit: the text is not whole.
+  final bool cutOff;
+}
+
+/// Thrown by a [DesignAgent] or a pass's check to end the pass because it
+/// can no longer mean anything (the UI it restyles was replaced): the UI is
+/// put back as it was and the outcome says [reason], not a refusal.
+final class DesignPassInterrupted implements Exception {
+  const DesignPassInterrupted(this.reason);
+  final String reason;
+
+  @override
+  String toString() => reason;
+}
+
+/// One answer of a pass and what became of it.
+final class DesignRound {
+  const DesignRound({
+    required this.round,
+    required this.outcome,
+    this.ops = 0,
+    this.rejected = const [],
+    this.problems = const [],
+    this.answerCharacters = 0,
+    this.milliseconds = 0,
+  });
+
+  /// 1 for the first answer asked for.
+  final int round;
+
+  /// `kept`, `refused` (it was applied and undone: [problems]), `unreadable`
+  /// (no operations could be read: [problems]), `nothing` (it had nothing to
+  /// change), `failed` (the agent threw: [problems]) or `interrupted`.
+  final String outcome;
+
+  /// How many operations the answer held.
+  final int ops;
+
+  /// The operations of it that were rejected, each as it was reported.
+  final List<String> rejected;
+
+  /// Why it was not kept.
+  final List<String> problems;
+
+  /// The answer's length, when it was text.
+  final int answerCharacters;
+
+  /// How long the answer and its checks took.
+  final int milliseconds;
+
+  Map<String, Object?> toJson() => {
+        'round': round,
+        'outcome': outcome,
+        if (ops > 0) 'ops': ops,
+        if (rejected.isNotEmpty) 'rejected': rejected,
+        if (problems.isNotEmpty) 'problems': problems,
+        if (answerCharacters > 0) 'answerCharacters': answerCharacters,
+        'ms': milliseconds,
+      };
+}
 
 /// What became of a pass.
 final class DesignOutcome {
-  const DesignOutcome({required this.kept, this.ops = 0, this.rounds = 0, this.problems = const []});
+  const DesignOutcome({
+    required this.kept,
+    this.ops = 0,
+    this.rounds = 0,
+    this.problems = const [],
+    this.nothing = false,
+    this.error,
+    this.interrupted,
+    this.rejected = const [],
+    this.applied = const [],
+    this.answers = const [],
+  });
 
   /// Whether the restyled UI is on screen. False: the UI is as it was.
   final bool kept;
 
-  /// How many operations the kept answer held.
+  /// How many operations of the kept answer were applied.
   final int ops;
 
-  /// How many answers were asked for.
+  /// How many answers the agent gave.
   final int rounds;
 
-  /// Why the last answer was refused (empty when [kept]).
+  /// Why the last answer was refused (empty when [kept] or [nothing]).
   final List<String> problems;
 
+  /// The agent found nothing to change: the UI is as it was, and that is
+  /// not a failure.
+  final bool nothing;
+
+  /// Why the pass could not run (the agent's call threw): not a refusal of
+  /// anything it answered.
+  final String? error;
+
+  /// Why the pass was cut short (the UI was replaced under it).
+  final String? interrupted;
+
+  /// The operations of the kept answer that were rejected and left out, as
+  /// reported (the rest of the answer was kept).
+  final List<String> rejected;
+
+  /// The operations the kept answer applied (the rejected ones left out):
+  /// applied again to the same UI, they give the same restyle.
+  final List<Object?> applied;
+
+  /// Each answer and what became of it, in order.
+  final List<DesignRound> answers;
+
+  /// `kept`, `nothing`, `error`, `interrupted` or `refused`.
+  String get endedBy => kept ? 'kept' : (nothing ? 'nothing' : (error != null ? 'error' : (interrupted != null ? 'interrupted' : 'refused')));
+
   @override
-  String toString() => kept ? 'DesignOutcome(kept: $ops ops in $rounds)' : 'DesignOutcome(refused: $problems)';
+  String toString() => kept ? 'DesignOutcome(kept: $ops ops in $rounds)' : 'DesignOutcome($endedBy: $problems)';
 }
+
+/// What [DesignPass.readAnswer] made of an answer: its operations, or that
+/// it has none to give ([nothing]), or why none could be read ([problem]).
+typedef DesignAnswerRead = ({List<Object?>? ops, bool nothing, String? problem});
 
 /// Runs the design pass on a session.
 ///
@@ -72,7 +185,12 @@ final class DesignOutcome {
 /// // kept: the same card, restyled, as one undo step (session.undo(author: DesignPass.author)).
 /// ```
 final class DesignPass {
-  DesignPass(this.session, {required this.design, this.check, this.maxRounds = 2, this.blocks = const []});
+  DesignPass(this.session, {required this.design, this.check, this.maxRounds = 2, this.blocks = const [], this.retryAfter});
+
+  /// How long to wait before asking once more after the agent's call threw
+  /// [error] (a rate limit, an overloaded service); null: do not ask again.
+  /// A call is asked again once at most; without this, never.
+  final Duration? Function(Object error)? retryAfter;
 
   /// The author of the pass's batch: what [UiSession.undo] takes to put the
   /// plain UI back.
@@ -188,7 +306,7 @@ THE UI NOW (its nodes; the roots are ${doc.roots.map((r) => '"$r"').join(', ')})
 ${pretty.convert(doc.toJson()['nodes'])}
 ${request == null || request.trim().isEmpty ? '' : 'WHAT THE USER ASKED FOR\n${request.trim()}\n'}
 ANSWER
-Two or three sentences on what you change and why. Then one ```json fence holding {"ops": [...]}: every op in the order it is applied. Patch what exists; set only what is new.''';
+Two or three sentences on what you change and why. Then one ```json fence holding {"ops": [...]}: every op in the order it is applied. Patch what exists; set only what is new. When the UI already sits at the bar and nothing should change, say so in a sentence and answer with {"ops": []}.''';
   }
 
   /// Asks the design agent, applies its answer and checks it, up to
@@ -201,59 +319,202 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
     var base = before;
     var problems = const <String>[];
     Object? previous;
+    final answers = <DesignRound>[];
+    // How many answers the agent gave, how many of them could not be read,
+    // and whether a call that threw was asked again.
+    var given = 0, unreadable = 0;
+    var askedAgain = false;
+    void putBack() {
+      // A round replaces the last: the next is applied to the UI as it was.
+      if (!identical(session.document, base)) session.undo(author: author);
+      base = session.document;
+    }
+
     for (var round = 1; round <= maxRounds; round++) {
-      final Object? answer;
+      final clock = Stopwatch()..start();
+      var length = 0;
+      void record(String outcome, {int ops = 0, List<String> rejected = const [], List<String> why = const []}) => answers.add(DesignRound(
+            round: round,
+            outcome: outcome,
+            ops: ops,
+            rejected: rejected,
+            problems: why,
+            answerCharacters: length,
+            milliseconds: clock.elapsedMilliseconds,
+          ));
+      DesignOutcome cutShort(String reason) {
+        record('interrupted', why: [reason]);
+        return DesignOutcome(kept: false, rounds: given, interrupted: reason, problems: [reason], answers: List.unmodifiable(answers));
+      }
+
+      Object? answer;
       try {
         answer = await design(DesignRequest(instructions: system, round: round, problems: problems, previous: previous));
+      } on DesignPassInterrupted catch (e) {
+        return cutShort(e.reason);
       } catch (e) {
-        problems = ['The design agent failed: ${'$e'.split('\n').first}'];
+        // The agent could not be asked (a key or model it refuses, a limit,
+        // an overloaded service). That is no refusal of an answer, and
+        // asking again at once would fail the same way: once more only when
+        // the host says the error passes, after the wait it names.
+        final message = '$e'.split('\n').first;
+        record('failed', why: [message]);
+        final wait = askedAgain ? null : retryAfter?.call(e);
+        if (wait != null) {
+          askedAgain = true;
+          await Future<void>.delayed(wait);
+          round--;
+          continue;
+        }
+        return DesignOutcome(kept: false, rounds: given, error: message, problems: [message], answers: List.unmodifiable(answers));
+      }
+      given++;
+      final text = answer is DesignAnswer ? answer.value : answer;
+      if (text is String) length = text.length;
+      final read = readAnswer(answer);
+      if (read.nothing) {
+        record('nothing');
+        return DesignOutcome(kept: false, nothing: true, rounds: given, answers: List.unmodifiable(answers));
+      }
+      final ops = read.ops;
+      if (ops == null) {
+        // Told once what was wrong with it, as found; a second answer that
+        // cannot be read ends the pass (the same sentence four times over
+        // taught it nothing).
+        problems = [read.problem!];
+        record('unreadable', why: problems);
+        if (++unreadable > 1) return DesignOutcome(kept: false, rounds: given, problems: problems, answers: List.unmodifiable(answers));
+        previous = text;
         continue;
       }
-      if (answer == null) return DesignOutcome(kept: false, rounds: round, problems: const ['The design agent gave no operations.']);
-      previous = answer;
-      final ops = opsOf(answer);
-      if (ops == null || ops.isEmpty) {
-        problems = const ['The answer must hold a ```json fence with {"ops": [...]}.'];
-        continue;
-      }
+      previous = text;
       // Someone else changed the UI while the agent worked: its answer is
       // for a UI that is gone.
-      if (!identical(session.document, base)) {
-        return DesignOutcome(kept: false, rounds: round, problems: const ['The UI changed while it was being restyled.']);
-      }
+      if (!identical(session.document, base)) return cutShort('The UI changed while it was being restyled.');
       final result = session.apply(ops, author: author);
-      problems = [
+      // A rejected operation is left out and said; the rest of the answer
+      // stands, as long as what the UI says and does is as it was (the
+      // check below reads the result, whatever was left out of it).
+      final rejected = [
         for (final d in result.diagnostics)
           if (result.rejected.contains(d.op)) 'Operation ${d.op + 1} was rejected (${d.code} at ${d.path}): ${d.message}',
+      ];
+      final applied = [
+        for (var i = 0; i < ops.length; i++)
+          if (!result.rejected.contains(i)) ops[i],
+      ];
+      problems = [
+        if (applied.isEmpty) ...rejected,
         ...changedMeaning(before, session.document, blocks: {
           for (final t in blocks)
             if (session.designSystem?.components[t] != null) t,
         }),
       ];
-      if (problems.isEmpty && check != null) problems = await check!();
-      if (problems.isEmpty) return DesignOutcome(kept: true, ops: ops.length, rounds: round);
-      // A round replaces the last: the next is applied to the UI as it was.
-      if (!identical(session.document, base)) session.undo(author: author);
-      base = session.document;
+      if (problems.isEmpty && check != null) {
+        try {
+          problems = await check!();
+        } on DesignPassInterrupted catch (e) {
+          putBack();
+          return cutShort(e.reason);
+        }
+      }
+      if (problems.isEmpty) {
+        record('kept', ops: ops.length, rejected: rejected);
+        return DesignOutcome(
+          kept: true,
+          ops: applied.length,
+          rounds: given,
+          rejected: rejected,
+          applied: applied,
+          answers: List.unmodifiable(answers),
+        );
+      }
+      record('refused', ops: ops.length, rejected: rejected, why: problems);
+      // The agent is told of the operations that were left out as well.
+      if (applied.isNotEmpty) problems = [...rejected, ...problems];
+      putBack();
     }
-    return DesignOutcome(kept: false, rounds: maxRounds, problems: problems);
+    return DesignOutcome(kept: false, rounds: given, problems: problems, answers: List.unmodifiable(answers));
   }
 
   /// The operations in [answer]: a list, `{"ops": [...]}`, or text holding
   /// one of those in a json fence or bare. Null when there are none to read.
-  static List<Object?>? opsOf(Object? answer) {
-    if (answer is List) return answer;
-    if (answer is Map) return answer['ops'] is List ? answer['ops'] as List : null;
-    if (answer is! String) return null;
-    final fence = RegExp(r'```(?:json)?\s*\n([\s\S]*?)\n```').firstMatch(answer)?[1];
-    final text = fence ?? answer;
-    final at = text.indexOf(RegExp(r'[\[{]'));
-    if (at < 0) return null;
-    try {
-      return opsOf(jsonDecode(text.substring(at, text.lastIndexOf(RegExp(r'[\]}]')) + 1)));
-    } on FormatException {
-      return null;
+  /// An empty list for an answer that has nothing to change. Never throws,
+  /// whatever the answer is ([readAnswer] says why none could be read).
+  static List<Object?>? opsOf(Object? answer) => readAnswer(answer).ops;
+
+  static const DesignAnswerRead _nothing = (ops: <Object?>[], nothing: true, problem: null);
+
+  /// Reads [answer] as a [DesignAgent] gives it.
+  ///
+  /// Of text, each json fence is tried, the last first (an answer may show
+  /// an example before the operations it means), then the text bare. With
+  /// none that reads, `problem` says what was found, in words the agent can
+  /// act on: where the JSON stops parsing, a fence that never closed (the
+  /// answer was cut off), no fence at all. A line `NOTHING`, an empty list
+  /// or `{"ops": []}` is an answer with nothing to change.
+  static DesignAnswerRead readAnswer(Object? answer) {
+    var cutOff = false;
+    if (answer is DesignAnswer) {
+      cutOff = answer.cutOff;
+      answer = answer.value;
     }
+    DesignAnswerRead? of(Object? value) {
+      final ops = value is List ? value : (value is Map && value['ops'] is List ? value['ops'] as List : null);
+      if (ops == null) return null;
+      return ops.isEmpty ? _nothing : (ops: ops, nothing: false, problem: null);
+    }
+
+    if (answer == null) return _nothing;
+    if (answer is! String) {
+      return of(answer) ?? (ops: null, nothing: false, problem: 'The answer must be a list of operations or {"ops": [...]}.');
+    }
+    const limit = 'The answer was cut off at the output limit before its operations were whole. Answer again with fewer '
+        'operations (the ones that matter most), in one ```json fence holding {"ops": [...]}.';
+    String? problem;
+    DesignAnswerRead? parse(String text) {
+      final at = text.indexOf(RegExp(r'[\[{]'));
+      final end = text.lastIndexOf(RegExp(r'[\]}]'));
+      if (at < 0 || end < at) {
+        problem ??= at < 0 ? 'The json fence holds no list or object.' : limit;
+        return null;
+      }
+      final json = text.substring(at, end + 1);
+      try {
+        final read = of(jsonDecode(json));
+        if (read == null) problem ??= 'The json must be {"ops": [...]}: it has no "ops" list.';
+        return read;
+      } on FormatException catch (e) {
+        final offset = (e.offset ?? 0).clamp(0, json.length);
+        final near = json.substring((offset - 30).clamp(0, json.length), (offset + 30).clamp(0, json.length)).replaceAll(RegExp(r'\s+'), ' ');
+        problem ??= 'The json does not parse (${e.message.split('\n').first}, at character $offset, near `$near`). '
+            'Answer again with the whole list of operations as valid JSON in one ```json fence.';
+        return null;
+      }
+    }
+
+    final fences = [for (final m in RegExp(r'```[A-Za-z]*[ \t]*\r?\n([\s\S]*?)```').allMatches(answer)) m[1]!];
+    for (final body in fences.reversed) {
+      final read = parse(body);
+      if (read != null) return read;
+    }
+    // A fence that opens and never closes: the answer stops inside it.
+    final open = '```'.allMatches(answer).length.isOdd;
+    if (fences.isEmpty && !open && answer.contains(RegExp(r'[\[{]'))) {
+      final read = parse(answer);
+      if (read != null) return read;
+    }
+    if (RegExp(r'^\W*NOTHING\W*$', multiLine: true).hasMatch(answer)) return _nothing;
+    if (open || cutOff) return (ops: null, nothing: false, problem: limit);
+    if (answer.trim().isEmpty) return (ops: null, nothing: false, problem: 'The answer was empty. Answer with one ```json fence holding {"ops": [...]}.');
+    return (
+      ops: null,
+      nothing: false,
+      problem: fences.isEmpty
+          ? 'The answer holds no operations: after your sentences, write one ```json fence holding {"ops": [...]} '
+              '({"ops": []} when nothing should change).'
+          : problem,
+    );
   }
 
   /// What a restyle must not touch and did, between [before] and [after]: a

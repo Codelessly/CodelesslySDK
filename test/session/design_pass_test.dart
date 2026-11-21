@@ -283,4 +283,177 @@ Card
     expect(DesignPass.opsOf('Here: ${jsonEncode({'ops': _good})}'), hasLength(2));
     expect(DesignPass.opsOf('SHIP'), isNull);
   });
+
+  group('reading an answer', () {
+    final good = jsonEncode({'ops': _good});
+
+    test('an answer cut off anywhere reads as cut off, and never throws', () {
+      final whole = 'I tighten the row.\n```json\n$good\n```';
+      for (var cut = 0; cut < whole.length; cut++) {
+        final read = DesignPass.readAnswer(whole.substring(0, cut));
+        expect(read.ops, isNull, reason: 'cut at $cut');
+        expect(read.problem, isNotNull, reason: 'cut at $cut');
+      }
+      // Before any closing bracket (what threw a RangeError), and mid list.
+      expect(DesignPass.readAnswer('Restyle.\n```json\n{"ops": [{"op": "patch", "id": "row", "pat').problem, contains('cut off at the output limit'));
+      expect(DesignPass.opsOf('Restyle.\n```json\n{"ops": ['), isNull);
+      // The host knows it stopped at the limit.
+      expect(DesignPass.readAnswer(const DesignAnswer('I will tighten the', cutOff: true)).problem, contains('cut off at the output limit'));
+      expect(DesignPass.readAnswer(DesignAnswer('Why.\n```json\n$good\n```')).ops, hasLength(2));
+    });
+
+    test('nothing to change: an empty list, {"ops": []}, null or NOTHING', () {
+      for (final Object? answer in [null, const <Object?>[], {'ops': const <Object?>[]}, 'It sits at the bar already.\n```json\n{"ops": []}\n```', 'It is fine.\nNOTHING']) {
+        final read = DesignPass.readAnswer(answer);
+        expect(read.nothing, isTrue, reason: '$answer');
+        expect(read.problem, isNull);
+        expect(read.ops, isEmpty);
+      }
+    });
+
+    test('the last fence that reads is the answer; an example before it is not', () {
+      final read = DesignPass.readAnswer('An op looks like this:\n```json\n{"op": "patch", "id": "x", "patch": {}}\n```\nMine:\n```json\n$good\n```');
+      expect(read.ops, hasLength(2));
+      // The operations first, a note in a fence after: the fence that reads.
+      expect(DesignPass.readAnswer('```json\n$good\n```\nIn short:\n```\nrow: tile\n```').ops, hasLength(2));
+    });
+
+    test('what does not parse says where; prose alone says what to write', () {
+      final comma = DesignPass.readAnswer('Why.\n```json\n{"ops": [{"op": "patch", "id": "row", "patch": {}},]}\n```');
+      expect(comma.ops, isNull);
+      expect(comma.problem, allOf(contains('does not parse'), contains('at character'), contains('near `')));
+      expect(DesignPass.readAnswer('I would make the title larger.').problem, contains('holds no operations'));
+      expect(DesignPass.readAnswer('```json\n{"changes": []}\n```').problem, contains('no "ops" list'));
+      expect(DesignPass.readAnswer(42).problem, isNotNull);
+    });
+  });
+
+  group('how a pass ends', () {
+    Future<(UiSession, String)> card() async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(_card));
+      return (session, jsonEncode(session.document.toJson()));
+    }
+
+    test('nothing to change is an outcome of its own, after one answer', () async {
+      final (session, plain) = await card();
+      var asked = 0;
+      final outcome = await DesignPass(session, maxRounds: 4, design: (_) async {
+        asked++;
+        return 'It already sits at the bar.\n```json\n{"ops": []}\n```';
+      }).run();
+      expect((outcome.kept, outcome.nothing, outcome.endedBy, asked), (false, true, 'nothing', 1));
+      expect(outcome.problems, isEmpty);
+      expect(outcome.answers.single.outcome, 'nothing');
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+
+    test('an answer that cannot be read is asked for once more, told what was wrong; a second ends the pass', () async {
+      final (session, plain) = await card();
+      final requests = <DesignRequest>[];
+      final outcome = await DesignPass(session, maxRounds: 4, design: (r) async {
+        requests.add(r);
+        return 'Why.\n```json\n{"ops": [{"op": "patch",]}\n```';
+      }).run();
+      expect(requests, hasLength(2));
+      expect(requests[1].problems.single, contains('does not parse'));
+      expect((outcome.kept, outcome.endedBy, outcome.rounds), (false, 'refused', 2));
+      expect(outcome.problems.single, contains('does not parse'));
+      expect(outcome.answers.map((a) => a.outcome), ['unreadable', 'unreadable']);
+      expect(jsonEncode(session.document.toJson()), plain);
+
+      // Read the second time: kept.
+      var round = 0;
+      final kept = await DesignPass(session, maxRounds: 4, design: (r) async => ++round == 1 ? 'Only words.' : _good).run();
+      expect((kept.kept, kept.rounds), (true, 2));
+      expect(kept.answers.map((a) => a.outcome), ['unreadable', 'kept']);
+    });
+
+    test('a call that throws is a pass that could not run: no answer was refused, and it is not asked again', () async {
+      final (session, plain) = await card();
+      var asked = 0;
+      final outcome = await DesignPass(session, maxRounds: 4, design: (_) async {
+        asked++;
+        throw StateError('401: invalid x-api-key');
+      }).run();
+      expect(asked, 1);
+      expect((outcome.kept, outcome.endedBy, outcome.rounds), (false, 'error', 0));
+      expect(outcome.error, contains('401: invalid x-api-key'));
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+
+    test('an error the host says passes is asked again once, after its wait', () async {
+      final (session, _) = await card();
+      var asked = 0;
+      final waits = <Object>[];
+      final outcome = await DesignPass(
+        session,
+        maxRounds: 2,
+        retryAfter: (e) {
+          waits.add(e);
+          return const Duration(milliseconds: 5);
+        },
+        design: (_) async {
+          if (++asked == 1) throw StateError('529 overloaded');
+          return _good;
+        },
+      ).run();
+      expect((outcome.kept, asked, waits.length), (true, 2, 1));
+      expect(outcome.answers.map((a) => a.outcome), ['failed', 'kept']);
+
+      // Twice in a row: it could not run.
+      asked = 0;
+      final failed = await DesignPass(session, retryAfter: (_) => Duration.zero, design: (_) async {
+        asked++;
+        throw StateError('529 overloaded');
+      }).run();
+      expect((failed.endedBy, asked), ('error', 2));
+    });
+
+    test('one rejected operation is left out and said; the rest of the answer is kept', () async {
+      final (session, plain) = await card();
+      final ops = [
+        _good[0],
+        {'op': 'patch', 'id': 'nobody', 'patch': {'props': {'spacing': 4}}},
+        _good[1],
+      ];
+      final outcome = await DesignPass(session, design: (_) async => ops).run();
+      expect((outcome.kept, outcome.ops, outcome.rounds), (true, 2, 1));
+      expect(outcome.rejected.single, contains('Operation 2 was rejected'));
+      expect(outcome.applied, [_good[0], _good[1]]);
+      expect(outcome.answers.single.rejected, outcome.rejected);
+      expect(session.document['row']!.toJson()['props'], containsPair('spacing', 12));
+      // What was applied gives the same restyle again (a reload).
+      final restyled = jsonEncode(session.document.toJson());
+      expect(session.undo(author: DesignPass.author), isTrue);
+      expect(jsonEncode(session.document.toJson()), plain);
+      expect(session.apply(outcome.applied, author: DesignPass.author, atomic: true).ok, isTrue);
+      expect(jsonEncode(session.document.toJson()), restyled);
+    });
+
+    test('a rejected operation beside one that changes what the UI says: refused, and the agent is told of both', () async {
+      final (session, plain) = await card();
+      final requests = <DesignRequest>[];
+      final outcome = await DesignPass(session, maxRounds: 2, design: (r) async {
+        requests.add(r);
+        return [
+          {'op': 'patch', 'id': 'nobody', 'patch': {'props': {'spacing': 4}}},
+          {'op': 'patch', 'id': 'title', 'patch': {'props': {'text': 'Choose seats'}}},
+        ];
+      }).run();
+      expect(outcome.kept, isFalse);
+      expect(requests[1].problems.join('\n'), allOf(contains('Operation 1 was rejected'), contains('no longer says what it said')));
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+
+    test('the agent or the check can cut the pass short: the UI is put back and the outcome says why', () async {
+      final (session, plain) = await card();
+      final byAgent = await DesignPass(session, design: (_) async => throw const DesignPassInterrupted('The page changed.')).run();
+      expect((byAgent.kept, byAgent.endedBy, byAgent.interrupted), (false, 'interrupted', 'The page changed.'));
+      final byCheck = await DesignPass(session, design: (_) async => _good, check: () => throw const DesignPassInterrupted('The page changed.')).run();
+      expect((byCheck.kept, byCheck.endedBy, byCheck.rounds), (false, 'interrupted', 1));
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+  });
 }
