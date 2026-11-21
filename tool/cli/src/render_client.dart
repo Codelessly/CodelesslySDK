@@ -337,7 +337,7 @@ class _LeftToTheScript implements Exception {
 /// render.sh says before it goes on to render the usual way); else the exit status.
 Future<int?> _viaServer(List<String> argv, StringSink out, StringSink err, CommandTimings? timings) async {
   final sdk = sdkRoot.path.replaceAll(r'\', '/');
-  final server = '$sdk/build/.render-server';
+  final server = renderServerDir;
   final ready = File('$server/ready'), pidFile = File('$server/pid'), portFile = File('$server/port');
   if (!ready.existsSync() || !pidFile.existsSync() || !portFile.existsSync()) return null;
   final prepared = prepareRenderArgs(argv);

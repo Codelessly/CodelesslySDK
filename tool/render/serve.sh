@@ -25,7 +25,7 @@
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sdk="$(cd "$here/../.." && pwd)"
-dir="$sdk/build/.render-server"
+dir="${CODELESSLY_RENDER_SERVER:-$sdk/build/.render-server}"
 . "$sdk/tool/lib/env.sh"
 
 alive() { [ -f "$dir/pid" ] && kill -0 "$(cat "$dir/pid")" 2>/dev/null; }

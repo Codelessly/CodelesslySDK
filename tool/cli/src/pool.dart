@@ -170,7 +170,7 @@ class _Pool {
 
   Future<int> run() async {
     Directory(dir).createSync(recursive: true);
-    final launch = await _Launch.prepare(sdk, flutter, log);
+    final launch = await _Launch.prepare(sdk, flutter, dir, log);
     if (launch == null) return 2;
     _launch = launch;
     _warmSite = _writeWarmSite();
@@ -340,7 +340,8 @@ class _Pool {
       _reply(socket, v2 ? 'failed The render server is stopping.' : 'stopping');
       return null;
     }
-    if (waiting.length >= maxQueue) {
+    // (A request a worker is free for does not wait: it is never refused.)
+    if (waiting.length >= maxQueue && (_idle.isEmpty || waiting.isNotEmpty)) {
       busyRefused++;
       // (render.sh's form has no word for it: the connection closes, and it renders the usual way.)
       if (v2) {
@@ -741,7 +742,7 @@ class _Launch {
 
   static String _exe(String path) => Platform.isWindows ? '$path.exe' : path;
 
-  static Future<_Launch?> prepare(String sdk, String flutter, void Function(String) log) async {
+  static Future<_Launch?> prepare(String sdk, String flutter, String serverDir, void Function(String) log) async {
     // The flutter command's SDK: bin/flutter is in it.
     var root = Platform.environment['FLUTTER_ROOT'] ?? '';
     final resolved = File(flutter).existsSync() ? File(flutter).resolveSymbolicLinksSync() : flutter;
@@ -767,13 +768,13 @@ class _Launch {
       return _Launch._(sdk, flutter, root);
     }
     final pool = Directory('$sdk/build/render_pool')..createSync(recursive: true);
-    // The assets `flutter test` made for this package, a copy of this server's own (a `flutter test` in the
+    // The assets `flutter test` made for this package, a copy of this server's own in its folder (a `flutter test` in the
     // checkout writes them again).
-    final assets = Directory('${pool.path}/assets');
+    final assets = Directory('$serverDir/assets');
     if (assets.existsSync()) assets.deleteSync(recursive: true);
     _copy(unitAssets, assets);
     // The font configuration `flutter test` gives the engine (Linux reads it): Flutter's own fonts, not the system's.
-    final fontConfig = File('${pool.path}/fonts.conf')
+    final fontConfig = File('$serverDir/fonts.conf')
       ..writeAsStringSync('<fontconfig>\n  <dir>$cache/artifacts</dir>\n  <cachedir>/var/cache/fontconfig</cachedir>\n</fontconfig>\n');
     final dill = File('${pool.path}/harness.dill');
     if (_stale(dill, sdk)) {
@@ -790,9 +791,14 @@ class _Launch {
         if (File(tmp).existsSync()) File(tmp).deleteSync();
         return null;
       }
-      if (dill.existsSync()) dill.deleteSync();
-      File(tmp).renameSync(dill.path);
       log('Compiled in ${(clock.elapsedMilliseconds / 1000).toStringAsFixed(1)} s.');
+      try {
+        if (dill.existsSync()) dill.deleteSync();
+        File(tmp).renameSync(dill.path);
+      } on FileSystemException {
+        // Another server of this checkout holds the older file (Windows): this one runs its own.
+        return _Launch._(sdk, flutter, root, tester: tester, dill: tmp, assets: assets.path, fontConfig: fontConfig.path);
+      }
     }
     return _Launch._(sdk, flutter, root, tester: tester, dill: dill.path, assets: assets.path, fontConfig: fontConfig.path);
   }
@@ -862,9 +868,11 @@ class _Launch {
           workingDirectory: sdk, environment: environment, runInShell: Platform.isWindows);
     }
     // What `flutter test` passes the engine, and the environment it gives the test.
+    // (Without its --enable-dart-profiling: nothing reads a profile of a worker, and sampling one costs a
+    // twentieth of what the workers render.)
     return Process.start(tester!, [
       '--disable-vm-service', '--enable-checked-mode', '--verify-entry-points', '--enable-software-rendering',
-      '--skia-deterministic-rendering', '--enable-dart-profiling', '--non-interactive', '--use-test-fonts',
+      '--skia-deterministic-rendering', '--non-interactive', '--use-test-fonts',
       '--disable-asset-fonts', '--packages=$sdk/.dart_tool/package_config.json', '--flutter-assets-dir=$assets', dill!,
     ], workingDirectory: sdk, environment: {
       ...environment,
@@ -906,7 +914,7 @@ Future<int> poolMain(List<String> argv) async {
 /// Asks the render server of this checkout one thing ([what]: `status`, `stop`) and returns its answer, or null
 /// when none is up.
 Future<String?> askServer(String what, {Duration timeout = const Duration(seconds: 5)}) async {
-  final server = '${sdkRoot.path.replaceAll(r'\', '/')}/build/.render-server';
+  final server = renderServerDir;
   try {
     final at = File('$server/port').readAsStringSync().trim().split(' ');
     final socket = await Socket.connect(InternetAddress.loopbackIPv4, int.parse(at[0]), timeout: timeout);

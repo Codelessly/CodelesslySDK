@@ -54,8 +54,7 @@ Future<int> benchMain(List<String> argv) async {
     return 2;
   }
   final server = (jsonDecode(statusText) as Map).cast<String, Object?>();
-  final sdk = sdkRoot.path.replaceAll(r'\', '/');
-  final at = File('$sdk/build/.render-server/port').readAsStringSync().trim().split(' ');
+  final at = File('$renderServerDir/port').readAsStringSync().trim().split(' ');
   final port = int.parse(at[0]), token = at[1];
   final ownOut = a['--out'] == null;
   final root = Directory(ownOut ? Directory.systemTemp.createTempSync('codelessly_bench').path : absolute(a['--out']!))..createSync(recursive: true);

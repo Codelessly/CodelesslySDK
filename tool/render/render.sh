@@ -136,7 +136,7 @@ say_timings() {
 }
 
 # The render server (tool/render/serve.sh), when it is up and serves this code: the run is a request to it.
-server="$sdk/build/.render-server"
+server="${CODELESSLY_RENDER_SERVER:-$sdk/build/.render-server}"
 server_pid=""
 if [ -f "$server/pid" ]; then IFS= read -r server_pid < "$server/pid" || true; fi
 server_alive() {
