@@ -3,10 +3,11 @@
 # looking things up, writing, checking and seeing, all headless (no editor, no device, no browser).
 # See tool/README.md for every tool, when to use it, and how they fit together.
 #
-#   tool/codelessly doctor                         is everything here? (Flutter, the API checkout, the reference)
+#   tool/codelessly doctor [--warm]                what is here (Flutter, the API checkout, the reference, QuickJS);
+#                                                  exit status 0 when rendering works (--warm renders to check)
 #   tool/codelessly docs [words | anchor | name]   the API reference: the pages, a section, a search
 #   tool/codelessly flatten <tree.json>            nested node trees (as the editor takes them) to a document
-#   tool/codelessly render <doc | site>... --out <dir> [--outline] [--sheet] [steps...]
+#   tool/codelessly render <doc | site>... --out <dir> [--outline] [--sheet] [--timings] [steps...]
 #                                                  render every screen at each size, report problems
 #   tool/codelessly outline <out dir> <doc | site> what a render drew, as text: boxes, texts, problems per node
 #   tool/codelessly states <states.json>           every state of a site rendered, compared, summarized
@@ -19,27 +20,43 @@
 #                                                  the issues and the words that stood in as placeholders, as JSON
 #                                                  (notation.sh validate)
 #   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
-#   tool/codelessly serve [--stop|--status]        keep the renderer running: renders take ~1 s instead of ~6 s
+#   tool/codelessly serve [--stop|--status]        keep the renderer running: a render costs its drawing (a page at one
+#                                                  size: a third of a second), not Flutter's start (5 s)
 #   tool/codelessly mcp                            all of the above as an MCP server (stdio), for any agent
 #
 # `tool/codelessly <command> --help` describes each.
 set -u
-sdk="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# When the command started, for --timings (bash 5 says it without starting a process).
+export CODELESSLY_STARTED="${EPOCHREALTIME:-}"
+# The SDK's folder, without starting a process (on Windows each one costs 30 ms or more, and a command that the
+# render server answers in a quarter of a second should not spend as long finding its own folder).
+case "${BASH_SOURCE[0]}" in */*) sdk="${BASH_SOURCE[0]%/*}/.." ;; *) sdk=".." ;; esac
+here="$PWD"
+if CDPATH= cd -- "$sdk" 2>/dev/null; then sdk="$PWD"; CDPATH= cd -- "$here" 2>/dev/null || true; else sdk="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; fi
 cmd="${1:-help}"
 [ $# -gt 0 ] && shift
 
 # The Dart commands (tool/cli): compiled to build/codelessly_cli when it is missing or older than their sources,
 # under a lock so concurrent first calls compile once. Flutter's dart compiles them; no other dependency.
 cli_exe="$sdk/build/codelessly_cli"
+# Whether a source of tool/cli is newer than the executable (bash's own test: no `find` to start).
+cli_stale() {
+  [ -x "$cli_exe" ] || return 0
+  local f
+  for f in "$sdk"/tool/cli/*.dart "$sdk"/tool/cli/*/*.dart "$sdk"/tool/cli/*/*/*.dart; do
+    [ "$f" -nt "$cli_exe" ] && return 0
+  done
+  return 1
+}
 run_cli() {
-  if [ ! -x "$cli_exe" ] || [ -n "$(find "$sdk/tool/cli" -name '*.dart' -newer "$cli_exe" -print -quit 2>/dev/null)" ]; then
+  if cli_stale; then
     . "$sdk/tool/lib/env.sh"
     codelessly_find_flutter "tool/codelessly $cmd" || exit 2
     mkdir -p "$sdk/build"
     (
       exec 8>"$sdk/build/.codelessly_cli.lock"
       command -v flock >/dev/null 2>&1 && flock 8
-      if [ ! -x "$cli_exe" ] || [ -n "$(find "$sdk/tool/cli" -name '*.dart' -newer "$cli_exe" -print -quit 2>/dev/null)" ]; then
+      if cli_stale; then
         echo "Compiling the toolkit's commands (tool/cli, once per change)..." >&2
         log="$(mktemp)"
         if ! "$dart_bin" compile exe "$sdk/tool/cli/codelessly.dart" -o "$cli_exe.tmp" > "$log" 2>&1; then
@@ -74,22 +91,39 @@ case "$cmd" in
     codelessly_find_api
     if [ -n "$api" ]; then say api "sibling checkout $api"; else say api "none beside the SDK: the published codelessly_api is used (no docs/reference, no notation)"; fi
     [ -n "${flutter_bin:-}" ] && say versions "$(codelessly_version_line)"
-    if ref="$("$0" docs --starter 2>/dev/null)"; then say reference "$(dirname "$ref")"; else say reference "MISSING: docs needs codelessly_api's docs/reference (CodelesslyAPI beside the SDK, or CODELESSLY_API)"; ok=0; fi
+    # The exit status says whether rendering works (0) or not (1): Flutter is there and, with --warm, a document
+    # was rendered. What only other commands need (the reference: docs and the notation; QuickJS: documents that
+    # have scripts) is said on its line and does not fail the check.
+    if ref="$("$sdk/tool/codelessly" docs --starter 2>/dev/null)"; then say reference "$(dirname "$ref")"; else say reference "not found (rendering does not need it): docs and the notation need codelessly_api's docs/reference; check out CodelesslyAPI's master beside the SDK, or set CODELESSLY_API to its folder"; fi
     if [ -x "$sdk/build/codelessly_cli" ]; then say commands "build/codelessly_cli (tool/cli, Dart)"; else say commands "not compiled yet (the first command compiles tool/cli)"; fi
-    lib=""; for l in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do [ -f "$l" ] && lib="$l"; done
-    if [ -n "$lib" ]; then say scripts "QuickJS $lib"; else say scripts "no QuickJS library: documents' scripts don't run in renders (tool/build_quickjs.sh builds it)"; fi
+    lib="${CODELESSLY_QUICKJS_LIBRARY:-}"; [ -n "$lib" ] && [ ! -f "$lib" ] && lib=""
+    for l in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do [ -z "$lib" ] && [ -f "$l" ] && lib="$l"; done
+    if [ -n "$lib" ]; then
+      say scripts "QuickJS $lib"
+    else
+      say scripts "QuickJS not built (optional; rendering works without it): only a document with scripts (JavaScript its \"Run script\" actions and formulas run) needs it, and those scripts do not run in a render until it is built; everything else draws the same. To build it: tool/build_quickjs.sh (Linux or macOS, with python3 and a C compiler; Windows has no engine yet), which writes .dart_tool/codelessly_quickjs/libcodelessly_quickjs.so (.dylib); or set CODELESSLY_QUICKJS_LIBRARY to a built library."
+    fi
     if [ "${1:-}" = "--warm" ] && [ -n "${flutter_bin:-}" ]; then
       tmp="$(mktemp -d)"
-      printf '{"schema":3,"roots":["c"],"nodes":{"c":{"type":"canvas","layout":{"width":100,"height":100}}}}' > "$tmp/doc.json"
+      printf '{"schema":3,"roots":["c"],"nodes":{"c":{"type":"canvas","layout":{"width":100,"height":100},"decoration":{"fills":[{"color":"#FFFFFFFF"}]}}}}' > "$tmp/doc.json"
       start=$(date +%s)
-      if "$sdk/tool/render/render.sh" "$tmp/doc.json" --out "$tmp/out" --sizes 100x100 >/dev/null 2>&1; then
+      "$sdk/tool/render/render.sh" "$tmp/doc.json" --out "$tmp/out" --sizes 100x100 > "$tmp/log" 2>&1
+      status=$?
+      # Rendering works when the capture was written (status 1 is a problem the report names in the document,
+      # not a harness that does not run).
+      if ls "$tmp/out"/*.png >/dev/null 2>&1; then
         say harness "compiled and rendered in $(( $(date +%s) - start ))s"
+        say rendering "works"
       else
-        say harness "FAILED: run tool/render/render.sh on a document to see why"; ok=0
+        say harness "FAILED (exit status $status). What it said:"
+        tail -15 "$tmp/log" | sed 's/^/             /'
+        say rendering "does NOT work: tool/render/render.sh <document.json> --out <dir> shows the whole output"
+        ok=0
       fi
       rm -rf "$tmp"
     else
       say harness "(--warm compiles the render harness now, so the first render is fast)"
+      if [ $ok = 1 ]; then say rendering "not checked: tool/codelessly doctor --warm renders a document to check"; else say rendering "does NOT work: no Flutter"; fi
     fi
     [ $ok = 1 ] && exit 0 || exit 1
     ;;

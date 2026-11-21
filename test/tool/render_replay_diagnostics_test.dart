@@ -154,7 +154,7 @@ void main() {
       final dir = Directory('${out.path}/sh')..createSync();
       // render.sh's start: the arguments from CODELESSLY_ARGS_FILE when the caller put them there.
       final launcher = File('tool/render/render.sh').readAsStringSync();
-      final start = launcher.substring(launcher.indexOf('if [ -n "\${CODELESSLY_ARGS_FILE'), launcher.indexOf('here="\$(cd'));
+      final start = launcher.substring(launcher.indexOf('if [ -n "\${CODELESSLY_ARGS_FILE'), launcher.indexOf('# This script\'s folder'));
       final script = File('${dir.path}/print.sh')
         ..writeAsStringSync('#!/usr/bin/env bash\n${start}for a in "\$@"; do printf "<%s>" "\$a"; done\n');
       if (!Platform.isWindows) Process.runSync('chmod', ['+x', script.path]);

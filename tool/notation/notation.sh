@@ -79,15 +79,26 @@
 #
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out
 # beside it (../CodelesslyAPI: the notation is newer than the published
-# package), resolves dependencies when they are stale, and runs
-# tool/notation/<command>.dart with the rest of the arguments.
+# package), resolves dependencies when they are stale, and runs the command
+# with the rest of the arguments from build/codelessly_notation: the commands
+# (tool/notation/main.dart) compiled to a native executable, again whenever
+# one of their sources, codelessly_api's lib/ or the dependencies changed. A
+# command then takes what its work takes (expanding a six-page site: a
+# third of a second), not the five seconds of compiling it from source on
+# every run. --timings (or CODELESSLY_TIMINGS=1) says how long on stderr.
+# CODELESSLY_NOTATION_SOURCE=1 runs from source as before (dart run).
 set -e
+# When the command started, for --timings (bash 5 says it without starting a process).
+export CODELESSLY_STARTED="${CODELESSLY_STARTED:-${EPOCHREALTIME:-}}"
 # The notation's arguments are files and words, never a bare `/`: Git Bash's
 # rewriting of POSIX paths for Dart is what they need. MSYS2_ARG_CONV_EXCL='*',
 # which `tool/codelessly render` needs for `--key /`, turned it off and Dart
 # looked for /c/Users/... ("Could not find file .../expand.dart": test 9).
 unset MSYS2_ARG_CONV_EXCL MSYS_NO_PATHCONV
-sdk="$(cd "$(dirname "$0")/../.." && pwd)"
+# The SDK's folder, by going there and back (no process started: tool/lib/env.sh says why).
+case "$0" in */*) sdk="${0%/*}/../.." ;; *) sdk="../.." ;; esac
+here="$PWD"
+if CDPATH= cd -- "$sdk" 2>/dev/null; then sdk="$PWD"; CDPATH= cd -- "$here" 2>/dev/null || true; else sdk="$(cd "$(dirname "$0")/../.." && pwd)"; fi
 cmd="${1:-}"
 case "$cmd" in
   prompt|expand|print|apply|vocabulary) shift ;;
@@ -101,7 +112,8 @@ esac
 codelessly_find_flutter "tool/notation/notation.sh $cmd ..." || exit 2
 codelessly_find_api
 codelessly_write_api_override
-used="$(codelessly_api_in_use)"
+codelessly_set_api_used
+used="$api_used"
 if [ -z "$used" ] || [ ! -f "$used/lib/notation.dart" ]; then
   {
     echo "The notation needs codelessly_api from its master branch; this checkout would compile against ${used:-the published package}, which does not have it."
@@ -111,4 +123,43 @@ if [ -z "$used" ] || [ ! -f "$used/lib/notation.dart" ]; then
   exit 2
 fi
 codelessly_pub_get || exit 2
-exec "$dart_bin" run "$sdk/tool/notation/$cmd.dart" "$@"
+if [ -n "${CODELESSLY_NOTATION_SOURCE:-}" ]; then
+  exec "$dart_bin" run "$sdk/tool/notation/$cmd.dart" "$@"
+fi
+
+# The commands compiled (tool/notation/main.dart, with codelessly_api's notation in it): compiled again when the
+# executable is older than a source of theirs, of the codelessly_api in use, or the resolved dependencies; under a
+# lock, so commands started together compile once.
+exe="$sdk/build/codelessly_notation"
+notation_stale() {
+  [ -x "$exe" ] || return 0
+  local f
+  shopt -s globstar nullglob
+  for f in "$sdk"/tool/notation/*.dart "$used"/lib/**/*.dart "$used/pubspec.yaml" "$sdk/pubspec.yaml" "$sdk/pubspec_overrides.yaml" "$sdk/.dart_tool/package_config.json"; do
+    if [ "$f" -nt "$exe" ]; then shopt -u globstar nullglob; return 0; fi
+  done
+  shopt -u globstar nullglob
+  return 1
+}
+if notation_stale; then
+  mkdir -p "$sdk/build"
+  (
+    exec 8>"$sdk/build/.codelessly_notation.lock"
+    command -v flock >/dev/null 2>&1 && flock 8
+    if notation_stale; then
+      echo "Compiling the notation's commands (tool/notation, once per change)..." >&2
+      log="$(mktemp)"
+      if ! (cd "$sdk" && "$dart_bin" compile exe tool/notation/main.dart -o "$exe.tmp") > "$log" 2>&1; then
+        rm -f "$log" "$exe.tmp"
+        exit 3
+      fi
+      rm -f "$log"
+      mv "$exe.tmp" "$exe"
+    fi
+  ) || {
+    # Not compiled (a source that does not compile says so best from source; a Dart with no native compiler):
+    # run from source, as before.
+    exec "$dart_bin" run "$sdk/tool/notation/$cmd.dart" "$@"
+  }
+fi
+CODELESSLY_SDK="$sdk" exec "$exe" "$cmd" "$@"

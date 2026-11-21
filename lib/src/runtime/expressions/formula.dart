@@ -2296,13 +2296,7 @@ DateTime? _toDate(Object? value) {
       if (!value.isFinite) return null;
       return DateTime.fromMillisecondsSinceEpoch(value.toInt());
     case String():
-      final String text = value.trim();
-      if (text.isEmpty) return null;
-      final int? millis = int.tryParse(text);
-      if (millis != null && text.length > 8) {
-        return DateTime.fromMillisecondsSinceEpoch(millis);
-      }
-      return DateTime.tryParse(text) ?? _typedDate(text);
+      return _textDate(value);
     case Map():
       final Object? seconds = value['seconds'] ?? value['_seconds'];
       if (seconds is! num) return null;
@@ -2317,6 +2311,42 @@ DateTime? _toDate(Object? value) {
   } catch (_) {
     return null;
   }
+}
+
+/// The dates [_textDate] read a moment ago, by their text (null: not a date).
+final Map<String, DateTime?> _textDates = <String, DateTime?>{};
+final Stopwatch _textDatesAge = Stopwatch();
+
+/// Reads text as a date (see [_toDate]). What a text read as is kept for up
+/// to a second: sorting or filtering a list by a date reads each row's text
+/// once per comparison, and reading a local time asks the system for its
+/// time zone, which is slow (on Windows a list of a few hundred rows spent
+/// most of a frame there). Kept no longer, so a time zone the device changes
+/// to is followed.
+DateTime? _textDate(String value) {
+  // (No written date is this long; a paragraph is not kept.)
+  if (value.length > 64) return _readTextDate(value);
+  if (!_textDatesAge.isRunning ||
+      _textDatesAge.elapsedMilliseconds > 1000 ||
+      _textDates.length > 4096) {
+    _textDates.clear();
+    _textDatesAge
+      ..reset()
+      ..start();
+  }
+  final DateTime? known = _textDates[value];
+  if (known != null || _textDates.containsKey(value)) return known;
+  return _textDates[value] = _readTextDate(value);
+}
+
+DateTime? _readTextDate(String value) {
+  final String text = value.trim();
+  if (text.isEmpty) return null;
+  final int? millis = int.tryParse(text);
+  if (millis != null && text.length > 8) {
+    return DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+  return DateTime.tryParse(text) ?? _typedDate(text);
 }
 
 /// A date as people type it: `10/03/2026` (month first), `Oct 3, 2026`,

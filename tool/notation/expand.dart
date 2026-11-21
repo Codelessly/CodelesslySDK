@@ -182,8 +182,10 @@ Future<void> main(List<String> args) async {
   // (the NOCD chat's quote bars wrapped at 390). Said, not guessed.
   if (whole && opt('--width') == null && !args.contains('--no-reflow')) stderr.writeln(_defaultWidthNote);
   if (whole) {
-    exit(_expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440),
-        skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped));
+    // (Not exit: what runs this as a command of its own, tool/notation/main.dart, says its timings after it.)
+    exitCode = _expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440),
+        skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped);
+    return;
   }
 
   final file = target;

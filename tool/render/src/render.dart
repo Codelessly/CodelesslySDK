@@ -20,6 +20,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart'
     show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels, TextEditingValue, TextInputAction, TextSelection;
 import 'package:flutter_test/flutter_test.dart';
+import 'timings.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
@@ -329,6 +330,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
 
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
+  final timings = RenderTimings.current..lap('read');
   FontDemand.handler = null;
   FontDemand.symbolFallback = const [];
   _mouse = null;
@@ -368,6 +370,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     }
   });
   final codepoints = materialCodepoints(root);
+  timings.lap('fonts');
   final pages = <Page>[];
   // The site's components: what its pages' calls render.
   final components = ComponentRegistry();
@@ -456,6 +459,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       }
     });
   }
+  timings.lap('prepare');
   final published = publishPages(pages,
       variables: publishVariables(site.manifest),
       breakpoints: site.manifest?['breakpoints'],
@@ -465,6 +469,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // The families the pages use that no file here provides, from Google
   // Fonts (as an app has them), or the open face that stands for them; kept
   // in the cache, so a second run needs no network.
+  timings.lap('publish');
   final google = renderUsesGoogleFonts
       ? GoogleFontCache(dir: GoogleFontCache.defaultDir(Directory.current.path), enabled: args.googleFonts && !GoogleFontCache.offByEnvironment)
       : null;
@@ -478,6 +483,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // The font files site.json declares that are not there (or not read):
   // one report for the site, before any screen, each face with its file,
   // where it was looked for and what its text is drawn in instead.
+  timings.lap('fonts');
   final unusableFamilies = _reportDeclaredFonts(declaredProblems, declared, fetcher, siteDir, issue);
   // A page's nodes before a component's of the same id (a page's row3 was
   // reported in a component's file: test 9, admin 4 and kanban 9); a node
@@ -646,9 +652,11 @@ Future<void> _renderAll(
   FormulaEvaluator.onActionFailure = (expression, action, why) => formulaFailures.add((expression, action, why));
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
+  final timings = RenderTimings.current;
   for (final screen in screens) {
     final label = _screenName(published, docs, screen);
     for (final size in args.sizes) {
+      timings.lap('setup');
       final sizeName = '${size.width.round()}x${size.height.round()}';
       exporter
         ..capture = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}'
@@ -845,8 +853,13 @@ Future<void> _renderAll(
         ));
         // Loading waits for the layout's fonts (registered with the engine in
         // real time) up to its font timeout (on the test's clock): let both run.
+        // (The real wait ends as soon as no font is still being registered: with nothing to load it is a turn
+        // of the event loop, not 20 ms for every screen at every size.)
         for (var i = 0; i < 100 && !controller.isLoaded && controller.error == null; i++) {
-          await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+          await tester.runAsync(() => Future.any<void>([
+                CodelesslyFonts.settled.then((_) => Future<void>(() {})),
+                Future<void>.delayed(const Duration(milliseconds: 20)),
+              ]));
           await tester.pump(const Duration(milliseconds: 100));
         }
         // Filmed from the load (`--frames` the first step): what the page
@@ -879,7 +892,9 @@ Future<void> _renderAll(
       }
 
       tester.takeAnnouncements();
+      timings.lap('setup');
       await show(filmLoad: args.steps.firstOrNull?.kind == 'frames');
+      timings.lap('show');
       hear('load', baseline: true);
       if (!controller.isLoaded) {
         issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
@@ -1107,8 +1122,10 @@ Future<void> _renderAll(
       // 6. Runtime checks, then the PNG. A font asked for by name late (by
       // a text that appeared after the screen settled) is waited for first:
       // its text is measured, checked and drawn in it, not in the fallback.
+      timings.lap('steps');
       await _fontsSettled(tester, fetcher);
       await layoutSettled(tester);
+      timings.lap('settle');
       for (final i in _check(binding, published, docs, fileOfNode, label, sizeName, faces, failedImages: failedImages)) {
         issue(i);
       }
@@ -1168,20 +1185,32 @@ Future<void> _renderAll(
       final file = '${args.out}/$name';
       final ro = boundary.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final page = fullPage;
+      timings.lap('checks');
+      // Nothing painted behind part of the screen: there, a reader sees the host's background (an app's or a
+      // browser page's), which the document does not choose. Counted on the capture's own pixels (the PNG read
+      // back and decoded for it cost as much again as writing it).
+      double? bare;
       if (page == null || !page.attached) {
-        await tester.runAsync(() async {
+        bare = await tester.runAsync<double?>(() async {
           final image = await ro.toImage(pixelRatio: 1);
+          timings.lap('capture');
+          final raw = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+          final share = raw == null ? null : _transparentShareOf(raw.buffer.asUint8List(), image.width * image.height);
+          timings.lap('transparency');
           final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
           image.dispose();
+          timings.lap('png');
           File(file).writeAsBytesSync(bytes!.buffer.asUint8List());
+          timings.lap('write');
+          return share;
         });
       } else {
-        File(file).writeAsBytesSync(await _captureFullPage(tester, ro, page, binding));
+        final (bytes, share) = await _captureFullPage(tester, ro, page, binding);
+        File(file).writeAsBytesSync(bytes);
+        bare = share;
+        timings.lap('full page');
       }
       report.images.add(file);
-      // Nothing painted behind part of the screen: there, a reader sees the host's background (an app's or a
-      // browser page's), which the document does not choose.
-      final bare = await tester.runAsync(() => _transparentShare(File(file).readAsBytesSync()));
       if (bare != null && bare >= 0.02) {
         final canvasId = published.layoutOfCanvas.keys.firstWhere((c) => published.layoutOfCanvas[c] == screen, orElse: () => '');
         issue(RuntimeIssue('transparent_background', 'warning',
@@ -1280,6 +1309,7 @@ Future<void> _renderAll(
             .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
       }
 
+      timings.lap('record');
       // The mouse a --hover step put on the screen leaves with it: the next
       // size's hover adds it again (Flutter's mouse tracker asserts on a
       // device added twice).
@@ -1291,6 +1321,7 @@ Future<void> _renderAll(
       timeLimit();
       controller.dispose();
       codelessly.dispose();
+      timings.lap('teardown');
     }
   }
 }
@@ -1852,7 +1883,7 @@ ui.Rect? _visibleClip(RenderBox b) {
 /// in the page (not pinned at the top of each window), and only the page's
 /// own route is drawn (a modal, a dialog or a sheet open over it, and its
 /// barrier, show in the first window only).
-Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
+Future<(List<int>, double?)> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
   final window = ro.size;
   final view = _rectOf(page);
   final max = page.maxScrollExtent;
@@ -2017,6 +2048,9 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final picture = recorder.endRecording();
   return (await tester.runAsync(() async {
     final image = await picture.toImage(window.width.ceil(), total.toInt());
+    // The share of it nothing is painted behind ([_transparentShareOf]), from its own pixels.
+    final raw = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final share = raw == null ? null : _transparentShareOf(raw.buffer.asUint8List(), image.width * image.height);
     final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
     image.dispose();
     picture.dispose();
@@ -2025,7 +2059,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     for (final (img, _) in slices) {
       img.dispose();
     }
-    return bytes!.buffer.asUint8List();
+    return (bytes!.buffer.asUint8List() as List<int>, share);
   }))!;
 }
 
@@ -4664,6 +4698,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.startedOn.isNotEmpty) 'startedOn': report.startedOn,
     'diagnostics': report.diagnostics,
   }));
+  RenderTimings.current.lap('report');
   return report;
 }
 
@@ -4775,24 +4810,15 @@ String? _shownText(NodeBox box) {
   return out;
 }
 
-/// The share of [png]'s pixels that are fully transparent, or null when it does not decode.
-Future<double?> _transparentShare(List<int> png) async {
-  try {
-    final codec = await ui.instantiateImageCodec(Uint8List.fromList(png));
-    final image = (await codec.getNextFrame()).image;
-    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    final total = image.width * image.height;
-    image.dispose();
-    if (data == null || total == 0) return null;
-    final bytes = data.buffer.asUint8List();
-    var bare = 0;
-    for (var i = 3; i < bytes.length; i += 4) {
-      if (bytes[i] == 0) bare++;
-    }
-    return bare / total;
-  } catch (_) {
-    return null;
+/// The share of the [total] pixels in [rgba] (four bytes each, alpha last) that are fully transparent; null for
+/// no pixels.
+double? _transparentShareOf(Uint8List rgba, int total) {
+  if (total == 0) return null;
+  var bare = 0;
+  for (var i = 3; i < rgba.length; i += 4) {
+    if (rgba[i] == 0) bare++;
   }
+  return bare / total;
 }
 
 /// The words that stood in as placeholders in the site at [siteDir] (a

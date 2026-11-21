@@ -10,8 +10,17 @@
 // one after another, writing that file's `.report` and `.status`. A run then
 // costs the rendering alone, not Flutter's start (about 5 s). It writes
 // <dir>/ready once it takes requests, and stops when <dir>/stop appears or no
-// request came for CODELESSLY_RENDER_IDLE seconds (default 1800).
+// request came for CODELESSLY_RENDER_IDLE seconds (default 1800). It also
+// listens on a socket of this machine (<dir>/port: the port and a token): a
+// line `<token> <arguments file>` is a request, answered `done` when the run
+// is over, so the caller neither looks for request files nor waits in steps.
+//
+// Every run also writes `<arguments file>.timings`: where its time went, one
+// line (src/timings.dart), which the command prints with --timings.
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 
@@ -20,6 +29,7 @@ import 'src/fonts.dart';
 import 'src/google_fonts.dart' show renderUsesGoogleFonts;
 import 'src/sheet.dart';
 import 'src/render.dart';
+import 'src/timings.dart';
 
 void main() {
   final argsFile = Platform.environment['CODELESSLY_RENDER_ARGS'];
@@ -37,6 +47,21 @@ void main() {
 Future<void> _renderOne(WidgetTester tester, String argsFile) async {
   final lines = argsFromFile(File(argsFile).readAsStringSync());
   final status = File('$argsFile.status');
+  // Where the run's time went (src/timings.dart), written beside the report before the status (which says the
+  // run is over): the command prints it with --timings or CODELESSLY_TIMINGS=1.
+  final timings = RenderTimings.current = RenderTimings();
+  try {
+    await _renderRuns(tester, lines, argsFile, status);
+  } finally {
+    File('$argsFile.timings').writeAsStringSync('${timings.line}\n');
+    final last = File('$argsFile.status.tmp');
+    if (last.existsSync()) last.renameSync(status.path);
+  }
+}
+
+/// The runs of one command. The status is written as `.status.tmp`; [_renderOne] names it `.status` last.
+Future<void> _renderRuns(WidgetTester tester, List<String> lines, String argsFile, File done) async {
+  final status = File('${done.path}.tmp');
   if (lines.contains('--sheet')) return _sheetOne(tester, lines, argsFile);
   // `--state <label> <steps…>`, again for each state: one run (one start of
   // Flutter, one compile) captures every state, each from a fresh start
@@ -98,29 +123,83 @@ Future<void> _sheetOne(WidgetTester tester, List<String> lines, String argsFile)
       base: value('--sheet-base'),
       flutterRoot: Platform.environment['FLUTTER_ROOT'] ?? ''));
   File('$argsFile.report').writeAsStringSync(made == null ? 'No PNGs found.\n' : 'wrote $made\n');
-  File('$argsFile.status').writeAsStringSync(made == null ? '1' : '0');
+  File('$argsFile.status.tmp').writeAsStringSync(made == null ? '1' : '0');
 }
 
 Future<void> _serve(WidgetTester tester, String dir) async {
   final idle = Duration(seconds: int.tryParse(Platform.environment['CODELESSLY_RENDER_IDLE'] ?? '') ?? 1800);
   final stop = File('$dir/stop');
+  // Requests also come over a socket on this machine (tool/cli's render: no shell, no polling): one line, the
+  // token then the arguments file; answered with one line when the run is over. `port` holds the port and the
+  // token, which only who can read this checkout's build/ knows.
+  final asked = <(Socket, String)>[];
+  var wake = Completer<void>();
+  final token = [for (var i = 0; i < 16; i++) Random.secure().nextInt(256).toRadixString(16).padLeft(2, '0')].join();
+  final listener = await tester.runAsync(() async {
+    try {
+      final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 0);
+      server.listen((socket) {
+        socket.setOption(SocketOption.tcpNoDelay, true);
+        final text = StringBuffer();
+        late final StreamSubscription<String> sub;
+        sub = utf8.decoder.bind(socket).listen((chunk) {
+          text.write(chunk);
+          final end = '$text'.indexOf('\n');
+          if (end < 0) return;
+          sub.cancel();
+          final line = '$text'.substring(0, end);
+          if (!line.startsWith('$token ')) {
+            socket.destroy();
+            return;
+          }
+          asked.add((socket, line.substring(token.length + 1)));
+          if (!wake.isCompleted) wake.complete();
+        }, onError: (_) => socket.destroy(), cancelOnError: true);
+      }, onError: (_) {});
+      File('$dir/port.tmp').writeAsStringSync('${server.port} $token\n');
+      File('$dir/port.tmp').renameSync('$dir/port');
+      return server;
+    } catch (_) {
+      return null; // No socket here: the request files alone.
+    }
+  });
   File('$dir/ready').writeAsStringSync('$pid\n');
   var served = 0;
   while (true) {
     // Wait on the real clock (the test's own is fake) for a request, the stop file or the idle limit.
-    final next = await tester.runAsync(() async {
+    final next = await tester.runAsync<(Socket?, String)?>(() async {
       final since = DateTime.now();
       while (!stop.existsSync() && DateTime.now().difference(since) < idle) {
+        if (asked.isNotEmpty) return asked.removeAt(0);
         final reqs = Directory(dir).listSync().whereType<File>().where((f) => f.path.endsWith('.req')).toList()
           ..sort((a, b) => a.path.compareTo(b.path));
-        if (reqs.isNotEmpty) return reqs.first;
-        await Future<void>.delayed(const Duration(milliseconds: 40));
+        if (reqs.isNotEmpty) {
+          final argsFile = reqs.first.readAsStringSync().trim();
+          reqs.first.deleteSync();
+          return (null, argsFile);
+        }
+        if (wake.isCompleted) wake = Completer<void>();
+        await Future.any([wake.future, Future<void>.delayed(const Duration(milliseconds: 40))]);
       }
       return null;
     });
     if (next == null) break;
-    final argsFile = next.readAsStringSync().trim();
-    next.deleteSync();
+    final (socket, argsFile) = next;
+    // The socket's caller is told when the run is over, whatever came of it (it reads the files then).
+    Future<void> answer() async {
+      if (socket == null) return;
+      await tester.runAsync(() async {
+        try {
+          socket.write('done\n');
+          await socket.flush();
+          await socket.close();
+        } catch (_) {
+          socket.destroy();
+        }
+      });
+    }
+
+    var stopServing = false;
     try {
       await _renderOne(tester, argsFile);
       if (DirectoryFontFetcher.engineConflicts.isNotEmpty) {
@@ -131,7 +210,7 @@ Future<void> _serve(WidgetTester tester, String dir) async {
           if (f.existsSync()) f.deleteSync();
         }
         File('$argsFile.retry').writeAsStringSync('${DirectoryFontFetcher.engineConflicts.join('\n')}\n');
-        break;
+        stopServing = true;
       }
     } catch (e, s) {
       // A run that throws answers with the error, and the server stops: what it threw in the middle of (a build,
@@ -140,11 +219,18 @@ Future<void> _serve(WidgetTester tester, String dir) async {
       File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n'
           'The render server stopped after it: the next run starts from a fresh Flutter.\n');
       File('$argsFile.status').writeAsStringSync('2');
+      stopServing = true;
+    }
+    if (stopServing) {
+      // No further request is taken: said before the caller is answered, so its next run does not ask.
+      _closeDoor(dir);
+      await answer();
       break;
     }
     // Whatever a run left for the test to find is that run's, not the next one's.
     tester.takeException();
     File('$dir/served').writeAsStringSync('${++served}\n');
+    await answer();
     // The next run gets a sound tree: an empty frame builds and lays out without an error. A run whose failure
     // (a framework assertion in a build) left it broken ends the server rather than the next run's capture.
     if (!await renderTreeSound(tester)) {
@@ -152,5 +238,19 @@ Future<void> _serve(WidgetTester tester, String dir) async {
       break;
     }
   }
-  File('$dir/ready').deleteSync();
+  _closeDoor(dir);
+  await tester.runAsync(() async {
+    await listener?.close();
+    for (final (socket, _) in asked) {
+      socket.destroy();
+    }
+  });
+}
+
+/// The server takes no more requests: its `port` and `ready` files are gone.
+void _closeDoor(String dir) {
+  for (final name in const ['port', 'ready']) {
+    final f = File('$dir/$name');
+    if (f.existsSync()) f.deleteSync();
+  }
 }

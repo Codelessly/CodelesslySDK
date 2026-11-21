@@ -16,8 +16,17 @@ if [ -n "${CODELESSLY_ARGS_FILE:-}" ] && [ -f "$CODELESSLY_ARGS_FILE" ]; then
   unset CODELESSLY_ARGS_FILE
   set -- "${file_args[@]}"
 fi
-here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-sdk="$(cd "$here/../.." && pwd)"
+# This script's folder and the SDK's, by going there and back (no process started: tool/lib/env.sh says why).
+case "${BASH_SOURCE[0]}" in */*) here="${BASH_SOURCE[0]%/*}" ;; *) here="." ;; esac
+was="$PWD"
+if CDPATH= cd -- "$here" 2>/dev/null; then
+  here="$PWD"
+  CDPATH= cd -- ../.. && sdk="$PWD"
+  CDPATH= cd -- "$was" 2>/dev/null || true
+else
+  here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  sdk="$(cd "$here/../.." && pwd)"
+fi
 # Scripts run on the QuickJS library tool/build_quickjs.sh builds, when it is there and none is named.
 if [ -z "${CODELESSLY_QUICKJS_LIBRARY:-}" ]; then
   for lib in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do
@@ -38,6 +47,8 @@ out=""
 expect_path=0
 want_ds=0
 design_system=""
+timings=0
+case "${CODELESSLY_TIMINGS:-}" in ''|0) ;; *) timings=1 ;; esac
 for a in "$@"; do
   if [ $want_ds = 1 ]; then
     a="$(abs "$a")"
@@ -57,6 +68,7 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
+    --timings) timings=1 ;;
     --out|--fonts|--slots|--compare|--sheet|--sheet-base|--pick-file) expect_path=1; prev="$a"; args+=("$a") ;;
     --design-system) want_ds=1 ;;
     --*) args+=("$a") ;;
@@ -115,33 +127,67 @@ trap 'rm -rf "$work"; codelessly_release_lock' EXIT
 # One argument after another, each ended by a NUL: an argument may hold a newline (--type note=$'one\ntwo').
 printf '%s\0' "${args[@]}" > "$work/args"
 
+# --timings (or CODELESSLY_TIMINGS=1): where the run's time went, one line on stderr after the report.
+say_timings() {
+  if [ $timings = 1 ] && [ -f "$work/args.timings" ]; then
+    echo "timings: render $(tr -d '\r\n' < "$work/args.timings")" >&2
+  fi
+  return 0
+}
+
 # The render server (tool/render/serve.sh), when it is up and serves this code: the run is a request to it.
 server="$sdk/build/.render-server"
-if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid")" 2>/dev/null; then
+server_pid=""
+if [ -f "$server/pid" ]; then IFS= read -r server_pid < "$server/pid" || true; fi
+server_alive() {
+  server_pid=""
+  if [ -f "$server/pid" ]; then IFS= read -r server_pid < "$server/pid" || true; fi
+  [ -n "$server_pid" ] && kill -0 "$server_pid" 2>/dev/null
+}
+if [ -f "$server/ready" ] && server_alive; then
   changed="$(find "$sdk/lib" "$sdk/tool/render" "$sdk/pubspec.yaml" "$sdk/pubspec_overrides.yaml" ${api:+"$api/lib" "$api/pubspec.yaml"} \
     -newer "$server/ready" -print -quit 2>/dev/null)"
   if [ -n "$changed" ]; then
     echo "The render server serves older code (${changed#$sdk/} changed since it started): stopping it; rendering the usual way. tool/render/serve.sh starts it again." >&2
     "$here/serve.sh" --stop >/dev/null 2>&1
   else
-    echo "Rendering with $(codelessly_version_line), the render server (pid $(cat "$server/pid"))." >&2
-    req="$server/$(date +%s%N)-$$.req"
-    printf '%s\n' "$work/args" > "$req.tmp" && mv "$req.tmp" "$req"
-    while [ ! -f "$work/args.status" ] && [ ! -f "$work/args.retry" ]; do
-      if ! kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null; then
+    echo "Rendering with $(codelessly_version_line), the render server (pid $server_pid)." >&2
+    # The request goes over the server's socket when it has one (build/.render-server/port: the port and a token),
+    # which answers the moment the run is over. Without one, a request file the server looks for, and a wait that
+    # looks for its answer.
+    asked=0 port="" token=""
+    if [ -f "$server/port" ]; then IFS=' ' read -r port token < "$server/port" || true; fi
+    if [ -n "$port" ] && [ -n "$token" ] && { exec 7<>"/dev/tcp/127.0.0.1/$port"; } 2>/dev/null; then
+      asked=1
+      printf '%s %s\n' "$token" "$work/args" >&7
+      IFS= read -r _ <&7 || true
+      exec 7>&-
+      if [ ! -f "$work/args.status" ] && [ ! -f "$work/args.retry" ]; then
         echo "The render server stopped during the run; rendering the usual way." >&2
-        rm -f "$req"
-        break
       fi
-      sleep 0.05
-    done
+    fi
+    if [ $asked = 0 ]; then
+      req="$server/$(date +%s%N)-$$.req"
+      printf '%s\n' "$work/args" > "$req.tmp" && mv "$req.tmp" "$req"
+      while [ ! -f "$work/args.status" ] && [ ! -f "$work/args.retry" ]; do
+        if ! server_alive; then
+          echo "The render server stopped during the run; rendering the usual way." >&2
+          rm -f "$req"
+          break
+        fi
+        sleep 0.05
+      done
+    fi
     if [ -f "$work/args.retry" ]; then
-      echo "The render server had other files registered for fonts this run draws ($(head -1 "$work/args.retry")); it stopped. Rendering the usual way; tool/render/serve.sh starts it again." >&2
-      for _ in $(seq 1 100); do kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null || break; sleep 0.1; done
+      IFS= read -r conflict < "$work/args.retry" || true
+      echo "The render server had other files registered for fonts this run draws (${conflict:-}); it stopped. Rendering the usual way; tool/render/serve.sh starts it again." >&2
+      for _ in $(seq 1 100); do server_alive || break; sleep 0.1; done
       rm -rf "$server"
     elif [ -f "$work/args.status" ]; then
       cat "$work/args.report"
-      exit "$(cat "$work/args.status")"
+      say_timings
+      IFS= read -r status < "$work/args.status" || true
+      exit "${status:-2}"
     fi
   fi
 fi
@@ -156,6 +202,7 @@ codelessly_pub_get || exit 2
 )
 if [ -f "$work/args.report" ]; then
   cat "$work/args.report"
+  say_timings
 else
   echo "The render harness did not finish. Its output:" >&2
   grep -v "Woah\|superuser\|^  /\|📎" "$work/flutter.log" | tail -60 >&2

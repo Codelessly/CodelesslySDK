@@ -11,6 +11,7 @@ import 'dart:io';
 
 import 'common.dart';
 import 'outline.dart';
+import 'render_client.dart';
 
 /// Render options that take a value (so their value is not a document).
 const renderValued = {
@@ -48,7 +49,7 @@ List<String> withDumpLayout(List<String> args) {
 Future<(int, String)> sheet(List<String> inputs, String out, {int height = 480, int? columns, String? title}) {
   final file = absolute(out);
   final single = inputs.length == 1 && FileSystemEntity.isDirectorySync(inputs.first) ? absolute(inputs.first) : null;
-  return runCaptured(renderScript, [
+  return renderCaptured([
     '--sheet', file, '--out', File(file).parent.path, '--sheet-height', '$height',
     if (columns != null) ...['--sheet-columns', '$columns'],
     if (title != null) ...['--sheet-title', title],
@@ -74,13 +75,20 @@ Future<int> renderMain(List<String> argv) async {
   if (outline) args.replaceRange(0, args.length, withDumpLayout(args));
   // The outline is of this invocation's captures, not those earlier runs left in --out.
   final before = snapshotOf(out);
-  final code = await runInherited(renderScript, args);
+  final timings = timingsAsked(argv) ? CommandTimings() : null;
+  timings?.lap('start');
+  final code = await renderInherited(args, timings: timings);
   if (code != 2) {
     if (outline) stdout.write('\n${outlineText(out, docs, fresh: writtenAfter(before))}');
     if (wantSheet) {
       final (_, text) = await sheet([out], '$out/sheet.png');
       stdout.write(text.split('\n').where((l) => l.startsWith('wrote ') || l.startsWith('No PNGs')).map((l) => '$l\n').join());
     }
+  }
+  if (timings != null) {
+    if (outline || wantSheet) timings.lap([if (outline) 'outline', if (wantSheet) 'sheet'].join(' and '));
+    await stdout.flush();
+    stderr.writeln('timings: command ${timings.line}');
   }
   return code;
 }

@@ -20,6 +20,7 @@ import 'common.dart';
 import 'docs.dart';
 import 'flatten.dart';
 import 'outline.dart';
+import 'render_client.dart';
 
 final Directory _work = () {
   final env = Platform.environment['CODELESSLY_MCP_WORK'];
@@ -208,7 +209,7 @@ Future<(List<Map<String, Object?>>, bool)> _call(String name, Map args) async {
             for (final e in s.entries) ...(e.value == true ? ['--${e.key}'] : ['--${e.key}', e.value is String ? e.value as String : jsonEncode(e.value)]),
         ],
       ];
-      final (code, report) = await runCaptured(renderScript, cmd);
+      final (code, report) = await renderCaptured(cmd);
       final shown = report.split('\n').where((l) => !l.startsWith('Rendering with ')).join('\n').trim();
       final content = [_text('$shown\n\n(exit $code; files: $out)')];
       if (code != 2 && args['outline'] != false) {

@@ -22,7 +22,7 @@ One entry point for the authoring loop. `tool/codelessly help` lists the command
 
 | Command | What it does | When |
 |---|---|---|
-| `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, the compiled commands, QuickJS. `--warm` compiles the render harness so the first render is fast. | Once per machine or session; when a command can't find something. |
+| `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, the compiled commands, QuickJS. `--warm` compiles the render harness and renders a document, so the first render is fast and the check is real. Its exit status is 0 when rendering works, 1 when it does not (no Flutter, or the document did not render); the reference (docs and the notation need it) and QuickJS (only documents with scripts need it: `build_quickjs.sh` builds it) are said on their lines and do not fail it. | Once per machine or session; when a command can't find something. |
 | `docs [query]` | The API reference from the shell: no query lists the pages; an anchor (`forms-validation-and-an-error-state`), a name (`row`, `navigate`, `textField`) or words (`sticky header`) print the best section and other matches. `--starter` prints the base's path. | Before writing a feature you haven't used. |
 | `flatten <tree.json>` | A nested node tree, trees per breakpoint (`{"trees": {"mobile": ..., "desktop": ...}}`, as the editor's `layouts.createResponsive` takes them) or a document with nested children, to a flat layout document. `key` names a node; `"@key"` elsewhere becomes its id. | You (or a generator) write screens as nested trees; render them headless before installing them in the editor. |
 | `render <doc \| site>... --out <dir>` | Publishes as the editor would, renders every screen at each size (`--sizes`, default phone, tablet, desktop) with `CodelesslyWidget`, after optional steps (`--tap`, `--type`, `--navigate`, `--hover`, `--drag`, `--set`, `--now`...), and reports what only rendering shows (overflow, clipped text, failed taps, missing fonts and images). `--outline` prints every capture's outline; `--sheet` writes `<out>/sheet.png`; `--compare` diffs against reference screenshots. All other options: [render/README.md](render/README.md). | Every time you want to see the result or check an interaction. |
@@ -44,7 +44,7 @@ A typical session:
 
 ```sh
 tool/codelessly doctor --warm
-tool/codelessly serve                                  # keep the renderer up: ~1 s renders
+tool/codelessly serve                                  # keep the renderer up: a render costs its drawing
 tool/codelessly docs                                   # what's where
 tool/codelessly docs "a row that becomes a column"     # the section for a need
 tool/codelessly render site/ --out out/ --outline      # problems, boxes, texts; PNGs in out/
@@ -52,10 +52,14 @@ tool/codelessly render site/ --out out/ --screen contact --tap submit --label er
 tool/codelessly states states.json                     # every state vs its reference: out/states/summary.md
 ```
 
-Speed: a render takes about 5 seconds once the harness is compiled (the first after an SDK change takes 20 to 60
-seconds, `doctor --warm` does it up front) plus about half a second per screen and size; with `serve` running, the
-5 seconds of Flutter's start go away. Runs on one checkout take turns (a lock in `build/`, or the server's queue);
-use git worktrees for runs in parallel.
+Speed: with `serve` running, a render costs its drawing: about a third of a second for a page at one size, under
+three seconds for six pages at three sizes; `expand` of a six-page site takes about a third of a second too.
+Without the server a render first starts Flutter (about 5 seconds once the harness is compiled; the first after an
+SDK change takes 20 to 60 seconds, `doctor --warm` does it up front). The commands are compiled once per change of
+their sources (`tool/cli`, and the notation's with `codelessly_api`'s `lib/`: ten to twenty seconds, said as it
+happens). `--timings` on `render` or a notation command (or `CODELESSLY_TIMINGS=1`) prints each phase's
+milliseconds on stderr. Runs on one checkout take turns (a lock in `build/`, or the server's queue); use git
+worktrees for runs in parallel.
 
 ## Every tool here
 

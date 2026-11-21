@@ -96,6 +96,7 @@ site: navigation may name a canvas of another page.
 | `--scroll <id or screen>=<px>` | Scroll a scrolling node, or the page, to an offset: one number, along the way it scrolls (`--scroll reading=650`), or `x,y` (`--scroll reading=0,650`; in a node that scrolls both ways, its first horizontal scroll view takes `x` and its first vertical one `y`). `--scroll screen` on a page that fits its window does nothing: a `scroll_nothing` warning, not an error. The scroll view's `scroll` and `scrollEnd` reactions run (`result.offset`, `result.max`), as a user's scroll runs them; `--drag` moves it with a finger instead (a pull, a fling). |
 | `--navigate <screen>` | Push a screen: a canvas id, a screen name or a URL path (`/project`, `speaker.html`), with a query string for its params: `--navigate speaker?id=ada`, `--navigate /project?id=soft-signal`. The screen reads them as `${route.id}`, as from a `navigate` action's `params`. A screen no such name finds is an error listing the screens. Later steps act on the screen navigated to, and the capture is named after it (`speaker@390x844.png`, not the starting screen's name; `--compare` looks for its reference). |
 | `--screen-timeout <seconds>` | The most real time one screen at one size may take, its load, steps and capture together (default 120). Past it the page's own functions and computed variables give nothing at once, so the screen ends; it is reported as an error (`screen_timeout`) naming what the time went to, and the run goes on to the next screen. |
+| `--timings` | Prints where the run's time went, one line on stderr after the report (also with `CODELESSLY_TIMINGS=1`): see "Where the time goes" below. |
 | `--wait <ms>` | Let time pass (animations, delays, toasts, timers), and `now()` and `nowMs()` with it: a clock or a deadline written from `now()` is that much later after the wait, as the timers that ran in it are (without `--now`, the run starts at the real time). |
 | `--frames <ms>,<ms>...` | Film what the step before started: a PNG at each time (ms after that step, which does not settle first, drawn frame by frame), named `<png name>-f<n>-<ms>ms.png` with `n` the burst of the run (`--long-press bubble#1=820 --frames 0,100,200,335 --tap pressBack --frames 0,100,200,335`: a lift out and back). It follows any step (a tap, a type, a set, a navigate, a wait, a hold): `--tap send --frames 120` is the row 120 ms after Send, before its delay ends; `--navigate detail --frames 0,100,200` a route's entrance. First in the run (or right after `--reload`), it films from the page's load: frame 0 is the first frame of the loaded page (its fonts and images loaded, none of its time passed), for a mount animation or a first timer. The times are on the run's clock: timers, `every`, delays and animations move only by the frames drawn (16 ms each), so a frame is the same on every run; work done in real time (a font file read, an image decoded) is waited for, not timed. With `--dump-layout` each frame has its layout (`<frame png>.layout.json`), so `--outline` lists it. In a states manifest `{"frames": [0, 120]}` (a list or `"0,120"`). A step before a `--wait` still settles: `--tap send --frames 120`, not `--tap send --wait 120`. The steps after the last go on as usual, after a settle. |
 | `--label <text>` | Add `-<text>` to the PNG names and the diagnostics file's (`diagnostics-<text>.json`; with `--screen home`, `diagnostics-home-<text>.json`), to keep states apart. |
@@ -319,16 +320,32 @@ names): the script writes a `pubspec_overrides.yaml` saying so on its first line
 is gone. An overrides file of your own is never touched. Without a sibling, the published `codelessly_api` is used.
 
 **The render server.** `tool/render/serve.sh` (or `tool/codelessly serve`) starts the harness once and keeps it
-running: every later `render.sh` run on the checkout is a request to it and skips Flutter's start (about 5 s), with
-the same arguments, report, files and exit status. It serves the code it started with: when the SDK's `lib/` or
-`tool/render/`, its pubspecs or the sibling `codelessly_api`'s `lib/` change after it started, `render.sh` stops it
-and renders the usual way. `serve.sh --status` and `--stop`; it stops by itself after `--idle` seconds without a
-request (default 1800). Its state and log are in `build/.render-server/`. `tool/codelessly states` uses it by
-default: with none up it starts one for the manifest and stops it at the end (one already up is used and left
-running); its first line says which, and each state's line ends `warm` or `cold`; `--cold` starts Flutter for each
-state instead. Each run on the server is still its own: a new app, the screen loaded afresh, nothing stored. A run
-that throws, or that leaves Flutter's widget tree broken (an empty frame after it reports an error), stops the
-server, so the next run starts from a fresh Flutter rather than drawing on that tree; `states` starts another.
+running: every later run on the checkout is a request to it and skips Flutter's start (about 5 s), with the same
+arguments, report, files and exit status. A run then costs its drawing: a page at one size about a third of a
+second, six pages at three sizes under three, an overlay opened by a tap at two sizes about half a second (on a
+developer's machine, once the server has drawn anything). `tool/codelessly render` asks the server itself, over a
+socket on this machine (`build/.render-server/port` holds the port and a token), and starts no shell;
+`render.sh` asks over the same socket (a server without one is asked through a request file). It serves the code
+it started with: when the SDK's `lib/` or `tool/render/`, its pubspecs or the sibling `codelessly_api`'s `lib/`
+change after it started, the run stops it and renders the usual way. `serve.sh --status` and `--stop`; it stops by
+itself after `--idle` seconds without a request (default 1800). Its state and log are in `build/.render-server/`.
+`tool/codelessly states` uses it by default: with none up it starts one for the manifest and stops it at the end
+(one already up is used and left running); its first line says which, and each state's line ends `warm` or
+`cold`; `--cold` starts Flutter for each state instead. Each run on the server is still its own: a new app, the
+screen loaded afresh, nothing stored. A run that throws, or that leaves Flutter's widget tree broken (an empty
+frame after it reports an error), stops the server, so the next run starts from a fresh Flutter rather than
+drawing on that tree; `states` starts another.
+
+**Where the time goes.** `--timings` (or `CODELESSLY_TIMINGS=1`) prints, on stderr after the report, the
+milliseconds of each phase of the run, summed over its screens and sizes with how many times each ran:
+`timings: render read 25 ms, fonts 23 ms (2), prepare 11 ms, publish 17 ms, setup 3 ms (2), show 102 ms, steps 1 ms,
+settle 0 ms, checks 7 ms, capture 2 ms, transparency 2 ms, png 37 ms, write 1 ms, record 1 ms, teardown 4 ms,
+report 1 ms; total 240 ms` (`read`: the documents; `show`: the screen built, loaded and settled; `steps`: the
+interactions; `checks`: what the report says of the layout; `capture`, `png`, `write`: the picture; `record`:
+focus, announcements and the layout dump; `full page`: a `--full-page` capture). `tool/codelessly render` adds
+its own: `timings: command start 51 ms, checks 28 ms, render 243 ms, outline 44 ms; total 366 ms` (`start`: until
+the command runs; `checks`: is the server up and current; `render`: the request). `test/tool/tool_speed_test.dart`
+fails when a warm expand or a warm render of one page takes seconds again.
 
 Runs take turns: `flutter test` rewrites the checkout's `build/` (native assets, test assets, the compiled harness)
 as it starts, so `render.sh` holds a lock (`build/.render.lock`) for the run, and a run started meanwhile says it is

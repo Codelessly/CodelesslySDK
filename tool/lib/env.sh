@@ -6,8 +6,13 @@
 #   sdk="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 #   . "$sdk/tool/lib/env.sh"
 #
-# Every function sets globals (flutter_bin, dart_bin, api, overrides) and
-# returns non-zero after printing what to do; callers exit 2 then.
+# Every function sets globals (flutter_bin, dart_bin, api, api_used, overrides)
+# and returns non-zero after printing what to do; callers exit 2 then.
+#
+# These run before every command, so they start no process where bash can do
+# the work itself (reading a file's lines, a folder's path by `cd`): on Windows
+# each `$(...)`, `grep`, `sed` or `head` is 30 ms or more, and a dozen of them
+# were a second of every command.
 
 # The marker on the first line of a pubspec_overrides.yaml these tools wrote;
 # an overrides file without it is the checkout's own and is never touched.
@@ -25,8 +30,8 @@ codelessly_find_flutter() {
     flutter_bin="$FLUTTER"
   elif [ -n "${FLUTTER_ROOT:-}" ] && [ -x "$FLUTTER_ROOT/bin/flutter" ]; then
     flutter_bin="$FLUTTER_ROOT/bin/flutter"
-  elif command -v flutter >/dev/null 2>&1; then
-    flutter_bin="$(command -v flutter)"
+  elif _codelessly_which flutter; then
+    flutter_bin="$REPLY"
   else
     local f
     for f in $places; do
@@ -48,8 +53,45 @@ codelessly_find_flutter() {
     } >&2
     return 2
   fi
-  dart_bin="$(dirname "$flutter_bin")/dart"
-  [ -x "$dart_bin" ] || dart_bin="$(command -v dart 2>/dev/null || echo dart)"
+  dart_bin="${flutter_bin%/*}/dart"
+  [ "$dart_bin" != "$flutter_bin/dart" ] && [ -x "$dart_bin" ] || dart_bin="$(command -v dart 2>/dev/null || echo dart)"
+}
+
+# _codelessly_which <command>
+# Sets REPLY to the command's file on the PATH (as `command -v` finds it) and
+# returns 0, or returns 1 when the PATH has none.
+_codelessly_which() {
+  local d IFS=:
+  REPLY=""
+  for d in $PATH; do
+    d="${d:-.}"
+    if [ -f "$d/$1" ] && [ -x "$d/$1" ]; then REPLY="$d/$1"; return 0; fi
+  done
+  return 1
+}
+
+# _codelessly_abs <folder>
+# Sets REPLY to the folder's path as `cd` there and `pwd` say it ("" when it
+# cannot be entered), by going there and back in this shell.
+_codelessly_abs() {
+  local here="$PWD"
+  REPLY=""
+  if CDPATH= cd -- "$1" 2>/dev/null; then
+    REPLY="$PWD"
+    CDPATH= cd -- "$here" 2>/dev/null || true
+  fi
+  return 0
+}
+
+# _codelessly_own_overrides <pubspec_overrides.yaml>
+# Whether the file is there and is the checkout's own (its first line is not
+# these tools' marker).
+_codelessly_own_overrides() {
+  local first=""
+  [ -f "$1" ] || return 1
+  IFS= read -r first < "$1" || true
+  case "$first" in "$codelessly_override_marker"*) return 1 ;; esac
+  return 0
 }
 
 # codelessly_find_api
@@ -57,26 +99,84 @@ codelessly_find_flutter() {
 # or ../codelessly_api beside the SDK), or "" when there is none.
 codelessly_find_api() {
   api=""
-  local d
+  local d line
   for d in "${CODELESSLY_API:-}" "$sdk/../CodelesslyAPI" "$sdk/../codelessly_api"; do
-    if [ -n "$d" ] && [ -f "$d/pubspec.yaml" ] && grep -q '^name: codelessly_api' "$d/pubspec.yaml"; then
-      api="$(cd "$d" && pwd)"
-      return 0
+    if [ -n "$d" ] && [ -f "$d/pubspec.yaml" ]; then
+      while IFS= read -r line || [ -n "$line" ]; do
+        case "$line" in
+          "name: codelessly_api"*)
+            _codelessly_abs "$d"
+            api="$REPLY"
+            return 0
+            ;;
+        esac
+      done < "$d/pubspec.yaml"
     fi
   done
   return 0
 }
 
+# codelessly_set_api_used
+# Sets api_used to the codelessly_api folder the SDK compiles against: the path
+# an overrides file of the checkout's own names, else the sibling ($api), else "".
+codelessly_set_api_used() {
+  local overrides="$sdk/pubspec_overrides.yaml" line in=0 here="$PWD"
+  api_used="$api"
+  _codelessly_own_overrides "$overrides" || return 0
+  # The first `path:` under `codelessly_api:`.
+  api_used=""
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%$'\r'}"
+    if [ $in = 0 ]; then
+      case "$line" in *codelessly_api:*) in=1 ;; esac
+    elif [[ "$line" =~ ^\ *path:\ *(.*)$ ]]; then
+      api_used="${BASH_REMATCH[1]}"
+      break
+    else
+      case "$line" in *path:*) in=0 ;; esac
+    fi
+  done < "$overrides"
+  case "$api_used" in
+    ''|/*) ;;
+    *)
+      # Relative to the SDK (or a Windows path, which `cd` takes from anywhere).
+      if CDPATH= cd -- "$sdk" 2>/dev/null && CDPATH= cd -- "$api_used" 2>/dev/null; then api_used="$PWD"; else api_used=""; fi
+      CDPATH= cd -- "$here" 2>/dev/null || true
+      ;;
+  esac
+  return 0
+}
+
 # codelessly_api_in_use
-# Prints the codelessly_api folder the SDK compiles against: the path an
-# overrides file of the checkout's own names, else the sibling ($api), else "".
+# Prints what codelessly_set_api_used sets.
 codelessly_api_in_use() {
-  local overrides="$sdk/pubspec_overrides.yaml" used="$api"
-  if [ -f "$overrides" ] && ! head -1 "$overrides" | grep -q "^$codelessly_override_marker"; then
-    used="$(sed -n '/codelessly_api:/,/path:/s/^ *path: *//p' "$overrides" | head -1)"
-    case "$used" in ''|/*) ;; *) used="$(cd "$sdk" && cd "$used" 2>/dev/null && pwd)" ;; esac
+  codelessly_set_api_used
+  printf '%s' "$api_used"
+}
+
+# _codelessly_override_path
+# Sets REPLY to the path the override names codelessly_api by: `../<folder>`
+# for the checkout beside the SDK, which pub reads on every system; else the
+# folder as Dart reads it (under Git Bash on Windows `C:/Users/...`: written
+# as bash says it, `/c/Users/...`, pub get could not find the package).
+_codelessly_override_path() {
+  local beside name
+  _codelessly_abs "$sdk/.."
+  beside="$REPLY"
+  if [ -n "$beside" ] && [ "$beside" != "/" ]; then
+    case "$api" in
+      "$beside"/*)
+        name="${api#"$beside"/}"
+        case "$name" in
+          */*) ;;
+          *) REPLY="../$name"; return 0 ;;
+        esac
+        ;;
+    esac
   fi
-  printf '%s' "$used"
+  REPLY="$api"
+  if command -v cygpath >/dev/null 2>&1; then REPLY="$(cygpath -m "$api")"; fi
+  return 0
 }
 
 # codelessly_write_api_override
@@ -84,12 +184,14 @@ codelessly_api_in_use() {
 # that says on its first line that these tools wrote it; removes that file when
 # the sibling is gone. An overrides file of the checkout's own is left alone.
 codelessly_write_api_override() {
-  local overrides="$sdk/pubspec_overrides.yaml" want
-  if [ ! -f "$overrides" ] || head -1 "$overrides" | grep -q "^$codelessly_override_marker"; then
+  local overrides="$sdk/pubspec_overrides.yaml" want have=""
+  if [ ! -f "$overrides" ] || ! _codelessly_own_overrides "$overrides"; then
     if [ -n "$api" ]; then
-      want="$(printf '%s: codelessly_api from %s.\ndependency_overrides:\n  codelessly_api:\n    path: %s\n' "$codelessly_override_marker" "$api" "$api")"
-      if [ "$(cat "$overrides" 2>/dev/null)" != "$want" ]; then
-        printf '%s\n' "$want" > "$overrides"
+      _codelessly_override_path
+      printf -v want '%s: codelessly_api from %s.\ndependency_overrides:\n  codelessly_api:\n    path: %s\n' "$codelessly_override_marker" "$api" "$REPLY"
+      if [ -f "$overrides" ]; then IFS= read -r -d '' have < "$overrides" || true; fi
+      if [ "$have" != "$want" ]; then
+        printf '%s' "$want" > "$overrides"
         echo "Using codelessly_api from $api (written to pubspec_overrides.yaml)." >&2
       fi
     elif [ -f "$overrides" ]; then
@@ -122,22 +224,53 @@ codelessly_pub_get() {
 # codelessly_version_line
 # "codelessly_sdk <version> @ <commit> on <branch> at <path>, codelessly_api ..."
 codelessly_version_line() {
-  local used api_desc
-  used="$(codelessly_api_in_use)"
-  if [ -n "$used" ] && [ -f "$used/pubspec.yaml" ]; then
-    api_desc="codelessly_api $(_codelessly_version_of "$used")$(_codelessly_commit_of "$used") from $used"
-    [ -f "$used/docs/reference/STARTER.md" ] || api_desc="$api_desc (no docs/reference here: check out its master branch)"
+  local api_desc sdk_version sdk_commit
+  codelessly_set_api_used
+  if [ -n "$api_used" ] && [ -f "$api_used/pubspec.yaml" ]; then
+    _codelessly_version_of "$api_used"
+    api_desc="codelessly_api $REPLY"
+    _codelessly_commit_of "$api_used"
+    api_desc="$api_desc$REPLY from $api_used"
+    [ -f "$api_used/docs/reference/STARTER.md" ] || api_desc="$api_desc (no docs/reference here: check out its master branch)"
   else
     api_desc="codelessly_api published ($(sed -n '/^  codelessly_api:/,/version:/s/^ *version: *//p' "$sdk/pubspec.lock" 2>/dev/null | tr -d '"' | head -1))"
   fi
-  printf 'codelessly_sdk %s%s at %s, %s' "$(_codelessly_version_of "$sdk")" "$(_codelessly_commit_of "$sdk")" "$sdk" "$api_desc"
+  _codelessly_version_of "$sdk"
+  sdk_version="$REPLY"
+  _codelessly_commit_of "$sdk"
+  sdk_commit="$REPLY"
+  printf 'codelessly_sdk %s%s at %s, %s' "$sdk_version" "$sdk_commit" "$sdk" "$api_desc"
 }
 
-_codelessly_version_of() { sed -n 's/^version: *//p' "$1/pubspec.yaml" 2>/dev/null | head -1; }
+# _codelessly_version_of <package folder>: sets REPLY to its pubspec's version.
+_codelessly_version_of() {
+  local line
+  REPLY=""
+  [ -f "$1/pubspec.yaml" ] || return 0
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      version:*)
+        line="${line%$'\r'}"
+        line="${line#version:}"
+        REPLY="${line#"${line%%[! ]*}"}"
+        return 0
+        ;;
+    esac
+  done < "$1/pubspec.yaml"
+  return 0
+}
+
+# _codelessly_commit_of <checkout>: sets REPLY to " @ <commit> on <branch>"
+# (no " on ..." with no branch checked out; "" outside a git checkout).
 _codelessly_commit_of() {
-  local c
-  c="$(git -C "$1" rev-parse --short HEAD 2>/dev/null)" || return 0
-  printf ' @ %s%s' "$c" "$(git -C "$1" symbolic-ref -q --short HEAD 2>/dev/null | sed 's/^/ on /')"
+  local c="" b=""
+  REPLY=""
+  { IFS= read -r c; IFS= read -r b; } < <(git -C "$1" rev-parse --short HEAD 2>/dev/null && git -C "$1" symbolic-ref -q --short HEAD 2>/dev/null) || true
+  c="${c%$'\r'}"
+  b="${b%$'\r'}"
+  [ -n "$c" ] || return 0
+  REPLY=" @ $c${b:+ on $b}"
+  return 0
 }
 
 # codelessly_take_lock

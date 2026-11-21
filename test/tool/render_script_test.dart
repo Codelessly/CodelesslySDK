@@ -120,7 +120,10 @@ void main() {
     File('${l.root}/CodelesslyAPI/pubspec.yaml').writeAsStringSync('name: codelessly_api\n');
     final r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
     final overrides = File('${l.sdk}/pubspec_overrides.yaml').readAsStringSync();
-    expect(overrides, contains('path: ${l.root}/CodelesslyAPI'));
+    // The checkout beside the SDK is named relative to it: a path pub reads on every system (written as bash says
+    // it on Windows, /c/Users/..., pub get could not find the package).
+    expect(overrides, endsWith('    path: ../CodelesslyAPI\n'));
+    expect(overrides, startsWith('# Written by tool/render/render.sh: codelessly_api from '));
     expect('${r.stderr}', contains('Using codelessly_api from'));
     // The override is new: dependencies resolve again.
     expect(l.callLines.where((c) => c.contains(' pub get')), hasLength(2));
