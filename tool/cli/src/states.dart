@@ -12,6 +12,7 @@ import 'dart:io';
 
 import 'common.dart';
 import 'outline.dart';
+import 'render_client.dart';
 import 'render_cmd.dart' show sheet;
 
 /// A step as render options: `{"tap": "go"}` → `--tap go`, `{"unfocus": true}` → `--unfocus`, a list as it is.
@@ -179,7 +180,7 @@ Future<int> _renderStates(List<Map> states, Args a, Map<String, Object?> m, File
       for (final f in diagnosticsFiles()) {
         f.deleteSync();
       }
-      final (code, text) = await runCaptured(renderScript, [...stateDocs, '--out', sdir, '--sizes', size, ...args, ...extra]);
+      final (code, text) = await renderCaptured([...stateDocs, '--out', sdir, '--sizes', size, ...args, ...extra]);
       if (code > status) status = code;
       log.write(text);
       for (final f in diagnosticsFiles()) {

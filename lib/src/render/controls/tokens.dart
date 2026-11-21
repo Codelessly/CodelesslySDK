@@ -166,20 +166,30 @@ class ControlTokens {
     b.tree.dependOnTheme(b);
     final parent = b.source.parentOf(b.id);
     final backdrop = parent == null ? null : backdropOf(b.source.node, b.source.parentOf, parent);
+    // Made once for a theme, a brightness and a backdrop: every control of a
+    // page on one ground draws with the same tokens (merging the theme over
+    // SSUI's for each was a twentieth of a page's first layout).
+    final made = _made[b.tree.theme] ??= {};
+    return made[(b.tree.dark, backdrop)] ??= ControlTokens._on(b.tree.theme, dark: b.tree.dark, backdrop: backdrop);
+  }
+
+  static final Expando<Map<(bool, Color?), ControlTokens>> _made = Expando();
+
+  factory ControlTokens._on(api.ThemeTokens theme, {required bool dark, Color? backdrop}) {
     // On a band whose brightness is not the screen's (a dark hero on a light
     // page, a light card on a dark one), the control is drawn for the band:
     // its neutral colors are made from what it sits on.
     // The theme's own `surface` says what its neutrals are made for: a dark
     // surface in a light theme (a site whose panels are dark) gave every
     // field on a light card a near-black fill and dark ink.
-    final ground = b.tree.theme.forBrightness(dark: b.tree.dark).surface?.flutter;
-    final madeForDark = ground == null ? b.tree.dark : ground.computeLuminance() < .18;
+    final ground = theme.forBrightness(dark: dark).surface?.flutter;
+    final madeForDark = ground == null ? dark : ground.computeLuminance() < .18;
     if (backdrop != null && backdrop.a > .9 && (backdrop.computeLuminance() < .18) != madeForDark) {
-      final onBand = b.tree.theme.mergedWith(api.ThemeTokens(surface: api.Color(backdrop.toARGB32()), colors: const {}));
+      final onBand = theme.mergedWith(api.ThemeTokens(surface: api.Color(backdrop.toARGB32()), colors: const {}));
       final t = ControlTokens.resolve(_withoutOnSurface(onBand), dark: backdrop.computeLuminance() < .18, backdrop: backdrop);
       return t;
     }
-    return ControlTokens.resolve(b.tree.theme, dark: b.tree.dark, backdrop: backdrop);
+    return ControlTokens.resolve(theme, dark: dark, backdrop: backdrop);
   }
 
   /// The merged tokens.

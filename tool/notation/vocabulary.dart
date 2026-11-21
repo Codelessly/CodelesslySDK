@@ -272,7 +272,8 @@ Future<void> main(List<String> args) async {
     await harvestSites(given, out: opt('--out'), designSystem: opt('--design-system'), aliasesFile: opt('--aliases'));
     return;
   }
-  final sdk = File.fromUri(Platform.script).parent.parent.parent.path;
+  // (Compiled, the script is build/codelessly_notation: notation.sh names the SDK's folder.)
+  final sdk = switch (Platform.environment['CODELESSLY_SDK']) { final String s when s.isNotEmpty => s, _ => File.fromUri(Platform.script).parent.parent.parent.path };
   final dsDir = opt('--design-system') ?? '$sdk/design_systems/cards';
   final problems = <String>[];
   final ds = await DesignSystem.load((ref) async {
