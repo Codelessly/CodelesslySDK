@@ -48,7 +48,7 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
   LineChartProps.spec.type: _chartWord,
   GraphProps.spec.type: (b, n, chain) {
     chain.add(_indicatorFit(b, n));
-    addGraph(b, n, chain, theme: _graphTheme(b));
+    addGraph(b, n, chain, theme: _graphTheme(b, n));
   },
   BarcodeProps.spec.type: (b, n, chain) => _painted(b, n, chain, BarcodePainter(_themed(b, n))),
 };
@@ -56,15 +56,21 @@ final Map<String, WidgetRecipe> indicatorsRecipes = {
 /// A chart type, drawn as the graph it says, in the theme's colors.
 void _chartWord(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(_indicatorFit(b, n));
-  addChartGraph(b, _themed(b, n), chain, theme: _graphTheme(b));
+  addChartGraph(b, _themed(b, n), chain, theme: _graphTheme(b, n));
 }
 
 /// What a graph drawn at [b] takes from the theme where its style says
-/// nothing ([graphThemeStyle]).
-Map<String, Object?> _graphTheme(NodeBuilder b) {
+/// nothing ([graphThemeStyle]), and the font of the text around it (the
+/// default text style [n] inherits, which carries the theme's font): a
+/// chart's labels are in the page's font unless the chart names one.
+Map<String, Object?> _graphTheme(NodeBuilder b, Node n) {
   b.tree.dependOnTheme(b);
   final theme = b.tree.components?.theme ?? api.ThemeTokens.none;
-  return graphThemeStyle(theme, surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
+  final family = n.behaviors.defaultTextStyle?.fontFamily ?? theme.fontFamily;
+  return {
+    ...graphThemeStyle(theme, surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id))),
+    if (family != null && family.isNotEmpty) 'fontFamily': family,
+  };
 }
 
 /// The size a drawn indicator has along an axis it hugs: it has no content

@@ -73,7 +73,14 @@ class CanvasSizingScope extends InheritedWidget {
 /// The box a canvas takes, and the size it's laid out at inside it.
 @immutable
 class CanvasBox {
-  const CanvasBox({required this.width, required this.height, required this.layoutWidth, required this.layoutHeight, required this.scale});
+  const CanvasBox({
+    required this.width,
+    required this.height,
+    required this.layoutWidth,
+    required this.layoutHeight,
+    required this.scale,
+    this.minHeight = 0,
+  });
 
   /// The box (null height: the canvas's content height).
   final double width;
@@ -85,6 +92,12 @@ class CanvasBox {
 
   /// layout → box scale (1 unless autoScale).
   final double scale;
+
+  /// The least height of a box as tall as its content ([height] null): the
+  /// least its host gives it (a page in a scroll view that is told its
+  /// window's height), so a page shorter than its window still reaches the
+  /// window's foot with its own ground. 0: none.
+  final double minHeight;
 
   @override
   String toString() => 'CanvasBox($width×$height, layout $layoutWidth×$layoutHeight @$scale)';
@@ -137,8 +150,11 @@ abstract final class CanvasViewport {
         height = constraints.constrainHeight(autoScale ? autoScaleHeight(canvas, width) : design.height);
       }
     }
+    // A canvas as tall as its content is at least as tall as its host
+    // says (the window of a page that scrolls).
+    final least = height == null && constraints.minHeight.isFinite ? constraints.minHeight : 0.0;
     if (!autoScale || design.width <= 0) {
-      return CanvasBox(width: width, height: height, layoutWidth: width, layoutHeight: height, scale: 1);
+      return CanvasBox(width: width, height: height, layoutWidth: width, layoutHeight: height, scale: 1, minHeight: least);
     }
     // Scaled to fit the width (up to the canvas's max width), laid out at
     // its design width; the height it lays out at keeps the box's ratio.
@@ -151,6 +167,7 @@ abstract final class CanvasViewport {
       layoutWidth: design.width,
       layoutHeight: height == null ? null : math.max(design.height, height / scale),
       scale: scale,
+      minHeight: least,
     );
   }
 
@@ -180,7 +197,16 @@ class CanvasViewportBox extends StatelessWidget {
       child: ClipRect(
         child: _ScaledBox(
           scale: box.scale,
-          child: SizedBox(width: box.layoutWidth, height: box.layoutHeight, child: child),
+          child: box.layoutHeight == null && box.minHeight > 0
+              ? ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minWidth: box.layoutWidth,
+                    maxWidth: box.layoutWidth,
+                    minHeight: box.minHeight / (box.scale <= 0 ? 1 : box.scale),
+                  ),
+                  child: child,
+                )
+              : SizedBox(width: box.layoutWidth, height: box.layoutHeight, child: child),
         ),
       ),
     );

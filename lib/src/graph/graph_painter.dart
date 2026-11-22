@@ -579,7 +579,12 @@ class GraphPainter {
   TextPainter _text(String text, Color color, double size, {FontWeight? weight, double? maxWidth}) => TextPainter(
         text: TextSpan(
             text: text,
-            style: TextStyle(color: color, fontSize: size, fontFamily: _style.fontFamily, fontWeight: weight)),
+            style: TextStyle(
+                color: color,
+                fontSize: size,
+                fontFamily: _style.fontFamily,
+                fontFamilyFallback: _style.fontFamilyFallback,
+                fontWeight: weight)),
         textDirection: TextDirection.ltr,
         maxLines: maxWidth == null ? null : 1,
         ellipsis: maxWidth == null ? null : '\u2026',

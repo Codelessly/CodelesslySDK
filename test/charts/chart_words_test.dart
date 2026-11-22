@@ -406,6 +406,35 @@ void main() {
       }
     });
 
+    testWidgets('a chart that names no font writes its labels in the font of the text around it', (tester) async {
+      // A chart's labels with no family at all are in the engine's default
+      // font, which need not be the page's (headless: solid blocks).
+      for (final (type, props) in <(String, Map<String, Object?>)>[
+        ('barChart', {'values': [3, 5, 4], 'labels': ['a', 'b', 'c'], 'labelFontFamily': ''}),
+        ('lineChart', {'data': [{'x': 0, 'y': 1}, {'x': 1, 'y': 3}]}),
+        ('plotChart', {'points': [1, 3, 2]}),
+        ('chart', {'chartType': 'donut', 'data': [{'label': 'a', 'value': 2}, {'label': 'b', 'value': 1}], 'series': [{'field': 'value'}]}),
+        ('chart', {'chartType': 'line', 'data': [{'label': 'a', 'v': 2}], 'series': [{'field': 'v'}]}),
+      ]) {
+        final nodes = page({'type': type, 'layout': {'width': 400, 'height': 200}, 'props': props});
+        nodes['col'] = {...nodes['col']!, 'defaultTextStyle': {'fontFamily': 'Lora'}};
+        final s = await harness.show(tester, nodes);
+        await tester.pump();
+        expect(graphOf(s, 'chart').engine.spec.style.fontFamily, 'Lora', reason: type);
+        await tester.pumpWidget(const SizedBox());
+      }
+      // Its own family wins.
+      final nodes = page({
+        'type': 'chart',
+        'layout': {'width': 400, 'height': 200},
+        'props': {'chartType': 'line', 'axisFontFamily': 'Mono', 'data': [{'label': 'a', 'v': 2}], 'series': [{'field': 'v'}]},
+      });
+      nodes['col'] = {...nodes['col']!, 'defaultTextStyle': {'fontFamily': 'Lora'}};
+      final s = await harness.show(tester, nodes);
+      await tester.pump();
+      expect(graphOf(s, 'chart').engine.spec.style.fontFamily, 'Mono');
+    });
+
     testWidgets('a chart with selectOnHover selects the bar under a mouse and under a finger', (tester) async {
       final s = await harness.show(
           tester,
