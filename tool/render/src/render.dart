@@ -22,7 +22,7 @@ import 'package:flutter/services.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'timings.dart';
 import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
-import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show viewportTriggersPaused;
+import 'package:codelessly_sdk/src/runtime/actions/wiring.dart' show ScreenTimers, viewportTriggersPaused;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/layout/text_box.dart' show RenderWholeWords;
@@ -1870,6 +1870,12 @@ Future<void> layoutSettled(WidgetTester tester) async {
 Future<void> _countersSettled(WidgetTester tester) async {
   for (var i = 0; i < 200 && VariableAnimator.anyPlaying; i++) {
     await tester.pump(const Duration(milliseconds: 100));
+  }
+  // A count-up a timer makes (`every 40 when tick<50` with `tick=tick+1`:
+  // [ScreenTimers]) arrives too, for 5 s of the screen's time at most: the
+  // picture showed a counter at 0, or a frame short of its end.
+  for (var i = 0; i < 100 && ScreenTimers.anyCounting; i++) {
+    await tester.pump(const Duration(milliseconds: 50));
   }
 }
 

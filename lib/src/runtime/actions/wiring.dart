@@ -16,7 +16,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
+import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, Reaction, SwitchProps, TriggerType, Trigger;
 import 'package:codelessly_api/core.dart' as api show WidgetState, OpenModalAction, OpenLinkAction, Reaction, HapticKind, kDefaultHoldMs;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -377,6 +377,25 @@ class TreeReactions implements NodeInteractions {
   }
 }
 
+/// The timers of the screens that are counting: a timer of a short interval
+/// (a quarter of a second or less) whose every reaction that holds says when
+/// it runs and writes a name that condition reads (`every 40 when tick<50`
+/// with `tick=tick+1`: a count-up, a bar that fills). Such a timer ends by
+/// itself; a clock, a carousel that turns while it is not paused and a
+/// countdown of seconds are not among them. For what takes a picture of a
+/// screen (the render command, a preview's camera): it lets these arrive,
+/// as it lets `animateTo` counters ([VariableAnimator.anyPlaying]), so the
+/// picture shows the numbers they end at.
+abstract final class ScreenTimers {
+  static int _counting = 0;
+
+  /// Whether a timer that counts to its end is running in any screen.
+  static bool get anyCounting => _counting > 0;
+
+  /// The longest interval of a timer that counts.
+  static const int countingIntervalMs = 250;
+}
+
 /// The screen triggers of one box: load (once), timers, value changes and
 /// keys; and the cancellation of the chains it started.
 class _BoxReactions {
@@ -399,7 +418,17 @@ class _BoxReactions {
     _timer?.cancel();
     _timer = null;
     _intervalMs = null;
+    _setCounting(false);
     _frames?.stop();
+  }
+
+  /// Whether this box's timer is one that counts to its end ([ScreenTimers]).
+  bool _counting = false;
+
+  void _setCounting(bool value) {
+    if (value == _counting) return;
+    _counting = value;
+    ScreenTimers._counting += value ? 1 : -1;
   }
 
   /// Back in the render tree.
@@ -462,6 +491,9 @@ class _BoxReactions {
       _timerUnwatch[name]=()=>watcher.removeListener(changed);
     }
     int? ms;
+    // Whether every reaction that holds ends itself: it says when it runs
+    // and writes a name that condition reads.
+    var ends = true;
     for (final r in n.actions) {
       if (r.trigger.type != TriggerType.timer) continue;
       final condition = r.trigger.when.trim();
@@ -470,8 +502,12 @@ class _BoxReactions {
       final every = source == null
           ? r.trigger.effectiveIntervalMs
           : Trigger.intervalMsOf(ctx.expressions.evaluate(source, ctx.scope));
-      if (every != null) ms = math.min(ms ?? 1 << 30, every);
+      if (every != null) {
+        ms = math.min(ms ?? 1 << 30, every);
+        ends = ends && condition.isNotEmpty && _writesWhatItReads(r, condition);
+      }
     }
+    _setCounting(ms != null && ms <= ScreenTimers.countingIntervalMs && ends);
     if (ms == _intervalMs) return;
     _timer?.cancel();
     _intervalMs = ms;
@@ -481,6 +517,28 @@ class _BoxReactions {
       if (_disposed || !box.attached || !box.tree.runtimeVisible || !_onstage) return;
       owner.fire(box, 'timer', event: {'result': {'tick': tick++, 'waitMs': 0}});
     });
+  }
+
+  /// Whether reaction [r] sets a variable its [condition] reads.
+  static bool _writesWhatItReads(Reaction r, String condition) {
+    final reads = FormulaEvaluator.referencedPaths(FormulaEvaluator.exactExpression(condition) ?? exactPath(condition) ?? condition).map(rootOf).toSet();
+    if (reads.isEmpty) return false;
+    var writes = false;
+    void walk(Object? v) {
+      if (writes) return;
+      if (v is Map) {
+        if (v['type'] == 'setVariable' && v['variable'] is String && reads.contains(rootOf(v['variable'] as String))) {
+          writes = true;
+          return;
+        }
+        v.values.forEach(walk);
+      } else if (v is List) {
+        v.forEach(walk);
+      }
+    }
+
+    walk([for (final a in r.actions) a.toJson()]);
+    return writes;
   }
 
   // --- the frame trigger: a Ticker -----------------------------------------------
@@ -681,6 +739,7 @@ class _BoxReactions {
 
   void dispose() {
     _disposed = true;
+    _setCounting(false);
     for(final remove in _timerUnwatch.values){remove();}
     _timerUnwatch.clear();
     cancellation.cancel();

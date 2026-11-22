@@ -204,7 +204,8 @@ export 'src/app/view_host.dart' show CodelesslyViewHost, maybeViewNavigatorOf, m
 export 'src/app/ui/toast.dart'
     show CodelesslyToast, ToastBelowRoute, ToastOverlayScope, ToastRequest;
 export 'src/runtime/actions/actions.dart';
-export 'src/runtime/actions/wiring.dart' show isTyping;
+export 'src/runtime/actions/wiring.dart' show ScreenTimers, isTyping;
+export 'src/runtime/actions/variable_animator.dart' show VariableAnimator;
 // The feature layers over the core runtime, and the runner that installs them.
 export 'src/features/first_party.dart';
 // Render objects that paint images, and whether one is still loading (tools wait for them before a capture).
