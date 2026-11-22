@@ -4,7 +4,7 @@
 // formulas do not have. A render reports each (formula_invalid), `expand`
 // says each where it was written, and an editor says each of the text it
 // reads.
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 
 import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 

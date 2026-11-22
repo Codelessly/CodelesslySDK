@@ -26,16 +26,16 @@ Row gap=8
 ''';
 
 void main() {
-  test('the kanban board: the extra ")" is an issue of its line, and the branch of two unbraced actions a formula that does not parse', () {
+  test('the kanban board: the extra ")" is an issue of its line and a formula that does not parse; the branch of two unbraced actions is read', () {
     final r = api.Catalog.run(api.standardCatalog, () => parseNotation(_board));
     expect(r.issues.map((i) => '${i.line}:${i.column}: ${i.message}'), contains(startsWith('7:54: the list\'s formula ends at column 54')));
     final bad = unreadableFormulas(r.document);
-    expect([for (final f in bad) f.expression], [startsWith('sortBy(filter(cards,'), '"" : toast "Type a title first"']);
+    expect([for (final f in bad) f.expression], [startsWith('sortBy(filter(cards,')]);
     expect(bad.first.field, 'bind.data');
     // expand says each where it was written; a line an issue said is not said again.
     final notes = formulaNotes(r.document, {'pages/board.txt': _board});
-    expect(notes, [startsWith('pages/board.txt:7:17: the formula does not parse, so node'), startsWith('pages/board.txt:9:')]);
-    expect(formulaNotes(r.document, {'pages/board.txt': _board}, said: {'pages/board.txt:7'}), [startsWith('pages/board.txt:9:')]);
+    expect(notes, [startsWith('pages/board.txt:7:17: the formula does not parse, so node')]);
+    expect(formulaNotes(r.document, {'pages/board.txt': _board}, said: {'pages/board.txt:7'}), isEmpty);
   });
 
   // The NOCD chat: `"replyTo": null` in site.json is a text variable; the map
