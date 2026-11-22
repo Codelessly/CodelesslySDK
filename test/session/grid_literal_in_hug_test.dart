@@ -68,6 +68,19 @@ void main() {
     expect(g.width, closeTo(a.width * 3 + 8, 0.01));
   });
 
+  testWidgets('where its parent gives it a width (a centered column of a page), its cells share that, as before', (tester) async {
+    await _show(tester, '''
+Column center w=fill
+  Text "Figures"
+  Grid#g cols=3 gap=24
+    Text#a "One"
+    Text#b "Two"
+    Text#c "Three"
+''');
+    expect(_box(tester, 'g').size.width, 600);
+    expect(_box(tester, 'a').size.width, closeTo((600 - 48) / 3, 0.01));
+  });
+
   testWidgets('in a bubble as wide as its content: two columns of its widest text', (tester) async {
     final session = await _show(tester, _bubble);
     expect([for (final d in session.layoutDiagnostics()) if (d.code == 'no_size') d.message], isEmpty);
