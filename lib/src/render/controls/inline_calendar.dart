@@ -57,6 +57,7 @@ void inlineCalendarRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {PickerL
     ..symbols = locale
     ..label = n.prop(CalendarProps.label)
     ..range = n.prop(CalendarProps.range)
+    ..weekStart = n.prop(CalendarProps.weekStart)
     ..direction = n.behaviors.textDirection == api.TextDirection.rtl
         ? TextDirection.rtl
         : TextDirection.ltr

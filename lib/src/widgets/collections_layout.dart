@@ -1653,6 +1653,9 @@ class RenderTableItems extends RenderCollection {
   /// The lines between cells, or null.
   BorderSide? gridLine;
 
+  /// Whether [gridLine] is drawn between columns too.
+  bool columnLines = true;
+
   /// Space inside the first and last columns at the table's edges (their
   /// widths include it; their cells sit inside it).
   double edge = 0;
@@ -1757,7 +1760,7 @@ class RenderTableItems extends RenderCollection {
     final width = _start(columnWidths, columnWidths.length);
     final height = _start(rowHeights, rowHeights.length);
     // A span's trailing border, inside the span at its end.
-    for (var i = 1; i <= columnWidths.length; i++) {
+    for (var i = 1; columnLines && i <= columnWidths.length; i++) {
       final x = _start(columnWidths, i);
       canvas.drawRect(Rect.fromLTWH(offset.dx + x - line.width, offset.dy, line.width, height), paint);
     }

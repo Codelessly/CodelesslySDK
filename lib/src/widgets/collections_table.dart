@@ -136,6 +136,7 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..pinHeaderColumn = headerColumn && n.prop(TableViewProps.pinHeaderColumn)
     ..rowHeights = [if (headerRow) math.max(minTouchRow, n.prop(TableViewProps.headerHeight)), for (final row in rows) math.max(minTouchRow, tableRowHeight(row, rowHeightKey, rowHeight))]
     ..gridLine = lineColor.alpha == 0 || lineWidth <= 0 ? null : BorderSide(color: lineColor.flutter, width: lineWidth)
+    ..columnLines = n.prop(TableViewProps.columnLines)
     ..headerBorder = headerBorderColor == null ? null : BorderSide(color: headerBorderColor, width: n.prop(TableViewProps.headerBorderWidth))
     ..headerColor = n.prop(TableViewProps.headerColor)?.flutter
     ..stripeColor = n.prop(TableViewProps.stripeColor)?.flutter
@@ -285,6 +286,9 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
   /// table that fills its width is given less than its columns' widths.
   static const double _minSqueezedColumn = 72;
   BorderSide? gridLine, headerBorder;
+
+  /// Whether [gridLine] is drawn between columns too.
+  bool columnLines = true;
   Color? headerColor, stripeColor, hoverColor, selectedColor;
   int selectedRow = -1;
 
@@ -783,7 +787,7 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
     final line = gridLine;
     if (line != null && line.width > 0) {
       final paint = Paint()..color = line.color;
-      for (var c = c0; c <= c1; c++) {
+      for (var c = c0; columnLines && c <= c1; c++) {
         canvas.drawRect(Rect.fromLTWH(_columnStarts[c + 1] - line.width, top, line.width, bottom - top).shift(origin), paint);
       }
       for (var r = r0; r <= r1; r++) {

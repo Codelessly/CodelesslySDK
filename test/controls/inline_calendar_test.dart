@@ -30,6 +30,7 @@ Future<(NodeTree, RecordedInteractions, RenderCalendar)> _show(
   bool rtl = false,
   bool range = true,
   Object? marks,
+  String? weekStart,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
@@ -44,6 +45,7 @@ Future<(NodeTree, RecordedInteractions, RenderCalendar)> _show(
         'dayPrices': {'2026-11-20': '£225', '2026-11-22': '£245'},
         'marks': marks ?? {'2026-11-24': 'Sold'},
         if (!range) 'range': false,
+        if (weekStart != null) 'weekStart': weekStart,
       }, rtl ? {'textDirection': 'rtl'} : const {}),
     },
     width: width,
@@ -68,6 +70,20 @@ Offset _day(RenderCalendar calendar, int day) {
 }
 
 void main() {
+  testWidgets("weekStart names the day its weeks start on; without it, the locale's", (tester) async {
+    final (_, _, sunday) = await _show(tester);
+    expect(sunday.weekdayInitials, ['S', 'M', 'T', 'W', 'T', 'F', 'S']);
+    expect(sunday.firstWeekday, DateTime.sunday);
+    final (_, _, monday) = await _show(tester, weekStart: 'monday');
+    expect(monday.weekdayInitials, ['M', 'T', 'W', 'T', 'F', 'S', 'S']);
+    expect(monday.firstWeekday, DateTime.monday);
+    // November 2026 starts on a Sunday: six days lead it in a Monday week.
+    expect(RenderCalendar.weekdayNamed('Mon'), DateTime.monday);
+    expect(RenderCalendar.weekdayNamed('saturday'), DateTime.saturday);
+    expect(RenderCalendar.weekdayNamed('first'), isNull);
+    expect(RenderCalendar.weekdayNamed(''), isNull);
+  });
+
   setUp(() => FormulaClock.pinned = DateTime(2026, 11, 14));
   tearDown(() => FormulaClock.pinned = null);
 

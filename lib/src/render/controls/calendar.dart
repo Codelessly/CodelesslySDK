@@ -205,8 +205,33 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     return d;
   }
 
-  /// The weekday the grid starts on (`DateTime.weekday`).
-  int get firstWeekday => _symbols.firstWeekday;
+  /// The weekday the grid starts on (`DateTime.weekday`): [weekStart] when
+  /// the document names one, else the locale's.
+  int get firstWeekday => _weekStart ?? _symbols.firstWeekday;
+
+  /// The day a week starts on, by name (`monday` ... `sunday`, or its first
+  /// three letters); anything else: the locale's.
+  set weekStart(String v) {
+    final i = weekdayNamed(v);
+    if (i == _weekStart) return;
+    _weekStart = i;
+    markNeedsLayout();
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
+  int? _weekStart;
+
+  /// [name] as `DateTime.weekday` (1 Monday ... 7 Sunday), null when it is
+  /// not a day's name.
+  static int? weekdayNamed(String name) {
+    const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+    final n = name.trim().toLowerCase();
+    if (n.length < 3) return null;
+    final i = days.indexOf(n.substring(0, 3));
+    const full = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    return i < 0 || !full[i].startsWith(n) ? null : i + 1;
+  }
 
   /// Days before the 1st in the first row.
   int _lead(DateTime month) =>
