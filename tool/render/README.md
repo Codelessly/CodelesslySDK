@@ -361,9 +361,9 @@ shared, listed or polled: a request of one capture is rendered by one worker as 
   minute keeps the pool through an agent's pauses between bursts, and a worker costs 1.5 s to start again
   against about 350 MB to keep. The whole server still stops after `--idle`.
 - **A request never waits for a warm-up or a start.** A new worker is given requests from the moment it is up; a
-  request it renders counts as one of its six warm-up rounds; the worker a request would be given does its
-  rounds only once nobody has asked for a second, and gives a round up (at its next capture) when a request
-  comes; workers being started take no request, and a request goes to an idle warm worker first.
+  request it renders counts as one of its six warm-up rounds; the worker a request would be given (the
+  warmest idle one) does no round of its own, and the others give a round up (at its next capture) when requests
+  come for them; workers being started take no request, and a request goes to an idle warm worker first.
 - `--workers <n>` is that many from start to stop, as before (`--workers 1` renders one request after another);
   `--min-workers <n>` and `--max-workers <n>` bound the automatic number (no top by default).
 

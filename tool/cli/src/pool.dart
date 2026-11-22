@@ -330,8 +330,8 @@ class _Pool {
 
   static const warmRounds = 6;
 
-  /// How long nobody must have asked before the last free worker does a warm-up round (a client that sends one
-  /// request after another sends the next within a tenth of a second of the answer).
+  /// How long nobody must have asked before the last free worker is taken to be as warm as it gets without a
+  /// client (it does no warm-up round of its own: [_warmIdle]).
   static const quietBeforeWarm = Duration(seconds: 1);
 
   /// A small site of the usual nodes, rendered by each new worker so the code a render runs is compiled before
@@ -496,8 +496,8 @@ class _Pool {
   static int _warmestFirst(_Worker a, _Worker b) => a.warmLeft != b.warmLeft ? a.warmLeft.compareTo(b.warmLeft) : b.served.compareTo(a.served);
 
   /// Nothing asks: the workers still to warm up do a round, all but the one a request would be given (the
-  /// warmest), so a request never finds every worker in a round. That last one does its rounds only once nobody
-  /// has asked for [quietBeforeWarm], and gives a round up when a request comes ([_makeWay]).
+  /// warmest), so a request never finds every worker in a round; a round is given up when requests come for
+  /// more workers than are free ([_makeWay]). That last one does no round of its own.
   void _warmIdle() {
     if (active.isNotEmpty) return;
     final idle = _idle..sort(_warmestFirst);
@@ -505,9 +505,12 @@ class _Pool {
       final w = idle.removeLast();
       if (w.warmLeft > 0) unawaited(_warm(w).then((_) => _schedule()));
     }
+    // The last one does no further round: a client could ask at any moment, and what it renders for the client
+    // warms it as well (measured: a round met by a request cost that request 100 ms, and the requests after the
+    // rounds were no faster than those of a worker that had done none).
     if (idle.length == 1 && idle.first.warmLeft > 0 && DateTime.now().difference(lastActivity) >= quietBeforeWarm &&
         !workers.any((w) => w.state == _WorkerState.busy && (w.job?.warm ?? false))) {
-      unawaited(_warm(idle.first).then((_) => _schedule()));
+      idle.first.warmLeft = 0;
     }
   }
 
@@ -912,7 +915,7 @@ class _Pool {
       // (The autoscaler's ceiling and holds run out with the clock, not with an event.)
       if (waiting.isNotEmpty || active.isNotEmpty) _follow();
     }
-    // The last free worker's warm-up rounds start once nobody has asked for a moment.
+    // (Workers still to warm up are looked at again once nobody has asked for a moment.)
     if (active.isEmpty && waiting.isEmpty && workers.any((w) => w.state == _WorkerState.idle && w.warmLeft > 0)) _schedule();
     if (served != _servedWritten) {
       try {
