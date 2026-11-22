@@ -1,0 +1,15 @@
+component Panel "A titled section of a page (a chart, a list on a dashboard, a settings group): a page's card with a head (the title, a line under it, a quiet action at its end) and the lines under it as the body, 14 apart. flush: no padding round the body and a rule under the head (a Table or ListRow lines that run to the edges)." children=list
+  param title="Section" required doc="Its title."
+  param note="" doc="A line under the title."
+  param flush:bool=false doc="No padding round the body (a table or a list that runs to the edges)."
+  param action="" doc="The label of a quiet button at the head's end (See all); pressing it fires onAction."
+  event onAction doc="The head's action was pressed."
+  preview "Default" 480x180 title="Recent orders" note="The last 30 days." action="See all"
+Column#panel w=fill fill=card border=line radius={theme.radii.cardWide} clip=antiAlias
+  Row#panelHead gap=12 middle w=fill pad={screen.width < 700 ? [18, 14, 12, 12] : [24, 18, 16, 14]} border-bottom={props.flush ? theme.colors.line : '#00000000'}
+    Column#panelTitles gap=2 grow
+      Text#panelTitle "{props.title}" style=heading3Wide size=18 maxLines=1 overflow=ellipsis
+      Text#panelNote "{props.note}" style=smallWide visible={props.note != ''}
+    Button.ghost#panelAction "{props.action}" size=small visible={props.action != ''} onTap={emit onAction}
+  Column#panelBody gap={props.flush ? 0 : 14} w=fill pad={props.flush ? [0, 0, 0, 0] : (screen.width < 700 ? [18, 2, 18, 18] : [24, 2, 24, 24])}
+    Slot#panelSlot w=null h=null

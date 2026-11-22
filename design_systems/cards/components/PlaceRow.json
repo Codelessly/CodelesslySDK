@@ -120,7 +120,19 @@
      0,
      8
     ]
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
+    }
+   ]
   },
   "card": {
    "type": "column",

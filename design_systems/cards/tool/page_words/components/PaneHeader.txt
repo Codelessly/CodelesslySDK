@@ -1,0 +1,16 @@
+component PaneHeader "The head of a side pane (an open record, an inspector): a person's initials in a circle when it is theirs, the title and a line under it, the lines under the call (its actions: IconButton lines) and a close button at its end that fires onClose; a rule under it." children=list
+  param title="Details" required doc="What the pane shows."
+  param note="" doc="A line under the title."
+  param avatar="" doc="A person's name: their initials in a circle before the title (empty: none)."
+  param closable:bool=true doc="A close button at its end."
+  event onClose doc="Close was pressed."
+  preview "Default" 380x68 title="Amara Okafor" note="Admin, joined March 2024" avatar="Amara Okafor"
+Row#paneHead gap=12 middle pad=[20,14,12,14] w=fill minHeight=64 border-bottom=line
+  Column#paneAvatar w=36 h=36 radius=999 fill=tileDeep border=line center middle visible={props.avatar != ''}
+    Text#paneInitials "{upper(substring(props.avatar, 0, 1)) + (contains(props.avatar, ' ') ? upper(substring(split(props.avatar, ' ')[1], 0, 1)) : '')}" size=12.5 weight=600 lineHeight=1.2 color=inkSoft
+  Column#paneTitles gap=1 grow
+    Text#paneTitle "{props.title}" style=headingWide maxLines=1 overflow=ellipsis
+    Text#paneNote "{props.note}" style=captionWide maxLines=1 overflow=ellipsis visible={props.note != ''}
+  Row#paneActions gap=4 middle
+    Slot#paneSlot w=null h=null
+  IconButton#paneClose "close" tooltip="Close" visible={props.closable} onTap={emit onClose}

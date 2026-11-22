@@ -1,0 +1,205 @@
+{
+ "schema": 3,
+ "id": "Brand",
+ "roots": [
+  "brand"
+ ],
+ "widget": {
+  "type": "Brand",
+  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 32 tile in the accent with a white glyph, the name in the display face, an optional line under it. On a rail (a tablet's width) the mark alone.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "App",
+    "required": true,
+    "doc": "The product's name."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the name (the workspace, what the app is)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name for the mark (empty: no mark)."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its mark (a collapsed sidebar); a tablet's width folds it too."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    224,
+    48
+   ],
+   "props": {
+    "name": "Northstar",
+    "note": "Admin console",
+    "icon": "hub"
+   }
+  }
+ ],
+ "nodes": {
+  "brand": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [4, 4, 4, 12] : [8, 4, 8, 12]}"
+   },
+   "children": [
+    "mark",
+    "words"
+   ]
+  },
+  "mark": {
+   "type": "column",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.controlSmall}",
+    "visible": "${= props.icon != ''}"
+   },
+   "children": [
+    "markGlyph"
+   ]
+  },
+  "markGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 18,
+    "color": "onAccent"
+   },
+   "bind": {
+    "props.icon": "${= props.icon == '' ? 'circle' : props.icon}"
+   }
+  },
+  "words": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
+   "children": [
+    "brandName",
+    "brandNote"
+   ]
+  },
+  "brandName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "bodyWide",
+     "fontFamily": "Inter Display",
+     "fontSize": 16,
+     "fontWeight": 700,
+     "height": 1.25,
+     "letterSpacing": -0.3,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "brandNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "inkFaint"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

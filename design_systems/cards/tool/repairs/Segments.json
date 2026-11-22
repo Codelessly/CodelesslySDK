@@ -1,0 +1,88 @@
+{
+ "nodes": {
+  "moreCellText": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  },
+  "cell0Text": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  },
+  "cell1Text": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  },
+  "cell2Text": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  },
+  "cell3Text": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  },
+  "cell4Text": {
+   "props": {
+    "overflow": "ellipsis",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0,
+     "hug": {
+      "$removed": true
+     }
+    }
+   }
+  }
+ }
+}

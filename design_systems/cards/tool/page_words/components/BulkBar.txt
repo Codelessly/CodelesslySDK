@@ -1,0 +1,13 @@
+component BulkBar "What acts on the rows chosen in a table or a list: a check in the accent, the count, Clear, and the lines under it (the actions: Button.outline lines, a Button.destructive last) at its end, on the card's fill inside an accent line. On a phone the actions go on a line under the count. Show it while something is chosen (visible={length(chosen) > 0})." children=list
+  param count:int=0 required doc="How many are chosen."
+  param noun="selected" doc="What follows the count (selected, members selected)."
+  event onClear doc="Clear was pressed: empty your list of chosen rows."
+  preview "Default" 900x52 count=3
+Row#bulk gap=10 middle pad=[14,8,10,8] w=fill minHeight=52 radius={theme.radii.panelWide} fill=card border=accent effects={theme.shadows.tile} phone.wrap=true phone.runSpacing=8 phone.pad=[14,10,10,10]
+  Column#bulkMark w=22 h=22 radius=999 fill=accent center middle
+    Icon#bulkGlyph "check" size=14 color=onAccent
+  Text#bulkCount "{props.count} {props.noun}" size=14.5 weight=600 lineHeight=1.3 letterSpacing=-0.1 color=ink tabularFigures=true
+  Button.ghost#bulkClear "Clear" size=small onTap={emit onClear}
+  box#bulkSpacer h=1 grow phone.visible=false
+  Row#bulkActions gap=8 middle phone.wrap=true phone.runSpacing=8
+    Slot#bulkSlot w=null h=null

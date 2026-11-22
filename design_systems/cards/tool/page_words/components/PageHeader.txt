@@ -1,0 +1,16 @@
+component PageHeader "The head of a page in an app: PageHeader \"Members\" \"Everyone with access.\" with the page's actions (Button.outline, Button) indented under it. The title in the display face, a line under it in the soft ink, a small label over it or a count beside it; the actions sit at its end, level with the title, and go under it where there is no room." children=list
+  param title="Page" required doc="The page's title."
+  param note="" doc="One line under the title: what the page holds."
+  param overline="" doc="A small label over the title (the section the page is in)."
+  param count="" doc="A count shown as a pill beside the title, as text (248, 1.2k; empty: none)."
+  preview "Members" 960x96 title="Members" note="Everyone with access to this workspace." count="50"
+Row#pageHead gap=24 middle pad=[0,4,0,4] w=fill wrap=true runSpacing=14
+  Column#pageTitles gap=6 grow basis=260
+    Text#pageOverline "{upper(props.overline)}" style=eyebrowWide visible={props.overline != ''}
+    Row#pageTitleRow gap=12 middle w=fill
+      Text#pageTitle "{props.title}" style=titleWide phone.size=24
+      Row#pageCount center middle pad=[10,3,10,3] fill=tile border=line radius=999 visible={props.count != ''}
+        Text#pageCountText "{props.count}" size=13 weight=600 lineHeight=1.3 color=inkSoft tabularFigures=true maxLines=1
+    Text#pageNote "{props.note}" style=mutedWide visible={props.note != ''}
+  Row#pageActions gap=10 middle wrap=true runSpacing=10
+    Slot#pageActionsSlot w=null h=null

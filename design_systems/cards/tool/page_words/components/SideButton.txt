@@ -1,0 +1,11 @@
+component SideButton "The one thing to do at a sidebar's head (Compose, New issue): a filled button as wide as the sidebar, its key at its end. On a rail (a tablet's width) the icon alone, its label as a tooltip. Fires onTap as any line does."
+  param label="New" required doc="What it does."
+  param icon="add" doc="A Material icon name."
+  param shortcut="" doc="Its key, as a key cap at its end."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+  preview "Default" 224x40 label="Compose" icon="edit" shortcut="C"
+Row#side gap=8 middle pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [11, 0, 11, 0] : [12, 0, 8, 0]} w=fill h=40 radius={theme.radii.ctaWide} fill=accent hovered.fill=accentDeep pressed.fill=accentDeep tooltip="{props.label}" margin=[0,4,0,10] effects={theme.shadows.cta}
+  Icon#sideGlyph "{props.icon}" size=18 color=onAccent
+  Text#sideLabel "{props.label}" size=14 weight=600 lineHeight=1.2 color=onAccent grow maxLines=1 overflow=ellipsis visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Row#sideKey pad=[6,2,6,2] radius={theme.radii.controlXs} fill=#29FFFFFF visible={props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}
+    Text#sideKeyText "{props.shortcut}" size=11 weight=600 lineHeight=1.3 color=onAccent

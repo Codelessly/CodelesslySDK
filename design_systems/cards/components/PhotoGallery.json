@@ -254,7 +254,7 @@
     "width": {
      "fill": 0
     },
-    "height": 92
+    "height": 136
    },
    "bind": {
     "props.kind": "${item.kind}",

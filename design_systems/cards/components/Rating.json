@@ -98,20 +98,6 @@
   }
  ],
  "nodes": {
-  "rating": {
-   "type": "row",
-   "children": [
-    "stars"
-   ],
-   "layout": {
-    "width": {
-     "hug": 200
-    },
-    "height": {
-     "hug": 44
-    }
-   }
-  },
   "stars": {
    "type": "slider",
    "props": {
@@ -154,6 +140,20 @@
      ]
     }
    ]
+  },
+  "rating": {
+   "type": "row",
+   "children": [
+    "stars"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 44
+    }
+   }
   }
  }
 }

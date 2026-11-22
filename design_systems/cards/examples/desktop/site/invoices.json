@@ -1,0 +1,2323 @@
+{
+ "schema": 3,
+ "roots": [
+  "invoices",
+  "invoices_sidebar"
+ ],
+ "nodes": {
+  "invoices": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1440.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   },
+   "name": "Invoices",
+   "path": "invoices"
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column3"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 248,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 64
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "Brand1",
+    "NavSection1",
+    "NavItem1",
+    "NavItem2",
+    "NavItem3",
+    "NavSection2",
+    "NavItem4",
+    "NavItem5",
+    "spacer1",
+    "column2"
+   ]
+  },
+  "Brand1": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Ledger",
+    "note": "Billing",
+    "icon": "receipt_long"
+   }
+  },
+  "NavSection1": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Billing"
+   }
+  },
+  "NavItem1": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Invoices",
+    "icon": "receipt_long",
+    "selected": true
+   },
+   "bind": {
+    "props.badge": "${= count(invoices,r=>r.status==\"Overdue\")}"
+   }
+  },
+  "NavItem2": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Customers",
+    "icon": "group"
+   }
+  },
+  "NavItem3": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Payments",
+    "icon": "payments"
+   }
+  },
+  "NavSection2": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Reports"
+   }
+  },
+  "NavItem4": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Revenue",
+    "icon": "insights"
+   }
+  },
+  "NavItem5": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Tax",
+    "icon": "account_balance"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem6",
+    "Account1"
+   ]
+  },
+  "NavItem6": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Settings",
+    "icon": "settings"
+   }
+  },
+  "Account1": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Raman",
+    "note": "Finance"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "column4"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     8,
+     12,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "iconButton1"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "menu"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "invoices_sidebar",
+       "presentation": "dialog",
+       "cover": true
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     32,
+     28,
+     32,
+     32
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        20,
+        24,
+        24
+       ]
+      }
+     }
+    },
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        16,
+        16,
+        16,
+        24
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "PageHeader1",
+    "row3",
+    "ChipTabs2",
+    "BulkBar1",
+    "column5",
+    "Pager1"
+   ]
+  },
+  "PageHeader1": {
+   "type": "PageHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invoices"
+   },
+   "bind": {
+    "props.note": "${= count(invoices,r=>r.status==\"Overdue\")} overdue, ${= count(invoices,r=>r.status==\"Due\")} due this month.",
+    "props.count": "${= length(invoices)}"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Export",
+    "icon": "download"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New invoice",
+    "icon": "add"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textField1",
+    "ChipTabs1",
+    "spacer2",
+    "text1"
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 10
+      }
+     }
+    }
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 280,
+    "height": 40.0
+   },
+   "props": {
+    "decoration": {
+     "labelText": "",
+     "hintText": "Search customer",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     }
+    },
+    "style": {
+     "from": "inputTextWide"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 699,
+       "flex": 1
+      }
+     }
+    }
+   ]
+  },
+  "ChipTabs1": {
+   "type": "ChipTabs",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "status",
+    "tabs": [
+     "All",
+     "Paid",
+     "Due",
+     "Overdue"
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 699,
+       "flex": 1
+      },
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${= length((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))))} of ${= length(invoices)} invoices"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "ChipTabs2": {
+   "type": "ChipTabs",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "status",
+    "tabs": [
+     "All",
+     "Paid",
+     "Due",
+     "Overdue"
+    ]
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "BulkBar1": {
+   "type": "BulkBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.count": "${= length(sel)}",
+    "props.noun": "selected, ${= money(sum(filter(invoices,r=>contains(sel,r.id)),r=>r.amount),\"$\",0)}",
+    "visible": "${= length(sel) > 0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onClear"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "outlinedButton2",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mark as paid",
+    "icon": "check"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders",
+    "icon": "send"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "children": [
+    "row4",
+    "column6",
+    "column7"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "band"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "sticky": {
+    "offset": 0
+   },
+   "children": [
+    "row5",
+    "row6",
+    "row7",
+    "row8",
+    "row9",
+    "row10"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox1"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "compact": true,
+    "tristate": true
+   },
+   "bind": {
+    "props.value": "${= length(sel) > 0 && length(sel) == length(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc')) ? true : (length(sel) == 0 ? false : null)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= (length(sel) == length(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc')) ? [] : map(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc'), x => coalesce(x.id, x)))}"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Select all"
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "${= (sort == \"customer\" ? \"-customer\" : \"customer\")}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2",
+    "icon1",
+    "icon2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Customer",
+    "maxLines": 1
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "primary"
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') == 'customer'}",
+    "props.icon": "${= sort == '-customer' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') != 'customer'}"
+   },
+   "opacity": 0.4
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": 90,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "${= (sort == \"id\" ? \"-id\" : \"id\")}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text3",
+    "icon3",
+    "icon4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "No.",
+    "maxLines": 1
+   }
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "primary"
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') == 'id'}",
+    "props.icon": "${= sort == '-id' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') != 'id'}"
+   },
+   "opacity": 0.4
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": 110,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "${= (sort == \"date\" ? \"-date\" : \"date\")}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "text4",
+    "icon5",
+    "icon6"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Date",
+    "maxLines": 1
+   }
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "primary"
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') == 'date'}",
+    "props.icon": "${= sort == '-date' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') != 'date'}"
+   },
+   "opacity": 0.4
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end",
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "${= (sort == \"amount\" ? \"-amount\" : \"amount\")}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "text5",
+    "icon7",
+    "icon8"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Amount",
+    "maxLines": 1
+   }
+  },
+  "icon7": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "primary"
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') == 'amount'}",
+    "props.icon": "${= sort == '-amount' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon8": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') != 'amount'}"
+   },
+   "opacity": 0.4
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "${= (sort == \"status\" ? \"-status\" : \"status\")}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "text6",
+    "icon9",
+    "icon10"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "text": "Status",
+    "maxLines": 1
+   }
+  },
+  "icon9": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 14,
+    "color": "primary"
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') == 'status'}",
+    "props.icon": "${= sort == '-status' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "icon10": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 14
+   },
+   "bind": {
+    "visible": "${= replace(sort, '-', '') != 'status'}"
+   },
+   "opacity": 0.4
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "focusGroup": {
+    "axis": "vertical",
+    "wrap": false
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc')}"
+   },
+   "children": [
+    "listView1Item"
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "mod+a"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= map(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc'), x => coalesce(x.id, x))}"
+      },
+      {
+       "type": "announce",
+       "message": "${= length(sel)} selected"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= (result.shift && selAnchor >= 0 ? map(slice(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc'), min(selAnchor, index), max(selAnchor, index) + 1), x => coalesce(x.id, x)) : (result.meta ? (contains(sel, coalesce(item.id, item)) ? without(sel, coalesce(item.id, item)) : append(sel, coalesce(item.id, item))) : [coalesce(item.id, item)]))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "selAnchor",
+       "value": "${= (result.shift && selAnchor >= 0 ? selAnchor : index)}"
+      },
+      {
+       "type": "announce",
+       "message": "${= length(sel)} selected"
+      }
+     ]
+    }
+   ],
+   "bind": {
+    "selected": "${= contains(sel, coalesce(item.id, item))}"
+   },
+   "states": {
+    "selected": {
+     "listView1Item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "row11"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 44
+    },
+    "padding": [
+     16,
+     6,
+     16,
+     6
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "selected": "${= contains(sel, coalesce(item.id, item))}"
+   },
+   "states": {
+    "hovered": {
+     "row11": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "band"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "row11": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "row12",
+    "row13",
+    "row14",
+    "row15",
+    "row16",
+    "row17"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox2"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "compact": true
+   },
+   "bind": {
+    "props.value": "${= contains(sel, coalesce(item.id, item))}"
+   },
+   "ignorePointer": true,
+   "focusable": false
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text7"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.customer}"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": 90,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text8"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mono"
+    },
+    "text": "${item.id}"
+   }
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": 110,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "text9"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.date}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end",
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "text10"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= money(item.amount,\"$\",0)}",
+    "style": {
+     "from": "bodyWide",
+     "tabularFigures": true
+    }
+   }
+  },
+  "row17": {
+   "type": "row",
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ],
+   "children": [
+    "StatusBadge1"
+   ]
+  },
+  "StatusBadge1": {
+   "type": "StatusBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${item.status}",
+    "props.tone": "${= item.status == 'Paid' ? 'success' : (item.status == 'Due' ? 'warning' : 'error')}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": 32,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= length(sortBy((slice((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),page*8,page*8+8)), replace(sort, '-', ''), startsWith(sort, '-') ? 'desc' : 'asc')) == 0}"
+   },
+   "children": [
+    "text11"
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "No invoices match. Clear the search or the filter."
+   }
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "page"
+   },
+   "bind": {
+    "props.count": "${= ceil(length((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))))/8)}"
+   }
+  },
+  "invoices_sidebar": {
+   "type": "canvas",
+   "name": "invoices_sidebar",
+   "slots": {
+    "body": "row18"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   }
+  },
+  "row18": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column8",
+    "column10"
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     16,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "Brand2",
+    "NavSection3",
+    "NavItem7",
+    "NavItem8",
+    "NavItem9",
+    "NavSection4",
+    "NavItem10",
+    "NavItem11",
+    "spacer3",
+    "column9"
+   ]
+  },
+  "Brand2": {
+   "type": "Brand",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Ledger",
+    "note": "Billing",
+    "icon": "receipt_long"
+   }
+  },
+  "NavSection3": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Billing"
+   }
+  },
+  "NavItem7": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Invoices",
+    "icon": "receipt_long",
+    "selected": true
+   },
+   "bind": {
+    "props.badge": "${= count(invoices,r=>r.status==\"Overdue\")}"
+   }
+  },
+  "NavItem8": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Customers",
+    "icon": "group"
+   }
+  },
+  "NavItem9": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Payments",
+    "icon": "payments"
+   }
+  },
+  "NavSection4": {
+   "type": "NavSection",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Reports"
+   }
+  },
+  "NavItem10": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Revenue",
+    "icon": "insights"
+   }
+  },
+  "NavItem11": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Tax",
+    "icon": "account_balance"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "NavItem12",
+    "Account2"
+   ]
+  },
+  "NavItem12": {
+   "type": "NavItem",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "label": "Settings",
+    "icon": "settings"
+   }
+  },
+  "Account2": {
+   "type": "Account",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Raman",
+    "note": "Finance"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "page_variables": [
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "sel",
+    "type": "list",
+    "value": [
+     "#1003",
+     "#1006"
+    ]
+   },
+   {
+    "name": "page",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "id": "#1001",
+      "customer": "Acme Corp",
+      "date": "May 02",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "id": "#1002",
+      "customer": "Globex",
+      "date": "May 05",
+      "amount": 860,
+      "status": "Due"
+     },
+     {
+      "id": "#1003",
+      "customer": "Initech",
+      "date": "May 09",
+      "amount": 430,
+      "status": "Overdue"
+     },
+     {
+      "id": "#1004",
+      "customer": "Umbrella",
+      "date": "May 12",
+      "amount": 2250,
+      "status": "Paid"
+     },
+     {
+      "id": "#1005",
+      "customer": "Hooli",
+      "date": "May 15",
+      "amount": 975,
+      "status": "Due"
+     },
+     {
+      "id": "#1006",
+      "customer": "Stark Ltd",
+      "date": "May 16",
+      "amount": 3100,
+      "status": "Overdue"
+     },
+     {
+      "id": "#1007",
+      "customer": "Wayne Co",
+      "date": "May 18",
+      "amount": 640,
+      "status": "Paid"
+     },
+     {
+      "id": "#1008",
+      "customer": "Wonka",
+      "date": "May 20",
+      "amount": 1480,
+      "status": "Due"
+     },
+     {
+      "id": "#1009",
+      "customer": "Soylent",
+      "date": "May 22",
+      "amount": 300,
+      "status": "Overdue"
+     },
+     {
+      "id": "#1010",
+      "customer": "Cyberdyne",
+      "date": "May 24",
+      "amount": 5200,
+      "status": "Paid"
+     },
+     {
+      "id": "#1011",
+      "customer": "Tyrell",
+      "date": "May 27",
+      "amount": 760,
+      "status": "Due"
+     },
+     {
+      "id": "#1012",
+      "customer": "Aperture",
+      "date": "May 29",
+      "amount": 1890,
+      "status": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "selAnchor",
+    "type": "decimal",
+    "value": -1
+   }
+  ]
+ }
+}

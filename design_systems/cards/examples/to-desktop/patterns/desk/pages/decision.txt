@@ -1,9 +1,0 @@
-state decision=""
-Column gap=16 pad=32 maxw=720
-  Banner "Deleted files skip the trash." lead="This cannot be undone" tone="danger"
-  Panel "Delete 214 old files?"
-    Property "Folder" "Shared Drive / Archive"
-    Property "Files" "214"
-  Row end gap=8
-    Button.outline "Deny" onTap={decision="Denied"}
-    Button.destructive "Approve deletion" onTap={decision="Approved"}

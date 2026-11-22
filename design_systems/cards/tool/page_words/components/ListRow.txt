@@ -1,0 +1,39 @@
+component ListRow "A row of a list (a mailbox, a feed, people, files, search results): a title, a second line and an optional third in quieter inks, a time or a figure at the end of the first line, a person's initials or an icon before them, and the line under the call (a Badge, a Toggle, an IconButton) at its end. unread: a dot and heavier lines. selected: a neutral fill and an accent bar at its start. A rule under it. It is as tall as its lines: write no height on it. Fires onPressed."
+  param title="Title" required doc="The first line (a name, a sender)."
+  param subtitle="" doc="The second line (a subject, an email)."
+  param preview="" doc="A third line, one line long (a snippet)."
+  param meta="" doc="At the end of the first line (a time, a size, a count)."
+  param avatar="" doc="A person's name: their initials in a circle before the lines (empty: none)."
+  param unread:bool=false doc="Not read yet."
+  param selected:bool=false doc="The open one."
+  param starred:bool=false doc="A star after the second line."
+  param attachment:bool=false doc="A paper clip after the second line."
+  param icon="" doc="A Material icon name on a tile before the lines (empty: none)."
+  param dense:bool=false doc="Less room above and below (a settings list, an inspector)."
+  param divider:bool=true doc="A hairline under the row."
+  param mark="" doc="What to mark in the text (a search query: what fuzzy matched is drawn bold and underlined; empty: nothing)."
+  event onPressed
+  slot trailing
+  preview "Unread" 400x92 title="Nora Patel" subtitle="November print invoice" preview="Hi Jamie, here is the invoice for the November proofs." meta="9:18 AM" avatar="Nora Patel" unread=true attachment=true
+  preview "Selected" 400x68 title="Maya Chen" subtitle="maya@northline.design" meta="Owner" avatar="Maya Chen" selected=true
+  preview "Icon" 400x68 title="Invoice #1042" subtitle="PDF, 164 KB" icon="description"
+Column#row w=fill selected={props.selected} selected.fill=tile hovered.fill=hoverOverlay pressed.fill=pressedOverlay border-bottom={props.divider ? theme.colors.line : '#00000000'} onTap={emit onPressed}
+  Stack#rowStack w=fill
+    Row#rowInner gap=12 middle pad={props.dense ? [20, 8, 16, 8] : [20, 12, 16, 12]} w=fill
+      Column#rowAvatar w=36 h=36 radius=999 fill=tileDeep border=line center middle visible={props.avatar != ''}
+        Text#rowInitials "{upper(substring(props.avatar, 0, 1)) + (contains(props.avatar, ' ') ? upper(substring(split(props.avatar, ' ')[1], 0, 1)) : '')}" size=12.5 weight=600 lineHeight=1.2 color=inkSoft
+      Column#rowIcon w=36 h=36 radius={theme.radii.controlSmall} fill=tile border=line center middle visible={props.icon != '' && props.avatar == ''}
+        Icon#rowGlyph "{props.icon == '' ? 'circle' : props.icon}" size=18 color=inkSoft
+      Column#rowLines gap=2 grow
+        Row#rowFirst gap=8 middle w=fill
+          Text#rowTitle "{props.title}" runs={matchRuns(props.title, props.mark)} style=strongWide size=14.5 lineHeight=1.35 grow maxLines=1 overflow=ellipsis color=ink visible={!props.unread}
+          Text#rowTitleUnread "{props.title}" runs={matchRuns(props.title, props.mark)} style=strongWide weight=700 size=14.5 lineHeight=1.35 grow maxLines=1 overflow=ellipsis color=ink visible={props.unread}
+          Text#rowMeta "{props.meta}" size=12.5 lineHeight=1.35 tabularFigures=true maxLines=1 visible={props.meta != ''} weight={props.unread ? 600 : 500} color={props.unread ? theme.colors.accent : theme.colors.inkFaint}
+        Row#rowSecond gap=6 middle w=fill visible={props.subtitle != ''}
+          Text#rowSubtitle "{props.subtitle}" runs={matchRuns(props.subtitle, props.mark)} size=13.5 lineHeight=1.4 maxLines=1 overflow=ellipsis weight={props.unread ? 600 : 400} color={props.unread ? theme.colors.ink : theme.colors.inkSoft}
+          Icon#rowAttach "attach_file" size=14 color=inkFaint visible={props.attachment}
+          Icon#rowStar "star" size=14 color=gold visible={props.starred}
+        Text#rowPreview "{props.preview}" size=13 lineHeight=1.4 color=inkFaint maxLines=1 overflow=ellipsis visible={props.preview != ''}
+      Slot#trailing w=null h=null name=trailing
+    box#rowDot w=6 h=6 radius=3 x=7 y=18 fill=accent visible={props.unread}
+    box#rowBar w=3 h=fill x=0 fill=accent visible={props.selected}

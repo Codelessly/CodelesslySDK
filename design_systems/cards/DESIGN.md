@@ -55,6 +55,19 @@ the top of the file, is not read: the render command says so, `site_key_ignored`
 - **Dark by default.** `"mode": "dark"` (`light`, `dark` or `system`, the default: the device's). The render
   command's `--theme` and a `setThemeMode` action change it over that.
 
+## Wide canvases
+
+Every block has one design that holds from a phone to a desktop; what changes with the width is written in the
+block itself, as rules that hold from 700 px of shown width (`tool/kit.py`: `wide`, `capped`). The width is the
+one the card is laid out in: a card in a narrow chat column of a wide window keeps the phone form. A `ChatCard` is
+at most `sizes.narrow` (720) wide and stands in the middle of its place; the blocks that are read across are at
+most as wide wherever they stand; pictures that are drawn to cover (`DayHeader`, `MapPanel`, `Media`, a gallery's
+thumbnails) grow taller so they stay pictures; a bar chart's bars stop at 88. Below 700 nothing differs from a
+phone. An app window has its own words (`Brand`, `NavItem`, `PageHeader`, `Panel`, `ListRow`, `BulkBar`…, written
+in the notation in `tool/page_words/components`), drawn with the same tokens at the page tier; in a `Sidebar` they
+fold to their icons at a tablet's width, where the sidebar is `sizes.rail` (64) wide. TO-DESKTOP.md is the
+writer's guide to all of it.
+
 ## Tabs, switches and pills
 
 Three kinds, each with one job, all built in `tool/blocks.py` from the same parts. `Tabs` is a page's (or a card's)

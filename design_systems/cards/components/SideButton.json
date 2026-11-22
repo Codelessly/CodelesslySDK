@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "id": "SideButton",
+ "roots": [
+  "side"
+ ],
+ "widget": {
+  "type": "SideButton",
+  "doc": "The one thing to do at a sidebar's head (Compose, New issue): a filled button as wide as the sidebar, its key at its end. On a rail (a tablet's width) the icon alone, its label as a tooltip. Fires onTap as any line does.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "New",
+    "required": true,
+    "doc": "What it does."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "add",
+    "doc": "A Material icon name."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its key, as a key cap at its end."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    224,
+    40
+   ],
+   "props": {
+    "label": "Compose",
+    "icon": "edit",
+    "shortcut": "C"
+   }
+  }
+ ],
+ "nodes": {
+  "side": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "margin": [
+     0,
+     4,
+     0,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [11, 0, 11, 0] : [12, 0, 8, 0]}",
+    "decoration.radius": "${theme.radii.ctaWide}",
+    "decoration.effects": "${theme.shadows.cta}"
+   },
+   "tooltip": "${props.label}",
+   "states": {
+    "hovered": {
+     "side": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "accentDeep"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "side": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "accentDeep"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "sideGlyph",
+    "sideLabel",
+    "sideKey"
+   ]
+  },
+  "sideGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 18,
+    "color": "onAccent"
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "sideLabel": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.2,
+     "color": "onAccent"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
+  },
+  "sideKey": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#29FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.controlXs}",
+    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
+   "children": [
+    "sideKeyText"
+   ]
+  },
+  "sideKeyText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "onAccent"
+    }
+   }
+  }
+ }
+}

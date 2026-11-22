@@ -1,0 +1,17 @@
+{
+ "schema": 3,
+ "pages": [],
+ "designSystem": "../../",
+ "components": [
+  "built/Account.json",
+  "built/Brand.json",
+  "built/BulkBar.json",
+  "built/ListRow.json",
+  "built/NavItem.json",
+  "built/NavSection.json",
+  "built/PageHeader.json",
+  "built/PaneHeader.json",
+  "built/Panel.json",
+  "built/SideButton.json"
+ ]
+}

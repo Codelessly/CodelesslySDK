@@ -6,7 +6,7 @@ the card's variable (a `variable` parameter) and change it themselves; every blo
 """
 import art
 from kit import *  # noqa: F401,F403
-from kit import FILL, HUG, STRING, INT, NUM, BOOL, STRINGS, NUMBERS, ROWS, JSON, P, PRESS
+from kit import WIDE, CARD_MAX, wide, capped, FILL, HUG, STRING, INT, NUM, BOOL, STRINGS, NUMBERS, ROWS, JSON, P, PRESS
 
 TONES = ('accent', 'good', 'warn', 'danger', 'neutral')
 TONE = P('tone', enum(*TONES), 'accent', 'The color role: accent, good, warn, danger or neutral.')
@@ -62,6 +62,10 @@ def chat_card():
         'content': col(['slot'], 14, pad=[18, 16, 18, 18]),
         'slot': {'type': 'slot'},
     }
+    # Wide: the card keeps a card's measure (the reading width of what is in it) and stands in the middle of its
+    # place, with more of the page around it; its blocks are then as wide as on a large phone, never a window.
+    wide(nodes['shell'], props={'crossAxisAlignment': 'center'}, layout={'padding': [24, 24, 24, 32]})
+    capped(nodes['card'])
     props = [
         P('title', STRING, '', 'The card title.'),
         P('subtitle', STRING, '', 'One quiet line under the title (empty: none).'),
@@ -275,8 +279,9 @@ def media():
          'paint': '${theme.colors.artShine}'},
     ]}
     nodes = {
-        'media': node('stack', {'width': FILL, 'height': 150}, children=['ground'],
-                      decoration={'radius': 14, 'clip': 'antiAlias'}, bind={'decoration.radius': '${= props.round ? theme.radii.tile : 0}'}),
+        'media': wide(node('stack', {'width': FILL, 'height': 150}, children=['ground'],
+                           decoration={'radius': 14, 'clip': 'antiAlias'}, bind={'decoration.radius': '${= props.round ? theme.radii.tile : 0}'}),
+                      layout={'height': 220}),
         'ground': node('box', dict(whole), bind={'visible': '${= %s}' % is_glyph}, customPaint=ground),
     }
     # One paint node per family: each kind is a group drawn only when it is the kind asked for.
@@ -639,6 +644,9 @@ def segments():
         **knob_cell('moreCell', '${item}', "(props.value == item || (props.value == '' && index == 0))", [setv('props.value', 'item'), fire('onChanged', '${item}')]),
     }
     nodes['track']['layout']['constraints'] = {'maxWidth': 603}
+    # Wide: the 200 px a segment is the most a phone's thumb wants; in a card's measure the switch spans its place
+    # as the tiles under it do, never wider than a card.
+    wide(nodes['track'], bind={'layout.constraints': E('{maxWidth: %d}' % CARD_MAX)})
     for i in range(n):
         opt = "(%s > %d ? at(props.options, %d) : '')" % (count, i, i)
         on = '(props.value == %s%s)' % (opt, " || props.value == ''" if i == 0 else '')
@@ -1292,7 +1300,12 @@ def comparison_table():
     n = 'length(props.names)'
     wide = '(%s > 2)' % n
     HEAD, CELL, FOOT, LABEL = 98, 46, 58, 84
+    # A column: 140 (or columnWidth, with three and more) on a phone. On a wide canvas the columns share what a card
+    # has beside the labels, when that is more: two plans fill the card and are not two narrow columns at its start.
+    # (Rules by the shown width, not screen.width: a card laid out in a narrow column of a wide window is a phone's.
+    # From 700 the card is at least 652 wide, from 768 it is its full 720.)
     colw = '(%s ? props.columnWidth : 140)' % wide
+    shared = lambda card: E('max(%s, (%d - 36 - (props.labelWidth - 14) - (%s ? 20 : 0)) / %s)' % (colw, card, wide, n))
     picked = lambda i: "(%s > %d && at(props.names, %d) == props.pick)" % (n, i, i)
     rule = {'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'strokeSides': 'top'}
     nodes = {
@@ -1332,6 +1345,8 @@ def comparison_table():
                                 bind={'visible': vis, 'layout.width': E(colw),
                                       'decoration.fills[0].color': E("%s ? theme.colors.accentTint : '#00FFFFFF'" % picked(i)),
                                       'decoration.radius': '${theme.radii.tile}'})
+        globals()['wide'](nodes['k%d' % i], bind={'layout.width': shared(WIDE - 48)})
+        globals()['wide'](nodes['k%d' % i], at=768, bind={'layout.width': shared(CARD_MAX)})
         nodes['h%d' % i] = node('column', {'width': FILL, 'height': HEAD, 'padding': [10, 10, 8, 0]},
                                 {'crossAxisAlignment': 'start', 'spacing': 2}, ['hc%d' % i, 'hn%d' % i, 'hp%d' % i, 'hs%d' % i])
         nodes['hc%d' % i] = row(['hcT%d' % i], width=HUG, pad=[7, 3, 7, 3], decoration={'fills': [{'color': 'accent'}], 'radius': 999},
@@ -1469,8 +1484,11 @@ def chart_card():
         ]},
     ]}
     gap = 10
-    bw = '((size.width - %d * (%s - 1)) / %s)' % (gap, n, n)
-    bx = '(index * (%s + %d))' % (bw, gap)
+    # A bar's place, and the bar in it: the whole place in a phone's plot; in a wide plot (560 and up) at most 88,
+    # in the middle of its place, so five values in a desktop card are bars and not slabs.
+    slot = '((size.width - %d * (%s - 1)) / %s)' % (gap, n, n)
+    bw = '(size.width >= 560 ? min(88, %s) : %s)' % (slot, slot)
+    bx = '(index * (%s + %d) + (%s - %s) / 2)' % (slot, gap, slot, bw)
     bh = 'max(6, item / %s * %d)' % (top, H)
     hot = '(item == max(props.values))'
     bar_ops = {'op': 'group', 'when': "${= props.kind != 'line'}", 'ops': [
@@ -1638,7 +1656,7 @@ def photo_gallery():
         'grid': grid(['cell'], '${props.columns}', 8, '${props.photos}', run_gap=10,
                      bind={'visible': "${= props.layout == 'grid' && %s}" % closed}),
         'cell': col(['thumb', 'caption'], 6, states={'pressed': {'cell': PRESS}}, actions=open_it),
-        'thumb': node('Media', {'width': FILL, 'height': 92}, {'kind': 'mountain'}, bind=dict(kind)),
+        'thumb': node('Media', {'width': FILL, 'height': 136}, {'kind': 'mountain'}, bind=dict(kind)),
         'caption': cap('caption'),
         # a strip that scrolls sideways
         'strip': node('row', {'width': FILL, 'height': 150}, {'scrollable': True, 'scrollDirection': 'horizontal', 'edgeFade': 12}, ['stripList'],
@@ -1713,8 +1731,9 @@ def day_header():
     whole = {'width': FILL, 'height': FILL, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}}
     nodes = {
         'day': col(['head', 'stops'], 14),
-        'head': node('stack', {'width': FILL, 'height': 92}, children=['art', 'scrim', 'texts', 'tag'],
-                     decoration={'radius': 16, 'clip': 'antiAlias'}, bind={'decoration.radius': '${theme.radii.panel}'}),
+        'head': wide(node('stack', {'width': FILL, 'height': 92}, children=['art', 'scrim', 'texts', 'tag'],
+                          decoration={'radius': 16, 'clip': 'antiAlias'}, bind={'decoration.radius': '${theme.radii.panel}'}),
+                     layout={'height': 132}),
         'art': node('Media', dict(whole), {'kind': 'temple', 'round': False}, bind={'props.kind': '${props.kind}', 'props.tone': '${props.tone}'}),
         'scrim': node('box', dict(whole), decoration={'fills': [{'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [
             {'position': 0, 'color': '#C2000000'}, {'position': 0.6, 'color': '#59000000'}, {'position': 1, 'color': '#00000000'}]}]}),
@@ -1841,9 +1860,10 @@ def map_panel():
         art.circle(196, 104, 8, c('card')), art.circle(196, 104, 5.5, c('accent')),
     ]
     nodes = {
-        'map': node('stack', {'width': FILL, 'height': 178}, children=['draw'] + ['p%d' % i for i in range(len(PIN_AT))],
-                    decoration={'fills': [{'color': 'mapLand'}], 'radius': 16, 'clip': 'antiAlias', 'strokes': [{'color': 'line'}], 'strokeWidth': 1},
-                    bind={'decoration.radius': '${theme.radii.panel}'}),
+        'map': wide(node('stack', {'width': FILL, 'height': 178}, children=['draw'] + ['p%d' % i for i in range(len(PIN_AT))],
+                         decoration={'fills': [{'color': 'mapLand'}], 'radius': 16, 'clip': 'antiAlias', 'strokes': [{'color': 'line'}], 'strokeWidth': 1},
+                         bind={'decoration.radius': '${theme.radii.panel}'}),
+                    layout={'height': 280}),
         'draw': node('box', {'width': FILL, 'height': FILL, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}},
                      customPaint={'viewBox': [360, 180], 'fit': 'cover', 'painter': draw}),
     }
@@ -2084,7 +2104,24 @@ def weather_day():
                      props, nodes, 'day', previews=[{'name': 'Tue', 'size': [360, 40], 'props': {'kind': 'rain', 'min': 13, 'max': 25}}])
 
 
+# The blocks whose lines are read across (a sentence, a choice, a row of label and value, a bar with its button):
+# on a wide canvas none is wider than a card, wherever it stands. The blocks that show data (StatTile, ChartCard,
+# the table's, a gallery, a carousel's pictures) fill the place the page gives them.
+MEASURED = ('Paragraph', 'ActionButton', 'TotalBar', 'Details', 'Callout', 'Disclosure', 'Receipt', 'Recommendation', 'Steps', 'InputField',
+            'OptionList', 'ChoiceChips', 'DayPicker', 'Counter', 'FlightOption', 'CartLine', 'DiffHunk', 'ComparisonTable', 'DayHeader',
+            'ItineraryStop', 'Checklist', 'MapPanel', 'PlaceRow', 'PlanStep', 'ProgressLine', 'WeatherNow', 'WeatherHours', 'WeatherDay',
+            'Pager', 'SectionLabel')
+
+
 def all_components():
+    docs = _all_components()
+    for d in docs:
+        if d['id'] in MEASURED:
+            capped(d['nodes'][d['roots'][0]])
+    return docs
+
+
+def _all_components():
     return [chat_card(), section_label(), paragraph(), action_button(), total_bar(), details(), callout(), disclosure(), receipt(), recommendation(),
             steps(), segments(), tabs(), tab_toggle(), segmented_control(), chip_tabs(), browser_tabs(), input_field(), option_list(), choice_chips(), day_picker(), counter(), rating(),
             flight_option(), product_tile(), carousel(), page_dots(), pager(), wide_scroll(), cart_line(),

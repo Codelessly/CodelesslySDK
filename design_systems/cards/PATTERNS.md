@@ -22,6 +22,13 @@ options, as wide as its place (`TabToggle` is the same switch only as wide as it
 slots or sizes in a grid, not tabs. All of them stay on one line and scroll sideways where they do not fit: do not
 split a long set into rows yourself, and do not use `SegmentedButton` or `Segments` for more than four options.
 
+## A card shown wide
+
+Write a card once. Shown 700 px wide and more (a tablet, a desktop window) it is at most 720 wide in the middle of
+its place, and its blocks take their wide form by themselves (taller pictures, a comparison's columns sharing the
+card, a switch spanning it): TO-DESKTOP.md lists them. What is yours is a choice of columns (`min700.cols=4` on a
+`Grid`). An app window is not a wide card: it is written with the page words below.
+
 ## Pages in brief
 
 A page (a website, an app window) uses the page tier of the same system: the same colors and fonts at a page's
@@ -30,7 +37,8 @@ scale, picked for you when the window is wide. Do not wrap a page in `ChatCard`,
 `Checklist`, `Steps`) work inside a page's `Card`.
 The page blocks are named for what they are: on a website `SiteNav`, `Hero`, `LogoStrip`, `FeatureCard`, `StatBand`,
 `Testimonial`, `PricingPlan`, `FaqItem`, `CallToAction`, `PostCard`, `SiteFooter` (a band block goes directly under
-`Page`, an item block in a `Grid` or a `Section`); in an app `PageHeader`, `StatCard`, `FormSection`, `SettingRow`,
+`Page`, an item block in a `Grid` or a `Section`); in an app `Brand`, `SideButton`, `NavSection`, `NavItem`,
+`Account`, `PageHeader`, `StatCard`, `Panel`, `ListRow`, `BulkBar`, `PaneHeader`, `FormSection`, `SettingRow`,
 `ConversationRow`, `TaskCard`, `BoardColumn`. Use one where the page has that part; write the rest as below.
 A website alternates plain and tinted bands (`Section`, `Section tint`). A band opens with `Text.eyebrow "FEATURES"`,
 a `Heading` and at most one `Text.lead`, then its content. The hero is `Row gap=48 middle` of a `Column grow gap=20`
@@ -43,18 +51,37 @@ a `Heading` and at most one `Text.lead`, then its content. The hero is `Row gap=
 others), a `Divider`, then `Row gap=10` lines of `Icon "check" color=#FF16A34A size=18` and `Text`; the recommended
 plan is `Card border=#FF2563EB` (no fill of its own) with a `Badge.primary "Most popular"` beside its name. A page closes on a
 `Section center` (a `Heading`, a `Text.lead`, the two buttons) and a `Footer` of a `Row between top` of columns.
-An app is `App` with a `Sidebar` (`Brand`, `Text.eyebrow` group labels, `NavItem` lines, `Spacer grow`, the
-signed-in person as a `Row gap=10 middle` of `Avatar` and a `Column`) and a `Main`: its `Nav` holds
-`Heading … level=1` and a `Row gap=8` of actions (one filled `Button`, the others `Button.outline`), and under it
-`Column pad=24 gap=20` of content. Figures are `Grid cols=4 gap=16` of `Card gap=8` (a `Row between middle` of
-`Text.muted` and `IconTile … size=32`, `Text.numberLarge`, a `Row gap=8 middle` of a `Badge` and a `Text.caption`).
-Charts sit in `Row gap=20` of `Card grow` and `Card w=360`, each headed by `Heading … level=3`. A table is one
-`Card pad=0 gap=0`: a header `Row pad=[20,12,20,12] gap=16` of `Text.columnHead` cells, then per record a
-`Row pad=[20,0,20,0] gap=16 h=52 middle border-top=#FFE5E7EB`; give the same `w:` to a column's header and its
-cells, `grow` to the name's column, and `right` to numbers. A form is `Column maxw=720 gap=20` of `Card gap=16`
-(`Heading … level=3`, `Text.muted`, fields two across in `Row gap=16` with `grow` on each); its buttons sit at the
-end of a `Row end gap=8`. A list beside its details is `Pane w=360` (rows of `Row pad=[16,12,16,12] gap=12
-border-bottom:#FFE5E7EB`, the open one `fill=#142563EB`) next to a `Pane` for the open item.
+An app is `App` with a `Sidebar` and a `Main`. The sidebar is its words, one a line: `Brand`, an optional
+`SideButton` (the one thing to do), `NavSection` group labels over `NavItem` lines, then `Footer` with the last
+`NavItem` lines and `Account` under it. Write only these words in a sidebar: each folds to its icon by itself at
+a tablet's width, where the sidebar is a rail of 64, and the whole sidebar is the drawer behind a menu button on a
+phone; a `Row` or a `Text` written there by hand does not fold. `Main` holds a `Column pad=[32,28,32,32] gap=20`
+(`tablet.pad=[24,20,24,24] phone.pad=[16,16,16,24]`) that opens with `PageHeader` and its actions (one filled
+`Button`, the others `Button.outline`). Figures are `Grid cols=4 gap=16 tablet.cols=2 phone.cols=1` of `StatCard`.
+Charts, lists and settings groups are `Panel` lines: two side by side in a `Row gap=16 top` (`grow` on one, a
+`w=` on the other), with a `LineChart` or `BarChart`, or `ListRow` lines in a `flush` one. A table is the
+notation's `Table r in rows columns=[…] sort=@sort select=@chosen` with a line per column under it (in a
+`Panel … flush` when it has a title); over it a filter row (`Row gap=10 middle` of
+`Input "Search" @q icon="search" w=280`, `ChipTabs` or `Select` lines, a `Spacer` and a `Text.caption` count) and
+`BulkBar count={length(chosen)} visible={length(chosen) > 0} onClear={chosen=[]}` with its actions; under it
+`Pager @page count={…}`. A form is `Column maxw=720 gap=20` of `Panel` (or `FormSection`) with fields two across in
+`Row gap=16` with `grow` on each; its buttons sit at the end of a `Row end gap=8`. A list beside its details is a
+`Pane w=400 fill=card` of `ListRow` lines (`selected={openId==m.id} onTap={openId=m.id}`) before a `Main fill=card`
+that opens with `PaneHeader` and shows the open item (`Details` for its labelled values); on a phone the list
+fills the screen and a tap shows the item with a way back, with nothing written for it.
+
+| Word | One line |
+|---|---|
+| `Brand "Northwind" "Analytics" icon="insights"` | The product's mark and name at the sidebar's head (`name`, `note`, `icon`). |
+| `SideButton "Compose" icon="edit" shortcut="C"` | The sidebar's one filled action (`label`, `icon`, `shortcut`). |
+| `NavSection "Workspace"` | The label over a group of items (`label`). |
+| `NavItem "Inbox" icon="inbox" badge="4" selected={tab=="inbox"} onTap={tab="inbox"}` | A place in the sidebar (`label`, `icon`, `selected`, `badge`, `shortcut`, `danger`). |
+| `Account "Jamie Park" "Workspace owner"` | The signed-in person, in the sidebar's `Footer` (`name`, `note`, `chevron`). |
+| `PageHeader "Members" "Everyone with access." overline="People" count="50"` + action lines | A page's head (`title`, `note`, `overline`, `count`); the actions go under the title where there is no room. |
+| `Panel "Recent orders" "The last 30 days." action="See all" onAction={…}` + lines | A titled section (`title`, `note`, `flush`, `action`). |
+| `ListRow "Maya Chen" "Studio visit" preview="…" meta="10:42" avatar="Maya Chen" unread selected={…}` | A row of a list (`title`, `subtitle`, `preview`, `meta`, `avatar` or `icon`, `unread`, `selected`, `starred`, `attachment`, `dense`, `divider`, `mark`); one line under it (a `Badge`, a `Toggle`, an `IconButton`) sits at its end. |
+| `BulkBar count={length(chosen)} noun="selected" onClear={chosen=[]}` + action lines | What acts on the chosen rows (`count`, `noun`). |
+| `PaneHeader "Amara Okafor" "Admin" avatar="Amara Okafor" onClose={openId=""}` + `IconButton` lines | The head of a side pane (`title`, `note`, `avatar`, `closable`). |
 A page's views (a product's Description, Specifications and Reviews; a settings page's sections) are
 `Tabs @tab tabs={[…]}` over one `if tab=="…"` block each, never a `SegmentedButton`; a billing period or a date
 range beside a heading is `TabToggle` (or `Segments` where it should span its place).
@@ -124,7 +151,8 @@ ChatCard "Delete 214 old files?" icon="delete_sweep_rounded" tone="danger" statu
 
 ## A dashboard and a table
 
-`Segments @range options=["7 days","30 days","90 days"]` over `Grid cols=2 gap=10` of four `StatTile`, then
+`Segments @range options=["7 days","30 days","90 days"]` over `Grid cols=2 gap=10 min700.cols=4` of four
+`StatTile` (two across on a phone, four where the card is shown wide), then
 `ChartCard … kind="line"` and `ChartCard … kind="bars"`. Keep each period's numbers in one list of records and
 read the chosen one (`state d=find(periods,p=>p.name==range)`). A sortable table:
 

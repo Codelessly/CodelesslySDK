@@ -2,6 +2,7 @@
 """Builds the Cards design system, then the showcase that uses it.
 
     python3 design_systems/cards/tool/build.py [--no-showcase]
+    py -X utf8 design_systems/cards/tool/build.py --no-showcase      (Windows: the files are read as UTF-8)
 
 1. Runs design_systems/tool/new_design_system.py on tool/brand.json: SSUI's components and theme, rebranded
    (so the standard controls come along).
@@ -24,6 +25,7 @@ SDK = os.path.dirname(SYSTEMS)
 sys.path.insert(0, HERE)
 
 import blocks  # noqa: E402
+import page_words  # noqa: E402
 import repairs  # noqa: E402
 import tokens  # noqa: E402
 
@@ -35,11 +37,12 @@ README = '''# Cards
 
 A design system for inline chat cards: a brand layer over SSUI's controls, plus card blocks at full polish and
 drawn media (no image files). See DESIGN.md (the look and the tokens) and PATTERNS.md (one worked card per kind).
-TO-DESKTOP.md says what each pattern becomes on a desktop written with Desk (`../desk`), with two screens taken
-across in `examples/to-desktop` (`python3 design_systems/cards/tool/to_desktop.py` renders its examples);
-`../NAMES.md` lists the parts Desk and Cards name differently.
+TO-DESKTOP.md says how the same words are laid out on a tablet and a desktop by themselves (a card keeps a card's
+measure; an app window is written with the page words and folds to a rail and a drawer), with three whole windows
+in `examples/desktop`; `../NAMES.md` lists the parts Desk and Cards name differently.
 
-Built by `python3 design_systems/cards/tool/build.py`. A change made to a generated component by hand is lost at
+Built by `python3 design_systems/cards/tool/build.py` (on Windows `py -X utf8 design_systems/cards/tool/build.py
+--no-showcase`: the `-X utf8` is needed, the sources are UTF-8). A change made to a generated component by hand is lost at
 the next build unless it is recorded: `python3 design_systems/cards/tool/repairs.py --record` writes each such
 change to `tool/repairs/<Name>.json`, which the build applies last:
 
@@ -49,12 +52,13 @@ change to `tool/repairs/<Name>.json`, which the build applies last:
 | `tool/tokens.py` | The token sets, light and dark: colors, radii, shadows, the type scale, the fonts |
 | `tool/kit.py` | The helpers blocks are written with |
 | `tool/blocks.py` | The %d blocks: %s |
+| `tool/page_words/components/*.txt` | The %d page words, written in the notation (`tool/page_words.py` expands them when one changed): %s |
 | `tool/art.py` | The drawn media as customPaint draw lists colored by tokens: scenes, product and food glyphs, weather glyphs, the map |
 | `tool/build.py` | The build |
 | `themes/light.json`, `themes/dark.json` | Each token set as a theme override for a site's `theme` |
 | `fonts/` | Inter, Inter Display and JetBrains Mono (SIL Open Font License), Latin subsets |
 
-These blocks replace SSUI's components of the same name: %s.
+These blocks and page words replace SSUI's components of the same name: %s.
 '''
 
 
@@ -137,12 +141,15 @@ def main():
     # Last, what Cards changes in what was just written (repairs.py): the menu, and the fixes made to a
     # generated block as edited JSON, each recorded as a patch so that this build gives it back.
     repairs.apply(ROOT, quiet=True)
-    replaced = sorted(base_names & {o.split('/')[1][:-5] for o in own})
+    # The page words (page_words.py): an app window's parts, written in the notation; one named as a component
+    # above takes its place.
+    page = page_words.install(ROOT)
+    replaced = sorted(base_names & {o.split('/')[1][:-5] for o in own + page})
     # Blocks stored after the build (designed on demand in a session and written into components/): kept, after
     # the blocks made here.
-    made = set(own) | set(base)
+    made = set(own) | set(base) | set(page)
     kept = sorted(f'components/{f}' for f in os.listdir(f'{ROOT}/components') if f.endswith('.json') and f'components/{f}' not in made)
-    manifest['components'] = own + [c for c in base if c not in own] + kept
+    manifest['components'] = own + page + [c for c in base if c not in own and c not in page] + kept
     manifest['design'] = 'DESIGN.md'
     manifest['patterns'] = 'PATTERNS.md'
     with open(f'{ROOT}/design_system.json', 'w') as f:
@@ -156,13 +163,20 @@ def main():
             f.write('\n')
     names = [o.split('/')[1][:-5] for o in own]
     with open(f'{ROOT}/README.md', 'w') as f:
-        f.write(README % (len(manifest['components']) - len(own), len(own), ', '.join(names), ', '.join(replaced) or 'none'))
+        f.write(README % (len(manifest['components']) - len(own) - len(page), len(own), ', '.join(names), len(page),
+                          ', '.join(o.split('/')[1][:-5] for o in page), ', '.join(replaced) or 'none'))
     with open(f'{ROOT}/BLOCKS.txt', 'w') as f:
         f.write(','.join(names) + '\n')
-    print(f'{ROOT}: {len(own)} blocks, {len(manifest["components"])} components in all')
+    print(f'{ROOT}: {len(own)} blocks, {len(page)} page words, {len(manifest["components"])} components in all')
+
+    # A page word's source changed: expand the sources (the manifest above is what they are expanded with), then
+    # build once more with what that wrote.
+    if '--page-words-expanded' not in sys.argv and page_words.stale() and page_words.expand(SDK):
+        sys.argv.append('--page-words-expanded')
+        return main()
 
     if '--no-showcase' not in sys.argv:
-        sys.exit(subprocess.run([sys.executable, f'{SDK}/examples/showcase/tool/build.py'] + sys.argv[1:]).returncode)
+        sys.exit(subprocess.run([sys.executable, f'{SDK}/examples/showcase/tool/build.py'] + [a for a in sys.argv[1:] if a != '--page-words-expanded']).returncode)
 
 
 if __name__ == '__main__':

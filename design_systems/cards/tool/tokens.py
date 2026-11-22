@@ -209,7 +209,9 @@ PAGE_TEXT_STYLES = {
 PAGE = {
     'radii': {'cardWide': 16, 'panelWide': 14, 'tileWide': 12, 'ctaWide': 10},
     # sizes.ctaWide 0: a button alone on its line is as big as its label on a page, not as wide as the page.
-    'sizes': {'content': 1120, 'narrow': 720, 'sidebar': 248, 'topBarWide': 64, 'tableRowWide': 52, 'ctaWide': 0, 'controlWide': 40},
+    # sizes.rail: an app's sidebar at a tablet's width, where the sidebar's words (NavItem, NavSection, Brand,
+    # Account, SideButton) fold to their icons; on a phone it is the drawer.
+    'sizes': {'content': 1120, 'narrow': 720, 'sidebar': 248, 'rail': 64, 'topBarWide': 64, 'tableRowWide': 52, 'ctaWide': 0, 'controlWide': 40},
     'spacing': {'cardWide': 24, 'tileWide': 18, 'cardGapWide': 14, 'section': 88, 'gutter': 32},
     'shadows': {'cardWide': [{'type': 'dropShadow', 'color': '#12000000', 'offset': [0, 12], 'blurRadius': 32, 'spreadRadius': -16},
                              {'type': 'dropShadow', 'color': '#0A000000', 'offset': [0, 1], 'blurRadius': 2}]},

@@ -1,4 +1,7 @@
 {
+ "roots": [
+  "rating"
+ ],
  "widget": {
   "props": [
    {
@@ -61,6 +64,20 @@
   ]
  },
  "nodes": {
+  "rating": {
+   "type": "row",
+   "children": [
+    "stars"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
   "stars": {
    "bind": {
     "props.divisions": "${= props.half ? props.max * 2 : props.max}",

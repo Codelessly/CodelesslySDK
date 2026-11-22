@@ -1,0 +1,276 @@
+{
+ "schema": 3,
+ "id": "PaneHeader",
+ "roots": [
+  "paneHead"
+ ],
+ "widget": {
+  "type": "PaneHeader",
+  "doc": "The head of a side pane (an open record, an inspector): a person's initials in a circle when it is theirs, the title and a line under it, the lines under the call (its actions: IconButton lines) and a close button at its end that fires onClose; a rule under it.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Details",
+    "required": true,
+    "doc": "What the pane shows."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "avatar",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A person's name: their initials in a circle before the title (empty: none)."
+   },
+   {
+    "key": "closable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A close button at its end."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose",
+    "doc": "Close was pressed."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    380,
+    68
+   ],
+   "props": {
+    "title": "Amara Okafor",
+    "note": "Admin, joined March 2024",
+    "avatar": "Amara Okafor"
+   }
+  }
+ ],
+ "nodes": {
+  "paneHead": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     20,
+     14,
+     12,
+     14
+    ],
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 64
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "paneAvatar",
+    "paneTitles",
+    "paneActions",
+    "paneClose"
+   ]
+  },
+  "paneAvatar": {
+   "type": "column",
+   "layout": {
+    "width": 36,
+    "height": {
+     "hug": 36
+    },
+    "constraints": {
+     "minHeight": 36
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "tileDeep"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.avatar != ''}"
+   },
+   "children": [
+    "paneInitials"
+   ]
+  },
+  "paneInitials": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(substring(props.avatar, 0, 1)) + (contains(props.avatar, ' ') ? upper(substring(split(props.avatar, ' ')[1], 0, 1)) : '')}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.2,
+     "color": "inkSoft"
+    }
+   }
+  },
+  "paneTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "paneTitle",
+    "paneNote"
+   ]
+  },
+  "paneTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "headingWide",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "paneNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "captionWide",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "paneActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "paneSlot"
+   ]
+  },
+  "paneSlot": {
+   "type": "slot"
+  },
+  "paneClose": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "bind": {
+    "visible": "${props.closable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ],
+   "tooltip": "Close"
+  }
+ }
+}

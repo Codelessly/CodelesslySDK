@@ -1,0 +1,256 @@
+{
+ "schema": 3,
+ "id": "BulkBar",
+ "roots": [
+  "bulk"
+ ],
+ "widget": {
+  "type": "BulkBar",
+  "doc": "What acts on the rows chosen in a table or a list: a check in the accent, the count, Clear, and the lines under it (the actions: Button.outline lines, a Button.destructive last) at its end, on the card's fill inside an accent line. On a phone the actions go on a line under the count. Show it while something is chosen (visible={length(chosen) > 0}).",
+  "children": "list",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "required": true,
+    "doc": "How many are chosen."
+   },
+   {
+    "key": "noun",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "selected",
+    "doc": "What follows the count (selected, members selected)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClear",
+    "doc": "Clear was pressed: empty your list of chosen rows."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    900,
+    52
+   ],
+   "props": {
+    "count": 3
+   }
+  }
+ ],
+ "nodes": {
+  "bulk": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     14,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "minHeight": 52
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panelWide}",
+    "decoration.effects": "${theme.shadows.tile}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      },
+      "layout": {
+       "padding": [
+        14,
+        10,
+        10,
+        10
+       ]
+      }
+     }
+    }
+   ],
+   "children": [
+    "bulkMark",
+    "bulkCount",
+    "bulkClear",
+    "bulkSpacer",
+    "bulkActions"
+   ]
+  },
+  "bulkMark": {
+   "type": "column",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ]
+   },
+   "children": [
+    "bulkGlyph"
+   ]
+  },
+  "bulkGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check",
+    "size": 14,
+    "color": "onAccent"
+   }
+  },
+  "bulkCount": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count} ${props.noun}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "letterSpacing": -0.1,
+     "color": "ink",
+     "tabularFigures": true
+    }
+   }
+  },
+  "bulkClear": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Clear"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClear"
+      }
+     ]
+    }
+   ]
+  },
+  "bulkSpacer": {
+   "type": "box",
+   "layout": {
+    "height": 1,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "bulkActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ],
+   "children": [
+    "bulkSlot"
+   ]
+  },
+  "bulkSlot": {
+   "type": "slot"
+  }
+ }
+}

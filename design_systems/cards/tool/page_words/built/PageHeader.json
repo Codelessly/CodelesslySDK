@@ -1,0 +1,287 @@
+{
+ "schema": 3,
+ "id": "PageHeader",
+ "roots": [
+  "pageHead"
+ ],
+ "widget": {
+  "type": "PageHeader",
+  "doc": "The head of a page in an app: PageHeader \"Members\" \"Everyone with access.\" with the page's actions (Button.outline, Button) indented under it. The title in the display face, a line under it in the soft ink, a small label over it or a count beside it; the actions sit at its end, level with the title, and go under it where there is no room.",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Page",
+    "required": true,
+    "doc": "The page's title."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One line under the title: what the page holds."
+   },
+   {
+    "key": "overline",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small label over the title (the section the page is in)."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A count shown as a pill beside the title, as text (248, 1.2k; empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Members",
+   "size": [
+    960,
+    96
+   ],
+   "props": {
+    "title": "Members",
+    "note": "Everyone with access to this workspace.",
+    "count": "50"
+   }
+  }
+ ],
+ "nodes": {
+  "pageHead": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     4,
+     0,
+     4
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "center",
+    "wrap": true,
+    "runSpacing": 14
+   },
+   "children": [
+    "pageTitles",
+    "pageActions"
+   ]
+  },
+  "pageTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "basis": 260,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "pageOverline",
+    "pageTitleRow",
+    "pageNote"
+   ]
+  },
+  "pageOverline": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(props.overline)}",
+    "style": "eyebrowWide"
+   },
+   "bind": {
+    "visible": "${= props.overline != ''}"
+   }
+  },
+  "pageTitleRow": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "pageTitle",
+    "pageCount"
+   ]
+  },
+  "pageTitle": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": "titleWide"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "style": {
+        "from": "titleWide",
+        "fontSize": 24
+       }
+      }
+     }
+    }
+   ]
+  },
+  "pageCount": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     3,
+     10,
+     3
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.count != ''}"
+   },
+   "children": [
+    "pageCountText"
+   ]
+  },
+  "pageCountText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.count}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "inkSoft",
+     "tabularFigures": true
+    },
+    "maxLines": 1
+   }
+  },
+  "pageNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "mutedWide"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "pageActions": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center",
+    "wrap": true,
+    "runSpacing": 10
+   },
+   "children": [
+    "pageActionsSlot"
+   ]
+  },
+  "pageActionsSlot": {
+   "type": "slot"
+  }
+ }
+}

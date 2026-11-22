@@ -147,3 +147,22 @@ def component(type_, doc, props, nodes, root, events=None, children=False, previ
     if variables:
         doc_['variables'] = {root: variables}
     return doc_
+
+
+# From this shown width on a block takes its wide form (a tablet, a desktop window). Below it a block is a
+# phone's, as written. The width is the one the block's canvas is laid out in: a card embedded in a narrow chat
+# column of a wide window keeps the phone form.
+WIDE = 700
+# The widest a card and a block standing alone on a wide page are (the theme's sizes.narrow).
+CARD_MAX = 720
+
+
+def wide(n, at=WIDE, **patch):
+    """Gives node n a wide form: patch (layout=, props=, decoration=, visible=, bind=) holds from `at` px up."""
+    n.setdefault('media', []).append({'minWidth': at, 'patch': patch})
+    return n
+
+
+def capped(n, width=CARD_MAX, at=WIDE):
+    """n is at most `width` wide on a wide canvas (it fills its place up to that)."""
+    return wide(n, at, layout={'constraints': {'maxWidth': width}})

@@ -187,7 +187,19 @@
     "height": {
      "hug": 0
     }
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
+    }
+   ]
   },
   "scrollCol": {
    "type": "column",
@@ -511,7 +523,25 @@
     "layout.width": "${= ((length(props.names) > 2) ? props.columnWidth : 140)}",
     "decoration.fills[0].color": "${= (length(props.names) > 0 && at(props.names, 0) == props.pick) ? theme.colors.accentTint : '#00FFFFFF'}",
     "decoration.radius": "${theme.radii.tile}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (652 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    },
+    {
+     "minWidth": 768,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (720 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    }
+   ]
   },
   "h0": {
    "type": "column",
@@ -881,7 +911,25 @@
     "layout.width": "${= ((length(props.names) > 2) ? props.columnWidth : 140)}",
     "decoration.fills[0].color": "${= (length(props.names) > 1 && at(props.names, 1) == props.pick) ? theme.colors.accentTint : '#00FFFFFF'}",
     "decoration.radius": "${theme.radii.tile}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (652 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    },
+    {
+     "minWidth": 768,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (720 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    }
+   ]
   },
   "h1": {
    "type": "column",
@@ -1251,7 +1299,25 @@
     "layout.width": "${= ((length(props.names) > 2) ? props.columnWidth : 140)}",
     "decoration.fills[0].color": "${= (length(props.names) > 2 && at(props.names, 2) == props.pick) ? theme.colors.accentTint : '#00FFFFFF'}",
     "decoration.radius": "${theme.radii.tile}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (652 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    },
+    {
+     "minWidth": 768,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (720 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    }
+   ]
   },
   "h2": {
    "type": "column",
@@ -1621,7 +1687,25 @@
     "layout.width": "${= ((length(props.names) > 2) ? props.columnWidth : 140)}",
     "decoration.fills[0].color": "${= (length(props.names) > 3 && at(props.names, 3) == props.pick) ? theme.colors.accentTint : '#00FFFFFF'}",
     "decoration.radius": "${theme.radii.tile}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (652 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    },
+    {
+     "minWidth": 768,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (720 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    }
+   ]
   },
   "h3": {
    "type": "column",
@@ -1991,7 +2075,25 @@
     "layout.width": "${= ((length(props.names) > 2) ? props.columnWidth : 140)}",
     "decoration.fills[0].color": "${= (length(props.names) > 4 && at(props.names, 4) == props.pick) ? theme.colors.accentTint : '#00FFFFFF'}",
     "decoration.radius": "${theme.radii.tile}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (652 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    },
+    {
+     "minWidth": 768,
+     "patch": {
+      "bind": {
+       "layout.width": "${= max(((length(props.names) > 2) ? props.columnWidth : 140), (720 - 36 - (props.labelWidth - 14) - ((length(props.names) > 2) ? 20 : 0)) / length(props.names))}"
+      }
+     }
+    }
+   ]
   },
   "h4": {
    "type": "column",

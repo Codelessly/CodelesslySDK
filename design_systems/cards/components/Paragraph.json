@@ -58,7 +58,19 @@
    },
    "bind": {
     "props.style.color": "${= props.strong ? theme.colors.ink : theme.colors.inkSoft}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
+    }
+   ]
   }
  }
 }

@@ -581,24 +581,24 @@
          {
           "op": "rrect",
           "rect": [
-           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10))}",
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10) + (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) - (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))) / 2)}",
            "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118)}",
-           "${= ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+           "${= (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))}",
            "${= max(6, item / max(1, max(props.values) * 1.12) * 118)}"
           ],
-          "radius": "${= min(8, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+          "radius": "${= min(8, (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) / 2)}",
           "when": "${= !(item == max(props.values))}",
           "paint": "${theme.colors.accentLine}"
          },
          {
           "op": "rrect",
           "rect": [
-           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10))}",
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10) + (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) - (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))) / 2)}",
            "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118)}",
-           "${= ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+           "${= (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))}",
            "${= max(6, item / max(1, max(props.values) * 1.12) * 118)}"
           ],
-          "radius": "${= min(8, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+          "radius": "${= min(8, (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) / 2)}",
           "when": "${= (item == max(props.values))}",
           "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.accentBright}, {'position': 1, 'color': theme.colors.accent}]}}}"
          },
@@ -606,7 +606,7 @@
           "op": "paragraph",
           "text": "${= thousands(item)}",
           "offset": [
-           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10)) + ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10) + (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) - (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))) / 2) + (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) / 2}",
            "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118) - 6}"
           ],
           "anchor": "bottomCenter",
@@ -621,7 +621,7 @@
           "op": "paragraph",
           "text": "${= index < length(props.labels) ? at(props.labels, index) : ''}",
           "offset": [
-           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10)) + ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10) + (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) - (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))))) / 2) + (size.width >= 560 ? min(88, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) : ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))) / 2}",
            126
           ],
           "anchor": "topCenter",

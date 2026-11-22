@@ -128,7 +128,17 @@
    },
    "bind": {
     "decoration.radius": "${= props.round ? theme.radii.tile : 0}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "height": 220
+      }
+     }
+    }
+   ]
   },
   "ground": {
    "type": "box",

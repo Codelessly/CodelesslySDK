@@ -1,0 +1,106 @@
+{
+ "schema": 3,
+ "id": "NavSection",
+ "roots": [
+  "section"
+ ],
+ "widget": {
+  "type": "NavSection",
+  "doc": "The label over a group of a sidebar's items: small spaced capitals in the faint ink, with room above that parts the groups. On a rail (a tablet's width) a short rule.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "required": true,
+    "doc": "The group's name (written as it reads; shown in capitals)."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to a rule (a collapsed sidebar); a tablet's width folds it too."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    224,
+    40
+   ],
+   "props": {
+    "label": "Workspace"
+   }
+  }
+ ],
+ "nodes": {
+  "section": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [10, 10, 10, 10] : [10, 18, 10, 6]}"
+   },
+   "children": [
+    "label",
+    "rule"
+   ]
+  },
+  "label": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": "eyebrow",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "height": 1,
+    "width": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= (props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
+  }
+ }
+}

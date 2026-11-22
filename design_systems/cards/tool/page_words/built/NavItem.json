@@ -1,0 +1,334 @@
+{
+ "schema": 3,
+ "id": "NavItem",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "NavItem",
+  "doc": "A place in an app's sidebar: an icon, its label, and at its end a count or a key. The chosen one sits on a neutral fill with its icon in the accent and a heavier label. On a rail (a tablet's width) the icon alone, its label as a tooltip.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Item",
+    "required": true,
+    "doc": "What it says."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name, drawn at 18."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The chosen item."
+   },
+   {
+    "key": "badge",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A count at its end (a soft pill)."
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A key at its end (a key cap)."
+   },
+   {
+    "key": "danger",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A destructive item (Delete, Sign out): red ink."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    224,
+    36
+   ],
+   "props": {
+    "label": "Inbox",
+    "icon": "inbox",
+    "selected": true,
+    "badge": "4"
+   }
+  },
+  {
+   "name": "Rest",
+   "size": [
+    224,
+    36
+   ],
+   "props": {
+    "label": "Archive",
+    "icon": "inventory_2",
+    "shortcut": "G A"
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [11, 0, 11, 0] : [10, 0, 8, 0]}",
+    "decoration.radius": "${theme.radii.controlMedium}",
+    "selected": "${= props.selected}"
+   },
+   "tooltip": "${props.label}",
+   "states": {
+    "selected": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "tileDeep"
+        }
+       ]
+      }
+     }
+    },
+    "hovered": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "glyph",
+    "name",
+    "count",
+    "key"
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 18
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.color": "${= props.danger ? theme.colors.bad : (props.selected ? theme.colors.accent : theme.colors.inkFaint)}",
+    "props.icon": "${= props.icon == '' ? 'circle' : props.icon}"
+   }
+  },
+  "name": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "height": 1.3
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
+    "props.style.fontWeight": "${= props.selected ? 600 : 500}",
+    "props.style.color": "${= props.danger ? theme.colors.badDeep : (props.selected ? theme.colors.ink : theme.colors.inkSoft)}"
+   }
+  },
+  "count": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     7,
+     2,
+     7,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.badge != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.card : theme.colors.tileDeep}"
+   },
+   "children": [
+    "countText"
+   ]
+  },
+  "countText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.badge}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "tabularFigures": true
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.selected ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "key": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.controlXs}",
+    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
+   "children": [
+    "keyText"
+   ]
+  },
+  "keyText": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.shortcut}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "inkFaint"
+    }
+   }
+  }
+ }
+}

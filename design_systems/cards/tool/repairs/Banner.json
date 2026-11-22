@@ -63,6 +63,15 @@
     },
     "default": false,
     "doc": "An x that fires onDismiss."
+   },
+   {
+    "key": "live",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Its title and message are read out by a screen reader when they change (a status that updates)."
    }
   ],
   "events": [
@@ -87,6 +96,16 @@
   "glyph": {
    "bind": {
     "props.icon": "${= props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.tone == 'success' ? 'check_circle' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'error' ? 'error_outline' : 'info_outline')))))))}"
+   }
+  },
+  "title": {
+   "bind": {
+    "props.live": "${props.live}"
+   }
+  },
+  "message": {
+   "bind": {
+    "props.live": "${props.live}"
    }
   },
   "action": {

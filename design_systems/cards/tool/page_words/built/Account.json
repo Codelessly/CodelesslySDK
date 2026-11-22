@@ -1,0 +1,259 @@
+{
+ "schema": 3,
+ "id": "Account",
+ "roots": [
+  "account"
+ ],
+ "widget": {
+  "type": "Account",
+  "doc": "The signed-in person at a sidebar's foot or in a top bar: their initials in a circle, their name and a line under it (a role, an email), a chevron for the account menu. On a rail (a tablet's width) the circle alone. Fires onTap as any line does.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Jamie Park",
+    "required": true,
+    "doc": "Their name."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under it (their role or email)."
+   },
+   {
+    "key": "chevron",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A chevron at its end (it opens a menu)."
+   },
+   {
+    "key": "rail",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Folded to the circle (a collapsed sidebar); a tablet's width folds it too."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    224,
+    52
+   ],
+   "props": {
+    "name": "Jamie Park",
+    "note": "Workspace owner"
+   }
+  }
+ ],
+ "nodes": {
+  "account": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "props.spacing": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? 0 : 10}",
+    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [4, 6, 4, 6] : [8, 8, 8, 8]}",
+    "decoration.radius": "${theme.radii.controlMedium}"
+   },
+   "tooltip": "${props.name}",
+   "states": {
+    "hovered": {
+     "account": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "account": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "children": [
+    "accountMark",
+    "accountWords",
+    "accountChevron"
+   ]
+  },
+  "accountMark": {
+   "type": "column",
+   "layout": {
+    "width": 32,
+    "height": {
+     "hug": 32
+    },
+    "constraints": {
+     "minHeight": 32
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "tileDeep"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "children": [
+    "accountInitials"
+   ]
+  },
+  "accountInitials": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(substring(props.name, 0, 1)) + (contains(props.name, ' ') ? upper(substring(split(props.name, ' ')[1], 0, 1)) : '')}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.2,
+     "color": "inkSoft"
+    }
+   }
+  },
+  "accountWords": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   },
+   "children": [
+    "accountName",
+    "accountNote"
+   ]
+  },
+  "accountName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.3,
+     "letterSpacing": -0.1,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "accountNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "inkFaint"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "accountChevron": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 16,
+    "color": "inkGhost"
+   },
+   "bind": {
+    "visible": "${= props.chevron && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+   }
+  }
+ }
+}

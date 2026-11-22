@@ -1,0 +1,246 @@
+{
+ "schema": 3,
+ "id": "Panel",
+ "roots": [
+  "panel"
+ ],
+ "widget": {
+  "type": "Panel",
+  "doc": "A titled section of a page (a chart, a list on a dashboard, a settings group): a page's card with a head (the title, a line under it, a quiet action at its end) and the lines under it as the body, 14 apart. flush: no padding round the body and a rule under the head (a Table or ListRow lines that run to the edges).",
+  "children": "list",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "required": true,
+    "doc": "Its title."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "flush",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "No padding round the body (a table or a list that runs to the edges)."
+   },
+   {
+    "key": "action",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label of a quiet button at the head's end (See all); pressing it fires onAction."
+   }
+  ],
+  "events": [
+   {
+    "key": "onAction",
+    "doc": "The head's action was pressed."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    480,
+    180
+   ],
+   "props": {
+    "title": "Recent orders",
+    "note": "The last 30 days.",
+    "action": "See all"
+   }
+  }
+ ],
+ "nodes": {
+  "panel": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cardWide}"
+   },
+   "children": [
+    "panelHead",
+    "panelBody"
+   ]
+  },
+  "panelHead": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "layout.padding": "${= screen.width < 700 ? [18, 14, 12, 12] : [24, 18, 16, 14]}",
+    "decoration.strokes[0].color": "${= props.flush ? theme.colors.line : '#00000000'}"
+   },
+   "children": [
+    "panelTitles",
+    "panelAction"
+   ]
+  },
+  "panelTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "panelTitle",
+    "panelNote"
+   ]
+  },
+  "panelTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "heading3Wide",
+     "fontSize": 18
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "panelNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "smallWide"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "panelAction": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.action != ''}",
+    "props.label": "${props.action}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction"
+      }
+     ]
+    }
+   ]
+  },
+  "panelBody": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "props.spacing": "${= props.flush ? 0 : 14}",
+    "layout.padding": "${= props.flush ? [0, 0, 0, 0] : (screen.width < 700 ? [18, 2, 18, 18] : [24, 2, 24, 24])}"
+   },
+   "children": [
+    "panelSlot"
+   ]
+  },
+  "panelSlot": {
+   "type": "slot"
+  }
+ }
+}

@@ -6,7 +6,8 @@
  ],
  "widget": {
   "type": "Panel",
-  "doc": "A bordered section with a header: a title, an optional icon and subtitle, the call's children below. Expandable opens and closes on its header. Fires onToggle.",
+  "doc": "A titled section of a page (a chart, a list on a dashboard, a settings group): a page's card with a head (the title, a line under it, a quiet action at its end) and the lines under it as the body, 14 apart. flush: no padding round the body and a rule under the head (a Table or ListRow lines that run to the edges).",
+  "children": "list",
   "props": [
    {
     "key": "title",
@@ -15,70 +16,41 @@
      "flutter": "String"
     },
     "default": "Section",
-    "doc": "The header's title (empty and not expandable: no header)."
+    "required": true,
+    "doc": "Its title."
    },
    {
-    "key": "subtitle",
+    "key": "note",
     "type": {
      "kind": "string",
      "flutter": "String"
     },
     "default": "",
-    "doc": "A muted line under the title."
+    "doc": "A line under the title."
    },
    {
-    "key": "icon",
-    "type": {
-     "kind": "string",
-     "flutter": "String"
-    },
-    "default": "",
-    "doc": "An icon before the title (empty: none)."
-   },
-   {
-    "key": "variant",
-    "type": {
-     "kind": "enumeration",
-     "flutter": "String",
-     "values": [
-      "default",
-      "expandable",
-      "elevated"
-     ]
-    },
-    "default": "default",
-    "doc": "default: a header over the content. expandable: the header opens and closes it. elevated: with a shadow."
-   },
-   {
-    "key": "open",
+    "key": "flush",
     "type": {
      "kind": "boolean",
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Expandable: whether the content shows at first."
+    "doc": "No padding round the body (a table or a list that runs to the edges)."
+   },
+   {
+    "key": "action",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label of a quiet button at the head's end (See all); pressing it fires onAction."
    }
   ],
   "events": [
    {
-    "key": "onToggle",
-    "payload": {
-     "kind": "boolean",
-     "flutter": "bool"
-    }
-   }
-  ],
-  "slots": [
-   "trailing"
-  ],
-  "children": "list"
- },
- "variables": {
-  "panel": [
-   {
-    "name": "toggled",
-    "type": "boolean",
-    "value": false
+    "key": "onAction",
+    "doc": "The head's action was pressed."
    }
   ]
  },
@@ -86,246 +58,188 @@
   {
    "name": "Default",
    "size": [
-    280,
-    90
+    480,
+    180
    ],
    "props": {
-    "title": "Billing",
-    "subtitle": "Plan and invoices"
-   }
-  },
-  {
-   "name": "Expandable",
-   "size": [
-    280,
-    40
-   ],
-   "props": {
-    "title": "Advanced",
-    "variant": "expandable"
+    "title": "Recent orders",
+    "note": "The last 30 days.",
+    "action": "See all"
    }
   }
  ],
  "nodes": {
   "panel": {
    "type": "column",
-   "children": [
-    "header",
-    "body"
-   ],
-   "props": {
-    "crossAxisAlignment": "stretch"
-   },
    "layout": {
     "width": {
-     "fill": 280
+     "fill": 0
     },
     "height": {
-     "hug": 90
-    },
-    "padding": 1
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
    },
    "decoration": {
     "fills": [
      {
-      "color": "primaryBackground"
+      "color": "card"
      }
     ],
     "strokes": [
      {
-      "color": "primaryBorder"
+      "color": "line"
      }
     ],
-    "radius": 10,
-    "clip": "antiAlias",
-    "effects": []
+    "clip": "antiAlias"
    },
    "bind": {
-    "decoration.effects": "${= props.variant == 'elevated' ? theme.shadows.level2 : []}"
-   }
-  },
-  "header": {
-   "type": "row",
-   "children": [
-    "glyph",
-    "titles",
-    "trailing",
-    "chevron"
-   ],
-   "props": {
-    "crossAxisAlignment": "center",
-    "spacing": 8
+    "decoration.radius": "${theme.radii.cardWide}"
    },
+   "children": [
+    "panelHead",
+    "panelBody"
+   ]
+  },
+  "panelHead": {
+   "type": "row",
    "layout": {
     "width": {
-     "fill": 280
+     "fill": 0
     },
     "height": {
-     "hug": 34
-    },
-    "padding": [
-     14,
-     10,
-     14,
-     10
-    ]
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
    },
    "decoration": {
     "strokes": [
      {
-      "color": "primaryBorder"
+      "color": "#00000000"
      }
     ],
     "strokeSides": "bottom"
    },
    "bind": {
-    "visible": "${= props.title != '' || props.variant == 'expandable'}",
-    "decoration.strokes[0].visible": "${= props.variant != 'expandable' || (props.open != toggled)}"
+    "layout.padding": "${= screen.width < 700 ? [18, 14, 12, 12] : [24, 18, 16, 14]}",
+    "decoration.strokes[0].color": "${= props.flush ? theme.colors.line : '#00000000'}"
+   },
+   "children": [
+    "panelTitles",
+    "panelAction"
+   ]
+  },
+  "panelTitles": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "panelTitle",
+    "panelNote"
+   ]
+  },
+  "panelTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "heading3Wide",
+     "fontSize": 18
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "panelNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${props.note}",
+    "style": "smallWide"
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "panelAction": {
+   "type": "textButton",
+   "layout": {
+    "height": 32.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.action != ''}",
+    "props.label": "${props.action}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click",
-      "when": "props.variant == 'expandable'"
+      "type": "click"
      },
      "actions": [
       {
-       "type": "setVariable",
-       "variable": "toggled",
-       "value": "${= !toggled}"
-      },
-      {
        "type": "componentEvent",
-       "event": "onToggle",
-       "value": "${= (props.open != toggled)}"
+       "event": "onAction"
       }
      ]
     }
    ]
   },
-  "glyph": {
-   "type": "icon",
-   "props": {
-    "icon": "settings",
-    "color": "secondaryText",
-    "size": 16
-   },
-   "layout": {
-    "width": 16,
-    "height": 16
-   },
-   "bind": {
-    "visible": "${= props.icon != ''}",
-    "props.icon": "${props.icon}"
-   }
-  },
-  "titles": {
+  "panelBody": {
    "type": "column",
-   "children": [
-    "title",
-    "subtitle"
-   ],
-   "props": {
-    "crossAxisAlignment": "start",
-    "spacing": 2
-   },
    "layout": {
     "width": {
-     "fill": 200
-    },
-    "height": {
-     "hug": 14
-    }
-   }
-  },
-  "title": {
-   "type": "text",
-   "props": {
-    "text": "${props.title}",
-    "style": {
-     "fontSize": 12,
-     "fontWeight": 600,
-     "height": 1.15,
-     "color": "primaryText",
-     "leadingDistribution": "even"
-    }
-   },
-   "layout": {
-    "width": {
-     "hug": 60
-    },
-    "height": {
-     "hug": 14
-    }
-   }
-  },
-  "subtitle": {
-   "type": "text",
-   "props": {
-    "text": "${props.subtitle}",
-    "style": {
-     "fontSize": 10.5,
-     "fontWeight": 400,
-     "height": 1.3,
-     "color": "tertiaryText",
-     "leadingDistribution": "even"
-    }
-   },
-   "layout": {
-    "width": {
-     "hug": 80
-    },
-    "height": {
-     "hug": 14
-    }
-   },
-   "bind": {
-    "visible": "${= props.subtitle != ''}"
-   }
-  },
-  "trailing": {
-   "type": "slot",
-   "props": {
-    "name": "trailing"
-   }
-  },
-  "chevron": {
-   "type": "icon",
-   "props": {
-    "icon": "chevron_right",
-    "color": "tertiaryText",
-    "size": 15
-   },
-   "layout": {
-    "width": 15,
-    "height": 15
-   },
-   "bind": {
-    "visible": "${= props.variant == 'expandable'}",
-    "props.icon": "${= (props.open != toggled) ? 'expand_more' : 'chevron_right'}"
-   }
-  },
-  "body": {
-   "type": "column",
-   "children": [
-    "content"
-   ],
-   "props": {
-    "crossAxisAlignment": "stretch"
-   },
-   "layout": {
-    "width": {
-     "fill": 280
-    },
-    "height": {
      "fill": 0
+    },
+    "height": {
+     "hug": 0
     }
    },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
    "bind": {
-    "visible": "${= props.variant != 'expandable' || (props.open != toggled)}"
-   }
+    "props.spacing": "${= props.flush ? 0 : 14}",
+    "layout.padding": "${= props.flush ? [0, 0, 0, 0] : (screen.width < 700 ? [18, 2, 18, 18] : [24, 2, 24, 24])}"
+   },
+   "children": [
+    "panelSlot"
+   ]
   },
-  "content": {
+  "panelSlot": {
    "type": "slot"
   }
  }

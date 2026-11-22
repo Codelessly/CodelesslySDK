@@ -1,0 +1,7 @@
+component NavSection "The label over a group of a sidebar's items: small spaced capitals in the faint ink, with room above that parts the groups. On a rail (a tablet's width) a short rule."
+  param label="Section" required doc="The group's name (written as it reads; shown in capitals)."
+  param rail:bool=false doc="Folded to a rule (a collapsed sidebar); a tablet's width folds it too."
+  preview "Default" 224x40 label="Workspace"
+Column#section pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [10, 10, 10, 10] : [10, 18, 10, 6]} w=fill
+  Text#label "{upper(props.label)}" style=eyebrow maxLines=1 overflow=ellipsis visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  box#rule h=1 w=fill fill=line visible={(props.rail || (screen.width >= 700 && screen.width < 1024))}

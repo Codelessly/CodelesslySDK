@@ -86,7 +86,19 @@
    "bind": {
     "data": "${props.days}",
     "props.crossAxisCount": "${= max(1, length(props.days))}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
+    }
+   ]
   },
   "day": {
    "type": "column",

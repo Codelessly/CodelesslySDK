@@ -113,7 +113,17 @@
    "bind": {
     "decoration.radius": "${theme.radii.control}",
     "layout.constraints": "${= {maxWidth: 200 * max(2, length(props.options)) + 3}}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "bind": {
+       "layout.constraints": "${= {maxWidth: 720}}"
+      }
+     }
+    }
+   ]
   },
   "scroll": {
    "type": "row",

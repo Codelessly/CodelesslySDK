@@ -1,7 +1,0 @@
-state range="30 days"
-Column h=fill scroll pad=12 fill=page
-  ChatCard "Product performance" "November so far" icon="insights_rounded" status="Live" tone="good"
-    Segments @range options=["7 days","30 days","90 days"]
-    Grid cols=2 gap=10
-      StatTile "Revenue" value="$78.9k" delta="+8.5%" icon="payments_rounded"
-      StatTile "Churn" value="3.1%" delta="+0.4%" invert=true icon="logout_rounded"

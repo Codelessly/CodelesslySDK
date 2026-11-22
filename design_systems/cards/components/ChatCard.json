@@ -108,7 +108,25 @@
       "color": "page"
      }
     ]
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "props": {
+       "crossAxisAlignment": "center"
+      },
+      "layout": {
+       "padding": [
+        24,
+        24,
+        24,
+        32
+       ]
+      }
+     }
+    }
+   ]
   },
   "card": {
    "type": "column",
@@ -159,6 +177,18 @@
        "to": 0
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 720
+       }
+      }
+     }
     }
    ]
   },
