@@ -54,7 +54,9 @@ Never restyle a part by hand to re-colour it.
   Every neutral Desk draws is made from the two: the window, cards and panels, the sidebar and the bars, a tinted
   band, the well, fields and selects, table heads, the selected tab's line, hairlines, hover fills, key caps and
   the second, third and fourth inks each keep their place between the site's ground and its ink. A cream site has
-  cream cards with a warm hairline, never a white card or a zinc grey. Status and label hues stay.
+  cream cards with a warm hairline, never a white card or a zinc grey. Status and label hues stay. The cards are
+  the ground's colour, as Desk's are: for white cards on a tinted page name them yourself (`"colors": {"card":
+  "#FFFFFFFF"}`), and that colour is yours.
 - **A dark site**: `"mode": "dark"`. The site opens on Desk's dark side on every device, in a render, in an app
   and in the editor: `"theme": {"primary": "#FFC6F432", "mode": "dark"}` is a whole dark theme. Give
   `dark.surface` and `dark.onSurface` for a dark ground of your own. (A near-black `surface` written as the light
