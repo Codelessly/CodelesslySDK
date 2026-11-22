@@ -231,7 +231,12 @@ class GraphEngine extends ChangeNotifier {
   /// it with an ellipsis.
   double textWidth(String text, double fontSize, {FontWeight? weight, double? maxWidth}) => (TextPainter(
         text: TextSpan(
-            text: text, style: TextStyle(fontSize: fontSize, fontFamily: spec.style.fontFamily, fontWeight: weight)),
+            text: text,
+            style: TextStyle(
+                fontSize: fontSize,
+                fontFamily: spec.style.fontFamily,
+                fontFamilyFallback: spec.style.fontFamilyFallback,
+                fontWeight: weight)),
         textDirection: TextDirection.ltr,
         maxLines: maxWidth == null ? null : 1,
         ellipsis: maxWidth == null ? null : '\u2026',

@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 
 import '../graph/graph_render.dart';
 import '../graph/graph_spec.dart';
+import '../render/convert.dart' show FontDemand;
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
 import 'chart_words.dart' show chartGraphOf;
@@ -48,16 +49,22 @@ Json graphSpecOf(Node n) {
 }
 
 /// [spec] with what its style leaves out taken from [theme] (the theme's
-/// colors for where the graph is drawn): a style's own word wins.
-Json _styled(Json spec, Json? theme) => {
-      ...spec,
-      'style': {
-        'background': '#00000000',
-        ...?theme,
-        for (final e in (_map(spec['style']) ?? const <String, Object?>{}).entries)
-          if (e.value != null && !(e.value is List && (e.value! as List).isEmpty)) e.key: e.value,
-      },
-    };
+/// colors for where the graph is drawn, and the font of the text around
+/// it): a style's own word wins. Its font is asked for as a text node's is
+/// (a family that is loaded when first drawn), and a character the font
+/// lacks falls back as every other text's does.
+Json _styled(Json spec, Json? theme) {
+  final style = <String, Object?>{
+    'background': '#00000000',
+    ...?theme,
+    for (final e in (_map(spec['style']) ?? const <String, Object?>{}).entries)
+      if (e.value != null && !(e.value is List && (e.value! as List).isEmpty)) e.key: e.value,
+  };
+  final family = style['fontFamily'] is String ? style['fontFamily']! as String : null;
+  if (family != null) FontDemand.need(family, 400, false);
+  if (FontDemand.fallbackOf(family, const []) case final fallback?) style['fontFamilyFallback'] = fallback;
+  return {...spec, 'style': style};
+}
 
 Json? _map(Object? v) => v is Map ? v.cast<String, Object?>() : null;
 

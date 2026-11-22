@@ -884,6 +884,7 @@ class GraphStyleSpec {
     this.separator = const Color(0x1F000000),
     this.fontSize = 11,
     this.fontFamily,
+    this.fontFamilyFallback = const [],
     this.topInset = 0,
     this.ink = const Color(0xFF111827),
     this.palette = graphPalette,
@@ -907,6 +908,10 @@ class GraphStyleSpec {
   final double fontSize;
   final String? fontFamily;
 
+  /// The families a character [fontFamily] lacks is drawn in, in order (the
+  /// host's: its symbol fonts, a family's later files).
+  final List<String> fontFamilyFallback;
+
   /// Room above the panes (for a crosshair's time written on top).
   final double topInset;
 
@@ -920,6 +925,7 @@ class GraphStyleSpec {
         separator: graphColor(j['separator'], const Color(0x1F000000)),
         fontSize: _d(j['fontSize'], 11),
         fontFamily: j['fontFamily'] is String ? j['fontFamily']! as String : null,
+        fontFamilyFallback: [for (final f in _l(j['fontFamilyFallback'])) if (f is String) f],
         topInset: _d(j['topInset'], 0),
         ink: graphColor(j['ink'], const Color(0xFF111827)),
         tooltip: graphColor(j['tooltip'], const Color(0xFFFFFFFF)),
@@ -940,6 +946,7 @@ class GraphStyleSpec {
         'separator': _hex(separator),
         'fontSize': fontSize,
         if (fontFamily != null) 'fontFamily': fontFamily,
+        if (fontFamilyFallback.isNotEmpty) 'fontFamilyFallback': fontFamilyFallback,
         'topInset': topInset,
         'ink': _hex(ink),
         'tooltip': _hex(tooltip),

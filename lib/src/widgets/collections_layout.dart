@@ -1017,6 +1017,30 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
 
   void changed() => markNeedsLayout();
 
+  /// A cell's extent across the grid where the grid is given none: the
+  /// widest its items want; else (no item has one) the extent the cell's
+  /// shape gives its length ([mainAxisExtent], or the longest item's own).
+  double _naturalCell(bool vertical) {
+    double across(RenderBox it) => vertical ? it.getMaxIntrinsicWidth(double.infinity) : it.getMaxIntrinsicHeight(double.infinity);
+    double along(RenderBox it) => vertical ? it.getMaxIntrinsicHeight(double.infinity) : it.getMaxIntrinsicWidth(double.infinity);
+    var cell = 0.0, length = mainAxisExtent ?? 0.0;
+    try {
+      for (final it in children) {
+        final w = across(it);
+        if (w.isFinite) cell = math.max(cell, w);
+      }
+      if (cell <= 0 && length <= 0) {
+        for (final it in children) {
+          final h = along(it);
+          if (h.isFinite) length = math.max(length, h);
+        }
+      }
+    } on FlutterError {
+      return 0;
+    }
+    return cell > 0 ? cell : length * (childAspectRatio > 0 ? childAspectRatio : 1);
+  }
+
   int _columns(double crossInner) {
     final min = minCrossAxisExtent;
     if (min != null) {
@@ -1043,9 +1067,21 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
     final maxMain = RenderCollection.main(c.biggest, axis);
     final maxCross = RenderCollection.cross(c.biggest, axis);
     final minMain = RenderCollection.main(c.smallest, axis);
-    final crossSize = maxCross.isFinite ? maxCross : RenderCollection.cross(c.smallest, axis);
-    final crossInner = math.max(0.0, crossSize - padCross);
+    var crossSize = maxCross.isFinite ? maxCross : RenderCollection.cross(c.smallest, axis);
+    var crossInner = math.max(0.0, crossSize - padCross);
     final cols = _columns(crossInner);
+    // Given no width (in something as wide as its content: a bubble, a row
+    // that hugs), a grid is as wide as its columns of its widest cell; and
+    // where no cell has a width either (tiles that say only a height), each
+    // is the shape the grid gives its cells: a square of its length. It was
+    // 0 wide, its tiles with it.
+    if (!maxCross.isFinite) {
+      final natural = _naturalCell(vertical);
+      if (natural > 0) {
+        crossInner = natural * cols + crossAxisSpacing * (cols - 1);
+        crossSize = math.max(crossSize, crossInner + padCross);
+      }
+    }
     final cellCross = math.max(0.0, crossInner - crossAxisSpacing * (cols - 1)) / cols;
     final viewportMain = hugMain || !maxMain.isFinite ? double.infinity : math.max(0.0, maxMain - padMain);
 

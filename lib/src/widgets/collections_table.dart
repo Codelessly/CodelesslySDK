@@ -123,6 +123,7 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   view
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
     ..designSize = Size(n.layout.width.value, n.layout.height.value)
+    ..hugHeight = n.layout.height.fit == SizeFit.hug
     ..columns = columns
     ..columnWidth = n.prop(TableViewProps.columnWidth)
     ..rowHeaderWidth = headerColumn ? n.prop(TableViewProps.rowHeaderWidth) : 0
@@ -257,8 +258,32 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
   bool fillWidth = false, stretchLastColumn = false;
   bool headerRow = false, headerColumn = false, pinHeaderRow = false, pinHeaderColumn = false;
 
-  /// Every row's height, the header's first when there is one.
+  /// Every row's height, the header's first when there is one: the least
+  /// a row is (a row whose cell's content is taller is as tall as that:
+  /// [_rowExtents]).
   List<double> rowHeights = const [];
+
+  /// Whether the table is as tall as its rows (at most what it is given)
+  /// rather than the height it is given: a table of three rows is three
+  /// rows tall, one of fifty scrolls in its cap.
+  bool hugHeight = false;
+
+  /// The height a row's tallest cell built so far needs, by row (header
+  /// counted), where that is more than its [rowHeights]: text that wraps to
+  /// more lines than the row has. Kept while the same rows are shown, so a
+  /// row scrolled out keeps its height.
+  final Map<int, double> _rowNeeds = {};
+
+  /// The room above and under a cell's content in a row grown to it.
+  static const double _grownRowPad = 8;
+
+  /// The rows' heights as laid out: [rowHeights], each at least what its
+  /// content needs.
+  List<double> _rowExtents = const [];
+
+  /// The least a column with no width of its own is squeezed to where a
+  /// table that fills its width is given less than its columns' widths.
+  static const double _minSqueezedColumn = 72;
   BorderSide? gridLine, headerBorder;
   Color? headerColor, stripeColor, hoverColor, selectedColor;
   int selectedRow = -1;
@@ -414,6 +439,7 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
   /// The recipe ran: spans, looks or data may have changed.
   void changed() {
     _wanted = null;
+    _rowNeeds.clear();
     markNeedsLayout();
     markNeedsPaint();
   }
@@ -450,6 +476,19 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
     // the viewport has beyond it.
     final total = rowHeaderWidth + edge * 2 + widths.fold<double>(0, (a, w) => a + w);
     final share = fillWidth && widths.isNotEmpty ? math.max(0.0, viewport - total) / widths.length : 0.0;
+    // A table as wide as its place that is given less than its columns'
+    // widths (a phone): the columns with no width of their own give way
+    // alike, down to a width a word still fits, before it scrolls sideways.
+    if (fillWidth && viewport.isFinite && total > viewport) {
+      final free = [for (var i = 0; i < columns.length; i++) if (columns[i].width == null) i];
+      final freeTotal = free.fold<double>(0, (a, i) => a + widths[i]);
+      if (freeTotal > 0) {
+        final k = math.max(0.0, freeTotal - (total - viewport)) / freeTotal;
+        for (final i in free) {
+          widths[i] = math.max(math.min(widths[i], _minSqueezedColumn), widths[i] * k);
+        }
+      }
+    }
     final offset = headerColumn ? 1 : 0;
     final extents = <double>[if (headerColumn) rowHeaderWidth, for (final w in widths) w + share];
     if (stretchLastColumn && extents.isNotEmpty && viewport.isFinite) {
@@ -465,7 +504,12 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
     }
     _columnExtents = extents;
     _columnStarts = _starts(extents);
-    _rowStarts = _starts(rowHeights);
+    _measureRows();
+  }
+
+  void _measureRows() {
+    _rowExtents = [for (var r = 0; r < rowHeights.length; r++) math.max(rowHeights[r], _rowNeeds[r] ?? 0)];
+    _rowStarts = _starts(_rowExtents);
   }
 
   // --- scrolling ---
@@ -579,11 +623,16 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
   @override
   double computeMinIntrinsicHeight(double width) => 0;
   @override
-  double computeMaxIntrinsicHeight(double width) => designSize.height;
+  double computeMaxIntrinsicHeight(double width) => hugHeight ? _rowsHeight : designSize.height;
+
+  double get _rowsHeight => rowHeights.fold<double>(0, (a, h) => a + h);
 
   // A table needs a bounded box; where it gets none (in a scroll view), it
-  // takes its design size.
-  Size _sizeFor(BoxConstraints c) => c.constrain(Size(c.hasBoundedWidth ? c.maxWidth : designSize.width, c.hasBoundedHeight ? c.maxHeight : designSize.height));
+  // takes its design size. One that hugs its height is as tall as its rows,
+  // at most what it is given.
+  Size _sizeFor(BoxConstraints c, [double? rows]) => c.constrain(Size(
+      c.hasBoundedWidth ? c.maxWidth : designSize.width,
+      hugHeight ? math.min(rows ?? _rowsHeight, c.maxHeight) : (c.hasBoundedHeight ? c.maxHeight : designSize.height)));
 
   @override
   Size computeDryLayout(BoxConstraints constraints) => _sizeFor(constraints);
@@ -591,14 +640,48 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
   @override
   void performLayout() {
     size = _sizeFor(constraints);
-    _measureSpans(size.width);
-    _scroll = _clamped(_scroll);
-    final window = _window();
-    if (!_listEquals(window, _wanted)) {
-      _wanted = window;
-      final build = onWindow;
-      if (build != null) invokeLayoutCallback<BoxConstraints>((_) => _cells = build(window));
+    // A new width wraps the cells' text anew.
+    if (_measuredWidth != size.width) {
+      _measuredWidth = size.width;
+      _rowNeeds.clear();
     }
+    _measureSpans(size.width);
+    // The cells in view are built and measured; a row whose content is
+    // taller than the row grows to it, which moves the rows under it (and,
+    // in a table as tall as its rows, the table's foot), so what is in view
+    // is found again: a few rounds settle it.
+    for (var round = 0; round < 4; round++) {
+      if (hugHeight) size = _sizeFor(constraints, _tableHeight);
+      _scroll = _clamped(_scroll);
+      final window = _window();
+      if (!_listEquals(window, _wanted)) {
+        _wanted = window;
+        final build = onWindow;
+        if (build != null) invokeLayoutCallback<BoxConstraints>((_) => _cells = build(window));
+      }
+      var grew = false;
+      var i = 0;
+      for (var child = firstChild; child != null; child = childAfter(child), i++) {
+        if (i >= _cells.length) continue;
+        final (r, c) = _cells[i];
+        if (r >= rowHeights.length || c >= _columnExtents.length) continue;
+        final lead = c == 0 ? edge : 0.0, trail = c == _columnExtents.length - 1 ? edge : 0.0;
+        final w = math.max(0.0, _columnExtents[c] - lead - trail);
+        final line = r == 0 ? _headerLine : 0.0;
+        final natural = w > 0 ? child.getMaxIntrinsicHeight(w) : 0.0;
+        if (natural.isFinite && natural > rowHeights[r] - line + 0.5) {
+          final need = natural + line + _grownRowPad * 2;
+          if (need > (_rowNeeds[r] ?? 0) + 0.5) {
+            _rowNeeds[r] = need;
+            grew = true;
+          }
+        }
+      }
+      if (!grew) break;
+      _measureRows();
+    }
+    if (hugHeight) size = _sizeFor(constraints, _tableHeight);
+    _scroll = _clamped(_scroll);
     var i = 0;
     for (var child = firstChild; child != null; child = childAfter(child), i++) {
       if (i >= _cells.length) {
@@ -610,11 +693,13 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
       // The header's line takes room under its cells, as a bordered box's
       // does: they center in the height above it.
       final line = r == 0 ? _headerLine : 0.0;
-      final w = math.max(0.0, _columnExtents[c] - lead - trail), h = math.max(0.0, rowHeights[r] - line);
+      final w = math.max(0.0, _columnExtents[c] - lead - trail), h = math.max(0.0, _rowExtents[r] - line);
       child.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);
       (child.parentData! as CollectionParentData).offset = Offset(_columnStarts[c] + lead, _rowStarts[r] + (h - child.size.height) / 2);
     }
   }
+
+  double? _measuredWidth;
 
   // --- paint: in layout order, what is pinned first ---
 
@@ -653,7 +738,7 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
         final rect = _cursorRow < 0 && headerRow
             ? Rect.fromLTWH(_columnStarts[_cursorColumn + (headerColumn ? 1 : 0)] - _scroll.dx, 0, _columnExtents[_cursorColumn + (headerColumn ? 1 : 0)], _pinnedHeight)
             : _cursorRow >= 0
-            ? Rect.fromLTWH(1, _rowStarts[_cursorRow + (headerRow ? 1 : 0)] - _scroll.dy, size.width - 2, rowHeights[_cursorRow + (headerRow ? 1 : 0)])
+            ? Rect.fromLTWH(1, _rowStarts[_cursorRow + (headerRow ? 1 : 0)] - _scroll.dy, size.width - 2, _rowExtents[_cursorRow + (headerRow ? 1 : 0)])
             : Rect.zero;
         if (!rect.isEmpty)
           canvas.drawRect(
@@ -768,7 +853,7 @@ class RenderRunningTable extends RenderBox with ContainerRenderObjectMixin<Rende
 
   /// The sortable body column under a header press, without the row header.
   int? headerColumnAt(Offset local) {
-    if (!headerRow || local.dy < 0 || local.dy >= rowHeights.first || local.dx < 0 || local.dx >= size.width) return null;
+    if (!headerRow || local.dy < 0 || local.dy >= (_rowExtents.isEmpty ? rowHeights.first : _rowExtents.first) || local.dx < 0 || local.dx >= size.width) return null;
     final x = pinHeaderColumn && local.dx < _pinnedWidth ? local.dx : local.dx + _scroll.dx;
     for (var c = headerColumn ? 1 : 0; c < _columnExtents.length; c++) {
       if (x >= _columnStarts[c] && x < _columnStarts[c + 1]) return c - (headerColumn ? 1 : 0);

@@ -2929,6 +2929,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     // its longest word, the text is drawn smaller, then cut (text_box.dart).
     if (n.prop(TextProps.maxLines) != 1 && !n.prop(TextProps.scaleDown) && n.behaviors.typewriter == null) {
       chain.add(_obtain<RenderWholeWords>('wholeWords', RenderWholeWords.new));
+    } else if (n.prop(TextProps.maxLines) == 1 && n.prop(TextProps.overflow) != api.TextOverflow.ellipsis && n.behaviors.typewriter == null) {
+      // One line that is not cut with an ellipsis is not narrowed below
+      // its whole line while something beside it can give way.
+      chain.add(_obtain<RenderWholeLine>('wholeLine', RenderWholeLine.new));
     }
     chain.add(paragraph);
   }

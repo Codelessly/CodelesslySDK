@@ -389,7 +389,10 @@ class RadialGaugePainter extends NodePainter {
             style: TextStyle(
               color: c(RadialGaugeProps.labelColor),
               fontSize: labelFontSize,
-              fontFamily: p(RadialGaugeProps.labelFontFamily),
+              // Its own family, else that of the text around it.
+              fontFamily: p(RadialGaugeProps.labelFontFamily) ?? n.behaviors.defaultTextStyle?.fontFamily,
+              fontFamilyFallback: FontDemand.fallbackOf(
+                  p(RadialGaugeProps.labelFontFamily) ?? n.behaviors.defaultTextStyle?.fontFamily, const []),
             ),
           ),
           textDirection: TextDirection.ltr,
@@ -778,7 +781,14 @@ class BarcodePainter extends NodePainter {
 
   void _paintText(Canvas canvas, bc.BarcodeText element, double fontHeight) {
     final painter = TextPainter(
-      text: TextSpan(text: element.text, style: TextStyle(color: color, fontSize: fontHeight, height: 1)),
+      text: TextSpan(
+          text: element.text,
+          style: TextStyle(
+              color: color,
+              fontSize: fontHeight,
+              height: 1,
+              fontFamily: n.behaviors.defaultTextStyle?.fontFamily,
+              fontFamilyFallback: FontDemand.fallbackOf(n.behaviors.defaultTextStyle?.fontFamily, const []))),
       textDirection: TextDirection.ltr,
       maxLines: 1,
     )..layout();

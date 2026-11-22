@@ -17,7 +17,10 @@
 // * `text_no_color`: a text with no color, or a transparent one;
 // * `component_empty`: a component call that rendered nothing.
 // * `content_overflows`: a child of a row or a column that reaches past
-//   its edge (a warning: it is drawn, clipped or over its neighbor).
+//   its edge (a warning: it is drawn, clipped or over its neighbor); and
+//   what a row left no room for: a text of several words given so little
+//   width that it is a word to a line or a word of it is cut, a field or a
+//   select narrower than a letter or two.
 // * `low_contrast`: a text drawn in a color too close to the fill it is on
 //   to be read (white on a white card, a dark ink on a dark band).
 //
@@ -195,6 +198,75 @@ void _checkFits(
   );
 }
 
+/// The least width a text of several words is read at, and the least a
+/// field or a select is used at.
+const double _leastTextWidth = 64, _leastFieldWidth = 44;
+
+/// What a row left no room for ([box], under a row): a text of three words
+/// or more narrower than [_leastTextWidth] that takes four lines or more
+/// (about a word to a line), a text a word of which is cut at its edge, a
+/// field or a select narrower than [_leastFieldWidth]. Reported as
+/// `content_overflows` on the node, so the answer names its line.
+void _checkSqueezed(
+  NodeBox box,
+  RenderParagraph? paragraph,
+  void Function(EditCode code, String path, String message, {String? nodeId, bool? error}) report,
+  String Function(String id, [String? field]) nodePath,
+  String Function(NodeBox b) nameOf,
+) {
+  if (!box.hasSize || !box.attached) return;
+  final type = box.node?.type;
+  // What squeezes is a row (or a row a few boxes up: a column of texts in it).
+  NodeBox? row;
+  var levels = 0;
+  for (RenderObject? o = box.parent; o != null && levels < 3; o = o.parent) {
+    if (o is RenderAbstractViewport || '${o.runtimeType}'.contains('Scroll')) return;
+    if (o is NodeBox) {
+      levels++;
+      if (o.node?.type == 'row') {
+        row = o;
+        break;
+      }
+    }
+  }
+  if (row == null || !row.hasSize) return;
+  String px(double v) => v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+  const fix = 'Its row keeps the widths of what is beside it and leaves it this. Let the row wrap there (wrap, or phone.wrap), stack it '
+      '(a Column at that width), give what is beside it less width, or hide a part at that size.';
+  if (paragraph != null && type == 'text') {
+    final text = paragraph.text.toPlainText().trim();
+    final words = text.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+    final w = paragraph.size.width;
+    if (words >= 3 && w < _leastTextWidth && w > 0) {
+      double natural = 0;
+      try {
+        natural = paragraph.getMaxIntrinsicWidth(double.infinity);
+      } catch (_) {}
+      if (natural >= w * 4) {
+        final short = text.length > 30 ? '${text.substring(0, 30)}...' : text;
+        report(
+          const EditCode('content_overflows', ''),
+          nodePath(box.id, 'layout'),
+          'Text "${nameOf(box)}" ("$short") is given ${px(w)} px in "${nameOf(row)}" (a row ${px(row.size.width)} wide): about a word to a line. $fix',
+          nodeId: box.id,
+          error: false,
+        );
+      }
+    }
+    return;
+  }
+  if (paragraph == null && (type == 'textField' || type == 'dropdown') && box.size.width < _leastFieldWidth) {
+    report(
+      const EditCode('content_overflows', ''),
+      nodePath(box.id, 'layout'),
+      '"${nameOf(box)}" (a ${type == 'textField' ? 'field' : 'select'}) is given ${px(box.size.width)} px in "${nameOf(row)}" (a row ${px(row.size.width)} wide): '
+      'too narrow to read or type in. $fix',
+      nodeId: box.id,
+      error: false,
+    );
+  }
+}
+
 /// What the view rendered under [root] shows wrong of [document] (see the
 /// file's comment). [canvas]: the canvas the view shows (null: none was
 /// found); [pending]: the ids the document lists that never arrived.
@@ -268,6 +340,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       if (n != null && n.type == CanvasProps.spec.type && o.instance == null && (canvas == null || o.id == canvas)) canvasBox ??= o;
       if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf, copies);
       if (n != null && shown && parent != null) _checkFits(o, parent, report, nodePath, nameOf);
+      if (n != null && shown && componentInstanceOf(o.instance) == null) _checkSqueezed(o, null, report, nodePath, nameOf);
       // A leaf that is not a container or a text: an icon, an image, a
       // control, a chart.
       if (shown && n != null && n.type != 'text') {
@@ -282,6 +355,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       if (call != null && !within.contains(call)) within = [...within, call];
     }
     if (o is RenderParagraph && shown && box != null) {
+      if (componentInstanceOf(box.instance) == null) _checkSqueezed(box, o, report, nodePath, nameOf);
       final issues = [
         for (final i in paragraphIssues(o, nameOf(box), noColor: 'nothing of it may show'))
           // Words the UI's own text or data has ("null check failed", a

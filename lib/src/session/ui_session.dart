@@ -552,12 +552,29 @@ class UiSession implements NodeSource {
   /// `no_size` warnings: nodes with content (text, an icon, a fill, children
   /// that show) that the views showing this session laid out with no width
   /// or no height. Call it after a frame.
+  ///
+  /// A note says why where the layout shows it: a node given no width
+  /// because what is beside it in its row keeps a width that takes the
+  /// row's (said once, on the node that was given none, not again on
+  /// everything in it), and a node with no height because all that is in it
+  /// is a list that shows no rows.
   List<EditDiagnostic> layoutDiagnostics() {
     final out = <EditDiagnostic>[];
     final seen = <String>{};
+    // Reported with no width: what is in one is not said again.
+    final narrow = <String>{};
+    bool underNarrow(String id) {
+      for (var p = _document.parentOf(id); p != null; p = _document.parentOf(p)) {
+        if (narrow.contains(p)) return true;
+      }
+      return false;
+    }
+
     for (final p in _probes) {
+      final sizes = {for (final (id, w, h) in p.sizes()) id: (w, h)};
       for (final (id, w, h) in p.sizes()) {
         if ((w > 0.5 && h > 0.5) || !seen.add(id)) continue;
+        if (w <= 0.5 && underNarrow(id)) continue;
         final n = _document[id];
         if (n == null || !n.visible || _held(id)) continue;
         final json = n.toJson();
@@ -574,13 +591,81 @@ class UiSession implements NodeSource {
             (readList(readMap(json['decoration'])?['fills'])?.isNotEmpty ?? false) ||
             n.childIds.any(_alwaysShows);
         if (!hasContent) continue;
+        if (w <= 0.5) narrow.add(id);
         out.add(EditDiagnostic.of(EditCodes.noSize, -1,
-            '"$id" (${n.type}) was laid out ${w.toStringAsFixed(0)} × ${h.toStringAsFixed(0)}: nothing of it shows. Give it a '
-            'width and a height (a number, {"hug": n} or {"fill": n}), or check that its parent has room.',
+            '"$id" (${n.type}) was laid out ${w.toStringAsFixed(0)} × ${h.toStringAsFixed(0)}: nothing of it shows. '
+            '${_whyNoSize(id, w, h, sizes) ?? 'Give it a width and a height (a number, {"hug": n} or {"fill": n}), or check that its parent has room.'}',
             path: editPointer(editPointer('/nodes', id), 'layout'), nodeId: id));
       }
     }
     return out;
+  }
+
+  /// Why node [id] was laid out [w] by [h] with nothing of it showing, and
+  /// what to write, where the layout ([sizes]: every node's laid-out size)
+  /// shows the cause; null when it does not.
+  String? _whyNoSize(String id, double w, double h, Map<String, (double, double)> sizes) {
+    final n = _document[id];
+    final parentId = _document.parentOf(id);
+    final parent = parentId == null ? null : _document[parentId];
+    if (n == null) return null;
+    String px(double v) => v.toStringAsFixed(0);
+    // No width in a row: what is beside it keeps a width that takes the row's.
+    if (w <= 0.5 && parent != null && parent.type == 'row') {
+      final row = sizes[parentId];
+      String? widest;
+      var kept = 0.0, most = 0.0;
+      for (final k in parent.childIds) {
+        if (k == id) continue;
+        final kid = _document[k];
+        final size = sizes[k];
+        if (kid == null || size == null || size.$1 <= 0.5) continue;
+        final fixed = readMap(kid.toJson()['layout'])?['width'] is num;
+        if (!fixed) continue;
+        kept += size.$1;
+        if (size.$1 > most) {
+          most = size.$1;
+          widest = k;
+        }
+      }
+      if (row != null && widest != null && kept >= row.$1 - 24) {
+        return 'Its row "$parentId" is ${px(row.$1)} wide here and "$widest" beside it keeps its width of ${px(most)}, so nothing is left for it. '
+            'Say what the row does at this width: let it wrap (wrap, or phone.wrap) so "$id" takes a line of its own, or give "$widest" a width '
+            'for this size (phone.w=fill). What is in "$id" has no width either and is not listed.';
+      }
+    }
+    // No height: all that is in it is a list (or lists) that shows no rows.
+    if (h <= 0.5 && w > 0.5 && n.childIds.isNotEmpty) {
+      final lists = <String>[];
+      var other = false;
+      void walk(String k, int depth) {
+        final kid = _document[k];
+        if (kid == null || !kid.visible || depth > 4) return;
+        final json = kid.toJson();
+        if ((readMap(json['bind']) ?? const {}).containsKey('data')) {
+          lists.add(k);
+          return;
+        }
+        if (kid.childIds.isEmpty) {
+          other = true;
+          return;
+        }
+        for (final c in kid.childIds) {
+          walk(c, depth + 1);
+        }
+      }
+
+      for (final k in n.childIds) {
+        walk(k, 0);
+      }
+      if (lists.isNotEmpty && !other) {
+        final formula = readMap(_document[lists.first]?.toJson()['bind'])?['data'];
+        return 'All that is in it is a list ("${lists.first}"${formula is String ? ', its rows $formula' : ''}) that shows no rows here, so nothing gives it a height: '
+            'no size of its own is missing. Check what the list repeats: a formula that does not parse or reads a name that has no value gives no rows '
+            '(in a component, a parameter is read in a formula by its name alone, not in braces of its own).';
+      }
+    }
+    return null;
   }
 
   /// Whether node [id] shows whatever the state is: not one a condition

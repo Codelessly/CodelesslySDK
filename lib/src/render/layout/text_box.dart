@@ -65,6 +65,7 @@ class RenderTextMinHeight extends RenderProxyBox {
 /// A text that takes one line and ends in an ellipsis is left to that; so is
 /// a text whose words all fit.
 class RenderWholeWords extends RenderProxyBox {
+  // (see [RenderWholeLine] for a text of one line)
   /// The least a text is drawn at, as a share of its size.
   static const double minScale = 0.65;
 
@@ -197,4 +198,13 @@ class RenderWholeWords extends RenderProxyBox {
       hitTest: (BoxHitTestResult r, Offset p) => super.hitTestChildren(r, position: p),
     );
   }
+}
+
+/// A text of one line that does not end in an ellipsis (a badge's label, a
+/// figure): the least it can be is its whole line, not its longest word, so
+/// a row that has no room narrows what can wrap or be cut short beside it
+/// before it cuts this text in the middle ("★ 4." of "★ 4.8").
+class RenderWholeLine extends RenderProxyBox {
+  @override
+  double computeMinIntrinsicWidth(double height) => child?.getMaxIntrinsicWidth(height) ?? 0;
 }
