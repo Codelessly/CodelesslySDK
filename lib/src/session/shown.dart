@@ -187,12 +187,68 @@ void _checkFits(
   final by = horizontal ? right : bottom;
   if (by <= 1) return;
   String px(double v) => v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+  // What to write, where the two say it: the copies of a list side by side
+  // do not shrink (nothing in "a flexible width, a text with maxLines" is
+  // theirs to take), and a text taller than a column of a height written
+  // for it is not cut by fewer lines.
+  final childType = child.node?.type;
+  final String fix;
+  if (horizontal && (childType == 'listView' || childType == 'gridView') && type == 'row') {
+    fix = 'It is the copies an each repeats, side by side: they do not shrink. Let them go on to further lines (wrap on the row), '
+        'let the row scroll (scroll), repeat fewer (each t in take(list, 2)), or give the row room.';
+  } else if (!horizontal && childType == 'text' && parent.node?.layout.height.fit == SizeFit.fixed && child.size.height > parent.size.height) {
+    fix = 'The text is ${px(child.size.height)} high (its size and its lines) and the column is written ${px(parent.size.height)} high: '
+        'give the column at least the text\'s height (or no height: it is as tall as what is in it), or the text a smaller size.';
+  } else {
+    fix = 'Let it shrink or wrap (a flexible or filling ${horizontal ? 'width' : 'height'}, a text with maxLines), or give the $type room.';
+  }
   report(
     const EditCode('content_overflows', ''),
     nodePath(child.id, 'layout'),
     '"${nameOf(child)}" reaches ${px(by)} px past the ${horizontal ? 'right' : 'bottom'} edge of "${nameOf(parent)}" '
-    '(a $type ${px(parent.size.width)} by ${px(parent.size.height)}): its content does not fit there. '
-    'Let it shrink or wrap (a flexible or filling ${horizontal ? 'width' : 'height'}, a text with maxLines), or give the $type room.',
+    '(a $type ${px(parent.size.width)} by ${px(parent.size.height)}): its content does not fit there. $fix',
+    nodeId: child.id,
+    error: false,
+  );
+}
+
+/// Reports [child], written with a height of its own, when the column
+/// [parent] gave it less than three quarters of that: a Stack, a picture or
+/// a box of a size gives way where a column has no room for all its lines (a
+/// column of a height with a line too many), so nothing reaches past the
+/// column's edge for [_checkFits] to report, and what was written 24 high is
+/// drawn 12 high with nothing said (a sheet's cells: an empty Stack h=24
+/// with its text written beside it, not in it).
+void _checkCutShort(
+  NodeBox child,
+  NodeBox parent,
+  void Function(EditCode code, String path, String message, {String? nodeId, bool? error}) report,
+  String Function(String id, [String? field]) nodePath,
+  String Function(NodeBox b) nameOf,
+) {
+  final n = child.node;
+  if (n == null || parent.node?.type != 'column' || !parent.hasSize || !child.hasSize || !child.attached || !parent.attached) return;
+  if (n.layout.height.fit != SizeFit.fixed) return;
+  final written = n.layout.height.value;
+  final given = child.size.height;
+  if (written < 8 || given >= written * 0.75) return;
+  // Under a scroller, or scaled, its height on screen is not the column's doing.
+  for (RenderObject? o = child.parent; o != null && !identical(o, parent); o = o.parent) {
+    if (o is RenderAbstractViewport || o is RenderTransform || o is RenderFittedBox || '${o.runtimeType}'.contains('Scroll')) return;
+  }
+  // What takes the rest of the column: the lines beside it.
+  final beside = [
+    for (final id in parent.node?.children ?? const <String>[])
+      if (id != child.id) id,
+  ];
+  if (beside.isEmpty) return;
+  String px(double v) => v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+  report(
+    const EditCode('content_overflows', ''),
+    nodePath(child.id, 'layout'),
+    '"${nameOf(child)}" is written ${px(written)} high and is given ${px(given)} in "${nameOf(parent)}" (a column ${px(parent.size.height)} high): '
+    'the column has no room for all its lines (beside it: ${beside.take(3).map((b) => '"$b"').join(', ')}), so it is cut short. '
+    'Lines meant to be drawn in it are written under it, indented; else give the column the height of all its lines, or let it scroll.',
     nodeId: child.id,
     error: false,
   );
@@ -340,6 +396,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       if (n != null && n.type == CanvasProps.spec.type && o.instance == null && (canvas == null || o.id == canvas)) canvasBox ??= o;
       if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf, copies);
       if (n != null && shown && parent != null) _checkFits(o, parent, report, nodePath, nameOf);
+      if (n != null && shown && parent != null && componentInstanceOf(o.instance) == null) _checkCutShort(o, parent, report, nodePath, nameOf);
       if (n != null && shown && componentInstanceOf(o.instance) == null) _checkSqueezed(o, null, report, nodePath, nameOf);
       // A leaf that is not a container or a text: an icon, an image, a
       // control, a chart.

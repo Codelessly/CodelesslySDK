@@ -1,8 +1,8 @@
 # Cards on a tablet and a desktop
 
 Cards is made for a phone first: a card in a chat, one column, the controls a thumb reaches. The same words work on
-a wide canvas by themselves. A card keeps a card's measure and stands in the middle of the window; a block that
-stands alone on a wide page is never wider than a card; an app window is written with Cards' own page words, which
+a wide canvas by themselves. A card keeps a card's measure and stands in the middle of the window; a block on a
+page is as wide as the panel or the column that holds it; an app window is written with Cards' own page words, which
 fold back to a tablet and a phone by themselves. Nothing is rewritten in another design system, and nothing is
 written twice.
 
@@ -28,13 +28,10 @@ Write the card once, as PATTERNS.md says. Shown wide:
 | `TotalBar`, `ActionButton` | As wide as the card: a card closes on one bar or one row of buttons at every width. |
 | `Carousel`, `Pages`, `PageDots`, `WideScroll` | As on a phone, in the card's measure: one item a view with a peek of the next, swiped or turned with the arrows. |
 
-The blocks whose lines are read across (`Paragraph`, `Details`, `Callout`, `Disclosure`, `Receipt`,
-`Recommendation`, `Steps`, `InputField`, `OptionList`, `ChoiceChips`, `DayPicker`, `Counter`, `FlightOption`,
-`CartLine`, `DiffHunk`, `ComparisonTable`, `DayHeader`, `ItineraryStop`, `Checklist`, `MapPanel`, `PlaceRow`,
-`PlanStep`, `ProgressLine`, the three weather blocks, `Pager`, `SectionLabel`, `TotalBar`, `ActionButton`) are at
-most 720 wide on a wide canvas wherever they stand, so one written straight on a wide page (no `ChatCard`) keeps
-its measure too. The blocks that show data (`StatTile`, `ChartCard`, `TableHeader` and `TableRow`, `PhotoGallery`,
-`Media`, `Carousel`) fill the place the page gives them.
+Outside a card a block fills the place it is given: in a `Panel` or a `Card` it is as wide as what holds it,
+and straight in a page's column it is as wide as the column, so its edges line up with the panels beside it. The
+page's measure is the column's: write `maxw=` on it (`Column maxw=860`). Only a `Paragraph` keeps a reading
+measure of 720 wherever it stands.
 
 ## What you still write
 

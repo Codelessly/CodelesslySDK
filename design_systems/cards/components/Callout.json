@@ -111,19 +111,7 @@
     "decoration.fills[0].color": "${toneTint}",
     "decoration.strokes[0].color": "${toneLine}",
     "decoration.radius": "${theme.radii.tile}"
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "patch": {
-      "layout": {
-       "constraints": {
-        "maxWidth": 720
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "icon": {
    "type": "icon",

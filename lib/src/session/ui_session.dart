@@ -628,6 +628,13 @@ class UiSession implements NodeSource {
           widest = k;
         }
       }
+      // With the row's gaps and its padding: a head of six fixed cells and
+      // their gaps took a pane of 720, and the cell that grows had no cause
+      // said (the widths alone were 30 short of the row's).
+      final rowJson = parent.toJson();
+      final spacing = switch (readMap(rowJson['props'])?['spacing']) { final num s => s.toDouble(), _ => 0.0 };
+      final laidOut = parent.childIds.where(sizes.containsKey).length;
+      kept += spacing * (laidOut > 1 ? laidOut - 1 : 0) + parent.layout.padding.horizontal;
       if (row != null && widest != null && kept >= row.$1 - 24) {
         return 'Its row "$parentId" is ${px(row.$1)} wide here and "$widest" beside it keeps its width of ${px(most)}, so nothing is left for it. '
             'Say what the row does at this width: let it wrap (wrap, or phone.wrap) so "$id" takes a line of its own, or give "$widest" a width '

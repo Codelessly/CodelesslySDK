@@ -113,19 +113,7 @@
    },
    "bind": {
     "decoration.radius": "${theme.radii.panel}"
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "patch": {
-      "layout": {
-       "constraints": {
-        "maxWidth": 720
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "cells": {
    "type": "gridView",

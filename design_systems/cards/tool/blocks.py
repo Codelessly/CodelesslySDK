@@ -2105,13 +2105,10 @@ def weather_day():
                      props, nodes, 'day', previews=[{'name': 'Tue', 'size': [360, 40], 'props': {'kind': 'rain', 'min': 13, 'max': 25}}])
 
 
-# The blocks whose lines are read across (a sentence, a choice, a row of label and value, a bar with its button):
-# on a wide canvas none is wider than a card, wherever it stands. The blocks that show data (StatTile, ChartCard,
-# the table's, a gallery, a carousel's pictures) fill the place the page gives them.
-MEASURED = ('Paragraph', 'ActionButton', 'TotalBar', 'Details', 'Callout', 'Disclosure', 'Receipt', 'Recommendation', 'Steps', 'InputField',
-            'OptionList', 'ChoiceChips', 'DayPicker', 'Counter', 'FlightOption', 'CartLine', 'DiffHunk', 'ComparisonTable', 'DayHeader',
-            'ItineraryStop', 'Checklist', 'MapPanel', 'PlaceRow', 'PlanStep', 'ProgressLine', 'WeatherNow', 'WeatherHours', 'WeatherDay',
-            'Pager', 'SectionLabel')
+# A block fills the place it is given: a card is a card's measure wide (ChatCard), and on a page the block is as
+# wide as the Panel, the Card or the column that holds it, so its edges line up with theirs. Only running text
+# keeps a reading measure on a wide canvas wherever it stands.
+MEASURED = ('Paragraph',)
 
 
 def all_components():

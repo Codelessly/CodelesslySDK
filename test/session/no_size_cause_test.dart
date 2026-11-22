@@ -103,4 +103,35 @@ void main() {
     expect(found.map((d) => d.nodeId), ['card']);
     expect(found.single.message, allOf(contains('a list ("list"'), contains('shows no rows'), isNot(contains('Give it a width and a height'))));
   });
+
+  testWidgets('a head that grows beside fixed cells whose widths and gaps take the row: the gaps and the padding are counted', (tester) async {
+    // Three cells of 90 are 270 of a row 350 wide: with two more gaps of 20
+    // and a padding of 12 a side nothing is left for the one that grows.
+    Json cell(String text) => {
+          'type': 'text',
+          'layout': {'width': 90, 'height': {'hug': 0}},
+          'props': {'text': text, 'style': {'fontSize': 10, 'color': '#FF111827'}},
+        };
+    final found = await _noSize(
+      tester,
+      _page({
+        'head': {
+          'type': 'row',
+          'layout': {'width': {'fill': 0}, 'height': {'hug': 0}, 'padding': [12, 0, 12, 0]},
+          'props': {'spacing': 20},
+          'children': ['name', 'email', 'role', 'status'],
+        },
+        'name': {
+          'type': 'text',
+          'layout': {'width': {'fill': 0}, 'height': {'hug': 0}, 'flex': 1},
+          'props': {'text': 'Name', 'style': {'fontSize': 10, 'color': '#FF111827'}},
+        },
+        'email': cell('Email'),
+        'role': cell('Role'),
+        'status': cell('Status'),
+      }, 'head'),
+    );
+    expect(found.map((d) => d.nodeId), ['name']);
+    expect(found.single.message, allOf(contains('"head" is 350 wide'), contains('keeps its width of 90'), isNot(contains('Give it a width and a height'))));
+  });
 }

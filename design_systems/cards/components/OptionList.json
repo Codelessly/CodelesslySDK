@@ -131,19 +131,7 @@
     "height": {
      "hug": 0
     }
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "patch": {
-      "layout": {
-       "constraints": {
-        "maxWidth": 720
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "title": {
    "type": "text",

@@ -161,19 +161,7 @@
       ]
      }
     ]
-   },
-   "media": [
-    {
-     "minWidth": 700,
-     "patch": {
-      "layout": {
-       "constraints": {
-        "maxWidth": 720
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "left": {
    "type": "column",

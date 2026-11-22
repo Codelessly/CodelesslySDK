@@ -57,6 +57,17 @@ Column#page h=fill scroll pad=24 gap=14 fill=page
   ChartCard#chart "Sign-ups by channel" value="1,340" values=[540,372,218] labels=["Organic","Paid","Referral"] kind="bars"
 ''';
 
+const _held = '''
+state pick="Standard"
+Column#page h=fill scroll pad=24 gap=14 fill=page center
+  Column#col w=fill maxw=860 gap=14
+    ProgressLine#line "Modules finished" "0 of 4" value=0.25
+    Panel#pn "Delivery" "How it reaches you."
+      OptionList#opt "Delivery" @pick options=["Standard","Express"] details=["3 to 5 days","Next day"]
+      Details#facts rows=[["Folder","Shared Drive / Archive"],["Files","214"]]
+    Callout#co "Day one" "Arrive at 7:30 for a tour." tone="good"
+''';
+
 /// Shows [notation], written for a phone (expanded at 390), in a window of [size]; with [host] the card is laid
 /// out in a column that wide at the window's start, as a chat column embeds it.
 Future<void> _show(WidgetTester tester, String notation, Size size, {double? host}) async {
@@ -149,13 +160,26 @@ void main() {
     }
   });
 
-  testWidgets('a block alone on a wide page is no wider than a card; a chart fills its place', (tester) async {
+  testWidgets('on a wide page a block fills its place; running text keeps a reading measure', (tester) async {
     await _show(tester, _bare, const Size(1440, 900));
-    for (final id in ['p', 'facts', 'opt', 'bar']) {
-      expect(rectOf(tester, id).width, 720, reason: id);
+    expect(rectOf(tester, 'p').width, 720);
+    for (final id in ['facts', 'opt', 'bar', 'chart']) {
+      expect(rectOf(tester, id).width, 1440 - 48, reason: id);
       expect(rectOf(tester, id).left, 24, reason: id);
     }
-    expect(rectOf(tester, 'chart').width, 1440 - 48);
+  });
+
+  testWidgets('a block is as wide as the column or the panel that holds it', (tester) async {
+    await _show(tester, _held, const Size(1440, 900));
+    final panel = rectOf(tester, 'pn');
+    expect(panel.width, 860);
+    expect(rectOf(tester, 'co').width, 860);
+    expect(rectOf(tester, 'line').width, 860);
+    for (final id in ['opt', 'facts']) {
+      final r = rectOf(tester, id);
+      expect(r.width, greaterThan(720), reason: id);
+      expect(r.left - panel.left, closeTo(panel.right - r.right, 0.5), reason: '$id has the same space at both sides');
+    }
   });
 
   test('every width rule of a card block holds from 700 up, or up to 699 or 1023: none changes a phone', () {
@@ -172,6 +196,6 @@ void main() {
         }
       }
     }
-    expect(wide, greaterThan(30));
+    expect(wide, greaterThan(12));
   });
 }

@@ -796,6 +796,70 @@ class RenderWrapItems extends RenderCollection {
   bool measure = true;
   double? itemWidth, itemHeight;
 
+  // Intrinsics: what is around it may measure it (a grid whose rows are as
+  // tall as their cells, a row that hugs its height, a row squeezing what
+  // is in it). It had none, so it measured 0: a card's wrapping chips were
+  // left out of the height of the card's row in a grid, and reached past it.
+  double _itemAlong(RenderBox it, bool max) => axis == Axis.horizontal
+      ? itemWidth ?? (max ? it.getMaxIntrinsicWidth(double.infinity) : it.getMinIntrinsicWidth(double.infinity))
+      : itemHeight ?? (max ? it.getMaxIntrinsicHeight(double.infinity) : it.getMinIntrinsicHeight(double.infinity));
+
+  /// Along its axis: at most all its items in one run; at least its longest
+  /// item (every item on a run of its own).
+  double _intrinsicAlong(bool max) {
+    if (!measure) return 0;
+    var total = 0.0, longest = 0.0, n = 0;
+    for (final it in children) {
+      final e = _itemAlong(it, max);
+      if (!e.isFinite) continue;
+      total += e;
+      longest = math.max(longest, e);
+      n++;
+    }
+    final pad = axis == Axis.vertical ? padding.vertical : padding.horizontal;
+    return (max ? total + spacing * math.max(0, n - 1) : longest) + pad;
+  }
+
+  /// Across its axis, given [along] of room: its runs as [layoutItems]
+  /// breaks them, one after the other.
+  double _intrinsicAcross(double along) {
+    if (!measure) return 0;
+    final vertical = axis == Axis.vertical;
+    final padMain = vertical ? padding.vertical : padding.horizontal;
+    final padCross = vertical ? padding.horizontal : padding.vertical;
+    final limit = along.isFinite ? math.max(0.0, along - padMain) : double.infinity;
+    var across = 0.0, runs = 0, runMain = 0.0, runCross = 0.0, inRun = 0;
+    for (final it in children) {
+      final e = math.min(_itemAlong(it, true), limit);
+      if (!e.isFinite) continue;
+      final thick = vertical ? itemWidth ?? it.getMaxIntrinsicWidth(e) : itemHeight ?? it.getMaxIntrinsicHeight(e);
+      if (inRun > 0 && runMain + spacing + e > limit + precisionErrorTolerance) {
+        across += runCross;
+        runs++;
+        runMain = 0;
+        runCross = 0;
+        inRun = 0;
+      }
+      runMain += (inRun == 0 ? 0 : spacing) + e;
+      runCross = math.max(runCross, thick.isFinite ? thick : 0);
+      inRun++;
+    }
+    if (inRun > 0) {
+      across += runCross;
+      runs++;
+    }
+    return across + runSpacing * math.max(0, runs - 1) + padCross;
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) => axis == Axis.horizontal ? _intrinsicAlong(false) : _intrinsicAcross(height);
+  @override
+  double computeMaxIntrinsicWidth(double height) => axis == Axis.horizontal ? _intrinsicAlong(true) : _intrinsicAcross(height);
+  @override
+  double computeMinIntrinsicHeight(double width) => axis == Axis.vertical ? _intrinsicAlong(false) : _intrinsicAcross(width);
+  @override
+  double computeMaxIntrinsicHeight(double width) => axis == Axis.vertical ? _intrinsicAlong(true) : _intrinsicAcross(width);
+
   @override
   bool layoutItems() {
     final c = constraints;
