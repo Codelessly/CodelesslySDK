@@ -70,7 +70,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -118,7 +118,7 @@
     "radius": 6
    },
    "bind": {
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [12, 0, 12, 0] : [10, 0, 8, 0]}",
+    "layout.padding": "${= props.rail ? [12, 0, 12, 0] : [10, 0, 8, 0]}",
     "selected": "${= props.selected}"
    },
    "tooltip": "${props.label}",
@@ -205,7 +205,7 @@
     "overflow": "ellipsis"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
+    "visible": "${= !props.rail}",
     "props.style.fontWeight": "${= props.selected ? 600 : 500}",
     "props.style.color": "${= props.danger ? theme.colors.errorInk : (props.selected ? theme.colors.accentText : theme.colors.ink2)}"
    }
@@ -238,7 +238,7 @@
     ]
    },
    "bind": {
-    "visible": "${= props.badge != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}",
+    "visible": "${= props.badge != '' && !props.rail}",
     "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTintBorder : theme.colors.subtleFill}"
    },
    "children": [
@@ -302,7 +302,7 @@
     ]
    },
    "bind": {
-    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= props.shortcut != '' && !props.rail}"
    },
    "children": [
     "keyText"

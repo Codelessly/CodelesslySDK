@@ -25,7 +25,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -56,7 +56,7 @@
     "crossAxisAlignment": "start"
    },
    "bind": {
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [8, 10, 8, 10] : [10, 18, 10, 6]}"
+    "layout.padding": "${= props.rail ? [8, 10, 8, 10] : [10, 18, 10, 6]}"
    },
    "children": [
     "label",
@@ -78,7 +78,7 @@
     "style": "overline"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    }
   },
   "rule": {
@@ -97,7 +97,7 @@
     ]
    },
    "bind": {
-    "visible": "${= (props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${props.rail}"
    }
   }
  }

@@ -42,7 +42,7 @@ final class ImageComparison {
   final int? firstDifference;
 
   Map<String, Object?> toJson() => {
-        'capture': capture.split('/').last,
+        'capture': capture.split(_slash).last,
         'reference': reference,
         'width': width,
         'captureHeight': captureHeight,
@@ -59,7 +59,7 @@ final class ImageComparison {
   String summary({int maxBands = 8}) {
     final b = StringBuffer();
     final dh = captureHeight - referenceHeight;
-    b.writeln('compare ${capture.split('/').last} with $reference: ${(matching * 100).toStringAsFixed(1)}% of pixels match '
+    b.writeln('compare ${capture.split(_slash).last} with $reference: ${(matching * 100).toStringAsFixed(1)}% of pixels match '
         '(${width}px wide; height ${_n(captureHeight)} vs ${_n(referenceHeight)}: '
         '${dh == 0 ? 'the same' : '${_n(dh.abs())} px ${dh > 0 ? 'taller' : 'shorter'} than the reference'}).');
     if (firstDifference != null) b.writeln('  first difference at y=$firstDifference.');
@@ -136,6 +136,10 @@ Future<List<int>> _png(ui.Image image) async {
   return data!.buffer.asUint8List();
 }
 
+/// What parts a path: a file listed on Windows comes with backslashes (its
+/// name was then the whole path, and no reference was found by its name).
+final _slash = RegExp(r'[/\\]');
+
 /// The reference screenshot for capture [png] (`<screen>@<WxH>[-<label>].png`):
 /// [reference] itself when it is a file; in a directory, the PNG of the
 /// same size whose name is the screen and the state exactly, the state
@@ -149,7 +153,7 @@ Future<List<int>> _png(ui.Image image) async {
   final type = FileSystemEntity.typeSync(reference);
   if (type == FileSystemEntityType.file) return (file: reference, candidates: const []);
   if (type != FileSystemEntityType.directory) return (file: null, candidates: const []);
-  final name = png.split('/').last;
+  final name = png.split(_slash).last;
   final m = RegExp(r'^(.*)@(\d+x\d+)(?:-(.*))?\.png$').firstMatch(name);
   if (m == null) return (file: null, candidates: const []);
   var screen = m[1]!.toLowerCase();
@@ -165,14 +169,14 @@ Future<List<int>> _png(ui.Image image) async {
   final files = [
     for (final f in Directory(reference).listSync())
       if (f is File && f.path.toLowerCase().endsWith('.png') && !f.path.endsWith('.compare.png') && !f.path.endsWith('.diff.png') &&
-          RegExp('(^|[^0-9])${RegExp.escape(size)}([^0-9]|\$)').hasMatch(f.path.split('/').last))
+          RegExp('(^|[^0-9])${RegExp.escape(size)}([^0-9]|\$)').hasMatch(f.path.split(_slash).last))
         f.path,
   ]..sort();
   const sep = r'(?:--|[-_@.])';
   String norm(String s) => s.replaceAll(RegExp(r'[-_@.]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
   // The name with the size taken out, its parts joined by single dashes.
   String rest(String f) {
-    final base = f.split('/').last.toLowerCase().replaceFirst(RegExp(r'\.png$'), '');
+    final base = f.split(_slash).last.toLowerCase().replaceFirst(RegExp(r'\.png$'), '');
     return norm(base.replaceFirst(RegExp('$sep?${RegExp.escape(size)}$sep?'), '-'));
   }
   final ofScreen = [

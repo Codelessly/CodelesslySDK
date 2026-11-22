@@ -203,9 +203,18 @@
     "height": 36
    },
    "bind": {
-    "data": "${props.tabs}",
-    "layout.height": "${= screen.width < 700 ? 44 : 36}"
-   }
+    "data": "${props.tabs}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 44
+      }
+     }
+    }
+   ]
   },
   "tab": {
    "type": "row",

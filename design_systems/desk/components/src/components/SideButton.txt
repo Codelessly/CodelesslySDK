@@ -1,11 +1,11 @@
-component SideButton "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a tablet's width) the icon alone."
+component SideButton "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a sidebar folded, or as narrow as one on a tablet) the icon alone."
   param label="New" required doc="What it does."
   param icon="add" doc="A Material icon name; drawn outlined."
   param shortcut="" doc="Its key, as a key cap at its end."
-  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
   preview "Default" 232x36 label="Compose" icon="edit" shortcut="C"
-Row#side gap=8 middle pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [12, 0, 12, 0] : [12, 0, 8, 0]} w=fill h=36 radius=7 fill=accent hovered.fill=accentHover tooltip="{props.label}" margin=[0,4,0,8] effects={theme.shadows.level1}
+Row#side gap=8 middle pad={props.rail ? [12, 0, 12, 0] : [12, 0, 8, 0]} w=fill h=36 radius=7 fill=accent hovered.fill=accentHover tooltip="{props.label}" margin=[0,4,0,8] effects={theme.shadows.level1}
   Icon#sideGlyph "{props.icon}_outlined" size=16 color=onAccent
-  Text#sideLabel "{props.label}" size=13 weight=600 color=onAccent grow visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
-  Row#sideKey pad=[5,1,5,1] radius=4 border=#40FFFFFF fill=#26FFFFFF visible={props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Text#sideLabel "{props.label}" size=13 weight=600 color=onAccent grow visible={!props.rail}
+  Row#sideKey pad=[5,1,5,1] radius=4 border=#40FFFFFF fill=#26FFFFFF visible={props.shortcut != '' && !props.rail}
     Text#sideKeyText "{props.shortcut}" style=keycap color=onAccent

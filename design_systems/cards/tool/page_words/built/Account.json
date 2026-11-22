@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Account",
-  "doc": "The signed-in person at a sidebar's foot or in a top bar: their initials in a circle, their name and a line under it (a role, an email), a chevron for the account menu. On a rail (a tablet's width) the circle alone. Fires onTap as any line does.",
+  "doc": "The signed-in person at a sidebar's foot or in a top bar: their initials in a circle, their name and a line under it (a role, an email), a chevron for the account menu. On a rail (a sidebar folded, or as narrow as one on a tablet) the circle alone. Fires onTap as any line does.",
   "props": [
    {
     "key": "name",
@@ -43,7 +43,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to the circle (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to the circle (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -75,8 +75,8 @@
     "crossAxisAlignment": "center"
    },
    "bind": {
-    "props.spacing": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? 0 : 10}",
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [4, 6, 4, 6] : [8, 8, 8, 8]}",
+    "props.spacing": "${= props.rail ? 0 : 10}",
+    "layout.padding": "${= props.rail ? [4, 6, 4, 6] : [8, 8, 8, 8]}",
     "decoration.radius": "${theme.radii.controlMedium}"
    },
    "tooltip": "${props.name}",
@@ -179,7 +179,7 @@
     "crossAxisAlignment": "start"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    },
    "children": [
     "accountName",
@@ -252,7 +252,7 @@
     "color": "inkGhost"
    },
    "bind": {
-    "visible": "${= props.chevron && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= props.chevron && !props.rail}"
    }
   }
  }

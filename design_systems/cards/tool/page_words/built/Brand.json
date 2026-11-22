@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Brand",
-  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 32 tile in the accent with a white glyph, the name in the display face, an optional line under it. On a rail (a tablet's width) the mark alone.",
+  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 32 tile in the accent with a white glyph, the name in the display face, an optional line under it. On a rail (a sidebar folded, or as narrow as one on a tablet) the mark alone.",
   "props": [
    {
     "key": "name",
@@ -43,7 +43,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to its mark (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to its mark (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -77,7 +77,7 @@
     "crossAxisAlignment": "center"
    },
    "bind": {
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [4, 4, 4, 12] : [8, 4, 8, 12]}"
+    "layout.padding": "${= props.rail ? [4, 4, 4, 12] : [8, 4, 8, 12]}"
    },
    "children": [
     "mark",
@@ -143,7 +143,7 @@
     "crossAxisAlignment": "start"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    },
    "children": [
     "brandName",

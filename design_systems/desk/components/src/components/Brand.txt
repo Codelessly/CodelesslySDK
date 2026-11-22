@@ -2,11 +2,11 @@ component Brand "The product's mark and name at the head of a sidebar or the sta
   param name="App" required doc="The product's name."
   param note="" doc="A line under the name (the workspace, the person)."
   param icon="" doc="A Material icon name for the mark."
-  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
   preview "Default" 232x44 name="Northstar" note="Admin console" icon="grid_view"
 Row#brand gap=10 middle pad=[6,4,6,10] w=hug
   Column#mark w=28 h=28 radius=7 fill=accent center middle visible={props.icon != ''}
     Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=16 color=onAccent
-  Column#words gap=0 grow visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Column#words gap=0 grow visible={!props.rail}
     Text#brandName "{props.name}" size=15 weight=700 letterSpacing=-0.2 color=ink maxLines=1 overflow=ellipsis
     Text#brandNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}

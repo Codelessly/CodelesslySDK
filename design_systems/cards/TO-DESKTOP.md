@@ -81,8 +81,12 @@ App
 | Width | What the window is, with nothing written for it |
 |---|---|
 | Desktop (1024 and up) | The sidebar 248 wide, the page beside it. |
-| Tablet (700 to 1023) | The sidebar is a rail of 64 (`sizes.rail`): `Brand`, `SideButton`, `NavSection`, `NavItem` and `Account` fold to their icon, the label a tooltip. A sidebar that holds a line written by hand (a `Row` of an `Icon` and a `Text`) is not made a rail: it stays as wide as written. |
+| Tablet (700 to 1023) | The sidebar is a rail of 64 (`sizes.rail`): `Brand`, `SideButton`, `NavSection`, `NavItem` and `Account` fold to their icon, the label a tooltip. A sidebar that holds a line written by hand (a `Row` of an `Icon` and a `Text`) is not made a rail: it stays as wide as written, and its words keep their labels (a word folds where its sidebar is a rail, which the sidebar tells it through `rail`; never by the window's width). With a `Pane` between the sidebar and `Main`, the rail stays and no menu button shows. |
 | Phone (under 700) | The sidebar is a drawer behind a menu button in the page's bar; `PageHeader`'s actions go under its title; a `Pane` beside a `Main` shows one of the two at a time. |
+
+A chosen row (a `Table` with `select=`, a selectable list, a line written `selected={…}`) is the neutral
+`selectedRow` with its ticked box or its bar in the accent, never a blue wash. A `Table` written directly under
+a `Panel … flush` has no frame of its own: the panel is its border, one rule under the panel's head.
 
 `examples/desktop` has three whole windows written this way (a dashboard, a table of records with a search, a
 filter, a selection and a bulk bar, a list beside its detail), each rendered at 1440, 834 and 390.

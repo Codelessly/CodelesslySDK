@@ -43,7 +43,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -146,7 +146,7 @@
     "crossAxisAlignment": "start"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    },
    "children": [
     "brandName",

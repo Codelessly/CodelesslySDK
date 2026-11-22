@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "NavSection",
-  "doc": "The label over a group of a sidebar's items: small spaced capitals in the faint ink, with room above that parts the groups. On a rail (a tablet's width) a short rule.",
+  "doc": "The label over a group of a sidebar's items: small spaced capitals in the faint ink, with room above that parts the groups. On a rail (a sidebar folded, or as narrow as one on a tablet) a short rule.",
   "props": [
    {
     "key": "label",
@@ -25,7 +25,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to a rule (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to a rule (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -56,7 +56,7 @@
     "crossAxisAlignment": "start"
    },
    "bind": {
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [10, 10, 10, 10] : [10, 18, 10, 6]}"
+    "layout.padding": "${= props.rail ? [10, 10, 10, 10] : [10, 18, 10, 6]}"
    },
    "children": [
     "label",
@@ -80,7 +80,7 @@
     "overflow": "ellipsis"
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    }
   },
   "rule": {
@@ -99,7 +99,7 @@
     ]
    },
    "bind": {
-    "visible": "${= (props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${props.rail}"
    }
   }
  }

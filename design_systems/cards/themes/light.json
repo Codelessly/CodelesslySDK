@@ -58,6 +58,7 @@
   "accentTint": "#FFF3F4F6",
   "accentLine": "#FFD1D5DB",
   "accentGlow": "#332563EB",
+  "selectedRow": "#FFF3F4F6",
   "good": "#FF16A34A",
   "goodDeep": "#FF15803D",
   "goodTint": "#1A16A34A",

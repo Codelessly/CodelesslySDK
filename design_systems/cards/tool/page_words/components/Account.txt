@@ -1,13 +1,13 @@
-component Account "The signed-in person at a sidebar's foot or in a top bar: their initials in a circle, their name and a line under it (a role, an email), a chevron for the account menu. On a rail (a tablet's width) the circle alone. Fires onTap as any line does."
+component Account "The signed-in person at a sidebar's foot or in a top bar: their initials in a circle, their name and a line under it (a role, an email), a chevron for the account menu. On a rail (a sidebar folded, or as narrow as one on a tablet) the circle alone. Fires onTap as any line does."
   param name="Jamie Park" required doc="Their name."
   param note="" doc="A line under it (their role or email)."
   param chevron:bool=true doc="A chevron at its end (it opens a menu)."
-  param rail:bool=false doc="Folded to the circle (a collapsed sidebar); a tablet's width folds it too."
+  param rail:bool=false doc="Folded to the circle (a collapsed sidebar); its sidebar tells it where it is a rail."
   preview "Default" 224x52 name="Jamie Park" note="Workspace owner"
-Row#account gap={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? 0 : 10} middle pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [4, 6, 4, 6] : [8, 8, 8, 8]} w=fill radius={theme.radii.controlMedium} tooltip="{props.name}" hovered.fill=hoverOverlay pressed.fill=pressedOverlay
+Row#account gap={props.rail ? 0 : 10} middle pad={props.rail ? [4, 6, 4, 6] : [8, 8, 8, 8]} w=fill radius={theme.radii.controlMedium} tooltip="{props.name}" hovered.fill=hoverOverlay pressed.fill=pressedOverlay
   Column#accountMark w=32 h=32 radius=999 fill=tileDeep border=line center middle
     Text#accountInitials "{upper(substring(props.name, 0, 1)) + (contains(props.name, ' ') ? upper(substring(split(props.name, ' ')[1], 0, 1)) : '')}" size=12 weight=600 lineHeight=1.2 color=inkSoft
-  Column#accountWords gap=1 grow visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Column#accountWords gap=1 grow visible={!props.rail}
     Text#accountName "{props.name}" size=14 weight=600 lineHeight=1.3 letterSpacing=-0.1 color=ink maxLines=1 overflow=ellipsis
     Text#accountNote "{props.note}" size=12.5 weight=500 lineHeight=1.3 color=inkFaint maxLines=1 overflow=ellipsis visible={props.note != ''}
-  Icon#accountChevron "unfold_more" size=16 color=inkGhost visible={props.chevron && !(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Icon#accountChevron "unfold_more" size=16 color=inkGhost visible={props.chevron && !props.rail}

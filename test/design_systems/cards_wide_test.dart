@@ -35,6 +35,19 @@ Column#page h=fill scroll fill=page
     TotalBar#bar "Total" amount="\$30.94" cta="Confirm order"
 ''';
 
+const _tabs = '''
+state range="30 days"
+state view="List"
+state kind="All"
+Column#page h=fill scroll fill=page
+  ChatCard#c "Views" "Every switch a card has"
+    Segments#seg @range options=["7 days","30 days","90 days"]
+    TabToggle#toggle @view options=["List","Grid"]
+    SegmentedControl#small @view options=["List","Grid"] size="xs"
+    ChipTabs#chips @kind tabs=["All","Open","Closed"]
+    BrowserTabs#open @kind tabs=["All","Open","Closed"]
+''';
+
 const _bare = '''
 Column#page h=fill scroll pad=24 gap=14 fill=page
   Paragraph#p "I am about to permanently delete old files from your shared drive. Nothing is removed until you approve."
@@ -110,6 +123,30 @@ void main() {
     expect(rectOf(tester, 'day/head').height, 92);
     expect(rectOf(tester, 'figures').height, greaterThan(200));
     expect(rectOf(tester, 'cmp/k1').width, 140);
+  });
+
+  // The tab-like controls have a phone's 44 high tap areas by the shown width too: they read the window's width
+  // once (screen.width), so in a narrow column of a wide window they were a desktop's.
+  for (final (name, size, host, phone) in const [
+    ('on a phone', Size(390, 844), null, true),
+    ('in a narrow column of a wide window', Size(1440, 900), 400.0, true),
+    ('in a wide window', Size(1440, 900), null, false),
+  ]) {
+    testWidgets('the tap areas of the tab-like controls $name are ${phone ? "a phone's 44" : 'as written'}', (tester) async {
+      await _show(tester, _tabs, size, host: host);
+      expect(rectOf(tester, 'seg/cell0').height, phone ? 44 : 40);
+      expect(rectOf(tester, 'toggle/list').height, phone ? 44 : 36);
+      expect(rectOf(tester, 'small/list').height, phone ? 44 : 28);
+      expect(rectOf(tester, 'chips/list').height, phone ? 44 : 36);
+      expect(rectOf(tester, 'open/list').height, phone ? 44 : 36);
+    });
+  }
+
+  test('no card block reads the window where the shown width is meant', () {
+    for (final name in File('design_systems/cards/BLOCKS.txt').readAsStringSync().trim().split(',')) {
+      final json = File('design_systems/cards/components/$name.json').readAsStringSync();
+      expect(RegExp(r'screen\.width\s*[<>]=?\s*\d').hasMatch(json), isFalse, reason: '$name compares screen.width: write a width rule (kit.wide, kit.phone)');
+    }
   });
 
   testWidgets('a block alone on a wide page is no wider than a card; a chart fills its place', (tester) async {

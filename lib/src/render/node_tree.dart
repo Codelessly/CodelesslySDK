@@ -3058,6 +3058,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
   /// and flexes mean nothing in a run, so a flexing axis hugs its content
   /// (measured intrinsically), or takes its design size when its subtree
   /// can't be measured. Its own alignment doesn't apply.
+  ///
+  /// With neither (a document written as text has no design sizes, and a
+  /// line that scrolls sideways, a field or a picture cannot be measured)
+  /// the axis is left to fill: along the run that is a line of its own, as
+  /// wide as the wrapping row, as a CSS item of `width: 100%` is. At a
+  /// design size of 0 it was not drawn at all (a row of tabs that scroll
+  /// beside a button, in a row that wraps on a phone).
   void _inRun(Node n, List<RenderBox> chain) {
     bool flexes(SizeFit f) => f == SizeFit.fill || f == SizeFit.flexible;
     final parentRow = _slot.parent?.isRow ?? true;
@@ -3066,7 +3073,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     final fh = flexes(n.hFit) && !(basis && parentRow), fv = flexes(n.vFit) && !(basis && !parentRow);
     if (!fh && !fv) return;
     if (!n.isFlex || _subtreeBlocksIntrinsics(n)) {
-      final c = BoxConstraints.tightFor(width: fh ? n.outerWidth : null, height: fv ? n.outerHeight : null);
+      final c = BoxConstraints.tightFor(
+          width: fh && n.outerWidth > 0 ? n.outerWidth : null, height: fv && n.outerHeight > 0 ? n.outerHeight : null);
       chain.add(_obtain<RenderConstrainedBox>('runSized', () => RenderConstrainedBox(additionalConstraints: c))
         ..additionalConstraints = c);
       return;

@@ -126,7 +126,17 @@
     "name": "Tenant",
     "note": "Northstar Studio",
     "icon": "hub_outlined"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavSection1": {
    "type": "NavSection",
@@ -140,7 +150,17 @@
    },
    "props": {
     "label": "People & access"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem1": {
    "type": "NavItem",
@@ -170,6 +190,16 @@
        "value": "members"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -201,6 +231,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavItem3": {
@@ -230,6 +270,16 @@
        "value": "teams"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -261,6 +311,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavSection2": {
@@ -275,7 +335,17 @@
    },
    "props": {
     "label": "Workspace"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem5": {
    "type": "NavItem",
@@ -304,6 +374,16 @@
        "value": "billing"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -335,6 +415,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavItem7": {
@@ -364,6 +454,16 @@
        "value": "settings"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -424,7 +524,17 @@
     "label": "Keyboard shortcuts",
     "icon": "keyboard_outlined",
     "shortcut": "?"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "Account1": {
    "type": "Account",
@@ -439,7 +549,17 @@
    "props": {
     "name": "Amara Okafor",
     "note": "Workspace owner"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "column3": {
    "type": "column",
@@ -1716,7 +1836,7 @@
       "decoration": {
        "fills": [
         {
-         "color": "activeTint"
+         "color": "selectedRow"
         }
        ]
       }
@@ -1778,7 +1898,7 @@
       "decoration": {
        "fills": [
         {
-         "color": "activeTint"
+         "color": "selectedRow"
         }
        ]
       }

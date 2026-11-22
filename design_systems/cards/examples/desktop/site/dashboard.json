@@ -122,7 +122,17 @@
     "name": "Northwind",
     "note": "Analytics",
     "icon": "insights"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavSection1": {
    "type": "NavSection",
@@ -136,7 +146,17 @@
    },
    "props": {
     "label": "Product"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem1": {
    "type": "NavItem",
@@ -150,7 +170,17 @@
     "label": "Performance",
     "icon": "insights",
     "selected": true
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem2": {
    "type": "NavItem",
@@ -164,7 +194,17 @@
     "label": "Customers",
     "icon": "group",
     "badge": "1,340"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem3": {
    "type": "NavItem",
@@ -177,7 +217,17 @@
    "props": {
     "label": "Plans",
     "icon": "sell"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem4": {
    "type": "NavItem",
@@ -190,7 +240,17 @@
    "props": {
     "label": "Reports",
     "icon": "description"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavSection2": {
    "type": "NavSection",
@@ -204,7 +264,17 @@
    },
    "props": {
     "label": "Workspace"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem5": {
    "type": "NavItem",
@@ -217,7 +287,17 @@
    "props": {
     "label": "Team",
     "icon": "groups"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem6": {
    "type": "NavItem",
@@ -230,7 +310,17 @@
    "props": {
     "label": "Settings",
     "icon": "settings"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "spacer1": {
    "type": "spacer",
@@ -289,7 +379,17 @@
    "props": {
     "name": "Dana Whitfield",
     "note": "Product lead"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "column3": {
    "type": "column",
@@ -818,20 +918,6 @@
    },
    "props": {
     "crossAxisAlignment": "start"
-   },
-   "decoration": {
-    "fills": [
-     {
-      "color": "pageFill"
-     }
-    ],
-    "strokes": [
-     {
-      "color": "line"
-     }
-    ],
-    "radius": 8,
-    "clip": "antiAlias"
    },
    "children": [
     "row4",

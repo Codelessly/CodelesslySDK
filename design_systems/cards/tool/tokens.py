@@ -13,6 +13,8 @@ LIGHT = {
         # the accent: selection, progress, the one thing to do
         'accent': '#FF2563EB', 'accentDeep': '#FF1D4ED8', 'accentBright': '#FF3B82F6', 'accentTint': '#FFF3F4F6',
         'accentLine': '#FFD1D5DB', 'onAccent': '#FFFFFFFF', 'accentGlow': '#332563EB',
+        # a chosen row (a Table's, a list's): the neutral of a selection, its ticked box or its bar the accent's mark
+        'selectedRow': '#FFF3F4F6',
         # status
         'good': '#FF16A34A', 'goodDeep': '#FF15803D', 'goodTint': '#1A16A34A', 'goodLine': '#4716A34A',
         'bad': '#FFDC2626', 'badDeep': '#FFB91C1C', 'badTint': '#1ADC2626', 'badLine': '#47DC2626',
@@ -72,6 +74,7 @@ DARK = {
         'lineStrong': '#FF4A4A4A', 'ink': '#FFFFFFFF', 'inkSoft': '#99FFFFFF', 'inkFaint': '#66FFFFFF', 'inkGhost': '#FF4A4A4A',
         'accent': '#FF3B82F6', 'accentDeep': '#FF60A5FA', 'accentBright': '#FF60A5FA', 'accentTint': '#FF262626',
         'accentLine': '#FF4A4A4A', 'onAccent': '#FFFFFFFF', 'accentGlow': '#523B82F6',
+        'selectedRow': '#FF262626',
         'good': '#FF22C55E', 'goodDeep': '#FF4ADE80', 'goodTint': '#2922C55E', 'goodLine': '#5C22C55E',
         'bad': '#FFEF4444', 'badDeep': '#FFFCA5A5', 'badTint': '#29EF4444', 'badLine': '#5CEF4444',
         'warn': '#FFFB923C', 'warnDeep': '#FFFDBA74', 'warnTint': '#29FB923C', 'warnLine': '#5CFB923C',

@@ -163,6 +163,14 @@ def wide(n, at=WIDE, **patch):
     return n
 
 
+def phone(n, **patch):
+    """Gives node n a phone's form: patch holds under WIDE px of shown width (a phone, or a card laid out in a
+    narrow column of a wide window), where n is as written elsewhere. A value the node binds is given up there
+    with bind={'<path>': None}."""
+    n.setdefault('media', []).append({'maxWidth': WIDE - 1, 'patch': patch})
+    return n
+
+
 def capped(n, width=CARD_MAX, at=WIDE):
     """n is at most `width` wide on a wide canvas (it fills its place up to that)."""
     return wide(n, at, layout={'constraints': {'maxWidth': width}})

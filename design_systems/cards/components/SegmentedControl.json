@@ -199,8 +199,21 @@
    },
    "bind": {
     "data": "${props.options}",
-    "layout.height": "${= screen.width < 700 ? 44 : (props.size == 'xs' ? 28 : (props.size == 'compact' ? 32 : (props.size == 'small' ? 34 : (props.size == 'medium' ? 36 : (44)))))}"
-   }
+    "layout.height": "${= props.size == 'xs' ? 28 : (props.size == 'compact' ? 32 : (props.size == 'small' ? 34 : (props.size == 'medium' ? 36 : (44))))}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 44
+      },
+      "bind": {
+       "layout.height": null
+      }
+     }
+    }
+   ]
   },
   "option": {
    "type": "row",

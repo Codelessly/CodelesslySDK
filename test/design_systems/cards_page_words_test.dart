@@ -76,7 +76,11 @@ void main() {
     for (final word in const ['Brand', 'SideButton', 'NavSection', 'NavItem', 'Account']) {
       final props = cards.components[word]!.widget!.props.map((p) => p.key);
       expect(props, contains('rail'), reason: word);
-      expect(jsonEncode(cards.components[word]!.toJson()['nodes']), contains('screen.width >= 700 && screen.width < 1024'), reason: word);
+      // It folds where it is told its sidebar is a rail (`rail`), never by the window's width: under a sidebar
+      // that stays as wide as written on a tablet its label stays.
+      final nodes = jsonEncode(cards.components[word]!.toJson()['nodes']);
+      expect(nodes, contains('props.rail'), reason: word);
+      expect(nodes, isNot(contains('screen.width')), reason: word);
     }
     // One set of names with Desk: the same parameters, in the same order, where Desk has the word.
     final desk = await DesignSystem.load((ref) async => File('design_systems/desk/$ref').existsSync() ? File('design_systems/desk/$ref').readAsStringSync() : null);

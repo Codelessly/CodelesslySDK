@@ -1,17 +1,17 @@
-component NavItem "A place in an app's sidebar: an icon, its label, and at its end a count or a key. The chosen one sits on a neutral fill with its icon in the accent and a heavier label. On a rail (a tablet's width) the icon alone, its label as a tooltip."
+component NavItem "A place in an app's sidebar: an icon, its label, and at its end a count or a key. The chosen one sits on a neutral fill with its icon in the accent and a heavier label. On a rail (a sidebar folded, or as narrow as one on a tablet) the icon alone, its label as a tooltip."
   param label="Item" required doc="What it says."
   param icon="" doc="A Material icon name, drawn at 18."
   param selected:bool=false doc="The chosen item."
   param badge="" doc="A count at its end (a soft pill)."
   param shortcut="" doc="A key at its end (a key cap)."
   param danger:bool=false doc="A destructive item (Delete, Sign out): red ink."
-  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+  param rail:bool=false doc="Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
   preview "Selected" 224x36 label="Inbox" icon="inbox" selected=true badge="4"
   preview "Rest" 224x36 label="Archive" icon="inventory_2" shortcut="G A"
-Row#item gap=10 middle pad={(props.rail || (screen.width >= 700 && screen.width < 1024)) ? [11, 0, 11, 0] : [10, 0, 8, 0]} w=fill h=36 tooltip="{props.label}" radius={theme.radii.controlMedium} selected={props.selected} selected.fill=tileDeep hovered.fill=hoverOverlay pressed.fill=pressedOverlay
+Row#item gap=10 middle pad={props.rail ? [11, 0, 11, 0] : [10, 0, 8, 0]} w=fill h=36 tooltip="{props.label}" radius={theme.radii.controlMedium} selected={props.selected} selected.fill=tileDeep hovered.fill=hoverOverlay pressed.fill=pressedOverlay
   Icon#glyph "{props.icon == '' ? 'circle' : props.icon}" size=18 visible={props.icon != ''} color={props.danger ? theme.colors.bad : (props.selected ? theme.colors.accent : theme.colors.inkFaint)}
-  Text#name "{props.label}" size=14 lineHeight=1.3 grow visible={!(props.rail || (screen.width >= 700 && screen.width < 1024))} maxLines=1 overflow=ellipsis weight={props.selected ? 600 : 500} color={props.danger ? theme.colors.badDeep : (props.selected ? theme.colors.ink : theme.colors.inkSoft)}
-  Row#count pad=[7,2,7,2] radius=999 visible={props.badge != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))} fill={props.selected ? theme.colors.card : theme.colors.tileDeep}
+  Text#name "{props.label}" size=14 lineHeight=1.3 grow visible={!props.rail} maxLines=1 overflow=ellipsis weight={props.selected ? 600 : 500} color={props.danger ? theme.colors.badDeep : (props.selected ? theme.colors.ink : theme.colors.inkSoft)}
+  Row#count pad=[7,2,7,2] radius=999 visible={props.badge != '' && !props.rail} fill={props.selected ? theme.colors.card : theme.colors.tileDeep}
     Text#countText "{props.badge}" size=12 weight=600 lineHeight=1.3 tabularFigures=true color={props.selected ? theme.colors.ink : theme.colors.inkSoft}
-  Row#key pad=[6,2,6,2] radius={theme.radii.controlXs} border=line fill=card visible={props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}
+  Row#key pad=[6,2,6,2] radius={theme.radii.controlXs} border=line fill=card visible={props.shortcut != '' && !props.rail}
     Text#keyText "{props.shortcut}" size=11 weight=600 lineHeight=1.3 color=inkFaint

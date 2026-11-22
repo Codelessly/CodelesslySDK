@@ -6,10 +6,10 @@ component Panel "A titled section of a page (a chart, a list on a dashboard, a s
   event onAction doc="The head's action was pressed."
   preview "Default" 480x180 title="Recent orders" note="The last 30 days." action="See all"
 Column#panel w=fill fill=card border=line radius={theme.radii.cardWide} clip=antiAlias
-  Row#panelHead gap=12 middle w=fill pad={screen.width < 700 ? [18, 14, 12, 12] : [24, 18, 16, 14]} border-bottom={props.flush ? theme.colors.line : '#00000000'}
+  Row#panelHead gap=12 middle w=fill pad=[24,18,16,14] phone.pad=[18,14,12,12] border-bottom={props.flush ? theme.colors.line : '#00000000'}
     Column#panelTitles gap=2 grow
       Text#panelTitle "{props.title}" style=heading3Wide size=18 maxLines=1 overflow=ellipsis
       Text#panelNote "{props.note}" style=smallWide visible={props.note != ''}
     Button.ghost#panelAction "{props.action}" size=small visible={props.action != ''} onTap={emit onAction}
-  Column#panelBody gap={props.flush ? 0 : 14} w=fill pad={props.flush ? [0, 0, 0, 0] : (screen.width < 700 ? [18, 2, 18, 18] : [24, 2, 24, 24])}
+  Column#panelBody gap={props.flush ? 0 : 14} w=fill pad={props.flush ? [0, 0, 0, 0] : [24, 2, 24, 24]} phone.pad={props.flush ? [0, 0, 0, 0] : [18, 2, 18, 18]}
     Slot#panelSlot w=null h=null

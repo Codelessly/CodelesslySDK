@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "SideButton",
-  "doc": "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a tablet's width) the icon alone.",
+  "doc": "The one thing to do at a sidebar's head (Compose, New issue): a primary button as wide as the sidebar, its key at its end; on a rail (a sidebar folded, or as narrow as one on a tablet) the icon alone.",
   "props": [
    {
     "key": "label",
@@ -43,7 +43,7 @@
      "flutter": "bool"
     },
     "default": false,
-    "doc": "Folded to its icon (a collapsed sidebar); a tablet's width folds it too."
+    "doc": "Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
    }
   ]
  },
@@ -89,7 +89,7 @@
     ]
    },
    "bind": {
-    "layout.padding": "${= (props.rail || (screen.width >= 700 && screen.width < 1024)) ? [12, 0, 12, 0] : [12, 0, 8, 0]}",
+    "layout.padding": "${= props.rail ? [12, 0, 12, 0] : [12, 0, 8, 0]}",
     "decoration.effects": "${theme.shadows.level1}"
    },
    "tooltip": "${props.label}",
@@ -152,7 +152,7 @@
     }
    },
    "bind": {
-    "visible": "${= !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= !props.rail}"
    }
   },
   "sideKey": {
@@ -188,7 +188,7 @@
     ]
    },
    "bind": {
-    "visible": "${= props.shortcut != '' && !(props.rail || (screen.width >= 700 && screen.width < 1024))}"
+    "visible": "${= props.shortcut != '' && !props.rail}"
    },
    "children": [
     "sideKeyText"

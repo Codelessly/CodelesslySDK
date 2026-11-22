@@ -178,6 +178,34 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
     child = box;
   }
 
+  // A host app moves a view (a GlobalKey above it: a page's view goes from
+  // a preview into a tile). Flutter keeps a moved subtree's semantics as
+  // they were built where it was, each node naming the node above it
+  // there, and reads them again only where the new place is in the
+  // semantics tree. Under an ExcludeSemantics it is not, so after the old
+  // place was removed the next layout in the view asked a node that was
+  // gone for its children's geometry (`identical(childRenderObject,
+  // parentRenderObject)`). So a view that leaves the pipeline forgets its
+  // semantics, and where it comes back it is read whole, from the nodes
+  // above it down (they moved with it and kept theirs).
+  bool _semanticsForgotten = false;
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    if (_semanticsForgotten) {
+      _semanticsForgotten = false;
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    clearSemantics();
+    _semanticsForgotten = true;
+  }
+
   /// The root box belongs to the tree, not to this view: let go of it.
   @override
   void dispose() {

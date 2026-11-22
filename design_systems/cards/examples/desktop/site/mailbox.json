@@ -158,7 +158,17 @@
     "name": "Postbox",
     "note": "Northline Studio",
     "icon": "mail"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "SideButton1": {
    "type": "SideButton",
@@ -192,6 +202,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavSection1": {
@@ -206,7 +226,17 @@
    },
    "props": {
     "label": "Mailbox"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem1": {
    "type": "NavItem",
@@ -236,6 +266,16 @@
        "value": "inbox"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -267,6 +307,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavItem3": {
@@ -296,6 +346,16 @@
        "value": "sent"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -328,6 +388,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavItem5": {
@@ -357,6 +427,16 @@
        "value": "archive"
       }
      ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
     }
    ]
   },
@@ -388,6 +468,16 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
    ]
   },
   "NavSection2": {
@@ -402,7 +492,17 @@
    },
    "props": {
     "label": "Folders"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem7": {
    "type": "NavItem",
@@ -416,7 +516,17 @@
     "label": "Studio",
     "icon": "folder",
     "badge": "1"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "NavItem8": {
    "type": "NavItem",
@@ -429,7 +539,17 @@
    "props": {
     "label": "Receipts",
     "icon": "folder"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "spacer1": {
    "type": "spacer",
@@ -488,7 +608,17 @@
    "props": {
     "name": "Jamie Park",
     "note": "jamie@northline.design"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "rail": true
+      }
+     }
+    }
+   ]
   },
   "column3": {
    "type": "column",
@@ -938,7 +1068,7 @@
    },
    "media": [
     {
-     "minWidth": 1024,
+     "minWidth": 700,
      "patch": {
       "visible": false,
       "bind": {
@@ -1007,7 +1137,7 @@
    },
    "media": [
     {
-     "minWidth": 1024,
+     "minWidth": 700,
      "patch": {
       "visible": false,
       "bind": {

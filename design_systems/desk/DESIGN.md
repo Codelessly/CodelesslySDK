@@ -37,9 +37,10 @@ App
     PaneHeader "Member" onClose={openId=""}
 ```
 
-- **Sidebar**: 240 wide on the chrome's fill, always. On a tablet it is a rail of 64 (Desk folds every sidebar
-  word to its icon) and the phone opens it as a drawer from a menu button, written or not: `tablet.w=64
-  hide=phone` says the same.
+- **Sidebar**: 240 wide on the chrome's fill, always. On a tablet it is a rail of 64 (every sidebar
+  word folds to its icon there: the sidebar tells each word through its `rail` parameter) and the phone opens it
+  as a drawer from a menu button, written or not: `tablet.w=64 hide=phone` says the same. A sidebar that holds a
+  line written by hand stays 240 on a tablet, its words whole.
 - **Main**: write a `Nav` as its first line when the page has a top bar (breadcrumb, search, account). The bar is
   48 high with a rule under it. A list-and-detail app (mail) writes the list as `Main w=380` and the detail as a
   `Pane` with no width.
@@ -67,7 +68,8 @@ Sidebar tablet.w=64 hide=phone
   `shortcut="G I"`. A destructive item takes `danger`.
 - `selected={…}` on every item of a group that switches views; the chosen one is tinted, never bold black.
 - Six to twelve items. More: group them, or move rarely used ones to the `Footer` or a settings page.
-- A user-collapsed sidebar: `Sidebar w=64` and `rail` on each `Brand`, `SideButton`, `NavItem`, `Account`.
+- A user-collapsed sidebar: `Sidebar w=64` folds its words by itself; with a width kept in a variable
+  (`Sidebar w={side}`), write `rail={folded}` on each `Brand`, `SideButton`, `NavItem`, `Account`.
 
 Do not: use `Button` rows as navigation; write labels in capitals yourself (`NavSection` does it); put a search
 field in the sidebar (it goes in the top bar or the list pane).

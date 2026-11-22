@@ -218,7 +218,7 @@ void main() {
         File('${refs.path}/$f').writeAsBytesSync(const []);
       }
     });
-    String? pick(String capture, [Map<String, String> map = const {}]) => referenceFor('/x/$capture', refs.path, map: map).file?.split('/').last;
+    String? pick(String capture, [Map<String, String> map = const {}]) => referenceFor('/x/$capture', refs.path, map: map).file?.split(RegExp(r'[/\\]')).last;
 
     test('a state whose name begins another state\'s name gets its own file', () {
       expect(pick('section@390x844-saved.png'), 'section--saved--390x844.png');

@@ -109,6 +109,12 @@
     "width": {
      "fill": 0
     },
+    "padding": [
+     24,
+     18,
+     16,
+     14
+    ],
     "height": {
      "hug": 0
     }
@@ -126,9 +132,23 @@
     "strokeSides": "bottom"
    },
    "bind": {
-    "layout.padding": "${= screen.width < 700 ? [18, 14, 12, 12] : [24, 18, 16, 14]}",
     "decoration.strokes[0].color": "${= props.flush ? theme.colors.line : '#00000000'}"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "padding": [
+        18,
+        14,
+        12,
+        12
+       ]
+      }
+     }
+    }
+   ],
    "children": [
     "panelTitles",
     "panelAction"
@@ -233,8 +253,18 @@
    },
    "bind": {
     "props.spacing": "${= props.flush ? 0 : 14}",
-    "layout.padding": "${= props.flush ? [0, 0, 0, 0] : (screen.width < 700 ? [18, 2, 18, 18] : [24, 2, 24, 24])}"
+    "layout.padding": "${= props.flush ? [0, 0, 0, 0] : [24, 2, 24, 24]}"
    },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "bind": {
+       "layout.padding": "${= props.flush ? [0, 0, 0, 0] : [18, 2, 18, 18]}"
+      }
+     }
+    }
+   ],
    "children": [
     "panelSlot"
    ]

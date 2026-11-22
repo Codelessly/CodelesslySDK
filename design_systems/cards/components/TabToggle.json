@@ -195,8 +195,21 @@
    },
    "bind": {
     "data": "${props.options}",
-    "layout.height": "${= screen.width < 700 ? 44 : (props.size == 'sm' ? 32 : (props.size == 'md' ? 36 : (44)))}"
-   }
+    "layout.height": "${= props.size == 'sm' ? 32 : (props.size == 'md' ? 36 : (44))}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 44
+      },
+      "bind": {
+       "layout.height": null
+      }
+     }
+    }
+   ]
   },
   "option": {
    "type": "row",

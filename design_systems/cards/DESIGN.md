@@ -43,7 +43,7 @@ the top of the file, is not read: the render command says so, `site_key_ignored`
 ```
 
 - **The accent.** `"primary"` (or `"colors": {"accent": ...}`) is enough. Everything Cards makes from its blue
-  follows it, in light and in dark: `accent`, the selected row's `activeTint`, `primaryTint` and its border, the
+  follows it, in light and in dark: `accent`, the selected tint `activeTint`, `primaryTint` and its border, the
   focus ring, `accentGlow`, the `info` color and its tints (an info `Banner`), and the shades `accentDeep` and
   `accentBright` (the site's hue at Cards' lightness). The dark accent is the site's, a little lighter; write
   `"dark": {"primary": ...}` to choose it. A color the site names itself, light or under `"dark"`, is the site's.

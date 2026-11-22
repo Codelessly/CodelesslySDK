@@ -6,7 +6,7 @@ the card's variable (a `variable` parameter) and change it themselves; every blo
 """
 import art
 from kit import *  # noqa: F401,F403
-from kit import WIDE, CARD_MAX, wide, capped, FILL, HUG, STRING, INT, NUM, BOOL, STRINGS, NUMBERS, ROWS, JSON, P, PRESS
+from kit import WIDE, CARD_MAX, wide, phone, capped, FILL, HUG, STRING, INT, NUM, BOOL, STRINGS, NUMBERS, ROWS, JSON, P, PRESS
 
 TONES = ('accent', 'good', 'warn', 'danger', 'neutral')
 TONE = P('tone', enum(*TONES), 'accent', 'The color role: accent, good, warn, danger or neutral.')
@@ -549,9 +549,10 @@ def steps():
 # SegmentedControl: a small switch in a track, two to four short options. ChipTabs and ChoiceChips: pills (a
 # filter, a choice of slots). All but ChoiceChips stay on one line: when the options do not fit, the line scrolls
 # sideways (every label at its own width, the line fading where it continues, the chosen option brought into
-# view); it never wraps and never squeezes a label. A phone (a window under 700 wide) gets 44 high tap areas.
+# view); it never wraps and never squeezes a label. A phone gets 44 high tap areas: a rule by the shown width
+# (kit.phone), so a card laid out in a narrow column of a wide window has them too.
 
-PHONE = 'screen.width < 700'
+TAP = 44
 HOVER = {'decoration': {'foregroundFills': [{'color': 'hoverOverlay'}]}}
 DOWN = {'decoration': {'foregroundFills': [{'color': 'pressedOverlay'}]}}
 EASE = [{'property': 'decoration', 'duration': 150}]
@@ -619,7 +620,6 @@ def segments():
     never cut one. More than five (not what this block is for) come from a list, each as wide as its label."""
     n = SEGMENT_SLOTS
     count = 'length(props.options)'
-    high = E('%s ? 44 : 40' % PHONE)
     at_ = 'indexOf(props.options, props.value)'
     # The least a segment is wide: the longest label, counted at 7.1 px a character (13 px Inter semibold runs
     # near 7), with 14 px each side of it and the 3 px between knobs. The knob's own padding is 10, so a label of
@@ -639,8 +639,8 @@ def segments():
         'scroll': strip(['cell%d' % i for i in range(n)] + ['more'], pad=[1.5, 0, 1.5, 0], actions=[
             {'trigger': {'type': 'load', 'when': '%s > 0' % at_}, 'actions': shown(0)},
             {'trigger': {'type': 'valueChanged', 'variable': 'props.value', 'when': '%s >= 0' % at_}, 'actions': shown(240)}]),
-        'more': line_of(['moreCell'], E('%s > %d ? props.options : []' % (count, n)), 40,
-                        bind={'visible': E('%s > %d' % (count, n)), 'layout.height': high}),
+        'more': phone(line_of(['moreCell'], E('%s > %d ? props.options : []' % (count, n)), 40,
+                              bind={'visible': E('%s > %d' % (count, n))}), layout={'height': TAP}),
         **knob_cell('moreCell', '${item}', "(props.value == item || (props.value == '' && index == 0))", [setv('props.value', 'item'), fire('onChanged', '${item}')]),
     }
     nodes['track']['layout']['constraints'] = {'maxWidth': 603}
@@ -651,7 +651,8 @@ def segments():
         opt = "(%s > %d ? at(props.options, %d) : '')" % (count, i, i)
         on = '(props.value == %s%s)' % (opt, " || props.value == ''" if i == 0 else '')
         nodes.update(knob_cell('cell%d' % i, E(opt), on, [setv('props.value', opt), fire('onChanged', E(opt))], width=FILL, height=40, pad_x=10,
-                               bind={'visible': E('%s > %d && %s <= %d' % (count, i, count, n)), 'layout.height': high}, min_width=widest))
+                               bind={'visible': E('%s > %d && %s <= %d' % (count, i, count, n))}, min_width=widest))
+        phone(nodes['cell%d' % i], layout={'height': TAP})
     props = [
         P('value', var(STRING), '', 'The name of your text variable: it holds the chosen option (declare it with the starting option).'),
         P('options', STRINGS, ['7 days', '30 days', '90 days'], 'Two to four short options (a word or two each).', True),
@@ -672,8 +673,8 @@ def pill_track(type_, doc, options, sizes, size_default, size_doc, preview):
     nodes = {
         'track': track(['scroll'], width=HUG),
         'scroll': strip(['list'], width=HUG, pad=[1.5, 0, 1.5, 0], actions=reveal('option', 'props.options')),
-        'list': line_of(['option'], '${props.options}', sizes[size_default][0],
-                        bind={'layout.height': E('%s ? 44 : (%s)' % (PHONE, by_size(0)))}),
+        'list': phone(line_of(['option'], '${props.options}', sizes[size_default][0], bind={'layout.height': E(by_size(0))}),
+                      layout={'height': TAP}, bind={'layout.height': None}),
         **knob_cell('option', '${item}', 'item == props.value', [setv('props.value', 'item'), fire('onChanged', '${item}')],
                     text_bind={'props.style.fontSize': E(by_size(2))},
                     knob_bind={'layout.padding': E('[%s, 0, %s, 0]' % (by_size(1), by_size(1)))}),
@@ -732,7 +733,7 @@ def chip_tabs():
     nodes = {
         'row': node('row', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'center', 'spacing': 8}, ['scroll', 'add']),
         'scroll': strip(['list'], width=HUG, actions=reveal('chip', 'props.tabs')),
-        'list': line_of(['chip'], '${props.tabs}', 36, gap=8, bind={'layout.height': E('%s ? 44 : 36' % PHONE)}),
+        'list': phone(line_of(['chip'], '${props.tabs}', 36, gap=8), layout={'height': TAP}),
         'chip': node('row', {'width': HUG, 'height': FILL}, {'crossAxisAlignment': 'center'}, ['pill'],
                      states={'hovered': {'pill': HOVER}, 'pressed': {'pill': DOWN}},
                      actions=click(setv('props.value', 'item'), fire('onSelected', '${item}'))),
@@ -764,7 +765,7 @@ def browser_tabs():
         'bar': node('row', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'end', 'spacing': 4}, ['scroll', 'add'],
                     decoration={'strokes': [{'color': 'line'}], 'strokeSides': 'bottom'}),
         'scroll': strip(['list'], width=HUG, actions=reveal('tab', 'props.tabs')),
-        'list': line_of(['tab'], '${props.tabs}', 36, gap=2, bind={'layout.height': E('%s ? 44 : 36' % PHONE)}),
+        'list': phone(line_of(['tab'], '${props.tabs}', 36, gap=2), layout={'height': TAP}),
         'tab': node('row', {'width': HUG, 'height': FILL, 'padding': [12, 0, 8, 0]}, {'crossAxisAlignment': 'center', 'spacing': 6}, ['glyph', 'label', 'close'],
                     decoration={'fills': [{'color': 'hoverOverlay'}], 'strokes': [{'color': 'line'}], 'strokeSides': 'top', 'radius': [10, 10, 0, 0]},
                     bind={'decoration.fills[0].color': E('%s ? theme.colors.primaryBackground : theme.colors.hoverOverlay' % on)},
