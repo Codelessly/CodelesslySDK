@@ -507,6 +507,9 @@ class _BoxReactions {
     // Whether every reaction that holds ends itself: it says when it runs
     // and writes a name that condition reads.
     var ends = true;
+    // Whether every one that holds says when it runs at all (a clock, with
+    // no condition, runs for as long as the screen shows).
+    var conditioned = true;
     for (final r in n.actions) {
       if (r.trigger.type != TriggerType.timer) continue;
       final condition = r.trigger.when.trim();
@@ -518,9 +521,10 @@ class _BoxReactions {
       if (every != null) {
         ms = math.min(ms ?? 1 << 30, every);
         ends = ends && condition.isNotEmpty && _writesWhatItReads(r, condition);
+        if (condition.isEmpty) conditioned = false;
       }
     }
-    _timerEnds = ms != null && ends;
+    _timerEnds = ms != null && conditioned;
     _setCounting(ms != null && ms <= ScreenTimers.countingIntervalMs && ends);
     if (ms == _intervalMs) return;
     _timer?.cancel();
