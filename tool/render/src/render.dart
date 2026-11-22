@@ -792,8 +792,10 @@ final Map<String, String> _fontStamps = {};
 /// run that this run does not give, this run is not drawn as one of its own would be: said in
 /// [DirectoryFontFetcher.engineConflicts], as for a face fetched with another file.
 Future<void> _registerOnce(String family, List<String> files) async {
+  // (A file is read once: what is read to tell it from another is what the engine is given.)
+  final read = <String, Uint8List>{};
   final stamps = [
-    for (final p in files) _fontStamps.putIfAbsent(fontFileKey(p), () => fontFileStamp(File(p).readAsBytesSync())),
+    for (final p in files) _fontStamps.putIfAbsent(fontFileKey(p), () => fontFileStamp(read[p] = File(p).readAsBytesSync())),
   ];
   final had = _registeredFonts.putIfAbsent(family, () => []);
   if (had.any((s) => !stamps.contains(s))) {
@@ -803,7 +805,7 @@ Future<void> _registerOnce(String family, List<String> files) async {
   if (fresh.isEmpty) return;
   final loader = FontLoader(family);
   for (final i in fresh) {
-    loader.addFont(Future.value(File(files[i]).readAsBytesSync().buffer.asByteData()));
+    loader.addFont(Future.value((read[files[i]] ?? File(files[i]).readAsBytesSync()).buffer.asByteData()));
     had.add(stamps[i]);
   }
   await loader.load();

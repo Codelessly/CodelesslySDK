@@ -23,6 +23,32 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// Whether a request's arguments ask for one capture, as far as they say: one run (no `--state`), one size, and
+/// one screen named (`--screen`, once) or one document given and nothing else. Nothing can be shared of such a
+/// request, so the server has one worker render it as a run of its own (`solo`), with no shared folder, and does
+/// not look for captures others could take. A request that turns out to have more (a document with several
+/// screens) is rendered whole by that worker; one that is not recognised goes the shared way, as before.
+bool asksOneCapture(List<String> args) {
+  var sizes = 0, screens = 0;
+  final inputs = <String>[];
+  for (var i = 0; i < args.length; i++) {
+    final a = args[i];
+    switch (a) {
+      case '--state' || '--sheet' || '--components-all' || '--modals' || '--component':
+        return false;
+      case '--sizes':
+        if (i + 1 >= args.length || args[i + 1].contains(',')) return false;
+        sizes++;
+      case '--screen':
+        screens++;
+    }
+    // What is not an option's value: the first argument, or one after another that is not an option.
+    if (!a.startsWith('--') && (i == 0 || !args[i - 1].startsWith('--'))) inputs.add(a);
+  }
+  if (sizes != 1 || screens > 1) return false;
+  return screens == 1 || (inputs.length == 1 && inputs.single.toLowerCase().endsWith('.json'));
+}
+
 /// The folder the workers of one request share.
 class FanDir {
   FanDir(this.path);
