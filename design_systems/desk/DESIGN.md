@@ -39,8 +39,11 @@ App
 
 - **Sidebar**: 240 wide on the chrome's fill, always. On a tablet it is a rail of 64 (every sidebar
   word folds to its icon there: the sidebar tells each word through its `rail` parameter) and the phone opens it
-  as a drawer from a menu button, written or not: `tablet.w=64 hide=phone` says the same. A sidebar that holds a
-  line written by hand stays 240 on a tablet, its words whole.
+  as a drawer from a menu button, written or not: `tablet.w=64 hide=phone` says the same. A line written by hand
+  that only shows something (a note in a `Box`, a tip) is hidden in the rail. A sidebar that holds a line written
+  by hand that does something (a field, a row that is tapped, a list of your own rows) has no rail: on a tablet
+  it is the drawer too, opened by the menu button, and Main has the whole window. Keep a sidebar to Desk's words
+  and it is a rail on every page of the app.
 - **Main**: write a `Nav` as its first line when the page has a top bar (breadcrumb, search, account). The bar is
   48 high with a rule under it. A list-and-detail app (mail) writes the list as `Main w=380` and the detail as a
   `Pane` with no width.
@@ -148,7 +151,10 @@ Do not: write `size=` or `weight=` on text; use more than two title levels on on
 - Labels (a card's, a team's) are `Tag … hue="violet"`; pick hues by meaning and keep them stable.
 - Destructive: `Button.destructive` only for the confirming button of a destructive dialog; elsewhere
   `Button.outline "Delete" color=errorInk` or a `MenuItem … danger`.
-- Dark mode needs nothing: every word follows it. Never write a `#…` colour; it will not.
+- Dark mode needs nothing: every word follows it. Never write a `#…` colour; it will not. An app that is dark
+  says so once, in site.json: `"theme": {"mode": "dark"}` (with its `primary`), not by dark colours on its lines.
+- A site's `surface` and `onSurface` re-ground every part (cards, sidebar, bars, fields, lines, the quiet inks),
+  and its `primary` re-accents every part: write the roles, never a part's fill.
 
 ## 8. States
 
@@ -247,3 +253,48 @@ Dialog#invite "Invite members" "They get an email with a link to join." w=520
 | `Text.caption`, `Text.muted` | `size=11 color=#FF9CA3AF` |
 | `Table … select=@chosen` + `BulkBar` | checkboxes drawn by hand in rows |
 | `Dialog#x "Title" w=560` + `Actions` | a dialog built from a Column with its own close button |
+
+## 15. A website's page
+
+A marketing or editorial page is `Page` with a `Nav`, `Section`s and a `Footer`, not an `App`. Desk then gives
+its texts the page scale (README: "On a website's page"): write looks, never sizes.
+
+```notation
+Page
+  Nav
+    Brand "Harbour & Hill" icon="sailing"
+    Row gap=4
+      Button.ghost "Homes" onTap={go homes}
+      Button.ghost "Areas" onTap={go areas}
+    Button "Book a viewing" onTap={go book}
+  Section image="assets/estuary.jpg"
+    Text.overline "WATERSIDE HOMES"
+    Text.heading1 "A home by the water, found in a week."
+    Text.lead "Hand-picked listings along the estuary, with viewings booked the same day."
+    Row gap=12
+      Button "See homes" size=large onTap={go homes}
+      Button.outline "How it works" size=large onTap={scroll how}
+  Section tint
+    Text.heading2 "Three ways we help"
+    Grid cols=3 gap=24
+      Card
+        Text.heading3 "Viewings the same day"
+        Text.muted "Pick a slot; an agent meets you there."
+  Footer
+    Row gap=48 top
+      Column grow gap=8
+        Brand "Harbour & Hill" icon="sailing"
+        Text.muted "Estate agents since 1998."
+      Column gap=8 w=160
+        Text.overline "COMPANY"
+        Text.muted "About" onTap={go about}
+        Text.muted "Careers" onTap={go careers}
+    Text.caption "© 2026 Harbour & Hill"
+```
+
+- One `Text.heading1` a page, in the first `Section` (the hero); `Text.heading2` heads each band under it.
+- Alternate `Section` and `Section tint`; one `Section fill=primary` at most (the closing call to action).
+- The palette is site.json's (`primary`, `surface`, `onSurface`, `titleFontFamily`, `"mode": "dark"` for a dark
+  site): bands, cards and inks follow it. Do not write a band's or a card's fill to match the page.
+- Do not: write `size=` on a headline (the scale is the page's); put an `App`'s `Sidebar` on a landing page; use
+  `PageHeader` as a hero (it is an app page's head).

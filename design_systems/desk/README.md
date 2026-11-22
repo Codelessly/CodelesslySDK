@@ -37,11 +37,67 @@ Read [DESIGN.md](DESIGN.md) before writing a screen: it says how a desktop app i
 - **Tones**: `neutral`, `info`, `success`, `warning`, `danger` (status), and the label hues `violet`, `pink`,
   `teal`, `amber`, `sky`, `green`, `red`, `slate`, each with a tint, an ink and a dot (`violetTint`, `violetInk`,
   `violetDot`).
-- **Another accent**: name one token, `primary`, in site.json's `theme` (`"theme": {"primary": "#FF0D9488"}`), and
-  `dark.primary` if the dark one should not be made from it. Everything Desk makes from its indigo follows, light
-  and dark: `accent`, `accentHover`, `accentText`, `accentTint`, `accentTintBorder`, the focus border and ring of
-  every Input and SearchField, `selection`, `selectedRow`, `activeTint`, `primaryTint`, `iconTile`, `chart1`, the
-  info tone. Name one of them yourself only to give it another value. Never restyle a part by hand to re-accent it.
+
+## A site's own theme
+
+A site re-themes Desk with a few roles in site.json's `theme`; Desk makes the rest from them, light and dark.
+Never restyle a part by hand to re-colour it.
+
+- **Another accent**: `primary` (`"theme": {"primary": "#FF0D9488"}`), and `dark.primary` if the dark one should
+  not be made from it. Everything Desk makes from its indigo follows: `accent`, `accentHover`, `accentText`,
+  `accentTint`, `accentTintBorder`, the focus border and ring of every Input and SearchField, `selection`,
+  `selectedRow`, `activeTint`, `primaryTint`, `iconTile`, `chart1`, the info tone; so buttons, switches, sliders,
+  checkboxes, chosen chips and segments, tabs, links, the brand tile and a chosen row are all the site's. On a
+  light accent (a lime, a mint) the label and the glyph on it are dark, and text in the accent is darkened until
+  it reads on the page. Name one of these yourself only to give it another value.
+- **Another ground and ink**: `surface` and `onSurface` (`"surface": "#FFFAF4E6", "onSurface": "#FF2A2620"`).
+  Every neutral Desk draws is made from the two: the window, cards and panels, the sidebar and the bars, a tinted
+  band, the well, fields and selects, table heads, the selected tab's line, hairlines, hover fills, key caps and
+  the second, third and fourth inks each keep their place between the site's ground and its ink. A cream site has
+  cream cards with a warm hairline, never a white card or a zinc grey. Status and label hues stay.
+- **A dark site**: `"mode": "dark"`. The site opens on Desk's dark side on every device, in a render, in an app
+  and in the editor: `"theme": {"primary": "#FFC6F432", "mode": "dark"}` is a whole dark theme. Give
+  `dark.surface` and `dark.onSurface` for a dark ground of your own. (A near-black `surface` written as the light
+  one is drawn with Desk's dark side on that ground too, so it never gives white cards on black; `mode` is the
+  way to say it.)
+- **Fonts and corners**: `fontFamily`, `titleFontFamily` (titles and headings, the page's too), `radius` (Desk's
+  radii in proportion).
+
+## On a website's page
+
+Desk is an app's system, and its scale under an `App` is exactly the one above. A page written with the
+notation's page words (`Page`, `Nav`, `Section`, `Footer`) is a website, read from further back, so each look has
+a second style there, `<look>Page`, which a text under a `Page` takes by itself (in the page's bar and its foot
+the app's stay):
+
+| Look | In an App | On a Page |
+|---|---|---|
+| `Text.heading1`, `Text.pageTitle` | 30/700 (28) | 60/700, 52 on a tablet, 43 on a phone |
+| `Text.display` | 30/700 | 72/700 |
+| `Text.heading2` | 24/700 | 36/700 |
+| `Text.heading3` | 18/600 | 22/600 |
+| `Text.heading` | 15/600 | 18/600 |
+| `Text.lead` | 15 | 19 (17 on a phone) |
+| `Text`, `Text.muted`, `Text.strong` | 13 | 16 |
+| `Text.reading` | 14 | 17 |
+| `Text.small`, `Text.caption`, `Text.overline` | 12, 12, 11 | 14, 13, 12 |
+| `Text.number`, `Text.numberLarge` | 24, 30 | 40, 56 |
+
+Controls keep Desk's control scale on a page (34, `size=large` 40).
+
+- **Bands**: `Section` is the page's ground, `Section tint` Desk's `band` a step off it with a hairline above and
+  below (both follow the site's `surface`), `Section fill=primary` the accent with the text on it in `onPrimary`.
+- **A hero**: the first `Section` with the `Text.heading1`; with a picture, `Section image="assets/hero.jpg"`
+  (the picture covers the band under a scrim and the texts are white; `scrim=` says another), or a dark
+  `gradient=[…]`. An overline (`Text.overline`), the headline, a `Text.lead`, then one `Button` and one
+  `Button.outline`, `size=large`.
+- **A footer**: `Footer` with a `Row gap=48 top` of a first `Column grow` (the `Brand` and a line) and link
+  columns (`Column gap=8 w=160`: a `Text.overline` and `Text.muted "About" onTap={go about}` lines), then a
+  `Text.caption` line.
+
+A dense tool page (results and filters, a calculator, docs) suits Desk as it is; a landing page gets its weight
+from the scale above, the bands and a hero. Desk has no marketing blocks of its own (pricing tables, logo walls,
+testimonials): compose them from `Card`, `Grid` and the page scale.
 
 ## Its words
 
@@ -50,7 +106,7 @@ The notation's own words, in Desk's look:
 | Word | What it is here |
 |---|---|
 | `App`, `Sidebar`, `Main`, `Pane`, `Nav` | The window: a 240 sidebar on the chrome, panes split by hairlines, a top bar per pane. |
-| `Brand "Postbox" "Workspace" icon="mail"` | The mark (an accent tile, a white glyph) and the name at the sidebar's head. |
+| `Brand "Postbox" "Workspace" icon="mail"` | The mark (an accent tile, a white glyph) and the name at the sidebar's head. With no icon: the name alone, and in a rail the tile with the name's first letter. |
 | `NavSection "Mailbox"` | A group label: 11/600 spaced capitals. |
 | `NavItem "Inbox" icon="inbox" badge="4" shortcut="G I" selected={…}` | A 32 row: outline icon, label 13/500; selected: the accent tint and ink; a count in a soft pill. On a tablet's rail: the icon alone. |
 | `Footer` (in a Sidebar) | Pinned at the sidebar's foot over a rule. Written straight under the `Sidebar`, as its last lines. |
@@ -77,7 +133,7 @@ Desk's own words (components):
 | `SearchField @q hint="Search mail" shortcut="/"` | A search field with an outline icon, a key cap, a clear button. |
 | `FilterButton "Labels" icon="label" count=2` | A filter of a filter bar; tinted while it has values. |
 | `KeyCap "Ctrl K"` | A key, as pressed. |
-| `Status "Active" tone="success"` (`pill`) | A record's state: a dot and its label, or a soft pill. |
+| `Status "Active" tone="success"` (`pill`) | A record's state: a dot and its label, or a soft pill. Tones: `neutral`, `info`, `success`, `warning`, `danger` (`error` is read as `danger`, on `Banner` and `Stat` too). |
 | `Tag "Design" hue="violet"` (`outline`, `removable`, `dot=false`) | A label on a record: 20 high, radius 4, its hue's tint. |
 | `Avatar "Maya Chen" size=28` | Initials on a soft tint picked by the name (20, 28, 36). |
 | `AvatarGroup names=[…] max=3` | People together, overlapping, +N. |
