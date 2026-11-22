@@ -17,14 +17,14 @@
 # the same time, one on each worker, and a request of many captures is shared among the workers that are idle
 # (tool/cli/src/pool.dart, tool/render/src/fan.dart).
 #
-# How many workers: by default (--workers auto) it starts ONE and follows the load (tool/cli/src/autoscale.dart).
-# One client rendering one page at a time has one warm worker and pays for one engine (about 350 MB). When work
+# How many workers: by default (--workers auto) it starts FOUR and follows the load (tool/cli/src/autoscale.dart).
+# A burst of a few clients finds them up (about 350 MB each; --min-workers 1 keeps one engine). When work
 # waits with no worker idle (requests queued, or captures of a request nobody took), workers are added in growing
-# steps (one for one request that waits; for a queue to 4, then 8, 12, 20, 32, 48, ...), each up in a second or
+# steps (one for one request that waits; for a queue to 8, then 12, 20, 32, 48, ...), each up in a second or
 # two, with no fixed top: what stops the growth is
 # a worker that does not start, free memory that would fall under a reserve (an eighth of the machine's, 0.5 to
 # 2 GB), or a raise that did not raise the work done per second (that level is then a ceiling for two minutes).
-# Workers idle for --retire-after seconds (60) are ended, down to one. --min-workers and --max-workers bound it
+# Workers idle for --retire-after seconds (60) are ended, down to four. --min-workers and --max-workers bound it
 # (no top by default). --workers n is that many from start to stop; --workers 1 renders one request after
 # another, as before there were workers. A worker is replaced by a fresh one when it holds more than --recycle-mb
 # megabytes (1024), when it stops, or when a request took longer than --request-timeout seconds (1200) on it.

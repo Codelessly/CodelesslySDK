@@ -4,12 +4,12 @@
 //       [--min-workers n] [--max-workers n] [--retire-after s] [--idle s] [--queue n] [--request-timeout s]
 //       [--recycle-mb n] [--recycle-after n]
 //
-// How many workers: by default (`--workers auto`) the server starts one and follows its load (autoscale.dart).
-// One client rendering one page at a time, which is nearly all use, has one warm worker and pays for one engine.
+// How many workers: by default (`--workers auto`) the server starts four and follows its load (autoscale.dart).
+// A burst of a few clients finds them up; `--min-workers 1` is one warm worker and one engine for one client.
 // When work waits with no worker idle (requests in the queue, or captures of a request nobody took), workers are
 // added in growing steps, each up in about a second; what stops the growth is a signal, not a number: a worker
 // that does not start, free memory that would fall under a reserve, or a raise that did not raise the work done
-// per second (the level is then a ceiling for two minutes). Workers idle for a minute are ended, down to one.
+// per second (the level is then a ceiling for two minutes). Workers idle for a minute are ended, down to four.
 // `--workers n` is that many from start to stop.
 //
 // tool/render/serve.sh starts it (tool/codelessly serve). Rendering in Flutter's engine runs on one thread of one
@@ -50,6 +50,9 @@ import 'memory.dart';
 /// What a worker may hold before it is replaced by a fresh one (when idle): the engine's memory grows with the
 /// captures it has made, about a megabyte each.
 const defaultRecycleMb = 1024;
+
+/// The workers `--workers auto` starts with and keeps, unless `--min-workers` or `--max-workers` says fewer.
+const defaultMinWorkers = 4;
 
 /// How many requests at a time a client that has many (tool/codelessly states) should send a server that
 /// follows its load: half the processors (the other half are the same cores twice on most machines, and the
@@ -1188,7 +1191,9 @@ Future<int> poolMain(List<String> argv) async {
   // --max-workers when given. (The machine's memory is read from the system itself, memory.dart: no process
   // is started to learn it.)
   final fixed = workersOption(a['--workers']);
-  final least = number('--min-workers', 1), most = a['--max-workers'] == null ? null : number('--max-workers', 1);
+  // Four to start with and to keep (a burst of a few clients finds them up), fewer when --max-workers says so.
+  final most = a['--max-workers'] == null ? null : number('--max-workers', 1);
+  final least = number('--min-workers', most != null && most < defaultMinWorkers ? most : defaultMinWorkers);
   if (fixed != null && (a['--min-workers'] != null || a['--max-workers'] != null)) {
     throw const UsageError('--min-workers and --max-workers bound --workers auto; --workers <n> is that many.');
   }

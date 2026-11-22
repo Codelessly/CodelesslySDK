@@ -403,10 +403,10 @@ void main() {
 
     test('one client, one render after another: one worker, no request waits for a warm-up, nothing is shared', () async {
       if (skip != null) return markTestSkipped(skip!);
-      final failed = await serveNow('$root/serverA', const []);
+      final failed = await serveNow('$root/serverA', const ['--min-workers', '1']);
       if (failed != null) return markTestSkipped('No render server could start here: $failed');
       final atStart = (await _status())!;
-      expect((atStart['workers'] as List).length, 1, reason: 'serve starts one worker.');
+      expect((atStart['workers'] as List).length, 1, reason: 'serve --min-workers 1 starts one worker.');
       expect(scaling(atStart)['mode'], 'auto');
       // The requests a client sends right after `serve` returns, back to back.
       final single = ['$root/sites/capture', '--screen', 'tools', '--sizes', '390x844', '--now', '2026-01-01T09:00:00Z', '--dump-layout', '--timings'];
@@ -439,9 +439,26 @@ void main() {
       if (refs['site'] != null) expect(two.said, refs['site']!.said);
     });
 
+    test('with no option, four workers to start with and to keep', () async {
+      if (skip != null) return markTestSkipped(skip!);
+      final failed = await serveNow('$root/serverFour', const []);
+      if (failed != null) return markTestSkipped('No render server could start here: $failed');
+      Map<String, Object?>? s;
+      for (var i = 0; i < 150; i++) {
+        s = await _status();
+        if (s != null && (s['workers'] as List).length == 4) break;
+        await Future<void>.delayed(const Duration(milliseconds: 200));
+      }
+      expect((s!['workers'] as List).length, 4, reason: 'serve starts four workers: ${s['workers']}');
+      expect(scaling(s)['mode'], 'auto');
+      expect(scaling(s)['min'], 4);
+      final said = '${(await _bash(['tool/codelessly', 'serve', '--status'])).stdout}';
+      expect(said, contains(RegExp(r'Workers follow the load: limit \d+ now \(least 4, most not fixed\)')));
+    });
+
     test('requests that wait add workers; idle ones are ended, down to one; the status says why', () async {
       if (skip != null) return markTestSkipped(skip!);
-      final failed = await serveNow('$root/serverB', const ['--retire-after', '4']);
+      final failed = await serveNow('$root/serverB', const ['--min-workers', '1', '--retire-after', '4']);
       if (failed != null) return markTestSkipped('No render server could start here: $failed');
       var most = 1;
       var watching = true;
@@ -490,7 +507,7 @@ void main() {
     test('a worker that does not start cuts the pool to what runs, and that level is remembered', () async {
       if (skip != null) return markTestSkipped(skip!);
       // (The first two workers start; none after them does.)
-      final failed = await serveNow('$root/serverC', const [], environment: {'CODELESSLY_RENDER_DEBUG_FAIL_START_FROM': '2'});
+      final failed = await serveNow('$root/serverC', const ['--min-workers', '1'], environment: {'CODELESSLY_RENDER_DEBUG_FAIL_START_FROM': '2'});
       if (failed != null) return markTestSkipped('No render server could start here: $failed');
       final runs = await load('fail', 8, 8, jobs.first.args);
       for (final r in runs) {

@@ -342,12 +342,13 @@ one. Where this Flutter has no `flutter_tester` to run directly, the workers are
 after another.
 
 **How many workers: it follows the load** (`--workers auto`, the default; `tool/cli/src/autoscale.dart`). `serve`
-starts one worker and returns. One client rendering one page at a time, which is nearly all use, has that one
-warm worker and pays for one engine (about 350 MB, 1 % of a core while idle), and nothing about its renders is
+starts four workers and returns once the first is up, so a burst of a few clients finds them warm
+(`--min-workers 1` keeps one). One client rendering one page at a time, which is nearly all use, has one
+warm worker to itself; each engine is about 350 MB and 1 % of a core while idle, and nothing about its renders is
 shared, listed or polled: a request of one capture is rendered by one worker as a run of its own.
 
 - **More are added when work waits**: requests in the queue, or captures of a request nobody took, with no worker
-  idle for 150 ms. One waiting request adds one worker; a queue adds them in growing steps (to 4, then 8, 12, 20,
+  idle for 150 ms. One waiting request adds one worker; a queue adds them in growing steps (to 8, then 12, 20,
   32, 48, 72, ...), each step once the workers of the one before are up (about 1.5 s) and, from 4 on, once the
   work done per second at this level is measured. There is no fixed top: a queue of a thousand grows the pool for
   as long as growing helps.
@@ -357,7 +358,7 @@ shared, listed or polled: a request of one capture is rendered by one worker as 
   could add at best (past the cores, engines side by side only slow one another): it is taken back. The level
   that was too many is remembered as a ceiling for two minutes; under it the pool tries half the gap; after it,
   past it again (the machine's other load changes).
-- **Workers idle for a minute are ended**, the least used first, down to one (`--retire-after <seconds>`): a
+- **Workers idle for a minute are ended**, the least used first, down to four (`--retire-after <seconds>`): a
   minute keeps the pool through an agent's pauses between bursts, and a worker costs 1.5 s to start again
   against about 350 MB to keep. The whole server still stops after `--idle`.
 - **A request never waits for a warm-up or a start.** A new worker is given requests from the moment it is up; a
@@ -365,7 +366,7 @@ shared, listed or polled: a request of one capture is rendered by one worker as 
   warmest idle one) does no round of its own, and the others give a round up (at its next capture) when requests
   come for them; workers being started take no request, and a request goes to an idle warm worker first.
 - `--workers <n>` is that many from start to stop, as before (`--workers 1` renders one request after another);
-  `--min-workers <n>` and `--max-workers <n>` bound the automatic number (no top by default).
+  `--min-workers <n>` and `--max-workers <n>` bound the automatic number (four at least, no top by default).
 
 - **Separate agents.** Each request is rendered by a worker of its own, at the same time as the others', and is a
   run of its own as ever: a new app, its site read afresh from its files, its `--now` or `--clock`, its sizes, its

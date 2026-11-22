@@ -22,7 +22,7 @@
 #   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
 #   tool/codelessly serve [--workers n|auto] [--stop|--status]   keep the renderer running: a render costs its drawing
 #                                                  (a page at one size: a quarter of a second), not Flutter's start
-#                                                  (5 s). One worker to start with; more are added while requests
+#                                                  (5 s). Four workers to start with; more are added while requests
 #                                                  wait (no fixed top) and end when idle; --workers n fixes the number
 #                                                  (serve --help: --min-workers, --max-workers, --retire-after, --idle)
 #   tool/codelessly bench --site <site folder>     how many layouts and captures a second the render server gives
