@@ -833,6 +833,13 @@ bool _startsEmpty(ExpressionValues values, String expression, LayoutDocument doc
       if (l.isEmpty) continue;
       if (v.contains('length($l)==0') || v.contains('length($l)<1') || v.contains('isEmpty($l)') || v.contains('!length($l)') || v.contains('$l==[]')) return true;
     }
+    // Or while none of a list it reads counts (`if count(history,
+    // h=>h.date==day)==0` beside `each h in filter(history, h=>h.date==day)`:
+    // a day picked in a calendar with nothing on it), or none is there.
+    for (final name in seen) {
+      final of = RegExp.escape(name);
+      if (RegExp('(?<![A-Za-z0-9_.])count\\($of,.*\\)(==0|<1)').hasMatch(v) || RegExp('!any\\($of,').hasMatch(v)) return true;
+    }
   }
   return false;
 }

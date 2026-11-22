@@ -336,6 +336,13 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
     final focus = FocusManager.instance.primaryFocus;
     final context = focus?.context;
     if (scope == null || focus == null || context == null || !context.mounted) return;
+    // Elements the frame has deactivated (a view removed with a dialog of it
+    // open: the page is unmounted, and this called, while the dialog's
+    // elements are still mounted) are on their way out: the focus leaves
+    // with its widget, and a deactivated element's ancestors are not to be
+    // walked (Flutter throws, "Looking up a deactivated widget's ancestor
+    // is unsafe", while it finalizes the tree).
+    if (!scope._active || !_isActive(context)) return;
     var inside = identical(context, scope);
     if (!inside) {
       context.visitAncestorElements((e) => !(inside = identical(e, scope)));
@@ -345,6 +352,18 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
     if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
       FocusManager.instance.applyFocusChangesIfNeeded();
     }
+  }
+
+  /// Whether [context] is in the tree (not deactivated). Flutter says so in
+  /// debug builds only, where walking up from a deactivated element is an
+  /// error; in a release build the walk ends at the root of what was removed.
+  static bool _isActive(BuildContext context) {
+    var active = true;
+    assert(() {
+      active = context is! Element || context.debugIsActive;
+      return true;
+    }());
+    return active;
   }
 
   void _unmounted(_IslandScopeElement scope) {
@@ -599,10 +618,26 @@ class _IslandScopeElement extends ProxyElement {
   @override
   BuildScope get buildScope => _buildScope;
 
+  /// In the tree: mounted and not deactivated ([IslandHost.releaseFocus]).
+  bool _active = false;
+
   @override
   void mount(Element? parent, Object? newSlot) {
     host._scope = this;
     super.mount(parent, newSlot);
+    _active = true;
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    _active = true;
+  }
+
+  @override
+  void deactivate() {
+    _active = false;
+    super.deactivate();
   }
 
   @override

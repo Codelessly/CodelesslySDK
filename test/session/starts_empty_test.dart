@@ -87,6 +87,14 @@ void main() {
     testWidgets('the UI has an empty state for it', (tester) async {
       expect(await _empties(tester, 'filter(clips,c=>c.day==today)', more: '    if length(filter(clips,c=>c.day==today))==0\n      Text "Nothing today"\n'), isEmpty);
     });
+
+    testWidgets('an empty state that counts the list it reads (if count(clips, …)==0), or asks whether any is there', (tester) async {
+      // A day picked in a calendar with nothing on it: the line beside the list says so.
+      expect(await _empties(tester, 'filter(clips,c=>c.day==today)', more: '    if count(clips,c=>c.day==today)==0\n      Text "Nothing today"\n'), isEmpty);
+      expect(await _empties(tester, 'filter(clips,c=>c.day==today)', more: '    if !any(clips,c=>c.day==today)\n      Text "Nothing today"\n'), isEmpty);
+      // A count of something else of it is no empty state for this list.
+      expect(await _empties(tester, 'filter(clips,c=>c.day==today)', more: '    if count(clips,c=>c.day==1)==1\n      Text "One on the first"\n'), hasLength(1));
+    });
   });
 
   group('still reported', () {

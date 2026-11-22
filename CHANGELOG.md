@@ -1,3 +1,35 @@
+## 42.1.0
+
+Cards' blocks fill the panel or column that holds them, two crashes are fixed, and the shown checks say more. Read
+"Draws and behaves differently" before upgrading. With codelessly_api 42.1.0, which this needs.
+
+### Draws and behaves differently
+
+- **Cards: a block fills the place it is given.** `Callout`, `OptionList`, `DayPicker`, `Details`, `Checklist`,
+  `ProgressLine` and the other blocks that were at most 720 wide on a wide canvas are as wide as the `Panel`, the
+  `Card` or the page's column they stand in, so their edges line up with the panels beside them. A `ChatCard` and
+  a `Paragraph` keep the 720 measure. A page's measure is its column's: write `maxw=` on it.
+- **A wrapping list has a measured size.** Inside what measures its children (a grid's rows, a row that squeezes
+  them) it counts its real height; it counted 0, so a card's chips ran past its cell.
+- **Cards' `SiteNav` on a phone** cuts a long brand name with an ellipsis; it pushed the action button past the
+  edge.
+- **An app frame drawn in a place with no height** is as tall as its tallest pane (it threw; see Fixed).
+
+### Fixed
+
+- **A view removed while one of its dialogs has the focus** no longer throws "Looking up a deactivated widget's
+  ancestor is unsafe".
+- **A row or column that stretches its children across an axis with no bound** is laid out to its content and
+  stretched to that; it gave its children an infinite size and threw.
+
+### Shown checks
+
+- `content_overflows` says when a line with a written height is given less than three quarters of it in a column,
+  and names the lines to indent under it; for a text taller than the column it is in, it gives both heights; for a
+  list of copies past a row's edge it says wrap, scroll or fewer.
+- `no_size` on a growing cell beside fixed ones counts the row's gaps and padding, and names the cause.
+- `list_empty` is not said of a list whose empty state is written with `count(list, …)==0` or `!any(list, …)`.
+
 ## 42.0.0
 
 A major version: tables, grids and one-line texts size themselves differently, and a site's theme reaches its

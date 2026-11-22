@@ -439,7 +439,10 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
   /// axis (0 or less: it fits).
   double get _pastEnd {
     var end = 0.0;
+    // (A layout that threw leaves boxes with no size: nothing to measure.)
+    if (!hasSize) return 0;
     for (var c = firstChild; c != null; c = childAfter(c)) {
+      if (!c.hasSize) continue;
       final at = (c.parentData! as FlexParentData).offset;
       end = math.max(end, direction == Axis.horizontal ? at.dx + c.size.width : at.dy + c.size.height);
     }
@@ -482,7 +485,15 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
   BoxConstraints? _innerConstraints;
 
   @override
-  BoxConstraints get constraints => _innerConstraints ?? super.constraints;
+  BoxConstraints get constraints {
+    if (_innerConstraints case final BoxConstraints inner) return inner;
+    final BoxConstraints given = super.constraints;
+    final double? across = _acrossTight;
+    if (across == null) return given;
+    return direction == Axis.horizontal
+        ? given.copyWith(minHeight: given.constrainHeight(across), maxHeight: given.constrainHeight(across))
+        : given.copyWith(minWidth: given.constrainWidth(across), maxWidth: given.constrainWidth(across));
+  }
 
   BoxConstraints _withoutGaps(BoxConstraints constraints, double gaps) {
     double shorten(double extent) => math.max(0, extent - gaps);
@@ -657,7 +668,7 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
 
   @override
   void performLayout() {
-    _layOut();
+    _layOutAcross();
     _lineUp();
     _fillContentCross = 0;
     final bool Function(RenderBox)? fills = _fillsAcross;
@@ -671,6 +682,47 @@ class RenderCodelesslyFlex extends RenderFlex implements ControlLineReporter {
             ? child.getMaxIntrinsicHeight(child.size.width)
             : child.getMaxIntrinsicWidth(child.size.height),
       );
+    }
+  }
+
+  /// While set, the children are not stretched: the pass that finds how
+  /// thick they are where nothing bounds the cross axis ([_layOutAcross]).
+  bool _unstretched = false;
+
+  @override
+  CrossAxisAlignment get crossAxisAlignment => _unstretched ? CrossAxisAlignment.start : super.crossAxisAlignment;
+
+  /// The cross extent found by the unstretched pass, given to the second.
+  double? _acrossTight;
+
+  /// [_layOut], and where the children stretch across an axis nothing
+  /// bounds (a row that fills the height of a column as tall as its
+  /// content, in a view as tall as its content: an app's frame drawn alone),
+  /// as thick as the thickest of them, each stretched to that, as a flex
+  /// that hugs is ([RenderHugCross]). Flutter stretches only to a bound: the
+  /// children were given an infinite extent, which no box takes
+  /// ("BoxConstraints forces an infinite height"), and nothing above was
+  /// laid out.
+  void _layOutAcross() {
+    final bool row = direction == Axis.horizontal;
+    final BoxConstraints given = constraints;
+    if (super.crossAxisAlignment != CrossAxisAlignment.stretch || (row ? given.hasBoundedHeight : given.hasBoundedWidth)) {
+      _layOut();
+      return;
+    }
+    _unstretched = true;
+    try {
+      _layOut();
+    } finally {
+      _unstretched = false;
+    }
+    final double natural = row ? size.height : size.width;
+    if (!natural.isFinite) return;
+    _acrossTight = natural;
+    try {
+      _layOut();
+    } finally {
+      _acrossTight = null;
     }
   }
 

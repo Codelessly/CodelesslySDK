@@ -46,7 +46,7 @@
    "type": "row",
    "children": ["mark", "brandName"],
    "props": {"crossAxisAlignment": "center", "spacing": 10},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true},
    "states": {"pressed": {"brandRow": {"opacity": 0.75}}},
    "actions": [
     {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": ""}]}
@@ -68,8 +68,8 @@
   },
   "brandName": {
    "type": "text",
-   "props": {"text": "${props.brand}", "style": {"from": "headingWide", "fontSize": 18, "fontWeight": 700}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "props": {"text": "${props.brand}", "style": {"from": "headingWide", "fontSize": 18, "fontWeight": 700}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true}
   },
   "linksWrap": {
    "type": "row",
