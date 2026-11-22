@@ -654,6 +654,21 @@ NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance, bo
   return asIndex;
 }
 
+/// The copy of repeated node [id] at position [index] of its list (from
+/// 0), among the copies built; null when none is.
+NodeBox? copyAt(RenderTree tree, String id, int index, {Object? instance}) {
+  final binder = tree.binder;
+  if (binder == null) return null;
+  var copies = scopedBoxesOf(tree, id, instance);
+  if (copies.isEmpty) copies = tree.boxesAtPath(id);
+  for (final b in copies) {
+    if (!b.attached) continue;
+    final scope = binder.scopeFor(b.source, b.id, b.instance);
+    if (scope != null && readPath(scope, 'index') == index) return b;
+  }
+  return null;
+}
+
 /// The box (global) of the node [OpenModalAction.anchorNode] names, in a
 /// list the copy built for [OpenModalAction.anchorItem]. Opened from a
 /// screen's `load`, the node may not be laid out yet: give it a few frames.
@@ -699,8 +714,22 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
           tree.boxesNamed(id).lastOrNull);
   // The copy whose item has that key, built; else the copy at that index
   // (`item={3}`), unless a list has an item keyed 3 it has not built.
-  var box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance, byIndex: false));
-  if (tree != null && item.isNotEmpty && box == null) {
+  // The copy at a position ([ScrollToAction.index]), whatever its item's
+  // key: built first when its list has not built it yet.
+  final position = a.index.isEmpty ? null : (num.tryParse(run.text(a.index).trim())?.round() ?? -1);
+  var box = tree == null
+      ? null
+      : position != null
+          ? (position < 0 ? null : copyAt(tree, id, position, instance: run.instance))
+          : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance, byIndex: false));
+  if (tree != null && position != null && position >= 0 && box == null) {
+    for (final list in LazyItemLists.repeating(tree, id)) {
+      if (!await list.buildItem(position)) continue;
+      box = copyAt(tree, id, position, instance: run.instance);
+      if (box != null) break;
+    }
+  }
+  if (tree != null && position == null && item.isNotEmpty && box == null) {
     // The copy of an item a list has not built (a long list builds the
     // items near its view only: a chat's first message, seen from its
     // end): the list scrolls until it is built, then it is revealed.
@@ -721,7 +750,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   // Not on this screen: from an overlay (a menu's item, a dialog's button),
   // the node is the page's under it (support desk, test 11: a Menu's
   // `scrollTo node=threadEnd` found nothing; round 10, R48).
-  if (tree != null && item.isEmpty && (box == null || !box.attached)) {
+  if (tree != null && item.isEmpty && position == null && (box == null || !box.attached)) {
     for (final other in RenderTree.live) {
       if (identical(other, tree)) continue;
       final b = other.boxOf(id) ?? other.boxesNamed(id).lastOrNull;
@@ -739,7 +768,7 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
       run.host.reportError(
           ActionFailed(
               a.type,
-              'no node "$id"${item.isEmpty ? '' : ' (item $item)'} is on screen to scroll to${a.node.contains(r'${') ? ' ("${a.node}" gave "$id")' : ''}'
+              'no node "$id"${position != null ? ' (index $position)' : item.isEmpty ? '' : ' (item $item)'} is on screen to scroll to${a.node.contains(r'${') ? ' ("${a.node}" gave "$id")' : ''}'
               '${template == null ? '' : '; "$id" is the key of an item of a list: its copy is scrolled to by its item, {"type": "scrollTo", "node": "$template", "item": "$id"} (scrollTo node=$template item={…})'}',
               nodeId: run.node?.id),
           StackTrace.current,
