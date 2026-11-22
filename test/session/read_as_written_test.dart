@@ -160,7 +160,7 @@ Column pad=16
         rect rect=[0,0,20,20] fill=#FF000000
       each b in bars
         rect rect=[{index*10},0,6,{b.v}] fill=#FF2563EB
-  Box shadow=soft pad=8
+  Box shadow=sm pad=8
     Text "Count {0}"
     Text "Use \\{name\\} for the name"
 ''');

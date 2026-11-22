@@ -69,8 +69,9 @@ void main() {
           uses += r.vocabulary.where((u) => u.kind == 'definition' && u.node != null).length;
           for (final i in r.issues) {
             // A use's own words a definition reads (an animate= written
-            // with a condition) are the answer's: those are not counted.
-            if (RegExp(r'^[A-Z][A-Za-z]*\.txt:\d+: ').hasMatch(i.message) && !i.message.contains('animate')) said.add('${f.uri.pathSegments.last}/${s.name}: $i');
+            // with a condition, a hidden= given one where visible={…} is
+            // written) are the answer's: those are not counted.
+            if (RegExp(r'^[A-Z][A-Za-z]*\.txt:\d+: ').hasMatch(i.message) && !i.message.contains('animate') && !i.message.contains('A line shown by a condition is written visible')) said.add('${f.uri.pathSegments.last}/${s.name}: $i');
           }
         }
       }

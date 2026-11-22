@@ -8,5 +8,5 @@ Row#brand gap=10 middle pad={props.rail ? [4, 4, 4, 12] : [8, 4, 8, 12]} w=hug
   Column#mark w=32 h=32 radius={theme.radii.controlSmall} fill=accent center middle visible={props.icon != ''}
     Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=18 color=onAccent
   Column#words gap=1 grow visible={!props.rail}
-    Text#brandName "{props.name}" font="Inter Display" size=16 weight=700 lineHeight=1.25 letterSpacing=-0.3 color=ink maxLines=1 overflow=ellipsis
+    Text#brandName "{props.name}" fontFamily="Inter Display" size=16 weight=700 lineHeight=1.25 letterSpacing=-0.3 color=ink maxLines=1 overflow=ellipsis
     Text#brandNote "{props.note}" size=12.5 weight=500 lineHeight=1.3 color=inkFaint maxLines=1 overflow=ellipsis visible={props.note != ''}
