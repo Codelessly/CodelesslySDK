@@ -3,7 +3,7 @@
 // the web.
 import 'dart:math' as math;
 
-import 'package:codelessly_api/codelessly_api.dart' show PageTransition, RouteTransition;
+import 'package:codelessly_api/core.dart' show PageTransition, RouteTransition;
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kIsWeb;
 import 'package:flutter/gestures.dart' show HorizontalDragGestureRecognizer;
 import 'package:flutter/services.dart' show PredictiveBackEvent;
@@ -170,12 +170,30 @@ final class AnimatedPageTransitions extends CodelesslyPageTransitions {
 /// The page transitions of the project the screens below belong to: what a
 /// full-screen modal opens with.
 class CodelesslyPageTransitionsScope extends InheritedWidget {
-  const CodelesslyPageTransitionsScope({super.key, required this.transitions, this.fill, required super.child});
+  const CodelesslyPageTransitionsScope({super.key, required this.transitions, this.fill, this.pageRoute, required super.child});
 
   final CodelesslyPageTransitions transitions;
 
   /// The project's surface, behind two screens that move.
   final Color Function()? fill;
+
+  /// The route a screen-covering modal of the project opens in (the
+  /// project's own page route); null: a [CodelesslyModalPageRoute].
+  final PageRoute<T> Function<T>({required WidgetBuilder builder, bool fullscreenDialog})? pageRoute;
+
+  /// The route a screen-covering modal opens in at [context]: the project's
+  /// above it, or with no project there (agent UI) a page playing the
+  /// platform's transition.
+  static PageRoute<T> modalRouteAt<T>(BuildContext context, {required WidgetBuilder builder}) {
+    final project = maybeOf(context);
+    final make = project?.pageRoute;
+    if (make != null) return make<T>(builder: builder, fullscreenDialog: true);
+    return CodelesslyModalPageRoute<T>(
+      builder: builder,
+      transitions: project?.transitions ?? CodelesslyPageTransitions.platform,
+      fill: project?.fill,
+    );
+  }
 
   static CodelesslyPageTransitionsScope? maybeOf(BuildContext context) =>
       context.getInheritedWidgetOfExactType<CodelesslyPageTransitionsScope>();
@@ -575,6 +593,45 @@ final class _ZoomPageTransitions extends CodelesslyPageTransitions {
         reverseBuilder: (context, animation, child) => _exit(animation, child),
         child: child,
       );
+}
+
+/// A screen-covering modal's page where no project says its route (agent
+/// UI, which compiles none of the app): it rises as a full-screen dialog
+/// with [transitions], over nothing but the screen beneath.
+class CodelesslyModalPageRoute<T> extends PageRoute<T> with CodelesslyHeroRoute<T>, CodelesslyPageTransitionsRoute<T> {
+  CodelesslyModalPageRoute({
+    required this.builder,
+    super.settings,
+    this.transitions = CodelesslyPageTransitions.platform,
+    this.fill,
+  }) : super(fullscreenDialog: true);
+
+  final WidgetBuilder builder;
+
+  @override
+  final CodelesslyPageTransitions transitions;
+
+  @override
+  final Color Function()? fill;
+
+  @override
+  bool get maintainState => true;
+
+  @override
+  bool get opaque => true;
+
+  @override
+  Color? get barrierColor => null;
+
+  @override
+  String? get barrierLabel => null;
+
+  @override
+  bool seeThroughAt(BuildContext context) => false;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) =>
+      Semantics(scopesRoute: true, explicitChildNodes: true, child: builder(context));
 }
 
 /// What a route that plays a [CodelesslyPageTransitions] is made of: the
