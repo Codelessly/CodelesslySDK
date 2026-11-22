@@ -38,7 +38,9 @@ void main() {
   test('every layout document checked in is of schema 3', () {
     final older = <String>[];
     for (final dir in ['test', 'examples', 'example', 'design_systems', 'benchmark', 'tool', 'docs']) {
-      for (final f in _files(dir, (p) => p.endsWith('.json'))) {
+      // (A design system's tool/repairs/<Name>.json is a merge patch for a
+      // component, not a document: it names only what it changes.)
+      for (final f in _files(dir, (p) => p.endsWith('.json') && !p.contains('/tool/repairs/'))) {
         final Object? json;
         try {
           json = jsonDecode(f.readAsStringSync());

@@ -247,7 +247,7 @@ export 'src/app/hosted_plugins.dart';
 export 'src/features/hosted/hosted.dart' show hostedPluginFeature;
 export 'src/app/navigation.dart' hide CanvasLocationMatch;
 export 'src/app/overlay_screens.dart';
-export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute, CodelesslyPageTransitionsScope;
+export 'src/app/page_transitions.dart' hide CodelesslyPageTransitionRoute, CodelesslyPageTransitionsScope, CodelesslyModalPageRoute;
 export 'src/app/paywalls.dart';
 export 'src/app/persisted_variables.dart';
 export 'src/app/presenter.dart';

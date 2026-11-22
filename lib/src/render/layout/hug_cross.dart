@@ -90,6 +90,38 @@ class RenderHugCross extends RenderProxyBox {
   }
 }
 
+/// A flex whose children all fill its cross axis and have no size there:
+/// where the parent gives no bound across, it is as thick as its children's
+/// content (their max intrinsic extent), not 0; where the parent gives a
+/// bound, it is laid out as it is given.
+class RenderHugUnbounded extends RenderProxyBox {
+  /// The child's cross axis.
+  Axis get cross => _cross;
+  Axis _cross = Axis.horizontal;
+  set cross(Axis value) {
+    if (_cross == value) return;
+    _cross = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void performLayout() {
+    final RenderBox? box = child;
+    final bool bounded = _cross == Axis.horizontal ? constraints.hasBoundedWidth : constraints.hasBoundedHeight;
+    if (box == null || bounded) {
+      super.performLayout();
+      return;
+    }
+    if (_cross == Axis.horizontal) {
+      final double width = constraints.constrainWidth(box.getMaxIntrinsicWidth(constraints.maxHeight));
+      box.layout(constraints.copyWith(minWidth: width, maxWidth: width), parentUsesSize: true);
+    } else {
+      final double height = constraints.constrainHeight(box.getMaxIntrinsicHeight(constraints.maxWidth));
+      box.layout(constraints.copyWith(minHeight: height, maxHeight: height), parentUsesSize: true);
+    }
+    size = box.size;
+  }
+}
 
 /// A leaf box that fills the cross axis of a [RenderHugCross] row/column:
 /// while the flex measures its natural thickness (unbounded across), it

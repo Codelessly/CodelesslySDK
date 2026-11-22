@@ -62,8 +62,9 @@ bool _near(Color a, Color b, [int tolerance = 40]) =>
 
 void main() {
   setUpAll(() async {
-    final roboto = File('/opt/flutter/bin/cache/artifacts/material_fonts/Roboto-Regular.ttf');
-    final medium = File('/opt/flutter/bin/cache/artifacts/material_fonts/Roboto-Medium.ttf');
+    final fonts = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}/bin/cache/artifacts/material_fonts';
+    final roboto = File('$fonts/Roboto-Regular.ttf');
+    final medium = File('$fonts/Roboto-Medium.ttf');
     if (!roboto.existsSync()) return;
     final loader = FontLoader('Roboto')
       ..addFont(Future.value(ByteData.sublistView(roboto.readAsBytesSync())))

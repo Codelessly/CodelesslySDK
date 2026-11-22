@@ -26,14 +26,18 @@ String _packageRoot(String name) {
     if (p['name'] == name) {
       final root = Uri.parse(p['rootUri']! as String);
       final base = Directory('.dart_tool').absolute.uri;
-      final path = base.resolveUri(root).toFilePath();
+      final path = _slashes(base.resolveUri(root).toFilePath());
       return path.endsWith('/') ? path : '$path/';
     }
   }
   throw StateError('No package $name');
 }
 
-final _sdkRoot = Directory.current.absolute.path;
+/// [path] with `/` between its parts on every platform (Windows writes `\`),
+/// so the prefixes below match there too.
+String _slashes(String path) => path.replaceAll(r'\', '/');
+
+final _sdkRoot = _slashes(Directory.current.absolute.path);
 final _apiRoot = _packageRoot('codelessly_api');
 
 /// The files [file] (an absolute path) imports, exports or includes, among
@@ -51,7 +55,7 @@ List<String> _targets(String file) {
       } else if (!uri.contains(':')) {
         path = File(file).parent.uri.resolve(uri).toFilePath();
       }
-      if (path != null) out.add(File(path).absolute.path.replaceAll(RegExp(r'/\./'), '/'));
+      if (path != null) out.add(_slashes(File(path).absolute.path).replaceAll(RegExp(r'/\./'), '/'));
     }
   }
   return out;
@@ -80,7 +84,7 @@ bool _sdkCore(String path) => ['render', 'widgets', 'runtime', 'scripting']
 void main() {
   final sdkFiles = [
     for (final f in Directory('lib').listSync(recursive: true).whereType<File>())
-      if (f.path.endsWith('.dart')) f.absolute.path,
+      if (f.path.endsWith('.dart')) _slashes(f.absolute.path),
   ];
 
   test('the API package was found', () {

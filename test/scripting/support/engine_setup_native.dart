@@ -2,12 +2,31 @@ import 'dart:io';
 
 import 'package:codelessly_sdk/src/scripting/sandbox/quickjs_sandbox.dart';
 
+final String _path =
+    '${Directory.current.path}/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.${Platform.isMacOS ? 'dylib' : 'so'}';
+
+/// Why the tests that run scripts cannot run on this machine, or null when
+/// they can: the test build of QuickJS (`tool/build_quickjs.sh`) is for
+/// Linux and macOS, and needs CMake with a C compiler where it is not
+/// built yet.
+final String? scriptEngineUnavailable = () {
+  if (File(_path).existsSync()) return null;
+  if (!Platform.isLinux && !Platform.isMacOS) {
+    return 'QuickJS for the tests is built on Linux and macOS only (tool/build_quickjs.sh): '
+        'not on ${Platform.operatingSystem}';
+  }
+  try {
+    if (Process.runSync('cmake', ['--version']).exitCode == 0) return null;
+  } on ProcessException {
+    // No cmake.
+  }
+  return 'QuickJS for the tests is not built and cannot be here: tool/build_quickjs.sh needs CMake and a C compiler';
+}();
+
 /// Points the SDK at a QuickJS build for this machine, building it with
 /// `tool/build_quickjs.sh` (CMake and a C compiler) when it's missing.
 void setUpScriptEngine() {
-  final String ext = Platform.isMacOS ? 'dylib' : 'so';
-  final String path =
-      '${Directory.current.path}/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.$ext';
+  final String path = _path;
   // Flutter runs suites in separate processes. Serialize their first build
   // so concurrent CMake configurations cannot corrupt the shared cache.
   Directory(File(path).parent.path).createSync(recursive: true);

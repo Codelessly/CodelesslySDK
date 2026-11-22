@@ -377,8 +377,14 @@ void main() {
           }
           // Wrapping, the two shared a run (and were lined up) at every
           // alignment, but where a wide field and the nested row don't fit
-          // one run of the 384 px row.
-          if (!partner.name.startsWith('a nested row')) expect(wrappedOnOneRun, aligns.length);
+          // one run of the 384 px row, and where one of them is a field that
+          // grows: a run has no room to share out, so a field that fills
+          // (it has no width of its own to measure) is a line of its own,
+          // as wide as the row.
+          bool ownLine(Case c) => c.lines.first.startsWith('Input') && c.lines.first.endsWith(' grow');
+          if (!partner.name.startsWith('a nested row')) {
+            expect(wrappedOnOneRun, ownLine(field) || ownLine(partner) ? 0 : aligns.length);
+          }
         });
       }
     }

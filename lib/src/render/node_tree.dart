@@ -2506,7 +2506,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
     final crossMin = isRow ? c.minHeight : c.minWidth;
     final cross = n.prop(FlexProps.crossAxisAlignment);
     final stretches = cross == api.CrossAxisAlignment.stretch;
-    var measureCross = false, stretchFallsBack = false, hugStretch = false;
+    var measureCross = false, measureUnbounded = false, stretchFallsBack = false, hugStretch = false;
     bool Function(RenderBox)? fillsAcross;
     _dependsOnDescendants = crossMin == null && crossWraps;
     if (crossMin == null && crossWraps) {
@@ -2517,9 +2517,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
         final blocked = children.any(_subtreeBlocksIntrinsics);
         measureCross = !blocked;
         stretchFallsBack = blocked && stretches;
+      } else if (_onlyFillsAcrossWithNoSize(isRow, children)) {
+        // Nothing in it has a thickness: every child fills across and
+        // none has a design size (a Grid's rows of equal cells). Where
+        // its parent gives it no bound across either (a row, a bubble as
+        // wide as its content), its children's content sets it, as under
+        // IntrinsicWidth / IntrinsicHeight; it was 0 thick. With a bound
+        // its children fill that, as before.
+        measureUnbounded = !children.any(_subtreeBlocksIntrinsics);
       }
     }
-    if (measureCross) {
+    if (measureUnbounded) {
+      chain.add(_obtain<RenderHugUnbounded>('hugUnbounded', RenderHugUnbounded.new)..cross = isRow ? Axis.vertical : Axis.horizontal);
+    } else if (measureCross) {
       chain.add(isRow
           ? _obtain<RenderIntrinsicHeight>('intrH', RenderIntrinsicHeight.new)
           : _obtain<RenderIntrinsicWidth>('intrW', RenderIntrinsicWidth.new));
@@ -2613,6 +2623,15 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
   static bool _fillsAcrossWrapping(bool isRow, List<Node> children) {
     bool fills(Node c) => c.type != 'spacer' && (isRow ? c.vFit : c.hFit) == SizeFit.fill;
     return children.any(fills) && children.any((c) => c.type != 'spacer' && !fills(c));
+  }
+
+  /// Every child fills the cross axis of a wrapping row/column and none has
+  /// a design size there: unmeasured, the flex is 0 thick.
+  static bool _onlyFillsAcrossWithNoSize(bool isRow, List<Node> children) {
+    final shown = children.where((c) => c.type != 'spacer');
+    return shown.isNotEmpty &&
+        shown.every((c) =>
+            (isRow ? c.vFit : c.hFit) == SizeFit.fill && (isRow ? c.layout.height.value : c.layout.width.value) == 0);
   }
 
   /// Whether intrinsic measurement can't see into [node]'s subtree

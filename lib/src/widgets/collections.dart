@@ -825,6 +825,7 @@ void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..headerColor = n.prop(TableViewProps.headerColor)?.flutter
     ..stripeColor = n.prop(TableViewProps.stripeColor)?.flutter
     ..gridLine = lineColor.alpha == 0 || lineWidth <= 0 ? null : BorderSide(color: lineColor.flutter, width: lineWidth)
+    ..columnLines = n.prop(TableViewProps.columnLines)
     ..edge = edge
     ..headerBorder = n.prop(TableViewProps.headerBorderColor) == null
         ? null

@@ -9,7 +9,17 @@
 # Usage: tool/build_quickjs.sh  ->  .dart_tool/codelessly_quickjs/libcodelessly_quickjs.{so,dylib}
 set -euo pipefail
 cd "$(dirname "$0")/.."
-ROOT=$(python3 - <<'PY'
+# The first Python that runs (python3 is a stub that only prints on some
+# Windows machines; `py` is the launcher there).
+PYTHON=
+for candidate in python3 python py; do
+  if "$candidate" -c "" >/dev/null 2>&1; then PYTHON=$candidate; break; fi
+done
+if [ -z "$PYTHON" ]; then
+  echo "No Python to read .dart_tool/package_config.json with (python3, python or py)." >&2
+  exit 1
+fi
+ROOT=$("$PYTHON" - <<'PY'
 import json, os
 config = json.load(open('.dart_tool/package_config.json'))
 for package in config['packages']:

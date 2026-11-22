@@ -1384,6 +1384,12 @@ class _LayoutViewState extends State<_LayoutView> {
     content = CodelesslyPageTransitionsScope(
       transitions: config.pageTransitions,
       fill: () => pageFillOf(_codelessly),
+      pageRoute: <T>({required WidgetBuilder builder, bool fullscreenDialog = false}) => CodelesslyPageRoute.of<T>(
+        transitions: config.pageTransitions,
+        fill: () => pageFillOf(_codelessly),
+        fullscreenDialog: fullscreenDialog,
+        builder: builder,
+      ),
       child: content,
     );
     // What a captureScreenshot action of this screen captures.

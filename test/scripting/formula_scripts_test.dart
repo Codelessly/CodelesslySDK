@@ -255,6 +255,10 @@ Future<void> _advance(WidgetTester tester, int milliseconds) async {
 }
 
 void main() {
+  if (scriptEngineUnavailable case final String why) {
+    test('scripts run on $scriptEngineName', () {}, skip: why);
+    return;
+  }
   {
     setUpAll(setUpScriptEngine);
 

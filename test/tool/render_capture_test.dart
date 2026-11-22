@@ -304,10 +304,18 @@ void main() {
     expect(overflow['message'], allOf(
       contains('"dish#1"'),
       contains('height is fixed at 60'),
-      contains('needs 92'),
       contains('dishName'),
       contains('{"hug": 60}'),
     ), reason: '${report.diagnostics}');
+    // What it needs is its two texts as this machine's text engine measures
+    // them (a line of Roboto at 24 is 27.5 to 29 high by platform), its
+    // padding (16) and its spacing (4): more than the 60 it is fixed at.
+    final said = RegExp(r'needs (\d+) \(dishName (\d+), dishPrice (\d+),').firstMatch(overflow['message'] as String);
+    expect(said, isNotNull, reason: '${overflow['message']}');
+    final [needs, name, price] = [for (var i = 1; i <= 3; i++) int.parse(said![i]!)];
+    expect(needs, name + price + 20);
+    expect(name, greaterThan(price * 2), reason: 'the name wraps to two lines of a larger size');
+    expect(needs, greaterThan(60));
   });
 
   testWidgets('a grid with fillGaps places a later small item in the hole an earlier span left (grid-auto-flow: dense)', (tester) async {
