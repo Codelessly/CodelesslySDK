@@ -1,3 +1,90 @@
+## 42.0.0
+
+A major version: tables, grids and one-line texts size themselves differently, and a site's theme reaches its
+design system. Read "Draws and behaves differently" before upgrading. New: a render server that renders in
+parallel, dragging that stays inside a `CodelesslyViewHost`, a design pass that keeps the safe part of an answer,
+and wide forms of Cards (codelessly_api 42.0.0, which this needs).
+
+### Draws and behaves differently
+
+- **Tables.** A running table that hugs its height is as tall as its rows, at most its cap; it was its cap. A
+  row whose cell's content is taller than the row grows to it (wrapped text was cut). The columns of a
+  `fillWidth` table given less than their widths share the squeeze down to 72 before the table scrolls sideways.
+- **A one-line text is not narrowed below its line**: with no ellipsis it reports its whole line as the least it
+  can be, so a row with no room narrows what can wrap beside it first.
+- **A grid given no width** is as wide as its columns of its widest cell, or of squares of its cells' length; it
+  was 0 wide.
+- **A child that fills, in a row that wraps**, with no design size and content that cannot be measured (a line
+  that scrolls sideways, a field) is a line of its own as wide as the row; it was 0 wide.
+- **A row or column as thick as its content whose children all fill across**, in a parent that gives no bound
+  (a grid of cells written out beside a text, or in a box as wide as its content), is as thick as their content;
+  it was 0 thick and drew nothing.
+- **A themed `DataTable`** draws rules under its rows only (`columnLines`, below).
+- **Charts write their labels in the page's font.** A chart, gauge or barcode that names no font takes the font
+  of the text around it; it took the engine's default.
+- **A page as tall as its content reaches its window's foot**: a canvas that hugs its height is at least as tall
+  as its host says.
+- **Cards and Desk.** A site's theme reaches the design system's page ground, cards, bands and inks (white cards
+  on a tinted page, a dark site). `Brand`, `SideButton`, `NavSection`, `NavItem` and `Account` fold on their
+  `rail` parameter alone, so under a sidebar that stays as wide as written they keep their labels. Cards'
+  tab-like controls take a phone's 44 high tap areas, and `Panel` its phone padding, by the shown width and not
+  the screen's. Cards' `SiteNav` shows no second action unless one is written.
+
+### Fixed
+
+- **A view moved with a `GlobalKey` into a place with no semantics** (under `ExcludeSemantics`) forgets the
+  semantics built where it was; once that place was removed the next layout asserted in Flutter's semantics pass.
+- **Agent UI (`UiSession`, `CodelesslyView`) compiles no feature library again**: a full-screen modal no longer
+  pulls in the app widget.
+- **The test suite runs on Windows**; script tests are skipped with a reason where QuickJS cannot be built, and
+  `tool/build_quickjs.sh` uses the first Python that runs.
+
+### New
+
+- **`CodelesslyViewHost`: what moves over a view stays in the host's box.** The copy of a dragged node, the row
+  lifted out of a reorderable list, a card dragged between lists and a lifted shared element are drawn in the
+  host's overlay: in the box's coordinates, clipped to it and scaled with it. A drag outside the box is over
+  nothing of the view. With no host nothing changes.
+- **`handleAction` is exported**, so a host's own handler of a core action can run the built-in one after it.
+- **`scrollTo index=`** reveals the copy at that position of its list (from 0), whatever the items' keys are,
+  built first when the list has not built it.
+- **Calendar `weekStart`** (`monday` … `sunday`) names the day an inline calendar's weeks start on, and
+  **table `columnLines`** (false: no lines between columns) is drawn at rest and running.
+- **Formulas a document cannot run**: `unreadableFormulas`, `unknownFunctionCalls`, `formulasOf`,
+  `nearestFunctions` and `formulaWhereWritten` are exported: the formulas that do not parse or call a function
+  that does not exist, and where each was written.
+- **The design pass keeps the safe part of an answer.** Each operation is tried on its own: one that would hide
+  or disable a node, reorder or remove content, change what a node says or does, drop a color or style that
+  follows a value, or make a text unreadable (a font size under 10, a contrast under 3:1) is left out and
+  reported in `DesignOutcome.rejected` with its reason; the rest is applied as one undo step.
+  `DesignPass.restyleFaults` and `DesignPass.readsValue` check the same rules.
+- **Cards for a desktop**: wide forms of `ChatCard`, `Segments`, `ComparisonTable`, `ChartCard`, `DayHeader`,
+  `MapPanel`, `Media` and `PhotoGallery`; ten page words (`Brand`, `SideButton`, `NavSection`, `NavItem`,
+  `Account`, `PageHeader`, `Panel`, `ListRow`, `BulkBar`, `PaneHeader`); `sizes.rail` folds a sidebar of them at
+  a tablet's width. `TO-DESKTOP.md` says how.
+- **Desk**: a page scale for websites, and tones and washes by the theme's names.
+- **Shown checks.** `low_contrast` is reported by the session's and the render's checks. `content_overflows` is
+  said of a text of several words given a word's width under a row, and of a field or a select narrower than 44.
+  `no_size` says why (a width taken by what is beside it in its row, a height no list row gives) and reads the
+  document's own boxes only. `list_empty` is not said of a list that starts empty on purpose, nor
+  `component_empty` of a call a rule hides.
+
+### `tool/codelessly`
+
+- **The render server renders in parallel**: `serve` runs a pool of render workers behind one port and token, so
+  requests from separate clients render at the same time and one request's captures are shared among idle
+  workers. `--workers auto` starts four and follows the load (`--min-workers`, `--max-workers`,
+  `--retire-after`); `--workers n` is a fixed number, at most 8 unless it says more. `serve --status` says the
+  limit and the last decision; `bench` measures it.
+- **`--layout-only`** returns the layout and the diagnostics without a picture.
+- **`states`** renders its states at the same time on the server's workers.
+- **`expand <site folder>`** reads the app's shared state from `app.txt` and needs no `site.json`: a folder
+  holding `pages/`, `components/` or `app.txt` is a site.
+- **A count-up is let arrive before a picture**: a timer with a condition, or one that writes what it reads, is
+  waited for (5 s of the screen's time at most).
+- **`CODELESSLY_RENDER_SERVER`** names another folder for a second server beside the checkout's. On Windows
+  `--compare` finds a reference by its name.
+
 ## 41.1.0
 
 A view can be given a box as its whole world, views can share variables, and the command-line tools answer in a
