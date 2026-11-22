@@ -368,6 +368,13 @@ class TreeReactions implements NodeInteractions {
     SchedulerBinding.instance.ensureVisualUpdate();
   }
 
+  /// Whether a timer that is to end by itself is running: every `every …
+  /// when condition` reaction whose time is being kept has a condition that
+  /// holds now (a figure counting up to its value, a countdown). A timer
+  /// with no condition (a clock) runs for as long as the screen shows and
+  /// is not one. What takes a picture waits for these, within a limit.
+  bool get hasEndingTimer => _boxes.values.any((s) => s.countsToAnEnd);
+
   /// Stops everything the boxes run.
   void dispose() {
     for (final s in _boxes.values) {
@@ -412,6 +419,12 @@ class _BoxReactions {
   bool _loaded = false;
   Timer? _timer;
   int? _intervalMs;
+
+  /// Whether the timer running now is one that ends: each timer reaction
+  /// whose time it keeps has a `when`, which holds now and stops it when it
+  /// no longer does (a count-up, a countdown to zero).
+  bool _timerEnds = false;
+  bool get countsToAnEnd => _intervalMs != null && _timerEnds && !_disposed && box.attached;
   final Map<String, VoidCallback> _timerUnwatch = {};
   final Map<String, Listenable> _watched = {};
   final Map<String, VoidCallback> _unwatch = {};
@@ -462,6 +475,7 @@ class _BoxReactions {
       _timerUnwatch[name]=()=>watcher.removeListener(changed);
     }
     int? ms;
+    var ends = true;
     for (final r in n.actions) {
       if (r.trigger.type != TriggerType.timer) continue;
       final condition = r.trigger.when.trim();
@@ -470,8 +484,13 @@ class _BoxReactions {
       final every = source == null
           ? r.trigger.effectiveIntervalMs
           : Trigger.intervalMsOf(ctx.expressions.evaluate(source, ctx.scope));
-      if (every != null) ms = math.min(ms ?? 1 << 30, every);
+      if (every != null) {
+        ms = math.min(ms ?? 1 << 30, every);
+        // One with no condition runs for as long as the screen shows.
+        if (condition.isEmpty) ends = false;
+      }
     }
+    _timerEnds = ms != null && ends;
     if (ms == _intervalMs) return;
     _timer?.cancel();
     _intervalMs = ms;

@@ -151,6 +151,9 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
   var showing = 0;
   // Per component call (outermost instance root): whether anything in it shows.
   final calls = <String, ({NodeBox box, int showing})>{};
+  // The calls a part of which is hidden where this is drawn (at this size,
+  // in this state): one that then shows nothing is not said to be empty.
+  final hides = <String>{};
   // The lists that came out empty, by id: one written under another list is
   // drawn once per row of it.
   final copies = _ListCopies();
@@ -188,6 +191,9 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
     if (o is NodeBox) {
       final n = o.node;
       final laid = o.hasSize && o.size.width > 0.5 && o.size.height > 0.5;
+      // A part of a call that a rule hides here (a brand's name in a
+      // sidebar folded to a rail): the call shows less on purpose.
+      if (shown && !o.drawn) hides.addAll({...within, ?callOf(o)});
       // Checked when its parent shows and it is not hidden (a list with no
       // items may lay out with no height: that is what is reported).
       final placed = shown && o.drawn;
@@ -276,6 +282,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
   // Calls that rendered nothing (and their labels, checked in _checkNode).
   for (final e in calls.entries) {
     if (e.value.showing > 0 || out.any((d) => d.nodeId == e.key && d.code == EditCodes.emptyLabel.name)) continue;
+    if (hides.contains(e.key)) continue;
     final b = e.value.box;
     final type = componentInstanceOf(b.instance)?.component;
     if (!b.drawn || !b.hasSize) continue;
@@ -533,9 +540,10 @@ void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
         nodeId: id);
     return;
   }
-  // Empty: is it computed from a list that is not?
+  // Empty: is it computed from a list that is not? (Not said of a list that
+  // is meant to start empty: [_startsEmpty].)
   final source = _nonEmptySource(values, expression, document);
-  if (source != null) {
+  if (source != null && !_startsEmpty(values, expression, document, source.$1)) {
     // Said after every copy of the list is seen, and only when none shows
     // an item ([_ListCopies]).
     copies.empty.putIfAbsent(
@@ -545,6 +553,87 @@ void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
             'each item\'s fields through a lambda: filter(${source.$1}, r => r.status == x), not filter(${source.$1}, status == x).',
             nodeId: id, error: false));
   }
+}
+
+/// The formulas of [document]'s computed variables, by name.
+Map<String, String> _formulasOf(LayoutDocument document) => {
+      for (final scope in (readMap(document.extra['variables']) ?? const {}).values)
+        for (final v in readList(scope) ?? const [])
+          if (readMap(v) case final Map m when m['formula'] is String && m['name'] is String) m['name'] as String: m['formula'] as String,
+    };
+
+/// Whether a list that is empty while [source] (a list it reads) is not is
+/// meant to start that way, so that it is nothing to report:
+/// - it follows a selection that is empty now: [expression] (or a formula it
+///   reads) reads another variable of the state whose value is an empty
+///   text, an empty list or nothing (no row chosen, no day picked, nothing
+///   saved yet, an empty search);
+/// - it chooses an empty list itself: a condition with a literal `[]` branch
+///   (`q=="" ? [] : results`);
+/// - the UI has an empty state for it: a node shown only while this list
+///   (or the list it reads) is empty (`if length(shown)==0`).
+/// A filter over values that are all there (a day's events compared with a
+/// number that is wrong) is still reported.
+bool _startsEmpty(ExpressionValues values, String expression, LayoutDocument document, String source) {
+  final formulas = _formulasOf(document);
+  String bare(String e) => (FormulaEvaluator.exactExpression(e) ?? e).replaceAll(RegExp(r'\s+'), '');
+  final texts = <String>[bare(expression)];
+  final seen = <String>{};
+  final names = [...values.namesRead(expression)];
+  final read = <String>{};
+  while (names.isNotEmpty) {
+    final name = names.removeLast();
+    if (!seen.add(name)) continue;
+    final f = formulas[name];
+    if (f == null) {
+      read.add(name);
+    } else {
+      texts.add(bare(f));
+      names.addAll(FormulaEvaluator.referencedPaths(f).map((p) => p.split(RegExp(r'[.\[]')).first));
+    }
+  }
+  // An empty list chosen by a condition.
+  if (texts.any((t) => RegExp(r'[?:]\[\]').hasMatch(t))) return true;
+  // A selection that is empty now. (A lambda's own parameter is no variable.)
+  final own = <String>{
+    for (final t in texts) ...[
+      for (final m in RegExp(r'([A-Za-z_][A-Za-z0-9_]*)=>').allMatches(t)) m[1]!,
+      for (final m in RegExp(r'\(([A-Za-z_][A-Za-z0-9_,]*)\)=>').allMatches(t)) ...m[1]!.split(','),
+    ],
+  };
+  for (final name in read) {
+    if (name == source || own.contains(name) || values.variable(name) == null) continue;
+    final Object? v;
+    try {
+      v = values.read(name);
+    } catch (_) {
+      continue;
+    }
+    if (!(v == null || (v is String && v.isEmpty) || (v is List && v.isEmpty) || (v is Map && v.isEmpty))) continue;
+    // Read as what is chosen (compared with a row's field, a list a row's
+    // field must be in, its first one), not as what is left out
+    // (`!contains(hidden, r.kind)`) or as "none chosen shows all" (`q==""`).
+    for (final t in texts) {
+      for (final m in RegExp('(?<![A-Za-z0-9_.])${RegExp.escape(name)}(?![A-Za-z0-9_(])').allMatches(t)) {
+        final before = t.substring(0, m.start), after = t.substring(m.end);
+        final compared = (before.endsWith('==') && !before.endsWith('!==')) || RegExp(r'''^==(?!""|''|\[\]|null)''').hasMatch(after);
+        final within = RegExp(r'(?<!!)contains\($').hasMatch(before) || RegExp(r'(first|last)\($').hasMatch(before) || after.startsWith('[');
+        if (compared || within) return true;
+      }
+    }
+  }
+  // An empty state written for it.
+  final lists = <String>{texts.first, ...seen};
+  for (final n in document.nodes.values) {
+    final visible = n.bind['visible'];
+    if (visible == null) continue;
+    final v = bare(visible);
+    for (final l in lists) {
+      if (l.isEmpty) continue;
+      if (v.contains('length($l)==0') || v.contains('length($l)<1') || v.contains('isEmpty($l)') || v.contains('!length($l)') || v.contains('$l==[]')) return true;
+    }
+  }
+  return false;
 }
 
 /// A non-empty list (its name and length) that [expression] reads, directly

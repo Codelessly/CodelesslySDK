@@ -156,11 +156,15 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 
   VoidCallback? _detachProbe, _detachValues, _detachShown;
 
-  /// Every node box this view laid out, with its size.
+  /// Every box this view laid out of the document's own nodes, with its
+  /// size. A box inside a component call is its definition's, under an id
+  /// of that definition: a document's node of the same id (the page's own
+  /// `listView1` beside a breadcrumb's) was said to have no size when a
+  /// crumb had none.
   Iterable<(String, double, double)> _sizes() {
     final out = <(String, double, double)>[];
     void visit(RenderObject o) {
-      if (o is NodeBox && o.hasSize) out.add((o.id, o.size.width, o.size.height));
+      if (o is NodeBox && o.hasSize && componentInstanceOf(o.instance) == null) out.add((o.id, o.size.width, o.size.height));
       o.visitChildren(visit);
     }
 
