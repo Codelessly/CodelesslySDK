@@ -3,7 +3,7 @@ component Stat "A figure on a dashboard or over a table: its label in the captio
   param text="0" required doc="The figure (written second: Stat \"Active\" \"43\")."
   param delta="" doc="The change (+4 this week); green when it starts with +, red with -."
   param note="" doc="A line under it."
-  param tone:neutral|success|warning|danger|info="neutral" doc="A dot before the label."
+  param tone:neutral|success|warning|danger|error|info="neutral" doc="A dot before the label."
   param band:bool=false doc="No frame (a cell of a strip of stats)."
   preview "Default" 240x96 label="Active members" text="43" delta="+4" note="this month"
 Column#stat gap=6 pad={props.band ? [20, 14, 20, 14] : [18, 16, 18, 16]} w=fill fill={props.band ? '#00000000' : theme.colors.card} border={props.band ? '#00000000' : theme.colors.line} radius=8

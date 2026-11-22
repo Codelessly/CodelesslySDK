@@ -40,6 +40,8 @@
    "ink3": "#FF71717A",
    "ink4": "#FFA1A1AA",
    "onAccent": "#FFFFFFFF",
+   "onAccentWash": "#26FFFFFF",
+   "onAccentLine": "#40FFFFFF",
    "primaryBorder": "#FFE4E4E7",
    "secondaryBorder": "#FFD4D4D8",
    "line": "#FFE4E4E7",
@@ -510,6 +512,211 @@
     "height": 1.2,
     "color": "primaryText",
     "leadingDistribution": "even"
+   },
+   "bodyPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 400,
+    "height": 1.6,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "bodySecondaryPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 400,
+    "height": 1.6,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "mutedPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 400,
+    "height": 1.6,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "strongPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 600,
+    "height": 1.6,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "readingPage": {
+    "fontFamily": "Inter",
+    "fontSize": 17,
+    "fontWeight": 400,
+    "height": 1.7,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "leadPage": {
+    "fontFamily": "Inter",
+    "fontSize": 19,
+    "fontWeight": 400,
+    "height": 1.55,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "smallPage": {
+    "fontFamily": "Inter",
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.5,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "captionPage": {
+    "fontFamily": "Inter",
+    "fontSize": 13,
+    "fontWeight": 400,
+    "height": 1.45,
+    "color": "tertiaryText",
+    "leadingDistribution": "even"
+   },
+   "displayPage": {
+    "fontFamily": "Inter",
+    "fontSize": 72,
+    "fontWeight": 700,
+    "height": 1.02,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -2.2
+   },
+   "pageTitlePage": {
+    "fontFamily": "Inter",
+    "fontSize": 60,
+    "fontWeight": 700,
+    "height": 1.06,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -1.7
+   },
+   "titlePage": {
+    "fontFamily": "Inter",
+    "fontSize": 60,
+    "fontWeight": 700,
+    "height": 1.06,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -1.7
+   },
+   "heading1Page": {
+    "fontFamily": "Inter",
+    "fontSize": 60,
+    "fontWeight": 700,
+    "height": 1.06,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -1.7
+   },
+   "heading2Page": {
+    "fontFamily": "Inter",
+    "fontSize": 36,
+    "fontWeight": 700,
+    "height": 1.15,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.8
+   },
+   "heading3Page": {
+    "fontFamily": "Inter",
+    "fontSize": 22,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.3
+   },
+   "headingPage": {
+    "fontFamily": "Inter",
+    "fontSize": 18,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.2
+   },
+   "sectionTitlePage": {
+    "fontFamily": "Inter",
+    "fontSize": 18,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -0.2
+   },
+   "overlinePage": {
+    "fontFamily": "Inter",
+    "fontSize": 12,
+    "fontWeight": 600,
+    "height": 1.3,
+    "color": "tertiaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": 0.9
+   },
+   "numberPage": {
+    "fontFamily": "Inter",
+    "fontSize": 40,
+    "fontWeight": 700,
+    "height": 1.1,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -1.0,
+    "tabularFigures": true
+   },
+   "numberLargePage": {
+    "fontFamily": "Inter",
+    "fontSize": 56,
+    "fontWeight": 700,
+    "height": 1.05,
+    "color": "primaryText",
+    "leadingDistribution": "even",
+    "letterSpacing": -1.6,
+    "tabularFigures": true
+   },
+   "monoPage": {
+    "fontFamily": "JetBrains Mono",
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.55,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "codePage": {
+    "fontFamily": "JetBrains Mono",
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.6,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "dangerPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 500,
+    "height": 1.6,
+    "color": "errorInk",
+    "leadingDistribution": "even"
+   },
+   "successPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 500,
+    "height": 1.6,
+    "color": "successInk",
+    "leadingDistribution": "even"
+   },
+   "linkPage": {
+    "fontFamily": "Inter",
+    "fontSize": 16,
+    "fontWeight": 500,
+    "height": 1.6,
+    "color": "accentText",
+    "leadingDistribution": "even"
    }
   },
   "dark": {
@@ -543,6 +750,8 @@
     "ink3": "#FF8A8A94",
     "ink4": "#FF5F5F69",
     "onAccent": "#FFFFFFFF",
+    "onAccentWash": "#26FFFFFF",
+    "onAccentLine": "#40FFFFFF",
     "primaryBorder": "#FF2C2C33",
     "secondaryBorder": "#FF3A3A43",
     "line": "#FF2C2C33",
@@ -838,6 +1047,27 @@
     }
    ]
   },
+  "media": [
+   {
+    "maxWidth": 599,
+    "patch": {
+     "textStyles": {
+      "leadPage": {
+       "fontSize": 17
+      },
+      "readingPage": {
+       "fontSize": 16
+      },
+      "numberPage": {
+       "fontSize": 32
+      },
+      "numberLargePage": {
+       "fontSize": 40
+      }
+     }
+    }
+   }
+  ],
   "durations": {
    "control": 120,
    "transition": 180,

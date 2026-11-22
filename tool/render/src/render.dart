@@ -4600,6 +4600,12 @@ List<RuntimeIssue> _check(
       for (final i in paragraphIssues(p, nameOf(b))) {
         out.add(RuntimeIssue(i.code, 'warning', i.message, nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
+      // A text too close in color to the fill it is on (the session's check too).
+      if (b.drawn) {
+        if (textContrastIssue(b, p, nameOf(b)) case final i?) {
+          out.add(RuntimeIssue(i.code, 'warning', i.message, nodeId: nameOf(b), screen: screen, size: size, file: file));
+        }
+      }
       final missing = <String>{};
       p.text.visitChildren((span) {
         if (span is TextSpan && span.text != null) {

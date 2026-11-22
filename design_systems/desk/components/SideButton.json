@@ -178,12 +178,12 @@
     "radius": 4,
     "strokes": [
      {
-      "color": "#40FFFFFF"
+      "color": "onAccentLine"
      }
     ],
     "fills": [
      {
-      "color": "#26FFFFFF"
+      "color": "onAccentWash"
      }
     ]
    },

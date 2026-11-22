@@ -18,10 +18,13 @@
 // * `component_empty`: a component call that rendered nothing.
 // * `content_overflows`: a child of a row or a column that reaches past
 //   its edge (a warning: it is drawn, clipped or over its neighbor).
+// * `low_contrast`: a text drawn in a color too close to the fill it is on
+//   to be read (white on a white card, a dark ink on a dark band).
 //
 // The text checks are shared with the render command (tool/render), which
 // reports the same codes for a site.
 import 'dart:convert' show jsonEncode;
+import 'dart:ui' as ui;
 
 import 'package:codelessly_api/core.dart';
 import 'package:flutter/rendering.dart';
@@ -34,6 +37,68 @@ import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 /// What a text shows when its value did not compute: `NaN`, `Infinity`, a
 /// bare `null` or `undefined`, or a `{name}` left as written.
 final _brokenValue = RegExp(r'\bNaN\b|\bInfinity\b|(?<![A-Za-z])(?:null|undefined)(?![A-Za-z])|\{[A-Za-z_][A-Za-z0-9_.]*\}');
+
+/// Under this contrast (WCAG's ratio, 1 to 21) a text is not read: white on
+/// a white card is 1, a pale grey on white 1.2 to 1.4. (A placeholder's or a
+/// disabled label's faint ink is 2 and up: quiet, and meant.)
+const double lowContrastBelow = 1.5;
+
+/// What the text [p] of the node [box] is drawn on, when that is known: the
+/// nearest fill under it that is one opaque color, with the node that has
+/// it. Null where it cannot be told from the tree: a picture or a gradient
+/// under it, a Stack (another child may be under the text), a drawing, a
+/// translucent fill or an opacity on the way, no fill at all.
+({ui.Color color, String id})? groundOfText(NodeBox box) {
+  for (RenderObject? o = box.parent; o != null; o = o.parent) {
+    if (o is RenderOpacity && o.opacity < 0.99) return null;
+    if (o is RenderAnimatedOpacity && o.opacity.value < 0.99) return null;
+    if (o is! NodeBox) continue;
+    final n = o.node;
+    if (n == null) continue;
+    if (const {'stack', 'pageView', 'image', 'customPaint'}.contains(n.type)) return null;
+    if ((n.behaviors.customPaint?.painter.isNotEmpty ?? false) || (n.behaviors.customPaint?.foregroundPainter.isNotEmpty ?? false)) return null;
+    if (n.opacity < 0.99) return null;
+    final fills = [for (final f in n.decoration.fills) if (f.visible && f.opacity > 0.02) f];
+    if (fills.isEmpty) continue;
+    // The topmost fill is what shows.
+    final top = fills.last;
+    final c = top.color;
+    if (c == null || c.name != null) return null;
+    final alpha = c.alpha / 255 * top.opacity;
+    if (alpha <= 0.02) {
+      if (fills.length > 1) return null;
+      continue;
+    }
+    if (alpha < 0.9) return null;
+    return (color: ui.Color(0xFF000000 | (c.value & 0xFFFFFF)), id: o.id);
+  }
+  return null;
+}
+
+/// `low_contrast` for the text [p] of the node [box] (named [name] in the
+/// message), or null: its color (over its ground, where it is translucent)
+/// is too close to the fill it is drawn on ([groundOfText]) to be read.
+({String code, String message})? textContrastIssue(NodeBox box, RenderParagraph p, String name) {
+  final ink = p.text.style?.color;
+  if (ink == null || ink.a < 0.3) return null;
+  final ground = groundOfText(box);
+  if (ground == null) return null;
+  final on = ground.color;
+  final shown = ui.Color.alphaBlend(ink, on);
+  double lum(ui.Color c) => c.computeLuminance();
+  final a = lum(shown), b = lum(on);
+  final ratio = a > b ? (a + .05) / (b + .05) : (b + .05) / (a + .05);
+  if (ratio >= lowContrastBelow) return null;
+  String hex(ui.Color c) => '#${c.toARGB32().toRadixString(16).toUpperCase().padLeft(8, '0')}';
+  final text = p.text.toPlainText().trim();
+  final short = text.length > 30 ? '${text.substring(0, 30)}…' : text;
+  return (
+    code: 'low_contrast',
+    message: 'The text "$name" ("$short") is drawn in ${hex(ink)} on ${hex(on)} (the fill of "${ground.id}"): a contrast of '
+        '${ratio.toStringAsFixed(1)} to 1, too little to read. Give the text a color that reads on that fill (or none: the theme\'s ink), '
+        'or give "${ground.id}" another fill; a color of the theme (its ink, its surface, a card) reads in both of its modes.',
+  );
+}
 
 /// What a text paragraph shows wrong, with the text's [name] (a node id or
 /// an instance path) in the message: `expression_not_evaluated` (it shows
@@ -228,6 +293,11 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
         for (final i in issues) {
           report(EditCode(i.code, ''), nodePath(box.id, i.code == EditCodes.textNoColor.name ? 'props/style' : 'props/text'), i.message,
               nodeId: box.id, error: false);
+        }
+        if (box.node?.type == 'text' && text.isNotEmpty) {
+          if (textContrastIssue(box, o, nameOf(box)) case final i?) {
+            report(EditCode(i.code, ''), nodePath(box.id, 'props/style'), i.message, nodeId: box.id, error: false);
+          }
         }
       }
     }

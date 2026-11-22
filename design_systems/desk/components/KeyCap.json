@@ -73,8 +73,8 @@
     ]
    },
    "bind": {
-    "decoration.strokes[0].color": "${= props.onAccent ? '#40FFFFFF' : theme.colors.keycapBorder}",
-    "decoration.fills[0].color": "${= props.onAccent ? '#26FFFFFF' : theme.colors.keycap}"
+    "decoration.strokes[0].color": "${= props.onAccent ? theme.colors.onAccentLine : theme.colors.keycapBorder}",
+    "decoration.fills[0].color": "${= props.onAccent ? theme.colors.onAccentWash : theme.colors.keycap}"
    },
    "children": [
     "keycapText"
@@ -96,7 +96,7 @@
     "style": "keycap"
    },
    "bind": {
-    "props.style.color": "${= props.onAccent ? '#FFFFFFFF' : theme.colors.keycapInk}"
+    "props.style.color": "${= props.onAccent ? theme.colors.onAccent : theme.colors.keycapInk}"
    }
   }
  }

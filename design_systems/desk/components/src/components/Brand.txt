@@ -1,12 +1,13 @@
-component Brand "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it."
+component Brand "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it. With no icon it is the name alone, and in a rail the tile with the name's first letter."
   param name="App" required doc="The product's name."
   param note="" doc="A line under the name (the workspace, the person)."
   param icon="" doc="A Material icon name for the mark."
   param rail:bool=false doc="Folded to its icon (a collapsed sidebar); its sidebar tells it where it is a rail."
   preview "Default" 232x44 name="Northstar" note="Admin console" icon="grid_view"
 Row#brand gap=10 middle pad=[6,4,6,10] w=hug
-  Column#mark w=28 h=28 radius=7 fill=accent center middle visible={props.icon != ''}
-    Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=16 color=onAccent
+  Column#mark w=28 h=28 radius=7 fill=accent center middle visible={props.icon != '' || props.rail}
+    Icon#markGlyph "{props.icon == '' ? 'circle' : props.icon}" size=16 color=onAccent visible={props.icon != ''}
+    Text#markLetter "{upper(left(trim(props.name), 1))}" size=14 weight=700 color=onAccent visible={props.icon == ''}
   Column#words gap=0 grow visible={!props.rail}
     Text#brandName "{props.name}" size=15 weight=700 letterSpacing=-0.2 color=ink maxLines=1 overflow=ellipsis
     Text#brandNote "{props.note}" style=meta maxLines=1 overflow=ellipsis visible={props.note != ''}

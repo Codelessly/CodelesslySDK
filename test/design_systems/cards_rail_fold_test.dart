@@ -71,14 +71,20 @@ void main() {
     expect(_drawn(tester, 'group/rule'), isFalse);
   });
 
-  testWidgets('with a line written by hand it stays as wide as written on a tablet, and its words keep their labels', (tester) async {
-    await _show(tester, _app('$_folding\n    Row#hand gap=10 middle pad=[12,8,12,8]\n      Icon "bolt"\n      Text "Upgrade plan"'), const Size(834, 1112));
+  testWidgets('with a line written by hand that is tapped it is the drawer on a tablet; one that only shows something is hidden in the rail', (tester) async {
+    await _show(tester, _app('$_folding\n    Row#hand gap=10 middle pad=[12,8,12,8] onTap={toast "up"}\n      Icon "bolt"\n      Text "Upgrade plan"'), const Size(834, 1112));
+    expect(_drawn(tester, 'side'), isFalse, reason: 'no rail has room for the row, and as wide as written it took a third of the window');
+    expect(rectOf(tester, 'main').left, 0);
+
+    await _show(tester, _app('$_folding\n    Box#note pad=12\n      Text "Storage is nearly full"'), const Size(834, 1112));
+    expect(rectOf(tester, 'side').width, 64);
+    expect(_drawn(tester, 'note'), isFalse);
+    expect(_drawn(tester, 'members/name'), isFalse);
+
+    // On a desktop both are whole.
+    await _show(tester, _app('$_folding\n    Box#note pad=12\n      Text "Storage is nearly full"'), const Size(1440, 900));
     expect(rectOf(tester, 'side').width, 248);
-    for (final path in ['members/name', 'members/count', 'brand/words', 'group/label', 'me/accountWords']) {
-      expect(_drawn(tester, path), isTrue, reason: path);
-    }
-    expect(_drawn(tester, 'group/rule'), isFalse);
-    expect(rectOf(tester, 'members/name').width, greaterThan(60));
+    expect(_drawn(tester, 'note'), isTrue);
   });
 
   testWidgets("a writer's own rail folds them too, and rail on a line folds that line anywhere", (tester) async {
@@ -101,8 +107,8 @@ void main() {
     // The main pane starts with what the page wrote: nothing is put above it.
     expect(rectOf(tester, 'hello').top, rectOf(tester, 'main').top);
 
-    // A sidebar the tablet drops (a line written by hand keeps it wide) gets the button there.
-    await _show(tester, _app('$_folding\n    Row#hand gap=10\n      Icon "bolt"\n      Text "Upgrade"', pane: pane), const Size(834, 1112));
+    // A sidebar the tablet drops (a line written by hand that is tapped: no rail) gets the button there.
+    await _show(tester, _app('$_folding\n    Row#hand gap=10 onTap={toast "up"}\n      Icon "bolt"\n      Text "Upgrade"', pane: pane), const Size(834, 1112));
     expect(rectOf(tester, 'hello').top, greaterThan(rectOf(tester, 'main').top + 20));
   });
 }
