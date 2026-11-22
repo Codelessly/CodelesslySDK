@@ -38,11 +38,12 @@
       "success",
       "warning",
       "danger",
+      "error",
       "neutral"
      ]
     },
     "default": "info",
-    "doc": "Its hue and icon."
+    "doc": "Its hue and icon (`error` is `danger`)."
    },
    {
     "key": "dismissible",
@@ -134,7 +135,7 @@
    },
    "bind": {
     "props.color": "${= get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')}",
-    "props.icon": "${= props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' ? 'error_outline' : 'info_outlined'))}"
+    "props.icon": "${= props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' || props.tone == 'error' ? 'error_outline' : 'info_outlined'))}"
    }
   },
   "bannerText": {

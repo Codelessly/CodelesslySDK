@@ -49,6 +49,7 @@ LIGHT = {
         "tertiaryText": "#FF71717A",
         "ink": "#FF18181B", "ink2": "#FF52525B", "ink3": "#FF71717A", "ink4": "#FFA1A1AA",
         "onAccent": "#FFFFFFFF",
+        "onAccentWash": "#26FFFFFF", "onAccentLine": "#40FFFFFF",  # a key cap on the accent
         # lines
         "primaryBorder": "#FFE4E4E7",
         "secondaryBorder": "#FFD4D4D8",
@@ -120,6 +121,7 @@ DARK = {
         "tertiaryText": "#FF8A8A94",
         "ink": "#FFF4F4F5", "ink2": "#FFB4B4BC", "ink3": "#FF8A8A94", "ink4": "#FF5F5F69",
         "onAccent": "#FFFFFFFF",
+        "onAccentWash": "#26FFFFFF", "onAccentLine": "#40FFFFFF",
         "primaryBorder": "#FF2C2C33",
         "secondaryBorder": "#FF3A3A43",
         "line": "#FF2C2C33",
@@ -228,6 +230,42 @@ TEXT = {
     "controlLarge": style(14, 500, 1.2),
 }
 
+# --- type on a website's page -------------------------------------------------------------------------------------
+# Desk's scale above is an app's: a window of panes read at arm's length, 13 px. A website's page (`Page` with
+# `Section`s) is read from further back and sells with its headline, so each look a page writes has a second style
+# named `<look>Page`, which a text under a `Page` takes instead (in its bar and its foot it keeps the app's). The
+# headline is a display size, made smaller on a tablet and a phone by the notation's own rule for a headline.
+PAGE_TEXT = {
+    "body": style(16, 400, 1.6),
+    "bodySecondary": style(16, 400, 1.6, "secondaryText"),
+    "muted": style(16, 400, 1.6, "secondaryText"),
+    "strong": style(16, 600, 1.6),
+    "reading": style(17, 400, 1.7),
+    "lead": style(19, 400, 1.55, "secondaryText"),
+    "small": style(14, 400, 1.5, "secondaryText"),
+    "caption": style(13, 400, 1.45, "tertiaryText"),
+    "display": style(72, 700, 1.02, letterSpacing=-2.2),
+    "pageTitle": style(60, 700, 1.06, letterSpacing=-1.7),
+    "title": style(60, 700, 1.06, letterSpacing=-1.7),
+    "heading1": style(60, 700, 1.06, letterSpacing=-1.7),
+    "heading2": style(36, 700, 1.15, letterSpacing=-0.8),
+    "heading3": style(22, 600, 1.3, letterSpacing=-0.3),
+    "heading": style(18, 600, 1.4, letterSpacing=-0.2),
+    "sectionTitle": style(18, 600, 1.4, letterSpacing=-0.2),
+    "overline": style(12, 600, 1.3, "tertiaryText", letterSpacing=0.9),
+    "number": style(40, 700, 1.1, letterSpacing=-1.0, tabularFigures=True),
+    "numberLarge": style(56, 700, 1.05, letterSpacing=-1.6, tabularFigures=True),
+    "mono": style(14, 400, 1.55, "secondaryText", MONO),
+    "code": style(14, 400, 1.6, "primaryText", MONO),
+    "danger": style(16, 500, 1.6, "errorInk"),
+    "success": style(16, 500, 1.6, "successInk"),
+    "link": style(16, 500, 1.6, "accentText"),
+}
+TEXT.update({f"{name}Page": s for name, s in PAGE_TEXT.items()})
+# On a phone a page's lead and its figures come down a step (the headline and the headings by the notation's rule).
+PAGE_PHONE = {"leadPage": {"fontSize": 17}, "readingPage": {"fontSize": 16}, "numberPage": {"fontSize": 32},
+              "numberLargePage": {"fontSize": 40}}
+
 SPACING = {"0.5": 2, "1": 4, "1.5": 6, "2": 8, "3": 12, "4": 16, "5": 20, "6": 24, "8": 32, "10": 40, "12": 48, "16": 64,
            "card": 16, "tile": 12, "cardGap": 8, "badge": 8, "gutter": 32, "section": 64, "page": 32, "pane": 20, "bar": 12}
 
@@ -274,6 +312,7 @@ def theme():
         "radii": RADII,
         "sizes": SIZES,
         "shadows": SHADOWS_LIGHT,
+        "media": [{"maxWidth": 599, "patch": {"textStyles": PAGE_PHONE}}],
         "durations": {"control": 120, "transition": 180, "tooltipDelay": 400, "enter": 200},
         "curves": {"standard": "easeOut", "enter": "easeOut"},
     })

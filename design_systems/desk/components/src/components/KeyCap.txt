@@ -2,5 +2,5 @@ component KeyCap "A key as it is pressed: a small raised cap in the mono face (/
   param label="K" required doc="The key or keys."
   param onAccent:bool=false doc="On an accent fill (a primary button): a translucent white cap."
   preview "Default" 48x20 label="Ctrl K"
-Row#keycap pad=[5,1,5,1] w=hug h=20 middle radius=4 border={props.onAccent ? '#40FFFFFF' : theme.colors.keycapBorder} fill={props.onAccent ? '#26FFFFFF' : theme.colors.keycap}
-  Text#keycapText "{props.label}" style=keycap color={props.onAccent ? '#FFFFFFFF' : theme.colors.keycapInk}
+Row#keycap pad=[5,1,5,1] w=hug h=20 middle radius=4 border={props.onAccent ? theme.colors.onAccentLine : theme.colors.keycapBorder} fill={props.onAccent ? theme.colors.onAccentWash : theme.colors.keycap}
+  Text#keycapText "{props.label}" style=keycap color={props.onAccent ? theme.colors.onAccent : theme.colors.keycapInk}

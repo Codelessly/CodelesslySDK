@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Brand",
-  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it.",
+  "doc": "The product's mark and name at the head of a sidebar or the start of a top bar: a 28 accent tile with a white outline glyph, the name 15/700, an optional line under it. With no icon it is the name alone, and in a rail the tile with the name's first letter.",
   "props": [
    {
     "key": "name",
@@ -91,7 +91,12 @@
    "type": "column",
    "layout": {
     "width": 28,
-    "height": 28
+    "height": {
+     "hug": 28
+    },
+    "constraints": {
+     "minHeight": 28
+    }
    },
    "props": {
     "crossAxisAlignment": "center",
@@ -106,10 +111,11 @@
     ]
    },
    "bind": {
-    "visible": "${= props.icon != ''}"
+    "visible": "${= props.icon != '' || props.rail}"
    },
    "children": [
-    "markGlyph"
+    "markGlyph",
+    "markLetter"
    ]
   },
   "markGlyph": {
@@ -127,7 +133,31 @@
     "color": "onAccent"
    },
    "bind": {
+    "visible": "${= props.icon != ''}",
     "props.icon": "${= props.icon == '' ? 'circle' : props.icon}"
+   }
+  },
+  "markLetter": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= upper(left(trim(props.name), 1))}",
+    "style": {
+     "from": "body",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "color": "onAccent"
+    }
+   },
+   "bind": {
+    "visible": "${= props.icon == ''}"
    }
   },
   "words": {

@@ -269,7 +269,7 @@ export 'src/session/ui_session.dart';
 export 'src/session/design_pass.dart';
 export 'src/session/on_demand_blocks.dart';
 export 'src/session/view.dart' hide SessionValues, ThemedSource;
-export 'src/session/shown.dart' show shownDiagnostics, paragraphIssues;
+export 'src/session/shown.dart' show shownDiagnostics, paragraphIssues, textContrastIssue, groundOfText, lowContrastBelow;
 
 export 'src/render/layout/design_scroll.dart' show RenderDesignScroll;
 // What a WidgetRecipe's NodeBuilder.fitBox gives.

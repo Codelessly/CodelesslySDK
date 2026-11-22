@@ -28,6 +28,7 @@
       "success",
       "warning",
       "danger",
+      "error",
       "info",
       "accent"
      ]
