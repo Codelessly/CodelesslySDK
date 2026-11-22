@@ -284,7 +284,7 @@ Future<void> _loadFonts() async {
     await loader.load();
   }
 
-  const material = '/opt/flutter/bin/cache/artifacts/material_fonts';
+  final material = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}/bin/cache/artifacts/material_fonts';
   await load('Roboto', ['$material/Roboto-Regular.ttf', '$material/Roboto-Medium.ttf']);
   await load('MaterialIcons', ['$material/MaterialIcons-Regular.otf']);
   final barlow = [

@@ -65,6 +65,10 @@ Matcher hasValue(Object? value) => isA<ScriptRunResult>()
     .having((r) => r.value, 'value', value);
 
 void main() {
+  if (scriptEngineUnavailable case final String why) {
+    test('scripts run on $scriptEngineName', () {}, skip: why);
+    return;
+  }
   setUpAll(setUpScriptEngine);
 
   group('results and parameters ($scriptEngineName)', () {

@@ -469,7 +469,15 @@ void main() {
           await Future<void>.delayed(const Duration(milliseconds: 200));
         }
       }();
-      final runs = await load('up', 6, 8, jobs.first.args);
+      // Six clients ask until a second worker has rendered: a worker takes
+      // seconds to start, and more on a machine that is busy (a whole test
+      // suite beside this one), so the load is not a fixed time.
+      final runs = <_Run>[];
+      for (var round = 0; round < 8; round++) {
+        runs.addAll(await load('up', 6, 8, jobs.first.args));
+        final now = await _status();
+        if (now != null && (now['workers'] as List).where((w) => ((w as Map)['requests'] as int) > 0).length > 1) break;
+      }
       watching = false;
       await watch;
       for (final r in runs) {
@@ -484,9 +492,10 @@ void main() {
       final said = '${(await _bash(['tool/codelessly', 'serve', '--status'])).stdout}';
       expect(said, contains(RegExp(r'Workers follow the load: limit \d+ now \(least 1, most not fixed\)')));
       expect(said, contains(RegExp(r'Last scaling decision: [\d:]+ \d+ -> \d+: \d+ waiting with all \d+ busy')));
-      // Nothing asks: back to one worker.
+      // Nothing asks: back to one worker (each is ended 4 s after it went
+      // idle; up to two minutes are given to a busy machine).
       Map<String, Object?>? s;
-      for (var i = 0; i < 150; i++) {
+      for (var i = 0; i < 600; i++) {
         s = await _status();
         if (s != null && (s['workers'] as List).length == 1) break;
         await Future<void>.delayed(const Duration(milliseconds: 200));
