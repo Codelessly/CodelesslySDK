@@ -28,11 +28,8 @@ import 'vocabulary.dart' show loadVocabulary;
 import 'vocabulary_record.dart';
 import 'vocabulary_words.dart';
 
-/// Whether [dir] is a writer's site folder: a site.json (beside it or in
-/// site/) and notation (pages/ or components/).
-bool isSiteFolder(String dir) =>
-    (File('$dir/site.json').existsSync() || File('$dir/site/site.json').existsSync()) &&
-    (Directory('$dir/pages').existsSync() || Directory('$dir/components').existsSync());
+// (A writer's site folder is one that holds notation, pages/ or components/
+// or app.txt, with a site.json or none: notation_site.dart's isSiteFolder.)
 
 /// Whether [path] is a vocabulary record (vocabulary_record.dart).
 bool isRecordFile(String path) => path.endsWith('.json') && readRecord(path) != null;

@@ -25,17 +25,22 @@ const openRecordNote = 'WHAT IS RECORDED\n'
     'define it, or leave it and it is recorded for support. A components/<Name>.txt is a component (`component Name` first) or '
     'definitions (`define Name …` first, read by every page).';
 
-/// What the open prompt says of the site's manifest: its shape in a few
-/// lines, and the reference page that has the whole of it (test 10: the
-/// manifest's shapes were the most looked-up thing the prompt did not say).
-const openSiteNote = 'THE SITE (site.json)\n'
-    '{"schema": 3, "pages": ["home.json", "cart.json"], "variables": {"cart": [], "favourites": {"value": [], "persist": true}}, '
+/// What the open prompt says of the site's files: the state its pages share
+/// (app.txt) and its manifest's shape in a few lines, and the reference
+/// page that has the whole of it (test 10: the manifest's shapes were the
+/// most looked-up thing the prompt did not say).
+const openSiteNote = 'THE SITE (pages/, components/, app.txt, site.json)\n'
+    'app.txt, beside pages/ and components/, is the state every page and component shares, as state lines (one a line; a long list one item a line):\n'
+    'state cart=[]\n'
+    'state favourites=[] saved\n'
+    'A site needs no site.json: its pages are then pages/*.txt, home first. One is written only for a theme of the site\'s own or a page order:\n'
+    '{"schema": 3, "pages": ["home.json", "cart.json"], '
     '"theme": {"primary": "#FF2F6B4F", "colors": {"ink": "#FF1F2A24", "paper": "#FFFBF8F2"}, '
     '"textStyles": {"body": {"fontSize": 15, "color": "ink"}, "title": {"fontSize": 28, "fontWeight": 600}}, '
     '"spacing": {"md": 16}, "radii": {"card": 10}, "dark": {"colors": {"ink": "#FFE8EDE9", "paper": "#FF141815"}}}}\n'
-    "Every page reads the variables by name (persist keeps one on the device) and the theme's names (color=ink, style=title); "
+    "Every page reads app.txt's state by name (saved keeps one on the device) and the theme's names (color=ink, style=title); "
     'the theme\'s "fontFamily": "Georgia" is the font of every text ("titleFontFamily" the headings\', a text style\'s "fontFamily" its own); '
-    'pages/<name>.txt expands to the page <name>.json. The whole manifest: docs/reference/notation/site.md.';
+    'pages/<name>.txt expands to the page <name>.json. The files and the whole manifest: docs/reference/notation/site.md.';
 
 Future<void> main(List<String> args) async {
   // --open: the open-vocabulary prompt (the grammar and the core only; a

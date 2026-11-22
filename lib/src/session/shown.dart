@@ -8,7 +8,8 @@
 // * `empty_view`: the canvas laid out with no size, or with no text, icon,
 //   image or control showing (or there is no canvas root);
 // * `list_empty`: a list that shows no items while its data is not a list,
-//   has no item template, or is empty while the list it reads is not;
+//   has no item template, or is empty while the list it reads is not (a
+//   list under another list's row: said once, when every copy is empty);
 // * `empty_label`: a control or component whose label resolved to nothing;
 // * `expression_not_evaluated`: a text that shows `${` on screen;
 // * `value_not_computed`: a text that shows NaN, Infinity, null or a `{name}`
@@ -150,6 +151,9 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
   var showing = 0;
   // Per component call (outermost instance root): whether anything in it shows.
   final calls = <String, ({NodeBox box, int showing})>{};
+  // The lists that came out empty, by id: one written under another list is
+  // drawn once per row of it.
+  final copies = _ListCopies();
   // The document as written (its texts and its data), to tell a word that
   // was written from one a formula gave.
   String? source;
@@ -191,7 +195,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       final parent = box;
       box = o;
       if (n != null && n.type == CanvasProps.spec.type && o.instance == null && (canvas == null || o.id == canvas)) canvasBox ??= o;
-      if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf);
+      if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf, copies);
       if (n != null && shown && parent != null) _checkFits(o, parent, report, nodePath, nameOf);
       // A leaf that is not a container or a text: an icon, an image, a
       // control, a chart.
@@ -231,6 +235,7 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
   }
 
   visit(root, true, null, const []);
+  copies.say();
 
   // The view itself.
   final c = canvasBox;
@@ -326,7 +331,7 @@ NodeBox? _treeOf(RenderObject root) {
 }
 
 void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCode, String, String, {String? nodeId, bool? error}) report,
-    String Function(String, [String?]) nodePath, String Function(NodeBox) nameOf) {
+    String Function(String, [String?]) nodePath, String Function(NodeBox) nameOf, _ListCopies copies) {
   // Only the document's own nodes (a component's are its definition's).
   if (componentInstanceOf(b.instance) case final ComponentInstance ci) {
     // A component call: its label, read on the call as bound.
@@ -340,7 +345,25 @@ void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCo
   if (written == null) return;
   _checkTextValues(b, n, written, report, nodePath);
   _checkLabel(b.id, n, written, report, nodePath);
-  if (_repeaters.contains(n.type)) _checkList(b, n, written, document, report, nodePath);
+  if (_repeaters.contains(n.type)) _checkList(b, n, written, document, report, nodePath, copies);
+}
+
+/// The copies of each list (a list under another list's row is one copy per
+/// row), by its id: an empty list computed from one that is not is said
+/// once for the list, and only when every copy of it shown is empty (a
+/// month's days, most with no event, are not a filter that matches nothing).
+final class _ListCopies {
+  /// The lists a copy of which shows items.
+  final filled = <String>{};
+
+  /// What to say of a list whose copy is empty, from its first such copy.
+  final empty = <String, void Function()>{};
+
+  void say() {
+    for (final e in empty.entries) {
+      if (!filled.contains(e.key)) e.value();
+    }
+  }
 }
 
 /// Whether the broken-looking word in [text] (`null`, `NaN`…) is in the data
@@ -453,7 +476,8 @@ void _checkLabel(String id, Node shown, Node written, void Function(EditCode, St
 }
 
 void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
-    void Function(EditCode, String, String, {String? nodeId, bool? error}) report, String Function(String, [String?]) nodePath) {
+    void Function(EditCode, String, String, {String? nodeId, bool? error}) report, String Function(String, [String?]) nodePath,
+    _ListCopies copies) {
   final expression = written.bind['data'];
   if (expression == null) return;
   final id = b.id;
@@ -476,7 +500,11 @@ void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
         nodeId: id);
     return;
   }
-  if (count is! num || count > 0) return;
+  if (count is! num) return;
+  if (count > 0) {
+    copies.filled.add(id);
+    return;
+  }
   final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
   if (values is! ExpressionValues) return;
   Object? data;
@@ -508,10 +536,14 @@ void _checkList(NodeBox b, Node shown, Node written, LayoutDocument document,
   // Empty: is it computed from a list that is not?
   final source = _nonEmptySource(values, expression, document);
   if (source != null) {
-    report(EditCodes.listEmpty, nodePath(id, 'bind/data'),
-        'List "$id" shows no items: $expression is empty while ${source.$1} has ${source.$2}. If a filter should keep them, read '
-        'each item\'s fields through a lambda: filter(${source.$1}, r => r.status == x), not filter(${source.$1}, status == x).',
-        nodeId: id, error: false);
+    // Said after every copy of the list is seen, and only when none shows
+    // an item ([_ListCopies]).
+    copies.empty.putIfAbsent(
+        id,
+        () => () => report(EditCodes.listEmpty, nodePath(id, 'bind/data'),
+            'List "$id" shows no items: $expression is empty while ${source.$1} has ${source.$2}. If a filter should keep them, read '
+            'each item\'s fields through a lambda: filter(${source.$1}, r => r.status == x), not filter(${source.$1}, status == x).',
+            nodeId: id, error: false));
   }
 }
 

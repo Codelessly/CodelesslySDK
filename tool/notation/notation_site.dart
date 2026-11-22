@@ -6,23 +6,33 @@
 // they are written in the notation (`components/*.txt`) or expanded
 // (`site.json`'s `components`, else `components/*.json`).
 //
-// A site is a folder with a `site.json`. A notation file belongs to the one
-// `--site` names, else the one beside `--out`, else the first found beside
-// the file or above it (its folder and the two above it), as `site.json` or
-// `site/site.json`: the layout
+// A site is a folder of notation: `pages/*.txt`, `components/*.txt` and
+// `app.txt` (the state its pages share, as `state` lines), with a
+// `site.json` when it wants a theme of its own or a page order, and none
+// otherwise. A notation file belongs to the site `--site` names, else the
+// one beside `--out`, else the first `site.json` or `site/site.json` found
+// beside the file or above it (its folder and the two above it), else the
+// folder whose `pages/` or `components/` it is in, or the first with an
+// `app.txt`: the layout
 //
 //   my-site/
 //     pages/home.txt          → site/home.json
 //     components/Card.txt     → site/components/Card.json
-//     site/site.json
+//     app.txt                 → the variables of site/site.json
+//     site/site.json          the site's own, or written by expand
 //
 // and a site folder that holds its notation itself (`site/pages/*.txt`,
-// `site/components/*.txt`) both work.
+// `site/components/*.txt`) both work. The manifest a render reads is the
+// site's own with app.txt's state among its variables, or, for a site with
+// none, one `expand` writes whole (codelessly_api notationBuiltManifest:
+// marked `"expand"`, never read back as the site's source).
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
+import 'package:codelessly_api/notation_site.dart'
+    show notationAppStatePath, notationBuiltManifest, notationPageOrder, notationSiteVariables, notationSourceManifest;
 
 import '../render/src/site.dart' show sitePath;
 import 'dictionary.dart';
@@ -34,6 +44,13 @@ export 'site_overlays.dart';
 /// folder holding one as `site.json` or `site/site.json`), else the one
 /// beside [out], else the first beside [file] or up to two folders above it.
 /// Null: the file is expanded alone.
+///
+/// A site needs no site.json: a folder that holds `pages/*.txt`,
+/// `components/*.txt` or `app.txt` ([isSiteFolder]) is one, and its manifest
+/// is then the one `expand` writes, `site/site.json` in it (not there until
+/// the folder is expanded). A file in such a folder's `pages/` or
+/// `components/`, or beside or under its `app.txt`, belongs to it when no
+/// site.json is found.
 String? findSiteManifest({String? site, String? out, String? file}) {
   String? at(String dir) {
     for (final c in ['$dir/${SiteManifest.fileName}', '$dir/site/${SiteManifest.fileName}']) {
@@ -43,7 +60,9 @@ String? findSiteManifest({String? site, String? out, String? file}) {
   }
 
   if (site != null) {
-    if (FileSystemEntity.isDirectorySync(site)) return at(site) ?? '$site/${SiteManifest.fileName}';
+    if (FileSystemEntity.isDirectorySync(site)) {
+      return at(site) ?? (isSiteFolder(site) ? '$site/site/${SiteManifest.fileName}' : '$site/${SiteManifest.fileName}');
+    }
     return site;
   }
   if (out != null) {
@@ -58,8 +77,29 @@ String? findSiteManifest({String? site, String? out, String? file}) {
       if (up.path == d.path) break;
       d = up;
     }
+    // No site.json: the folder whose pages/ or components/ the file is in,
+    // or the first with an app.txt.
+    final parent = File(file).absolute.parent;
+    final folder = parent.uri.pathSegments.where((s) => s.isNotEmpty).lastOrNull;
+    if ((folder == 'pages' || folder == 'components') && isSiteFolder(parent.parent.path)) {
+      return '${parent.parent.path}/site/${SiteManifest.fileName}';
+    }
+    d = parent;
+    for (var i = 0; i < 3; i++) {
+      if (File('${d.path}/$notationAppStatePath').existsSync()) return '${d.path}/site/${SiteManifest.fileName}';
+      final up = d.parent;
+      if (up.path == d.path) break;
+      d = up;
+    }
   }
   return null;
+}
+
+/// Whether [dir] holds a site's notation: `pages/*.txt`, `components/*.txt`
+/// or `app.txt`. What makes a folder a site when it has no site.json.
+bool isSiteFolder(String dir) {
+  bool notation(String d) => Directory(d).existsSync() && Directory(d).listSync().any((f) => f is File && f.path.endsWith('.txt'));
+  return notation('$dir/pages') || notation('$dir/components') || File('$dir/$notationAppStatePath').existsSync();
 }
 
 /// A component written in the notation: its type (the name on its
@@ -72,7 +112,56 @@ typedef SkippedComponent = ({String path, String type, String message});
 
 /// A site as `expand` reads it ([load]).
 final class NotationSite {
-  NotationSite._(this.manifestPath, this.manifest, this.problems);
+  NotationSite._(this.manifestPath, this.manifest, this.problems, {this.hasManifest = true, this.manifestAsRead});
+
+  /// Whether the site has a manifest of its own: false when there is no
+  /// site.json, or the one there is the one `expand` wrote whole
+  /// (codelessly_api `notationSourceManifest`).
+  final bool hasManifest;
+
+  /// The text of the manifest's file as it was read; null when there is none.
+  final String? manifestAsRead;
+
+  /// The app's state file: `app.txt` beside the pages read, else in the
+  /// site's folder or beside it; null when the site has none.
+  late final String? appStatePath = () {
+    final beside = pageSources.isEmpty ? null : '${File(pageSources.first).parent.parent.path}/$notationAppStatePath';
+    for (final p in [?beside, for (final h in _homes.reversed) '$h/$notationAppStatePath']) {
+      if (File(p).existsSync()) return p;
+    }
+    return null;
+  }();
+
+  /// What the app's state file declares (codelessly_api
+  /// `readNotationAppState`); null when the site has none.
+  late final NotationAppState? appState = appStatePath == null ? null : readNotationAppState(File(appStatePath!).readAsStringSync(), catalog: standardCatalog);
+
+  /// What app.txt has that is not read, and each name it declares that
+  /// site.json's variables declare too (app.txt's is used), by line.
+  late final List<({int line, String message})> appStateIssues = () {
+    final out = <({int line, String message})>[for (final i in appState?.issues ?? const <NotationIssue>[]) (line: i.line, message: i.message)];
+    notationSiteVariables(manifest['variables'], appState, say: (line, message) => out.add((line: line, message: message)));
+    return out..sort((a, b) => a.line - b.line);
+  }();
+
+  /// app.txt's state by name, as [variables] has it.
+  Map<String, Json> get appVariables => {
+        for (final name in appState?.variables.keys ?? const <String>[])
+          if (variables[name] case final v?) name: v,
+      };
+
+  /// The manifest a render reads the site's variables from when it is not
+  /// the site's own as written (codelessly_api `notationBuiltManifest`):
+  /// the whole manifest of a site with none, or the site's with app.txt's
+  /// state among its variables. Null: nothing to write.
+  Json? get builtManifest => notationBuiltManifest(
+        source: hasManifest ? manifest : null,
+        pages: notationPageOrder([for (final p in pageSources) _stem(p)]),
+        appVariables: appVariables,
+      );
+
+  /// Whether there is a site here at all: a manifest of its own, or notation.
+  bool get isSite => (hasManifest && manifest.isNotEmpty) || pageSources.isNotEmpty || sources.isNotEmpty || definitionFiles.isNotEmpty || appStatePath != null;
 
   /// The manifest's path.
   final String manifestPath;
@@ -88,9 +177,11 @@ final class NotationSite {
 
   /// The site's variables by name, as [NotationOptions.projectVariables]
   /// takes them.
-  late final Map<String, Json> variables = {
-    for (final v in Variable.declarationsFromJson(manifest['variables'])) v.name: {'type': v.type.name, ...v.toJson()},
-  };
+  ///
+  /// The manifest's `variables` and app.txt's state (codelessly_api
+  /// `notationSiteVariables`): a name both declare is app.txt's
+  /// ([appStateIssues] says so).
+  late final Map<String, Json> variables = notationSiteVariables(manifest['variables'], appState);
 
   /// The ids of the pages the manifest lists (each page reference's file
   /// stem).
@@ -105,7 +196,7 @@ final class NotationSite {
   /// loop's item of that name instead: `"to": "${= item}"`).
   late final List<String> screens = {
     ...listedScreens,
-    for (final p in pageSources) _stem(p),
+    ...notationPageOrder([for (final p in pageSources) _stem(p)]),
   }.toList();
 
   /// The dictionaries the manifest names (`dictionary`: folders of
@@ -398,16 +489,28 @@ final class NotationSite {
     final problems = <String>[];
     Json manifest = const {};
     final f = File(path);
+    var hasManifest = false;
+    String? asRead;
     if (!f.existsSync()) {
-      problems.add('$path: no such file, so no site is known (its variables, theme and components)');
+      // A folder of notation is a site with no manifest.
+      final dir = f.absolute.parent;
+      if (!isSiteFolder(dir.path) && !isSiteFolder(dir.parent.path)) {
+        problems.add('$path: no such file, so no site is known (its variables, theme and components)');
+      }
     } else {
+      asRead = f.readAsStringSync();
+      hasManifest = true;
       try {
-        manifest = readMap(jsonDecode(f.readAsStringSync())) ?? const {};
+        final read = readMap(jsonDecode(asRead)) ?? const <String, Object?>{};
+        // What expand wrote in it is not the site's source.
+        final source = notationSourceManifest(read);
+        hasManifest = source != null;
+        manifest = source ?? const {};
       } on FormatException catch (e) {
         problems.add('$path is not JSON (${e.message}): its variables, theme and components were not read');
       }
     }
-    final site = NotationSite._(path, manifest, problems);
+    final site = NotationSite._(path, manifest, problems, hasManifest: hasManifest, manifestAsRead: asRead);
     if (readString(manifest['designSystem']) case final ref?) {
       final dsDir = sitePath(site.dir, ref);
       try {

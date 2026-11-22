@@ -70,6 +70,7 @@ import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
+import 'package:codelessly_api/notation_site.dart' show notationBuiltKey;
 
 import 'notation_site.dart';
 import 'dictionary.dart';
@@ -150,12 +151,27 @@ Future<void> main(List<String> args) async {
   for (final p in site?.problems ?? const <String>[]) {
     stderr.writeln(p);
   }
-  if (whole && (site == null || site.manifest.isEmpty)) exit(2);
+  // A site is a folder of notation (pages/, components/, app.txt), with a
+  // site.json or none.
+  if (whole && (site == null || !site.isSite)) {
+    if (site != null && site.problems.isEmpty) {
+      stderr.writeln('$target: no site here: a site is a folder with pages/<screen>.txt (and components/<Word>.txt, app.txt, site.json as it needs them).');
+    }
+    exit(2);
+  }
   // What the site's components/ has that is not loaded or not used: an
   // issue in every mode, --open too (the owner's decision, 2026-11-18).
   var skippedIssues = 0;
   for (final s in site?.skipped ?? const <SkippedComponent>[]) {
     stderr.writeln(s.message);
+    skippedIssues++;
+  }
+  // What app.txt (the app's shared state) has that is not read.
+  final appIssues = <Map<String, Object?>>[
+    for (final i in site?.appStateIssues ?? const <({int line, String message})>[]) {'file': recordPath(site!.appStatePath!, site.home), 'line': i.line, 'message': i.message},
+  ];
+  for (final i in appIssues) {
+    stderr.writeln('${i['file']}: line ${i['line']}: ${i['message']}');
     skippedIssues++;
   }
   // --validate: nothing is written (no document, no record); what an expand
@@ -184,7 +200,7 @@ Future<void> main(List<String> args) async {
   if (whole) {
     // (Not exit: what runs this as a command of its own, tool/notation/main.dart, says its timings after it.)
     exitCode = _expandSite(site!, ds, settings(double.tryParse(opt('--width') ?? '') ?? 1440),
-        skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped);
+        skippedIssues: skippedIssues, record: record ? opt('--vocabulary') ?? '${site.home}/vocabulary.json' : null, components: components, validate: validate, skipped: skipped, appIssues: appIssues);
     return;
   }
 
@@ -246,6 +262,7 @@ Future<void> main(List<String> args) async {
       for (final i in result.issues) {'file': recordPath(file, dir), 'line': i.line, 'column': i.column, 'message': site?.placeDefinitionLine(i.message, text) ?? i.message},
       for (final m in more) {'file': recordPath(file, dir), 'message': m},
       for (final s in skipped) {'file': s['file'], 'message': s['message']},
+      ...appIssues,
     ];
     stdout.writeln(const JsonEncoder.withIndent(' ').convert(validationOf(snap, issues: issues, skipped: skipped)));
     if (issues.isNotEmpty) exitCode = 1;
@@ -286,15 +303,27 @@ Future<void> main(List<String> args) async {
 /// [skippedIssues]: the component files not loaded that count as issues.
 /// [record]: where the vocabulary record goes (null: none).
 int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
-    {int skippedIssues = 0, String? record, Set<String> components = const {}, bool validate = false, List<Map<String, Object?>> skipped = const []}) {
+    {int skippedIssues = 0,
+    String? record,
+    Set<String> components = const {},
+    bool validate = false,
+    List<Map<String, Object?>> skipped = const [],
+    List<Map<String, Object?>> appIssues = const []}) {
   final expander = NotationExpander(site: site, designSystem: ds, settings: settings);
   var issues = skippedIssues;
   // With --validate stdout is the JSON alone: the lines go to stderr.
   final say = validate ? stderr : stdout;
   final found = <Map<String, Object?>>[
     for (final s in skipped) {'file': s['file'], 'message': s['message']},
+    ...appIssues,
   ];
   final snap = siteSnapshot(site, components: components, open: settings.open, dir: site.home);
+  // The app's state file: read by every page and component, written to no
+  // JSON of its own (its variables go in the manifest a render reads).
+  if (site.appStatePath case final app?) {
+    final names = site.appState!.variables.keys.toList();
+    say.writeln('${recordPath(app, site.home)} -> ${names.isEmpty ? 'declares nothing' : 'declares ${names.join(', ')} (every page and component reads ${names.length == 1 ? 'it' : 'them'})'}');
+  }
   final held = <Placeholder>[];
   var leftOut = 0;
   const encoder = JsonEncoder.withIndent(' ');
@@ -379,7 +408,9 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
   }
   for (final (i, p) in expanded.pages.indexed) {
     report(p.path, site.pageOut(p.path), expanded.results[i], p.document, about(p.path));
-    if (!site.listedScreens.contains(p.name)) {
+    // (A site whose manifest lists no pages, or that has none, shows every
+    // page there is: `home` first, then by name.)
+    if (site.listedScreens.isNotEmpty && !site.listedScreens.contains(p.name)) {
       stderr.writeln('${rel(p.path)}: site.json\'s pages do not list ${p.name}: add "${p.name}.json" there, or the site does not have it.');
       found.add({'file': recordPath(p.path, site.home), 'message': 'site.json\'s pages do not list ${p.name}.'});
       issues++;
@@ -410,6 +441,22 @@ int _expandSite(NotationSite site, DesignSystem? ds, ExpandSettings settings,
       }
     }
     return issues == 0 ? 0 : 1;
+  }
+  // The manifest a render reads: the site's own with app.txt's state among
+  // its variables, or the whole of it for a site that has none.
+  if (site.builtManifest case final built?) {
+    final text = '${encoder.convert(built)}\n';
+    if (text != site.manifestAsRead) {
+      File(site.manifestPath)
+        ..parent.createSync(recursive: true)
+        ..writeAsStringSync(text);
+    }
+    say.writeln(site.hasManifest
+        ? '${rel(site.manifestPath)}: app.txt\'s state written among its variables (what a render reads)'
+        : '${rel(site.manifestPath)}: written (the pages in order${site.appVariables.isEmpty ? '' : ' and app.txt\'s state'}: what a render reads)');
+  } else if (site.manifestAsRead != null && site.hasManifest && site.manifestAsRead!.contains('"$notationBuiltKey"')) {
+    // What an earlier expand wrote there and app.txt no longer declares.
+    File(site.manifestPath).writeAsStringSync('${encoder.convert(site.manifest)}\n');
   }
   if (record != null) {
     final saved = saveRecord(record, snap, whole: true);

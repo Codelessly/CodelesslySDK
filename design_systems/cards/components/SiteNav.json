@@ -4,13 +4,13 @@
  "roots": ["band"],
  "widget": {
   "type": "SiteNav",
-  "doc": "A website's top bar, written first under Page: SiteNav brand=\"Tidewater\" icon=\"waves\" links=[\"Features\",\"Pricing\"] active={page} secondary=\"Sign in\" cta=\"Start free\" onNavigate={page=result} (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; an empty label hides its button, and an empty active marks no link). On a phone the menu opens all links and the secondary action; the CTA stays in the bar.",
+  "doc": "A website's top bar, written first under Page: SiteNav brand=\"Tidewater\" icon=\"waves\" links=[\"Features\",\"Pricing\"] active={page} secondary=\"Sign in\" cta=\"Start free\" onNavigate={page=result} (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; with no secondary there is no quiet action, an empty cta hides its button, and an empty active marks no link). On a phone the menu opens all links and the secondary action; the CTA stays in the bar.",
   "props": [
    {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name, at the left.", "required": true},
    {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon on the small accent mark before the name (empty: no mark)."},
    {"key": "links", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["Features", "Pricing", "Customers", "Docs"], "doc": "The page links, centered in the bar.", "required": true},
    {"key": "active", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The current page's link name; it is marked in the accent (empty: none)."},
-   {"key": "secondary", "type": {"kind": "string", "flutter": "String"}, "default": "Sign in", "doc": "The quiet action's label (empty: hidden)."},
+   {"key": "secondary", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The quiet action's label (none unless written: secondary=\"Sign in\")."},
    {"key": "cta", "type": {"kind": "string", "flutter": "String"}, "default": "Start free", "doc": "The one primary action's label (empty: hidden)."}
   ],
   "events": [
