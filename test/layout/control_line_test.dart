@@ -52,7 +52,7 @@ final List<Case> fields = [
   (name: 'a multi-line field', lines: ['Input#f "Notes" lines=3 @v grow'], control: (t) => fieldBoxOf(t, 'f'), designSystem: null),
   (
     name: "Cards' InputField",
-    lines: ['InputField#f label="Email" placeholder="you@example.com" @v'],
+    lines: ['InputField#f label="Email" hint="you@example.com" @v'],
     control: (t) => _node(t, 'f/box'),
     designSystem: 'design_systems/cards',
   ),

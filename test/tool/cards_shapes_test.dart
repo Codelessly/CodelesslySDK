@@ -116,7 +116,8 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     for (final (line, said) in [
       ('StatCard "Users" value="3" description="up 4%"', 'A StatCard\'s description is written note: note="up 4%".'),
       ('StatCard "Users" value="3" detail="up 4%"', 'A StatCard\'s detail is written note: note="up 4%".'),
-      ('InputField "Email" hint="you@example.com" @sel', 'An InputField\'s hint is written placeholder: placeholder="you@example.com".'),
+      ('InputField "Email" placeholder="you@example.com" @sel', 'An InputField\'s placeholder is written hint: hint="you@example.com".'),
+      ('Banner "Sold out" tone="error"', 'A Banner\'s tone is one of info, success, warning, danger, neutral: tone=danger.'),
       ('ListRow "Milk" onDelete={toast "removed"}', 'The notation has one name for each word and key: write ListRow "Milk" onRemove={toast "removed"}'),
     ]) {
       expect(read('${state}Column\n  $line\n').issues.map((i) => i.message), [said], reason: line);

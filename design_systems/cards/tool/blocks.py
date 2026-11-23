@@ -818,13 +818,13 @@ def input_field():
         'icon': icon('search_rounded', 18, 'inkFaint', bind={'props.icon': '${props.icon}', 'visible': "${= props.icon != ''}"}),
         'field': node('textField', {'width': FILL, 'height': 46},
                       {'style': 'field', 'cursorColor': 'accent', 'maxLines': 1, 'decoration': deco},
-                      bind={'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}',
+                      bind={'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.hint}',
                             'props.keyboardType': '${props.keyboard}', 'visible': '${= props.lines <= 1}'},
                       actions=changed),
         'area': node('textField', {'width': FILL, 'height': HUG},
                      {'style': {'from': 'field', 'fontWeight': 400, 'height': 1.5}, 'cursorColor': 'accent', 'maxLines': 0, 'minLines': 3,
                       'keyboardType': 'multiline', 'textAlignVertical': 'top', 'decoration': deco},
-                     bind={'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}',
+                     bind={'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.hint}',
                            'props.minLines': '${= max(2, props.lines)}', 'visible': '${= props.lines > 1}'},
                      actions=changed),
         'error': row(['errorIcon', 'errorText'], 5, bind={'visible': "${= props.error != ''}"}),
@@ -838,7 +838,7 @@ def input_field():
     props = [
         P('value', var(STRING), '', 'The name of your text variable: the field shows it and writes it as the user types.'),
         P('label', STRING, '', 'The label over the field (empty: none).'),
-        P('placeholder', STRING, '', 'Shown while the field is empty.'),
+        P('hint', STRING, '', 'Shown while the field is empty.'),
         P('lines', INT, 1, 'More than 1 makes it a multi-line box about that many lines tall (a message body).'),
         P('icon', STRING, '', 'A Material icon inside the field, e.g. search_rounded (empty: none).'),
         P('error', STRING, '', 'A message under the field, in red with a red border (empty: no error).'),
@@ -847,7 +847,7 @@ def input_field():
     ]
     return component('InputField', "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" @email; lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
                      props, nodes, 'wrap', events=[('onChanged', 'The text changed; the value is the new text.')],
-                     previews=[{'name': 'Field', 'size': [340, 72], 'props': {'label': 'Email', 'placeholder': 'you@example.com'}}])
+                     previews=[{'name': 'Field', 'size': [340, 72], 'props': {'label': 'Email', 'hint': 'you@example.com'}}])
 
 
 # --- OptionList -------------------------------------------------------------------------------------------

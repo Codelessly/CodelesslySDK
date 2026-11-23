@@ -132,13 +132,22 @@ void main() {
     });
   });
 
-  test('a Banner, a Status and a Stat read tone="error" as danger; a Brand with no icon has its letter in a rail', () {
+  test('a Banner, a Status and a Stat have one word for each tone: tone="error" is said with danger; a Brand with no icon has its letter in a rail', () {
     final catalog = desk.catalogOver(standardCatalog);
     final r = Catalog.run(
         catalog,
-        () => parseNotation('Column\n  Banner "Sold out" tone="error"\n  Status "Failed" tone="error" pill\n  Stat "Errors" "3" tone="error"\n  Brand "Cutline" rail=true\n',
+        () => parseNotation('Column\n  Banner "Sold out" tone="danger"\n  Status "Failed" tone="danger" pill\n  Stat "Errors" "3" tone="danger"\n  Brand "Cutline" rail=true\n',
             catalog: catalog, options: NotationOptions.fromDesignSystem(desk, width: 1440, named: true)));
     expect(r.issues, isEmpty);
+    final said = Catalog.run(
+        catalog,
+        () => parseNotation('Column\n  Banner "Sold out" tone="error"\n  Status "Failed" tone="error" pill\n  Stat "Errors" "3" tone="error"\n',
+            catalog: catalog, options: NotationOptions.fromDesignSystem(desk, width: 1440, named: true)));
+    expect([for (final i in said.issues) i.message], [
+      'A Banner\'s tone is one of info, success, warning, danger, neutral: tone=danger.',
+      'A Status\'s tone is one of neutral, success, warning, danger, info, accent: tone=danger.',
+      'A Stat\'s tone is one of neutral, success, warning, danger, info: tone=danger.',
+    ]);
     final brand = desk.components.definitions['Brand']!;
     expect(brand.toJson().toString(), contains('markLetter'));
   });

@@ -1,6 +1,6 @@
 {
  "widget": {
-  "doc": "An inline message (info, success, warning, error): the tone's tint, icon and an optional action (the actions slot). Fires onDismiss. icon= puts an icon of its own in place of the tone's; action= a button at its end that fires onAction.",
+  "doc": "An inline message (info, success, warning, danger): the tone's tint, icon and an optional action (the actions slot). Fires onDismiss. icon= puts an icon of its own in place of the tone's; action= a button at its end that fires onAction.",
   "props": [
    {
     "key": "title",
@@ -30,7 +30,7 @@
       "info",
       "success",
       "warning",
-      "error",
+      "danger",
       "neutral"
      ]
     },
@@ -95,7 +95,7 @@
   },
   "glyph": {
    "bind": {
-    "props.icon": "${= props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.tone == 'success' ? 'check_circle' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'error' ? 'error_outline' : 'info_outline')))))))}"
+    "props.icon": "${= props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.icon != '' ? props.icon : (props.tone == 'success' ? 'check_circle' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' ? 'error_outline' : 'info_outline')))))))}"
    }
   },
   "title": {

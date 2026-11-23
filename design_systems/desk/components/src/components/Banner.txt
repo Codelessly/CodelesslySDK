@@ -1,12 +1,12 @@
 component Banner "A message across a page or a pane (a plan limit, a failed sync, a read-only view): a soft tint and a hairline of its tone, an outline icon, a title and a line, and its lines under it (an action) at the end. `dismissible`: a close button that fires onClose." children=list
   param lead="" doc="A short bold lead before the message."
   param message="Something needs your attention." required doc="What it says."
-  param tone:info|success|warning|danger|error|neutral="info" doc="Its hue and icon (`error` is `danger`)."
+  param tone:info|success|warning|danger|neutral="info" doc="Its hue and icon."
   param dismissible:bool=false doc="A close button at its end."
   event onClose
   preview "Info" 640x48 lead="Read only." message="You are viewing an archived board." tone="info"
 Row#banner gap=10 middle pad=[14,10,10,10] w=fill radius=8 fill={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Tint')} border={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'TintBorder')}
-  Icon#bannerGlyph "{props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' || props.tone == 'error' ? 'error_outline' : 'info_outlined'))}" size=16 color={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')}
+  Icon#bannerGlyph "{props.tone == 'success' ? 'check_circle_outline' : (props.tone == 'warning' ? 'warning_amber' : (props.tone == 'danger' ? 'error_outline' : 'info_outlined'))}" size=16 color={get(theme.colors, (props.tone == 'danger' ? 'error' : props.tone) + 'Ink')}
   Text#bannerText "{props.lead == '' ? props.message : props.lead + ' ' + props.message}" size=13 grow color=ink runs={props.lead == '' ? [] : [{"start":0,"end":length(props.lead),"style":{"fontWeight":600}}]}
   Row#bannerActions gap=8 middle
     Slot#bannerSlot w=null h=null

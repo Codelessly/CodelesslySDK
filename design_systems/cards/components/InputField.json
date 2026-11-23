@@ -30,7 +30,7 @@
     "doc": "The label over the field (empty: none)."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -116,7 +116,7 @@
    ],
    "props": {
     "label": "Email",
-    "placeholder": "you@example.com"
+    "hint": "you@example.com"
    }
   }
  ],
@@ -280,7 +280,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.keyboardType": "${props.keyboard}",
     "visible": "${= props.lines <= 1}",
     "props.obscureText": "${props.obscure}"
@@ -363,7 +363,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.minLines": "${= max(2, props.lines)}",
     "visible": "${= props.lines > 1}"
    },

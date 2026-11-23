@@ -164,7 +164,7 @@ each p in desc?sortByDesc(plans,sort):sortBy(plans,sort)
   TableRow cells={[p.plan,p.subs,money(p.revenue,"$",0)]}
 ```
 
-Filter with `Segments @status`, search with `InputField placeholder="Search" icon="search_rounded" @q`, page with
+Filter with `Segments @status`, search with `InputField hint="Search" icon="search_rounded" @q`, page with
 `Pager @page count={ceil(length(shown)/5)}` and `slice(sorted,page*5,page*5+5)`, tick rows with
 `selectable=true checked={contains(sel,r.id)} onPressed={sel=contains(sel,r.id)?without(sel,r.id):append(sel,r.id)}`, and
 show a `TotalBar` under an `if length(sel)>0`.

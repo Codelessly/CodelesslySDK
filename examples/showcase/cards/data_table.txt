@@ -8,7 +8,7 @@ state shown=filter(invoices,r=>(status=="All"||r.status==status)&&contains(lower
 state rows=slice(desc?sortByDesc(shown,sort):sortBy(shown,sort),page*5,page*5+5)
 state page=0
 ChatCard "Invoices" "{length(shown)} of 12 shown" icon="receipt_long_rounded" status="{count(invoices,r=>r.status=="Overdue")} overdue" tone="warn"
-  InputField#search placeholder="Search customer" icon="search_rounded" @q onChanged={page=0}
+  InputField#search hint="Search customer" icon="search_rounded" @q onChanged={page=0}
   Segments#status @status options=["All","Paid","Due","Overdue"] onChanged={page=0}
   TableHeader#head @sort desc=@desc columns=["No.","Customer","Date","Amount","Status"] keys=["id","customer","date","amount","status"] widths=[5,8,5,6,6] selectable=true checked={length(rows)>0&&all(rows,r=>contains(sel,r.id))} onToggleAll={sel=result?unique(concat(sel,map(rows,r=>r.id))):removeWhere(sel,s=>any(rows,r=>r.id==s))}
   each r in rows

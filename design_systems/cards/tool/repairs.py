@@ -141,7 +141,19 @@ def _reorderable_list(doc):
     return doc
 
 
-REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item, 'SortMenu': _sort_menu, 'ReorderableList': _reorderable_list}
+def _banner(doc):
+    """SSUI's banner calls its red tone error; under Cards it is danger, the word every other tone here has."""
+    text = json.dumps(doc, ensure_ascii=False)
+    text = text.replace("props.tone == 'error'", "props.tone == 'danger'")
+    doc = json.loads(text)
+    for p in doc['widget']['props']:
+        if p['key'] == 'tone':
+            p['type']['values'] = ['danger' if v == 'error' else v for v in p['type']['values']]
+    doc['widget']['doc'] = doc['widget']['doc'].replace('(info, success, warning, error)', '(info, success, warning, danger)')
+    return doc
+
+
+REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item, 'SortMenu': _sort_menu, 'ReorderableList': _reorderable_list, 'Banner': _banner}
 
 # A removed key in a recorded patch. JSON null cannot say it: a document may hold a null of its own.
 REMOVED = {'$removed': True}

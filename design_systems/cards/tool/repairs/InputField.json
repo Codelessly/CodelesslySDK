@@ -24,7 +24,7 @@
     "doc": "The label over the field (empty: none)."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
