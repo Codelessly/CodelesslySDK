@@ -1,3 +1,22 @@
+## 43.0.0
+
+With codelessly_api 43.0.0, which this needs: the notation has one form for each thing, and a form that said what
+another form says is refused with the line to write. Read codelessly_api's "Reads differently" before upgrading;
+notation written with a removed form has to be rewritten.
+
+### Reads differently
+
+- **The design systems' sources, the examples and the showcases** are written in the one form of each thing
+  (`shadow=small`, `onPointerDown`, `hint=`, `maxw=`, `state … saved`).
+- **Desk's `Banner`, `Stat` and `Status`**: a `tone` is `danger`; `error` is refused with `tone=danger`.
+- **Cards' `Banner`**: a `tone` is `danger`, as in Desk; `error` is refused with `tone=danger`.
+- **Cards' `InputField`**: `hint=`, as on an `Input`; `placeholder=` is refused with the `hint=` line.
+
+### Fixed
+
+- **A chain of worked-out states shows the same values and reads quickly.** A page whose states are each worked out
+  from the one before (a loan's schedule, ten steps deep) took tens of seconds to read; it reads at once.
+
 ## 42.1.0
 
 Cards' blocks fill the panel or column that holds them, two crashes are fixed, and the shown checks say more. Read
