@@ -343,7 +343,7 @@
     "title": "Channel sync",
     "text": "Availability stays in step across every booking site, so double bookings never happen.",
     "icon": "sync",
-    "tone": "good",
+    "tone": "success",
     "link": "Learn more"
    }
   },
@@ -362,7 +362,7 @@
     "title": "Smart pricing",
     "text": "Rates adjust to demand, seasons and local events, so you never leave money on the table.",
     "icon": "trending_up_rounded",
-    "tone": "warn",
+    "tone": "warning",
     "link": "Learn more"
    }
   },

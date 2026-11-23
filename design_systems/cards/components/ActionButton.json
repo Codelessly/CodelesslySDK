@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ActionButton",
-  "doc": "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled={condition} dims and blocks it; put two in a Row gap=10 for a pair such as Cancel and Confirm.",
+  "doc": "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, success or dark; enabled={condition} dims and blocks it; put two in a Row gap=10 for a pair such as Cancel and Confirm.",
   "props": [
    {
     "key": "label",
@@ -27,12 +27,12 @@
       "primary",
       "quiet",
       "danger",
-      "good",
+      "success",
       "dark"
      ]
     },
     "default": "primary",
-    "doc": "primary (the accent, one per card), quiet (grey), danger (red), good (green) or dark."
+    "doc": "primary (the accent, one per card), quiet (grey), danger (red), success (green) or dark."
    },
    {
     "key": "icon",
@@ -116,7 +116,7 @@
     "radius": 14
    },
    "bind": {
-    "decoration.fills[0].color": "${= props.tone == 'quiet' ? theme.colors.tile : props.tone == 'danger' ? theme.colors.bad : props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'dark' ? theme.colors.bar : theme.colors.accent}",
+    "decoration.fills[0].color": "${= props.tone == 'quiet' ? theme.colors.tile : props.tone == 'danger' ? theme.colors.bad : props.tone == 'success' ? theme.colors.goodDeep : props.tone == 'dark' ? theme.colors.bar : theme.colors.accent}",
     "decoration.radius": "${theme.radii.cta}",
     "decoration.effects": "${= props.tone == 'primary' && props.enabled ? theme.shadows.cta : []}",
     "opacity": "${= props.enabled ? 1 : 0.4}"

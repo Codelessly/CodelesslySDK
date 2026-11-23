@@ -43,13 +43,13 @@
      "kind": "enumeration",
      "flutter": "String",
      "values": [
-      "sm",
-      "md",
-      "lg"
+      "small",
+      "medium",
+      "large"
      ]
     },
-    "default": "md",
-    "doc": "sm, md or lg."
+    "default": "medium",
+    "doc": "small, medium or large."
    }
   ],
   "events": [
@@ -195,7 +195,7 @@
    },
    "bind": {
     "data": "${props.options}",
-    "layout.height": "${= props.size == 'sm' ? 32 : (props.size == 'md' ? 36 : (44))}"
+    "layout.height": "${= props.size == 'small' ? 32 : (props.size == 'medium' ? 36 : (44))}"
    },
    "media": [
     {
@@ -312,7 +312,7 @@
     "decoration.fills[0].color": "${= item == props.value ? theme.colors.raisedBackground : '#00FFFFFF'}",
     "decoration.effects": "${= item == props.value ? theme.shadows.knob : []}",
     "decoration.radius": "${= max(0, theme.radii.control - 3)}",
-    "layout.padding": "${= [props.size == 'sm' ? 10 : (props.size == 'md' ? 14 : (18)), 0, props.size == 'sm' ? 10 : (props.size == 'md' ? 14 : (18)), 0]}"
+    "layout.padding": "${= [props.size == 'small' ? 10 : (props.size == 'medium' ? 14 : (18)), 0, props.size == 'small' ? 10 : (props.size == 'medium' ? 14 : (18)), 0]}"
    },
    "transitions": [
     {
@@ -341,7 +341,7 @@
    },
    "bind": {
     "props.style.color": "${= item == props.value ? theme.colors.ink : theme.colors.inkSoft}",
-    "props.style.fontSize": "${= props.size == 'sm' ? 12.5 : (props.size == 'md' ? 13 : (14))}"
+    "props.style.fontSize": "${= props.size == 'small' ? 12.5 : (props.size == 'medium' ? 13 : (14))}"
    }
   }
  }

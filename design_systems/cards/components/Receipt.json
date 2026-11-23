@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Receipt",
-  "doc": "The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone good for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.",
+  "doc": "The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone success for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.",
   "props": [
    {
     "key": "title",
@@ -52,14 +52,14 @@
      "flutter": "String",
      "values": [
       "accent",
-      "good",
-      "warn",
+      "success",
+      "warning",
       "danger",
       "neutral"
      ]
     },
-    "default": "good",
-    "doc": "good (done), danger (denied, deleted), neutral (cancelled), accent or warn."
+    "default": "success",
+    "doc": "success (done), danger (denied, deleted), neutral (cancelled), accent or warning."
    },
    {
     "key": "icon",
@@ -442,22 +442,22 @@
    {
     "name": "toneInk",
     "type": "text",
-    "formula": "props.tone == 'good' ? theme.colors.good : props.tone == 'warn' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent"
+    "formula": "props.tone == 'success' ? theme.colors.good : props.tone == 'warning' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent"
    },
    {
     "name": "toneDeep",
     "type": "text",
-    "formula": "props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'warn' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'neutral' ? theme.colors.ink : theme.colors.accentDeep"
+    "formula": "props.tone == 'success' ? theme.colors.goodDeep : props.tone == 'warning' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'neutral' ? theme.colors.ink : theme.colors.accentDeep"
    },
    {
     "name": "toneTint",
     "type": "text",
-    "formula": "props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint"
+    "formula": "props.tone == 'success' ? theme.colors.goodTint : props.tone == 'warning' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint"
    },
    {
     "name": "toneLine",
     "type": "text",
-    "formula": "props.tone == 'good' ? theme.colors.goodLine : props.tone == 'warn' ? theme.colors.warnLine : props.tone == 'danger' ? theme.colors.badLine : props.tone == 'neutral' ? theme.colors.lineStrong : theme.colors.accentLine"
+    "formula": "props.tone == 'success' ? theme.colors.goodLine : props.tone == 'warning' ? theme.colors.warnLine : props.tone == 'danger' ? theme.colors.badLine : props.tone == 'neutral' ? theme.colors.lineStrong : theme.colors.accentLine"
    }
   ]
  }

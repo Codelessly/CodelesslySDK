@@ -3,7 +3,7 @@ state t=0
 state running=false
 state steps=[{"t":"Back up your content","d":"Export posts, pages and settings."},{"t":"Set up the new host","d":"Create the site and install the theme."},{"t":"Import posts","d":"Copy articles, tags and categories."},{"t":"Move media","d":"Upload images and fix their links."},{"t":"Redirect old URLs","d":"Map old addresses to the new ones."},{"t":"Final checks","d":"Test links, feeds and the DNS switch."}]
 every 1s when running onTick={t=t+1; done=min(6,floor(t/2)); running=done<6}
-ChatCard "Blog migration plan" "Six steps, about two seconds each" icon="rocket_launch_rounded" status="{done>=6?"Complete":(running?"Running":(t>0?"Paused":"Ready"))}" tone={done>=6?"good":"accent"}
+ChatCard "Blog migration plan" "Six steps, about two seconds each" icon="rocket_launch_rounded" status="{done>=6?"Complete":(running?"Running":(t>0?"Paused":"Ready"))}" tone={done>=6?"success":"accent"}
   ProgressLine "{done} of 6 steps" "{t} s elapsed" value={done/6}
   each s in steps
     PlanStep "{s.t}" "{s.d}" index={index} current={done} running={running} last={index==5}

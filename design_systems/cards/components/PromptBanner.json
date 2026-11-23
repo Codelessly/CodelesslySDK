@@ -27,11 +27,11 @@
       "info",
       "neutral",
       "warning",
-      "critical"
+      "danger"
      ]
     },
     "default": "info",
-    "doc": "info and neutral: plain. warning and critical: tinted."
+    "doc": "info and neutral: plain. warning and danger: tinted."
    },
    {
     "key": "icon",
@@ -82,7 +82,7 @@
    ],
    "props": {
     "message": "Out of credits",
-    "tone": "critical",
+    "tone": "danger",
     "icon": "error_outline",
     "actionLabel": "Add credits"
    }
@@ -131,8 +131,8 @@
     ]
    },
    "bind": {
-    "decoration.fills[0].color": "${= props.tone == 'critical' ? theme.colors.errorTint : (props.tone == 'warning' ? theme.colors.warningTint : theme.colors.secondaryBackground)}",
-    "decoration.strokes[0].color": "${= props.tone == 'critical' ? theme.colors.errorTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : theme.colors.primaryBorder)}"
+    "decoration.fills[0].color": "${= props.tone == 'danger' ? theme.colors.errorTint : (props.tone == 'warning' ? theme.colors.warningTint : theme.colors.secondaryBackground)}",
+    "decoration.strokes[0].color": "${= props.tone == 'danger' ? theme.colors.errorTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : theme.colors.primaryBorder)}"
    },
    "states": {
     "hovered": {
@@ -192,7 +192,7 @@
    "bind": {
     "visible": "${= props.icon != ''}",
     "props.icon": "${props.icon}",
-    "props.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+    "props.color": "${= props.tone == 'danger' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
    }
   },
   "message": {
@@ -218,7 +218,7 @@
     }
    },
    "bind": {
-    "props.style.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+    "props.style.color": "${= props.tone == 'danger' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
    }
   },
   "action": {
@@ -275,7 +275,7 @@
     }
    },
    "bind": {
-    "props.style.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+    "props.style.color": "${= props.tone == 'danger' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
    }
   },
   "chevron": {
@@ -290,7 +290,7 @@
     "height": 14
    },
    "bind": {
-    "props.color": "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+    "props.color": "${= props.tone == 'danger' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
    }
   }
  }

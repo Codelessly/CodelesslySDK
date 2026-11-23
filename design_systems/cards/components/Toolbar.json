@@ -61,13 +61,13 @@
      "kind": "enumeration",
      "flutter": "String",
      "values": [
-      "sm",
-      "md",
-      "lg"
+      "small",
+      "medium",
+      "large"
      ]
     },
-    "default": "md",
-    "doc": "sm, md or lg."
+    "default": "medium",
+    "doc": "small, medium or large."
    }
   ],
   "events": [
@@ -153,7 +153,7 @@
    "bind": {
     "data": "${props.tools}",
     "props.scrollDirection": "${= props.orientation == 'vertical' ? 'vertical' : 'horizontal'}",
-    "layout.height": "${= props.orientation == 'vertical' ? length(props.tools) * ((props.size == 'sm' ? 26 : (props.size == 'lg' ? 44 : 32)) + 4) - 4 : (props.size == 'sm' ? 26 : (props.size == 'lg' ? 44 : 32))}"
+    "layout.height": "${= props.orientation == 'vertical' ? length(props.tools) * ((props.size == 'small' ? 26 : (props.size == 'large' ? 44 : 32)) + 4) - 4 : (props.size == 'small' ? 26 : (props.size == 'large' ? 44 : 32))}"
    }
   },
   "tool": {
@@ -225,7 +225,7 @@
    "bind": {
     "selected": "${= contains(props.active, item)}",
     "opacity": "${= item == '-' ? 0 : 1}",
-    "layout.padding": "${= item == '-' ? (props.size == 'sm' ? 2 : 3) : (props.size == 'sm' ? 6 : (props.size == 'lg' ? 12 : 8))}"
+    "layout.padding": "${= item == '-' ? (props.size == 'small' ? 2 : 3) : (props.size == 'small' ? 6 : (props.size == 'large' ? 12 : 8))}"
    },
    "states": {
     "hovered": {
@@ -285,9 +285,9 @@
    },
    "bind": {
     "props.icon": "${= item == '-' ? 'circle' : item}",
-    "props.size": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (20))}",
-    "layout.width": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (20))}",
-    "layout.height": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (20))}"
+    "props.size": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (20))}",
+    "layout.width": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (20))}",
+    "layout.height": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (20))}"
    }
   }
  }

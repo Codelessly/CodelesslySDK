@@ -39,7 +39,7 @@
     "doc": "The name of your text variable holding the chosen option."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -190,7 +190,7 @@
    "bind": {
     "props.items": "${props.options}",
     "props.value": "${props.value}",
-    "props.hint": "${props.placeholder}",
+    "props.hint": "${props.hint}",
     "props.enabled": "${props.enabled}"
    },
    "actions": [

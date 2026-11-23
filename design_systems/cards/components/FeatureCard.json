@@ -1,25 +1,74 @@
 {
  "schema": 3,
  "id": "FeatureCard",
- "roots": ["tile"],
+ "roots": [
+  "tile"
+ ],
  "widget": {
   "type": "FeatureCard",
-  "doc": "One feature as a page tile, as wide as its cell: FeatureCard \"Live calendar\" \"Every room, every night...\" icon=\"calendar_month_rounded\" tone=\"accent\" link=\"Learn more\" onPressed={…} (tone tints the icon square: accent by default, good, warn, bad or neutral; link empty hides it).",
+  "doc": "One feature as a page tile, as wide as its cell: FeatureCard \"Live calendar\" \"Every room, every night...\" icon=\"calendar_month_rounded\" tone=\"accent\" link=\"Learn more\" onPressed={…} (tone tints the icon square: accent by default, success, warning, danger or neutral; link empty hides it).",
   "props": [
-   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Live calendar", "doc": "The feature's name.", "required": true},
-   {"key": "text", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "Two lines or so describing it."},
-   {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "auto_awesome_rounded", "doc": "A Material icon in the tinted square."},
-   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "accent", "doc": "The square's tint: accent (default), good, warn, bad or neutral."},
-   {"key": "link", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The link's label, e.g. Learn more (empty: none)."}
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Live calendar",
+    "doc": "The feature's name.",
+    "required": true
+   },
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Two lines or so describing it."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "auto_awesome_rounded",
+    "doc": "A Material icon in the tinted square."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "accent",
+    "doc": "The square's tint: accent (default), success, warning, danger or neutral."
+   },
+   {
+    "key": "link",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The link's label, e.g. Learn more (empty: none)."
+   }
   ],
   "events": [
-   {"key": "onPressed", "doc": "The tile or its link was pressed; the value is the title."}
+   {
+    "key": "onPressed",
+    "doc": "The tile or its link was pressed; the value is the title."
+   }
   ]
  },
  "previews": [
   {
    "name": "Accent feature",
-   "size": [368, 290],
+   "size": [
+    368,
+    290
+   ],
    "props": {
     "title": "A quieter arrival",
     "text": "The first step is clear and close at hand.",
@@ -30,12 +79,15 @@
   },
   {
    "name": "Channel sync",
-   "size": [368, 290],
+   "size": [
+    368,
+    290
+   ],
    "props": {
     "title": "Channel sync",
     "text": "Booking.com, Airbnb and Expedia stay in step within seconds, so a room sold anywhere is closed everywhere.",
     "icon": "sync_alt_rounded",
-    "tone": "good",
+    "tone": "success",
     "link": "Learn more"
    }
   }
@@ -43,65 +95,216 @@
  "nodes": {
   "tile": {
    "type": "column",
-   "children": ["mark", "title", "text", "linkRow"],
-   "props": {"crossAxisAlignment": "start", "spacing": 0},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [30, 30, 30, 30]},
-   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 16},
-   "bind": {"decoration.radius": "${theme.radii.cardWide}"},
-   "states": {"pressed": {"tile": {"opacity": 0.86}}},
+   "children": [
+    "mark",
+    "title",
+    "text",
+    "linkRow"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     30,
+     30,
+     30,
+     30
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "radius": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cardWide}"
+   },
+   "states": {
+    "pressed": {
+     "tile": {
+      "opacity": 0.86
+     }
+    }
+   },
    "actions": [
-    {"trigger": {"type": "click"}, "actions": [
-     {"type": "componentEvent", "event": "onPressed", "value": "${props.title}"}
-    ]}
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.title}"
+      }
+     ]
+    }
    ]
   },
   "mark": {
    "type": "row",
-   "children": ["markIcon"],
-   "props": {"mainAxisAlignment": "center"},
-   "layout": {"width": 48, "height": 48},
-   "decoration": {"fills": [{"color": "iconTile"}], "radius": 12},
+   "children": [
+    "markIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 48,
+    "height": 48
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "iconTile"
+     }
+    ],
+    "radius": 12
+   },
    "bind": {
     "decoration.radius": "${theme.radii.tileWide}",
-    "decoration.fills[0].color": "${= props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'bad' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint}"
+    "decoration.fills[0].color": "${= props.tone == 'success' ? theme.colors.goodTint : props.tone == 'warning' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint}"
    }
   },
   "markIcon": {
    "type": "icon",
-   "props": {"icon": "auto_awesome_rounded", "size": 24, "color": "accent"},
-   "layout": {"width": 24, "height": 24},
+   "props": {
+    "icon": "auto_awesome_rounded",
+    "size": 24,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
    "bind": {
     "props.icon": "${props.icon}",
-    "props.color": "${= props.tone == 'good' ? theme.colors.good : props.tone == 'warn' ? theme.colors.warn : props.tone == 'bad' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent}"
+    "props.color": "${= props.tone == 'success' ? theme.colors.good : props.tone == 'warning' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent}"
    }
   },
   "title": {
    "type": "text",
-   "props": {"text": "${props.title}", "style": "heading3Wide"},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 22, 0, 0]}
+   "props": {
+    "text": "${props.title}",
+    "style": "heading3Wide"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     22,
+     0,
+     0
+    ]
+   }
   },
   "text": {
    "type": "text",
-   "props": {"text": "${props.text}", "style": {"from": "mutedWide", "height": 1.6}},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 12, 0, 0]},
-   "bind": {"visible": "${= props.text != ''}"}
+   "props": {
+    "text": "${props.text}",
+    "style": {
+     "from": "mutedWide",
+     "height": 1.6
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.text != ''}"
+   }
   },
   "linkRow": {
    "type": "row",
-   "children": ["linkText", "linkIcon"],
-   "props": {"crossAxisAlignment": "center", "spacing": 6},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [0, 22, 0, 0]},
-   "bind": {"visible": "${= props.link != ''}"}
+   "children": [
+    "linkText",
+    "linkIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     22,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.link != ''}"
+   }
   },
   "linkText": {
    "type": "text",
-   "props": {"text": "${props.link}", "style": {"from": "strongWide", "fontSize": 14, "color": "accent"}},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${props.link}",
+    "style": {
+     "from": "strongWide",
+     "fontSize": 14,
+     "color": "accent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "linkIcon": {
    "type": "icon",
-   "props": {"icon": "arrow_forward_rounded", "size": 16, "color": "accent"},
-   "layout": {"width": 16, "height": 16}
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 16,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
   }
  }
 }

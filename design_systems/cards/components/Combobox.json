@@ -39,7 +39,7 @@
     "doc": "The name of your text variable holding the choice."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -48,7 +48,7 @@
     "doc": "Shown with no choice."
    },
    {
-    "key": "searchPlaceholder",
+    "key": "searchHint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -241,7 +241,7 @@
   "choice": {
    "type": "text",
    "props": {
-    "text": "${= props.value != '' ? props.value : props.placeholder}",
+    "text": "${= props.value != '' ? props.value : props.hint}",
     "style": {
      "fontSize": 14,
      "fontWeight": 400,
@@ -442,7 +442,7 @@
    },
    "bind": {
     "props.initialValue": "${query}",
-    "props.decoration.hintText": "${props.searchPlaceholder}"
+    "props.decoration.hintText": "${props.searchHint}"
    },
    "actions": [
     {

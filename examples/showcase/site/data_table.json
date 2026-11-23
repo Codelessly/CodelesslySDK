@@ -36,7 +36,7 @@
    "props": {
     "title": "Invoices",
     "icon": "receipt_long_rounded",
-    "tone": "warn"
+    "tone": "warning"
    },
    "bind": {
     "props.subtitle": "${= length((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))))} of 12 shown",

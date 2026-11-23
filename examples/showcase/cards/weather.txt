@@ -7,4 +7,4 @@ ChatCard
   WeatherDay "Tue" kind="rain" low=14 high=20 min=13 max=25
   WeatherDay "Wed" kind="partly" low=13 high=18 min=13 max=25
   WeatherDay "Thu" kind="sun" low=15 high=25 min=13 max=25
-  ActionButton#alert "{alert?"Rain alert is on":"Alert me before it rains"}" icon="{alert?"notifications_active_rounded":"notifications_none_rounded"}" tone="{alert?"good":"primary"}" onPressed={alert=!alert; emit rain_alert alert}
+  ActionButton#alert "{alert?"Rain alert is on":"Alert me before it rains"}" icon="{alert?"notifications_active_rounded":"notifications_none_rounded"}" tone="{alert?"success":"primary"}" onPressed={alert=!alert; emit rain_alert alert}

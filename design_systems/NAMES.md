@@ -36,7 +36,7 @@ the drawer on a phone, with nothing written for it.
 |---|---|---|---|
 | `Dialog` | `title`, `note`, `overline`; slot `actions`; `onClose` | `title`, `description`, `closable`; slot `actions`; `onClose` | `note` / `description`; `overline` / `closable` |
 | `Field` | `label`, `note`, `error`, `required` | `label`, `help`, `error`, `required` | `note` / `help` |
-| `Banner` | `lead`, `message`, `tone` (info, success, warning, danger, neutral), `dismissible`; action lines; `onClose` | `title`, `message`, `tone` (… `error` …), `icon`, `action` (a label), `dismissible`, `live`; slot `actions`; `onDismiss`, `onAction` | `lead` / `title`; `danger` / `error`; actions as lines / a label; event names |
+| `Banner` | `lead`, `message`, `tone` (info, success, warning, danger, neutral), `dismissible`; action lines; `onClose` | `title`, `message`, `tone` (the same five), `icon`, `action` (a label), `dismissible`, `live`; slot `actions`; `onDismiss`, `onAction` | `lead` / `title`; actions as lines / a label; event names |
 | `Breadcrumb` | `items`; `onNavigate` | `items`, `showHomeIcon`; `onNavigate` | Cards' home icon |
 | `Tabs` | `tabs`, `@value`, `icons`, `counts`; `onChanged` | `tabs`, `@value`; `onChanged` | Desk's icons and counts |
 | `Pager` | `@page` (from 1), `pages`, `summary` | `@value` (from 0), `count`, `label` | all three names, and where the count starts |
@@ -53,10 +53,10 @@ the drawer on a phone, with nothing written for it.
 | Part | Desk | Cards | What differs |
 |---|---|---|---|
 | A figure | `Stat "Label" "43"` (`text`), `delta`, `note`, `tone`, `band` | `StatTile` (`value`, `delta`, `invert`, `note`, `icon`); also `StatCard` (`value`, `change`, `trend`, `good`), `InlineStat`, `StatBand` | `text` / `value`; Desk's tone dot, Cards' icon and `invert` |
-| A record's state | `Status "Active" tone=… pill` | `StatusBadge` (`label`, `tone`), `StatusDot` (`status`, `label`, `size`), `StatusIndicator` | one word with `pill` / three; `danger` / `error` |
+| A record's state | `Status "Active" tone=… pill` | `StatusBadge` (`label`, `tone`), `StatusDot` (`status`, `label`, `size`), `StatusIndicator` | one word with `pill` / three |
 | A label on a record | `Tag "Design" hue=… dot outline removable` | `Badge` (`label`, `tone`, `dot`, `pill`); `Chip` is a choice (`selected`, `removable`, `icon`) | `hue` (eight label hues) / `tone` (status tones) |
 | Nothing to show | `Empty "title" "note" icon=…` + one button line | `EmptyState` (`icon`, `title`, `message`, slot `actions`) | `note` / `message`; a line / a slot |
-| A search field | `SearchField @q hint=… shortcut=…` | `SearchBar` (`placeholder`, `size`, `onClear`), `HeaderSearchInput`, `FullWidthSearchInput`, `InputField icon="search_rounded"` | `hint` / `placeholder`; Desk's key cap |
+| A search field | `SearchField @q hint=… shortcut=…` | `SearchBar` (`hint`, `size`, `onClear`), `HeaderSearchInput`, `FullWidthSearchInput`, `InputField icon="search_rounded"` | Desk's key cap |
 | A filter | `FilterButton "Labels" icon=… count=2` (one control of a bar) | `ChipTabs @filter tabs=[…]` (pills), `FilterBar` (a whole bar: `query`, `filters`, `count`, `action`) | a button per filter / pills / a whole bar |
 | A dialog's foot | `Actions` + button lines | `CardActions` (`actions`, `icons`, `onAction`) | lines / a list |
 | A group label | `ListGroup "Today" meta=…` | `SectionLabel` (`label`, `note`), `DayHeader` | `meta` / `note` |
@@ -65,15 +65,15 @@ the drawer on a phone, with nothing written for it.
 | People together | `AvatarGroup` (`names`, `max`, `size` a number) | `ModelAvatarStack` (`labels`, `max`, `size` a word), vocabulary `AvatarStack` | `names` / `labels` |
 | An attachment | `FileTile "notes.txt" "164 KB"` (`name`, `note`, `icon`, `onDownload`) | `FileListItem` (`path`, `name`, `icon`, slots `meta`, `actions`), vocabulary `AttachmentTile` | `note` / a slot |
 | A key | `KeyCap "Ctrl K"` | vocabulary `Kbd` | the name |
-| A message across a page | `Banner` | `Callout` (in a card: `title`, `message`, `tone` accent/good/warn/danger) and `Banner` | two words in Cards |
+| A message across a page | `Banner` | `Callout` (in a card: `title`, `message`, `tone` accent/success/warning/danger) and `Banner` | two words in Cards |
 | A menu | `Menu#id` + `MenuItem` lines (`MenuPopover` for the frame) | `ContextMenu` (`items`, `icons`, `shortcuts`, `destructive`), `MenuPopover` + `MenuItem` | lines / lists |
 | A titled block of a page | `Panel` | `Panel`; also `SectionCard`, `FormSection` (a form's group) | three words in Cards |
 | A switch of a few options | the notation's `SegmentedButton @x items=[…]` | `Segments @x options=[…]`, `TabToggle`, `SegmentedControl` (`options`, `size`) | `items` / `options` |
 | A setting | a `Row` of a label and a `Toggle` in a `Panel` | `SettingRow` (`title`, `description`, `kind`, `@value`, `detail`, `danger`) | no word in Desk |
 
-The tones are the widest split: Desk says `neutral`, `success`, `warning`, `danger`, `info` (and eight label hues);
-Cards' SSUI layer says `neutral`, `success`, `warning`, `error`, `info`, its blocks `accent`, `good`, `warn`,
-`danger`, `neutral`, and `ActionButton` `primary`, `quiet`, `danger`, `good`, `dark`. The second line of a part is
+The tones are one scale, the notation's: `neutral`, `success`, `warning`, `danger`, `info` in Desk (with eight
+label hues) and in Cards, whose blocks add `accent` and whose `ActionButton` takes `primary`, `quiet`, `danger`,
+`success`, `dark`. A size is `small`, `medium` or `large`, a field's empty text its `hint`, in both. The second line of a part is
 `note` everywhere in Desk and `subtitle`, `description`, `help`, `message` or `note` in Cards.
 
 ## 3. What one has and the other lacks

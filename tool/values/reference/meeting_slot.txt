@@ -8,7 +8,7 @@ state s=find(slots,x=>x.t==time)
 state endH=s.h+floor((s.m+30)/60)
 state endM=(s.m+30)%60
 state endT=(endH<10?"0":"")+endH+":"+(endM<10?"0":"")+endM
-ChatCard "Team meeting" "30 minutes · next week" icon="event_rounded" status={booked?"Booked":(length(slots)-length(taken))+" slots free"} tone={booked?"good":"accent"}
+ChatCard "Team meeting" "30 minutes · next week" icon="event_rounded" status={booked?"Booked":(length(slots)-length(taken))+" slots free"} tone={booked?"success":"accent"}
   if !booked
     Row gap=8
       PersonChip "Priya"

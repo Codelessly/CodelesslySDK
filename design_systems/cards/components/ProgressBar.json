@@ -26,7 +26,7 @@
       "primary",
       "success",
       "warning",
-      "error"
+      "danger"
      ]
     },
     "default": "primary",
@@ -90,7 +90,7 @@
    },
    "bind": {
     "layout.flex": "${= round(max(0, min(1, props.value)) * 1000)}",
-    "decoration.fills[0].color": "${= props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.primary))}"
+    "decoration.fills[0].color": "${= props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'danger' ? theme.error : theme.primary))}"
    }
   },
   "rest": {

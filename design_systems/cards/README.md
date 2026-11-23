@@ -18,6 +18,7 @@ change to `tool/repairs/<Name>.json`, which the build applies last:
 | `tool/kit.py` | The helpers blocks are written with |
 | `tool/blocks.py` | The 49 blocks: ChatCard, SectionLabel, Paragraph, ActionButton, TotalBar, Details, Callout, Disclosure, Receipt, Recommendation, Steps, Segments, Tabs, TabToggle, SegmentedControl, ChipTabs, BrowserTabs, InputField, OptionList, ChoiceChips, DayPicker, Counter, Rating, FlightOption, ProductTile, Carousel, PageDots, Pager, WideScroll, CartLine, DiffHunk, ComparisonTable, StatTile, ChartCard, TableHeader, TableRow, PhotoGallery, DayHeader, ItineraryStop, Checklist, MapPanel, PlaceRow, PlanStep, ProgressLine, WeatherNow, WeatherHours, WeatherDay, Media, WeatherGlyph |
 | `tool/page_words/components/*.txt` | The 10 page words, written in the notation (`tool/page_words.py` expands them when one changed): Account, Brand, BulkBar, ListRow, NavItem, NavSection, PageHeader, PaneHeader, Panel, SideButton |
+| `tool/core_words.py` | The notation's own words on every component, run last: a tone is `info`, `success`, `warning`, `danger` or `neutral`, a size `small`, `medium` or `large`, a field's empty text its `hint`, its keyboard its `type`, a masked field `password` |
 | `tool/art.py` | The drawn media as customPaint draw lists colored by tokens: scenes, product and food glyphs, weather glyphs, the map |
 | `tool/build.py` | The build |
 | `themes/light.json`, `themes/dark.json` | Each token set as a theme override for a site's `theme` |

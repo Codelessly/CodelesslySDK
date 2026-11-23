@@ -1,103 +1,374 @@
 {
  "schema": 3,
  "id": "TaskCard",
- "roots": ["tile"],
+ "roots": [
+  "tile"
+ ],
  "widget": {
   "type": "TaskCard",
-  "doc": "One task on a board, as wide as its column: TaskCard title=\"Build the new homepage hero\" label=\"Frontend\" tone=\"info\" code=\"LNS-106\" due=\"Nov 27\" dueTone=\"soon\" comments=6 assignee=\"SO\" avatarTone=\"warn\" selected={sel==t.id} onPressed={sel=t.id} (tone: accent, good, warn, bad, info, neutral or lilac, default accent; dueTone: empty, soon, late or done; avatarTone: accent, good, warn, bad, info or purple).",
+  "doc": "One task on a board, as wide as its column: TaskCard title=\"Build the new homepage hero\" label=\"Frontend\" tone=\"info\" code=\"LNS-106\" due=\"Nov 27\" dueTone=\"soon\" comments=6 assignee=\"SO\" avatarTone=\"warning\" selected={sel==t.id} onPressed={sel=t.id} (tone: accent, success, warning, danger, info, neutral or lilac, default accent; dueTone: empty, soon, late or done; avatarTone: accent, success, warning, danger, info or purple).",
   "props": [
-   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Build the new homepage hero", "doc": "The task, two lines at most.", "required": true},
-   {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Frontend", "doc": "The label chip's text (empty: none)."},
-   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "accent", "doc": "The chip's tint: accent, good, warn, bad, info, neutral or lilac."},
-   {"key": "code", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A task key in monospace at the top right (LNS-106; empty: none)."},
-   {"key": "due", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The due date as text (Nov 27; empty: none)."},
-   {"key": "dueTone", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "Empty (quiet), soon (orange), late (red) or done (green check, muted title)."},
-   {"key": "comments", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "How many comments."},
-   {"key": "assignee", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The assignee's initials (SO; empty: unassigned)."},
-   {"key": "avatarTone", "type": {"kind": "string", "flutter": "String"}, "default": "accent", "doc": "The initials' disc: accent, good, warn, bad, info or purple."},
-   {"key": "selected", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "The open task: an accent border."}
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Build the new homepage hero",
+    "doc": "The task, two lines at most.",
+    "required": true
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Frontend",
+    "doc": "The label chip's text (empty: none)."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "accent",
+    "doc": "The chip's tint: accent, success, warning, danger, info, neutral or lilac."
+   },
+   {
+    "key": "code",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A task key in monospace at the top right (LNS-106; empty: none)."
+   },
+   {
+    "key": "due",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The due date as text (Nov 27; empty: none)."
+   },
+   {
+    "key": "dueTone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Empty (quiet), soon (orange), late (red) or done (green check, muted title)."
+   },
+   {
+    "key": "comments",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many comments."
+   },
+   {
+    "key": "assignee",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The assignee's initials (SO; empty: unassigned)."
+   },
+   {
+    "key": "avatarTone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "accent",
+    "doc": "The initials' disc: accent, success, warning, danger, info or purple."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The open task: an accent border."
+   }
   ],
   "events": [
-   {"key": "onPressed", "doc": "The tile was tapped."}
+   {
+    "key": "onPressed",
+    "doc": "The tile was tapped."
+   }
   ]
  },
  "previews": [
   {
    "name": "Selected",
-   "size": [260, 124],
-   "props": {"code": "LNS-106", "tone": "info", "due": "Nov 27", "dueTone": "soon", "comments": 6, "assignee": "SO", "avatarTone": "warn", "selected": true}
+   "size": [
+    260,
+    124
+   ],
+   "props": {
+    "code": "LNS-106",
+    "tone": "info",
+    "due": "Nov 27",
+    "dueTone": "soon",
+    "comments": 6,
+    "assignee": "SO",
+    "avatarTone": "warning",
+    "selected": true
+   }
   }
  ],
  "nodes": {
   "tile": {
    "type": "column",
-   "children": ["head", "title", "foot"],
-   "props": {"crossAxisAlignment": "stretch", "spacing": 10},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [14, 12, 14, 12]},
-   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1.5, "radius": 12},
+   "children": [
+    "head",
+    "title",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 12
+   },
    "bind": {
     "decoration.radius": "${theme.radii.tileWide}",
     "decoration.strokes[0].color": "${= props.selected ? theme.colors.accent : theme.colors.line}"
    },
-   "states": {"pressed": {"tile": {"opacity": 0.85}}},
+   "states": {
+    "pressed": {
+     "tile": {
+      "opacity": 0.85
+     }
+    }
+   },
    "actions": [
-    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPressed"}]}
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
    ]
   },
   "head": {
    "type": "row",
-   "children": ["chip", "code"],
-   "props": {"crossAxisAlignment": "center", "spacing": 8},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"visible": "${= props.label != '' || props.code != ''}"}
+   "children": [
+    "chip",
+    "code"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != '' || props.code != ''}"
+   }
   },
   "chip": {
    "type": "row",
-   "children": ["chipText"],
-   "props": {"crossAxisAlignment": "center"},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [8, 3, 8, 3]},
-   "decoration": {"fills": [{"color": "primaryTint"}], "radius": 6},
+   "children": [
+    "chipText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     3,
+     8,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6
+   },
    "bind": {
     "visible": "${= props.label != ''}",
-    "decoration.fills[0].color": "${= props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'bad' ? theme.colors.badTint : props.tone == 'info' ? theme.colors.infoTint : props.tone == 'lilac' ? theme.colors.neutralTint : props.tone == 'neutral' ? theme.colors.neutralTint : theme.colors.primaryTint}"
+    "decoration.fills[0].color": "${= props.tone == 'success' ? theme.colors.goodTint : props.tone == 'warning' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'info' ? theme.colors.infoTint : props.tone == 'lilac' ? theme.colors.neutralTint : props.tone == 'neutral' ? theme.colors.neutralTint : theme.colors.primaryTint}"
    }
   },
   "chipText": {
    "type": "text",
-   "props": {"text": "${props.label}", "style": {"from": "captionWide", "fontSize": 12, "fontWeight": 600}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "captionWide",
+     "fontSize": 12,
+     "fontWeight": 600
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
    "bind": {
-    "props.style.color": "${= props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'warn' ? theme.colors.warnDeep : props.tone == 'bad' ? theme.colors.badDeep : props.tone == 'info' ? theme.colors.info : props.tone == 'lilac' ? theme.colors.purple : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent}"
+    "props.style.color": "${= props.tone == 'success' ? theme.colors.goodDeep : props.tone == 'warning' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'info' ? theme.colors.info : props.tone == 'lilac' ? theme.colors.purple : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent}"
    }
   },
   "code": {
    "type": "text",
-   "props": {"text": "${props.code}", "style": {"from": "code", "fontSize": 11, "color": "inkFaint"}, "textAlign": "right", "maxLines": 1},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${props.code}",
+    "style": {
+     "from": "code",
+     "fontSize": 11,
+     "color": "inkFaint"
+    },
+    "textAlign": "right",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "title": {
    "type": "text",
-   "props": {"text": "${props.title}", "style": {"from": "strongWide", "color": "ink"}, "maxLines": 2, "overflow": "ellipsis"},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"props.style.color": "${= props.dueTone == 'done' ? theme.colors.inkSoft : theme.colors.ink}"}
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "strongWide",
+     "color": "ink"
+    },
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.dueTone == 'done' ? theme.colors.inkSoft : theme.colors.ink}"
+   }
   },
   "foot": {
    "type": "row",
-   "children": ["dueBox", "comBox", "gap", "avatar"],
-   "props": {"crossAxisAlignment": "center", "spacing": 12},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "children": [
+    "dueBox",
+    "comBox",
+    "gap",
+    "avatar"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "dueBox": {
    "type": "row",
-   "children": ["dueIcon", "dueText"],
-   "props": {"crossAxisAlignment": "center", "spacing": 5},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
-   "bind": {"visible": "${= props.due != ''}"}
+   "children": [
+    "dueIcon",
+    "dueText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.due != ''}"
+   }
   },
   "dueIcon": {
    "type": "icon",
-   "props": {"icon": "calendar_today_rounded", "size": 14, "color": "inkFaint"},
-   "layout": {"width": 14, "height": 14},
+   "props": {
+    "icon": "calendar_today_rounded",
+    "size": 14,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
    "bind": {
     "props.icon": "${= props.dueTone == 'done' ? 'check_circle_rounded' : 'calendar_today_rounded'}",
     "props.color": "${= props.dueTone == 'late' ? theme.colors.bad : props.dueTone == 'soon' ? theme.colors.warn : props.dueTone == 'done' ? theme.colors.good : theme.colors.inkFaint}"
@@ -105,47 +376,133 @@
   },
   "dueText": {
    "type": "text",
-   "props": {"text": "${props.due}", "style": {"from": "captionWide", "fontSize": 13, "color": "inkSoft"}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "props": {
+    "text": "${props.due}",
+    "style": {
+     "from": "captionWide",
+     "fontSize": 13,
+     "color": "inkSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
    "bind": {
     "props.style.color": "${= props.dueTone == 'late' ? theme.colors.badDeep : props.dueTone == 'soon' ? theme.colors.warnDeep : props.dueTone == 'done' ? theme.colors.goodDeep : theme.colors.inkSoft}"
    }
   },
   "comBox": {
    "type": "row",
-   "children": ["comIcon", "comText"],
-   "props": {"crossAxisAlignment": "center", "spacing": 5},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "children": [
+    "comIcon",
+    "comText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "comIcon": {
    "type": "icon",
-   "props": {"icon": "chat_bubble_outline_rounded", "size": 14, "color": "inkFaint"},
-   "layout": {"width": 14, "height": 14}
+   "props": {
+    "icon": "chat_bubble_outline_rounded",
+    "size": 14,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
   },
   "comText": {
    "type": "text",
-   "props": {"text": "${= fixed(props.comments, 0)}", "style": {"from": "captionWide", "fontSize": 13, "color": "inkSoft"}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${= fixed(props.comments, 0)}",
+    "style": {
+     "from": "captionWide",
+     "fontSize": 13,
+     "color": "inkSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "gap": {
    "type": "box",
-   "layout": {"width": {"fill": 0}, "height": 1}
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1
+   }
   },
   "avatar": {
    "type": "row",
-   "children": ["avatarText"],
-   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
-   "layout": {"width": 26, "height": 26},
-   "decoration": {"fills": [{"color": "accent"}], "radius": 13},
+   "children": [
+    "avatarText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 13
+   },
    "bind": {
     "visible": "${= props.assignee != ''}",
-    "decoration.fills[0].color": "${= props.avatarTone == 'good' ? theme.colors.good : props.avatarTone == 'warn' ? theme.colors.warn : props.avatarTone == 'bad' ? theme.colors.bad : props.avatarTone == 'info' ? theme.colors.info : props.avatarTone == 'purple' ? theme.colors.purple : theme.colors.accent}"
+    "decoration.fills[0].color": "${= props.avatarTone == 'success' ? theme.colors.good : props.avatarTone == 'warning' ? theme.colors.warn : props.avatarTone == 'danger' ? theme.colors.bad : props.avatarTone == 'info' ? theme.colors.info : props.avatarTone == 'purple' ? theme.colors.purple : theme.colors.accent}"
    }
   },
   "avatarText": {
    "type": "text",
-   "props": {"text": "${props.assignee}", "style": {"from": "captionWide", "fontSize": 10, "fontWeight": 700, "color": "onAccent"}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${props.assignee}",
+    "style": {
+     "from": "captionWide",
+     "fontSize": 10,
+     "fontWeight": 700,
+     "color": "onAccent"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   }
  }
 }

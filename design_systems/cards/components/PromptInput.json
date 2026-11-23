@@ -21,7 +21,7 @@
     "doc": "The name of your text variable."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -30,7 +30,7 @@
     "doc": "Shown while empty."
    },
    {
-    "key": "hint",
+    "key": "note",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -94,7 +94,7 @@
    ],
    "props": {
     "value": "Summarize the launch plan",
-    "hint": "Enter to send, Shift+Enter for a new line"
+    "note": "Enter to send, Shift+Enter for a new line"
    }
   }
  ],
@@ -299,7 +299,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}"
+    "props.decoration.hintText": "${props.hint}"
    },
    "actions": [
     {
@@ -432,7 +432,7 @@
   "hint": {
    "type": "text",
    "props": {
-    "text": "${props.hint}",
+    "text": "${props.note}",
     "style": {
      "fontSize": 12,
      "fontWeight": 400,
@@ -456,7 +456,7 @@
     ]
    },
    "bind": {
-    "visible": "${= props.hint != ''}"
+    "visible": "${= props.note != ''}"
    }
   }
  }

@@ -36,13 +36,13 @@
      "kind": "enumeration",
      "flutter": "String",
      "values": [
-      "sm",
-      "md",
-      "lg"
+      "small",
+      "medium",
+      "large"
      ]
     },
-    "default": "md",
-    "doc": "sm, md or lg."
+    "default": "medium",
+    "doc": "small, medium or large."
    },
    {
     "key": "icon",
@@ -81,7 +81,7 @@
    ],
    "props": {
     "variant": "primary",
-    "size": "sm",
+    "size": "small",
     "icon": "sparkles"
    }
   }
@@ -153,7 +153,7 @@
     ]
    },
    "bind": {
-    "layout.padding": "${= props.size == 'sm' ? [12, 6, 12, 6] : (props.size == 'md' ? [16, 8, 16, 8] : ([24, 12, 24, 12]))}",
+    "layout.padding": "${= props.size == 'small' ? [12, 6, 12, 6] : (props.size == 'medium' ? [16, 8, 16, 8] : ([24, 12, 24, 12]))}",
     "decoration.fills[1].visible": "${= props.variant == 'gradient'}"
    },
    "states": {
@@ -205,9 +205,9 @@
    },
    "bind": {
     "props.icon": "${= props.icon == 'crown' ? 'workspace_premium' : 'auto_awesome'}",
-    "props.size": "${= props.size == 'sm' ? 16 : (props.size == 'md' ? 20 : (24))}",
-    "layout.width": "${= props.size == 'sm' ? 16 : (props.size == 'md' ? 20 : (24))}",
-    "layout.height": "${= props.size == 'sm' ? 16 : (props.size == 'md' ? 20 : (24))}"
+    "props.size": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 20 : (24))}",
+    "layout.width": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 20 : (24))}",
+    "layout.height": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 20 : (24))}"
    }
   },
   "label": {
@@ -231,7 +231,7 @@
     }
    },
    "bind": {
-    "props.style.fontSize": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 16 : (18))}"
+    "props.style.fontSize": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))}"
    }
   }
  }

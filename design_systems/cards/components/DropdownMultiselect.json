@@ -43,7 +43,7 @@
     "doc": "The name of your list variable holding the chosen labels."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -241,7 +241,7 @@
   "choice": {
    "type": "text",
    "props": {
-    "text": "${= length(props.value) > 0 ? join(props.value, ', ') : props.placeholder}",
+    "text": "${= length(props.value) > 0 ? join(props.value, ', ') : props.hint}",
     "style": {
      "fontSize": 14,
      "fontWeight": 400,

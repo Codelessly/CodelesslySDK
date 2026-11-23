@@ -124,6 +124,37 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     }
   });
 
+  test('Cards\' blocks take the notation\'s words for a tone, a size, a hint and a keyboard; the words they had are said', () {
+    for (final line in [
+      'Callout "Heads up" "Check the dates." tone="warning"',
+      'Callout "Saved" "All set." tone="success"',
+      'StatusBadge "Failed" tone="danger"',
+      'StatusDot status="danger" size="small"',
+      'ProgressBar value=0.4 tone="danger"',
+      'SearchBar @sel hint="Search" size="large"',
+      'TabToggle options=["A","B"] @filter size="small"',
+      'InputField "Email" hint="you@example.com" @sel type=email password',
+      'ActionButton "Approve" tone="success"',
+    ]) {
+      expect(read('${state}Column\n  $line\n').issues.map((i) => i.message), isEmpty, reason: line);
+    }
+    for (final (line, said) in [
+      ('Callout "Heads up" "Check the dates." tone="warn"', 'tone=warning'),
+      ('Callout "Saved" "All set." tone="good"', 'A Callout\'s tone is one of'),
+      ('StatusBadge "Failed" tone="error"', 'tone=danger'),
+      ('StatusDot status="error"', 'status=danger'),
+      ('SearchBar @sel size="sm"', 'size=small'),
+      ('SearchBar @sel placeholder="Search"', 'A SearchBar\'s placeholder is written hint: hint="Search".'),
+      ('InputField "Email" @sel keyboard="email"', 'keyboard is written type: type="email".'),
+      ('InputField "Email" @sel type="emailAddress"', 'type=email'),
+      ('InputField "Email" @sel obscure=true', 'obscure is written password: password=true.'),
+    ]) {
+      final issues = read('${state}Column\n  $line\n').issues.map((i) => i.message).toList();
+      expect(issues, hasLength(1), reason: line);
+      expect(issues.single, contains(said), reason: line);
+    }
+  });
+
   for (final e in lines.entries) {
     test(e.key.split('\n').last, () {
       final r = read('${state}Column\n  ${e.key}\n');

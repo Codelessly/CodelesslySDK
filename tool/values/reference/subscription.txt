@@ -6,7 +6,7 @@ state seatCap=5
 state yearly=12*12
 state save=yearly-120
 state pct=floor(save*100/yearly+0.5)
-ChatCard "Pro plan" "Renews in 3 days · Nov 18" icon="workspace_premium_rounded" status="Active" tone="good"
+ChatCard "Pro plan" "Renews in 3 days · Nov 18" icon="workspace_premium_rounded" status="Active" tone="success"
   Details rows={[["Price",annual?"$120 / year":"$12 / month"],["Per month",annual?"$10":"$12"],["You save",annual?"$"+save+" a year ("+pct+"%)":""]]}
   ProgressLine "Storage" "{used} of {cap} GB · {floor(used*100/cap+0.5)}%" value={used/cap}
   ProgressLine "Seats" "{seats} of {seatCap} · {floor(seats*100/seatCap+0.5)}%" value={seats/seatCap}

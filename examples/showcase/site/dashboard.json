@@ -38,7 +38,7 @@
     "subtitle": "November so far",
     "icon": "insights_rounded",
     "status": "Live",
-    "tone": "good"
+    "tone": "success"
    },
    "children": [
     "range",

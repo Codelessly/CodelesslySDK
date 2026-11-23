@@ -21,7 +21,7 @@
     "doc": "The name of your text variable holding what is typed."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -267,7 +267,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}"
+    "props.decoration.hintText": "${props.hint}"
    },
    "actions": [
     {

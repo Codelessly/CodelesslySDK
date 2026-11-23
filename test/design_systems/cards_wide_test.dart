@@ -65,7 +65,7 @@ Column#page h=fill scroll pad=24 gap=14 fill=page center
     Panel#pn "Delivery" "How it reaches you."
       OptionList#opt "Delivery" @pick options=["Standard","Express"] details=["3 to 5 days","Next day"]
       Details#facts rows=[["Folder","Shared Drive / Archive"],["Files","214"]]
-    Callout#co "Day one" "Arrive at 7:30 for a tour." tone="good"
+    Callout#co "Day one" "Arrive at 7:30 for a tour." tone="success"
 ''';
 
 /// Shows [notation], written for a phone (expanded at 390), in a window of [size]; with [host] the card is laid

@@ -21,7 +21,7 @@
     "doc": "The name of your text variable: the field shows it and writes it as the user types."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -39,7 +39,7 @@
     "doc": "Draws the error border (the message goes under it: a Field's error)."
    },
    {
-    "key": "obscure",
+    "key": "password",
     "type": {
      "kind": "boolean",
      "flutter": "bool"
@@ -48,13 +48,13 @@
     "doc": "Hides the text (passwords)."
    },
    {
-    "key": "keyboard",
+    "key": "type",
     "type": {
      "kind": "enumeration",
      "flutter": "String",
      "values": [
       "text",
-      "emailAddress",
+      "email",
       "number",
       "phone",
       "url",
@@ -99,7 +99,7 @@
     28
    ],
    "props": {
-    "placeholder": "name@company.com"
+    "hint": "name@company.com"
    }
   },
   {
@@ -190,10 +190,10 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.decoration.errorText": "${= props.error ? '​' : ''}",
-    "props.obscureText": "${props.obscure}",
-    "props.keyboardType": "${props.keyboard}",
+    "props.obscureText": "${props.password}",
+    "props.keyboardType": "${= props.type == 'email' ? 'emailAddress' : props.type}",
     "props.enabled": "${props.enabled}",
     "disabled": "${= !props.enabled}"
    },

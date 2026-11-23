@@ -56,7 +56,7 @@
     "doc": "What it suggests."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -340,7 +340,7 @@
     }
    },
    "bind": {
-    "props.placeholder": "${props.placeholder}"
+    "props.hint": "${props.hint}"
    },
    "actions": [
     {

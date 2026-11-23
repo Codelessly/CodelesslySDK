@@ -8,14 +8,14 @@ import art
 from kit import *  # noqa: F401,F403
 from kit import WIDE, CARD_MAX, wide, phone, capped, FILL, HUG, STRING, INT, NUM, BOOL, STRINGS, NUMBERS, ROWS, JSON, P, PRESS
 
-TONES = ('accent', 'good', 'warn', 'danger', 'neutral')
-TONE = P('tone', enum(*TONES), 'accent', 'The color role: accent, good, warn, danger or neutral.')
+TONES = ('accent', 'success', 'warning', 'danger', 'neutral')
+TONE = P('tone', enum(*TONES), 'accent', 'The color role: accent, success, warning, danger or neutral.')
 
 
 def tone_vars(expr='props.tone'):
     """Three colors a block computes from its tone: the ink, the tint behind it and the tint's line."""
     def pick(a, g, w, d, n):
-        return ("%s == 'good' ? theme.colors.%s : %s == 'warn' ? theme.colors.%s : %s == 'danger' ? theme.colors.%s : "
+        return ("%s == 'success' ? theme.colors.%s : %s == 'warning' ? theme.colors.%s : %s == 'danger' ? theme.colors.%s : "
                 "%s == 'neutral' ? theme.colors.%s : theme.colors.%s") % (expr, g, expr, w, expr, d, expr, n, a)
     return [
         {'name': 'toneInk', 'type': 'text', 'formula': pick('accent', 'good', 'warn', 'bad', 'inkSoft')},
@@ -73,7 +73,7 @@ def chat_card():
         P('status', STRING, '', 'A small status pill at the right of the header, e.g. Draft or Step 1 of 3 (empty: none).'),
         TONE,
     ]
-    return component('ChatCard', "The card itself: put it at the root and write the blocks indented under it (a white rounded card with a header: icon tile, title, subtitle and a status pill; tone colors the tile and pill: accent, good, warn, danger, neutral).",
+    return component('ChatCard', "The card itself: put it at the root and write the blocks indented under it (a white rounded card with a header: icon tile, title, subtitle and a status pill; tone colors the tile and pill: accent, success, warning, danger, neutral).",
                      props, nodes, 'shell', children=True, variables=tone_vars(),
                      previews=[{'name': 'Header', 'size': [420, 120], 'props': {'title': 'London to Lisbon', 'subtitle': 'Fri 20 Nov · 1 adult',
                                                                                'icon': 'flight_takeoff_rounded', 'status': '3 options'}}])
@@ -84,7 +84,7 @@ def chat_card():
 def action_button():
     def fill_of():
         return ("${= props.tone == 'quiet' ? theme.colors.tile : props.tone == 'danger' ? theme.colors.bad : "
-                "props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'dark' ? theme.colors.bar : theme.colors.accent}")
+                "props.tone == 'success' ? theme.colors.goodDeep : props.tone == 'dark' ? theme.colors.bar : theme.colors.accent}")
     def ink_of():
         return "${= props.tone == 'quiet' ? theme.colors.ink : props.tone == 'dark' ? theme.colors.onBar : theme.colors.onAccent}"
     nodes = {
@@ -103,11 +103,11 @@ def action_button():
     }
     props = [
         P('label', STRING, 'Continue', "The button's label.", True),
-        P('tone', enum('primary', 'quiet', 'danger', 'good', 'dark'), 'primary', 'primary (the accent, one per card), quiet (grey), danger (red), good (green) or dark.'),
+        P('tone', enum('primary', 'quiet', 'danger', 'success', 'dark'), 'primary', 'primary (the accent, one per card), quiet (grey), danger (red), success (green) or dark.'),
         P('icon', STRING, '', 'A Material icon before the label (empty: none).'),
         P('enabled', BOOL, True, 'False dims it and it does not fire.'),
     ]
-    return component('ActionButton', "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled={condition} dims and blocks it; put two in a Row gap=10 for a pair such as Cancel and Confirm.",
+    return component('ActionButton', "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, success or dark; enabled={condition} dims and blocks it; put two in a Row gap=10 for a pair such as Cancel and Confirm.",
                      props, nodes, 'btn', events=[('onPressed', 'The button was tapped while enabled.')],
                      previews=[{'name': 'Primary', 'size': [240, 46], 'props': {'label': 'Confirm flight'}},
                                {'name': 'Quiet', 'size': [240, 46], 'props': {'label': 'Cancel', 'tone': 'quiet'}}])
@@ -392,10 +392,10 @@ def callout():
     props = [
         P('title', STRING, '', 'The short point, bold (This cannot be undone).'),
         P('message', STRING, '', 'One or two sentences under it (empty: none).'),
-        P('tone', enum(*TONES), 'warn', 'accent, good, warn, danger or neutral.'),
+        P('tone', enum(*TONES), 'warning', 'accent, success, warning, danger or neutral.'),
         P('icon', STRING, 'info_rounded', 'A Material icon.'),
     ]
-    return component('Callout', "A tinted note inside a card: a bold title and a message with an icon; tone is warn (default), danger (a risk, cannot be undone), good, accent or neutral.",
+    return component('Callout', "A tinted note inside a card: a bold title and a message with an icon; tone is warning (default), danger (a risk, cannot be undone), success, accent or neutral.",
                      props, nodes, 'box', variables=tone_vars(),
                      previews=[{'name': 'Risk', 'size': [340, 70], 'props': {'title': 'This cannot be undone', 'message': 'Deleted files skip the trash.',
                                                                            'tone': 'danger', 'icon': 'warning_rounded'}}])
@@ -464,10 +464,10 @@ def receipt():
         P('message', STRING, '', 'One or two sentences under it.'),
         P('code', STRING, '', 'A reference to keep: an order or booking number (empty: none).'),
         P('codeLabel', STRING, 'Reference', 'What the code is.'),
-        P('tone', enum(*TONES), 'good', 'good (done), danger (denied, deleted), neutral (cancelled), accent or warn.'),
+        P('tone', enum(*TONES), 'success', 'success (done), danger (denied, deleted), neutral (cancelled), accent or warning.'),
         P('icon', STRING, 'check_rounded', 'The icon in the badge: check_rounded, close_rounded, send_rounded.'),
     ]
-    return component('Receipt', "The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone good for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.",
+    return component('Receipt', "The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone success for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.",
                      props, nodes, 'box', variables=tone_vars(),
                      previews=[{'name': 'Done', 'size': [340, 230], 'props': {'title': 'Order confirmed', 'message': 'A receipt is on its way.',
                                                                             'code': 'CL-48213', 'codeLabel': 'Order'}}])
@@ -689,7 +689,7 @@ def pill_track(type_, doc, options, sizes, size_default, size_doc, preview):
 
 def tab_toggle():
     return pill_track('TabToggle', "A small switch between two to four views as a track only as wide as its options, the chosen one raised (List or Grid in a toolbar, Monthly or Yearly over prices); Segments is the same switch as wide as its place, and a page's tabs are Tabs. The choice is kept in your variable. Fires onChanged. Where its options do not fit it scrolls sideways on one line.",
-                      ['List', 'Grid'], {'sm': (32, 10, 12.5), 'md': (36, 14, 13), 'lg': (44, 18, 14)}, 'md', 'sm, md or lg.',
+                      ['List', 'Grid'], {'small': (32, 10, 12.5), 'medium': (36, 14, 13), 'large': (44, 18, 14)}, 'medium', 'small, medium or large.',
                       {'name': 'Two', 'size': [160, 36], 'props': {'options': ['List', 'Grid'], 'value': 'List'}})
 
 
@@ -819,7 +819,7 @@ def input_field():
         'field': node('textField', {'width': FILL, 'height': 46},
                       {'style': 'field', 'cursorColor': 'accent', 'maxLines': 1, 'decoration': deco},
                       bind={'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.hint}',
-                            'props.keyboardType': '${props.keyboard}', 'visible': '${= props.lines <= 1}'},
+                            'props.keyboardType': "${= props.type == 'email' ? 'emailAddress' : props.type}", 'visible': '${= props.lines <= 1}'},
                       actions=changed),
         'area': node('textField', {'width': FILL, 'height': HUG},
                      {'style': {'from': 'field', 'fontWeight': 400, 'height': 1.5}, 'cursorColor': 'accent', 'maxLines': 0, 'minLines': 3,
@@ -843,7 +843,7 @@ def input_field():
         P('icon', STRING, '', 'A Material icon inside the field, e.g. search_rounded (empty: none).'),
         P('error', STRING, '', 'A message under the field, in red with a red border (empty: no error).'),
         P('success', STRING, '', 'A green confirmation under the field, e.g. "SAVE10 applied" (empty: none).'),
-        P('keyboard', enum('text', 'emailAddress', 'number', 'phone', 'url'), 'text', 'The keyboard a phone shows.'),
+        P('type', enum('text', 'email', 'number', 'phone', 'url'), 'text', 'The keyboard a phone shows.'),
     ]
     return component('InputField', "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" @email; lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
                      props, nodes, 'wrap', events=[('onChanged', 'The text changed; the value is the new text.')],

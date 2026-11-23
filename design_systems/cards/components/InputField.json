@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "InputField",
-  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" @email; obscure=true masks a password, lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
+  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" @email; password masks what is typed, lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
   "props": [
    {
     "key": "value",
@@ -75,13 +75,13 @@
     "doc": "A green confirmation under the field, e.g. \"SAVE10 applied\" (empty: none)."
    },
    {
-    "key": "keyboard",
+    "key": "type",
     "type": {
      "kind": "enumeration",
      "flutter": "String",
      "values": [
       "text",
-      "emailAddress",
+      "email",
       "number",
       "phone",
       "url"
@@ -91,7 +91,7 @@
     "doc": "The keyboard a phone shows."
    },
    {
-    "key": "obscure",
+    "key": "password",
     "type": {
      "kind": "boolean",
      "flutter": "bool"
@@ -281,9 +281,9 @@
    "bind": {
     "props.initialValue": "${props.value}",
     "props.decoration.hintText": "${props.hint}",
-    "props.keyboardType": "${props.keyboard}",
+    "props.keyboardType": "${= props.type == 'email' ? 'emailAddress' : props.type}",
     "visible": "${= props.lines <= 1}",
-    "props.obscureText": "${props.obscure}"
+    "props.obscureText": "${props.password}"
    },
    "actions": [
     {

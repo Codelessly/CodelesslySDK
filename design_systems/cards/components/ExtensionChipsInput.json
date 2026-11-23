@@ -25,7 +25,7 @@
     "doc": "The name of your list variable holding the extensions."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -180,7 +180,7 @@
    },
    "bind": {
     "props.initialValue": "${draft}",
-    "props.decoration.hintText": "${props.placeholder}"
+    "props.decoration.hintText": "${props.hint}"
    },
    "actions": [
     {

@@ -10,4 +10,4 @@ ChatCard "Your package" "DHL Express" icon="local_shipping_rounded" status="Stag
   InputField#instr "Delivery instructions" "e.g. Leave with a neighbour" @instr
   ActionButton#save "Save instructions" enabled={instr!=""} onPressed={saved=instr}
   if saved!=""
-    Callout "Instructions saved" "{saved}" tone="good" icon="check_rounded"
+    Callout "Instructions saved" "{saved}" tone="success" icon="check_rounded"

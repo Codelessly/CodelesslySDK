@@ -21,7 +21,7 @@
     "doc": "The name of your text variable."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -78,8 +78,8 @@
     32
    ],
    "props": {
-    "placeholder": "you@company.com",
-    "kind": "email"
+    "kind": "email",
+    "hint": "you@company.com"
    }
   },
   {
@@ -171,7 +171,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.obscureText": "${= props.kind == 'password'}",
     "props.keyboardType": "${= props.kind == 'email' ? 'emailAddress' : 'text'}",
     "props.decoration.enabledBorder.borderSide.color": "${= props.error != '' ? theme.error : theme.colors.secondaryBorder}",

@@ -9,8 +9,8 @@ Page
       Text.lead "Run your whole property from one calm screen."
     Grid cols=3 gap=24
       FeatureCard "Live calendar" "Every room, every night, in one view that updates the moment a guest books." icon="calendar_month_rounded" tone="accent" link="Learn more"
-      FeatureCard "Channel sync" "Availability stays in step across every booking site, so double bookings never happen." icon="sync" tone="good" link="Learn more"
-      FeatureCard "Smart pricing" "Rates adjust to demand, seasons and local events, so you never leave money on the table." icon="trending_up_rounded" tone="warn" link="Learn more"
+      FeatureCard "Channel sync" "Availability stays in step across every booking site, so double bookings never happen." icon="sync" tone="success" link="Learn more"
+      FeatureCard "Smart pricing" "Rates adjust to demand, seasons and local events, so you never leave money on the table." icon="trending_up_rounded" tone="warning" link="Learn more"
   Section tint compact
     StatBand values=["4,200","31%","2 min"] labels=["hotels","more direct bookings","setup"]
   Section center

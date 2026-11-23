@@ -21,7 +21,7 @@
     "doc": "The name of your text variable."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -66,7 +66,7 @@
     88
    ],
    "props": {
-    "placeholder": "Add a note…"
+    "hint": "Add a note…"
    }
   }
  ],
@@ -152,7 +152,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.decoration.errorText": "${= props.error ? '​' : ''}",
     "props.enabled": "${props.enabled}",
     "disabled": "${= !props.enabled}"

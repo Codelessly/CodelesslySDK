@@ -207,7 +207,7 @@
    },
    "bind": {
     "props.label": "${= props.action == 'create' ? 'Create' : (props.action == 'delete' ? 'Delete' : 'Edit')}",
-    "props.tone": "${= props.action == 'create' ? 'success' : (props.action == 'delete' ? 'error' : 'primary')}"
+    "props.tone": "${= props.action == 'create' ? 'success' : (props.action == 'delete' ? 'danger' : 'primary')}"
    }
   },
   "surface": {

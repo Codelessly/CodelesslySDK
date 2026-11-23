@@ -1,4 +1,4 @@
 state picked=""
-ChatCard "Compare phone plans" "Lite and Max, side by side" icon="sim_card_rounded" status={picked==""?"2 plans":"You picked "+picked} tone={picked==""?"accent":"good"}
+ChatCard "Compare phone plans" "Lite and Max, side by side" icon="sim_card_rounded" status={picked==""?"2 plans":"You picked "+picked} tone={picked==""?"accent":"success"}
   ComparisonTable#table names=["Lite","Max"] prices=["$25/mo","$45/mo"] notes=["Pay monthly","Premium"] pick="Max" rows=[["Price","$25 a month","$45 a month",1],["Data","10 GB","Unlimited",2],["Calls","500 min","Unlimited",2],["Roaming","Not included","EU and US",2],["Contract","Monthly","24 months",1],["Extras","None","Streaming, 5G",2]] onChoose={picked=result; emit choose_plan result}
   Recommendation "Max is the better value" "It wins 4 of the 6 rows for $20 more a month." eyebrow="Recommendation"

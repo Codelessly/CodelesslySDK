@@ -25,6 +25,7 @@ SDK = os.path.dirname(SYSTEMS)
 sys.path.insert(0, HERE)
 
 import blocks  # noqa: E402
+import core_words  # noqa: E402
 import page_words  # noqa: E402
 import repairs  # noqa: E402
 import tokens  # noqa: E402
@@ -53,6 +54,7 @@ change to `tool/repairs/<Name>.json`, which the build applies last:
 | `tool/kit.py` | The helpers blocks are written with |
 | `tool/blocks.py` | The %d blocks: %s |
 | `tool/page_words/components/*.txt` | The %d page words, written in the notation (`tool/page_words.py` expands them when one changed): %s |
+| `tool/core_words.py` | The notation's own words on every component, run last: a tone is `info`, `success`, `warning`, `danger` or `neutral`, a size `small`, `medium` or `large`, a field's empty text its `hint`, its keyboard its `type`, a masked field `password` |
 | `tool/art.py` | The drawn media as customPaint draw lists colored by tokens: scenes, product and food glyphs, weather glyphs, the map |
 | `tool/build.py` | The build |
 | `themes/light.json`, `themes/dark.json` | Each token set as a theme override for a site's `theme` |
@@ -144,6 +146,8 @@ def main():
     # The page words (page_words.py): an app window's parts, written in the notation; one named as a component
     # above takes its place.
     page = page_words.install(ROOT)
+    # Every component in the notation's own words (core_words.py): a tone, a size, a field's hint and type.
+    core_words.apply(ROOT)
     replaced = sorted(base_names & {o.split('/')[1][:-5] for o in own + page})
     # Blocks stored after the build (designed on demand in a session and written into components/): kept, after
     # the blocks made here.

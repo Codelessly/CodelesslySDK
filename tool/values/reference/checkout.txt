@@ -9,7 +9,7 @@ state zip=""
 state email=""
 state sub=sum(cart,c=>c.price*c.qty)
 state fee=ship=="Express"?12:4
-ChatCard "Checkout" "{sum(cart,c=>c.qty)} items" icon="shopping_cart_rounded" status="{step>3?"Paid":"Step "+step+" of 3"}" tone={step>3?"good":"accent"}
+ChatCard "Checkout" "{sum(cart,c=>c.qty)} items" icon="shopping_cart_rounded" status="{step>3?"Paid":"Step "+step+" of 3"}" tone={step>3?"success":"accent"}
   Steps current={step} steps=["Cart","Shipping","Payment"]
   if step==1
     each c in cart
@@ -21,7 +21,7 @@ ChatCard "Checkout" "{sum(cart,c=>c.qty)} items" icon="shopping_cart_rounded" st
     Row gap=10 top
       InputField#city "City" "London" @city error={tried&&city==""?"Enter a city":""} grow
       InputField#zip "Postcode" "N1 9GU" @zip error={tried&&zip==""?"Enter a postcode":""} grow
-    InputField#email "Email" "you@example.com" @email keyboard="emailAddress" error={tried&&!contains(email,"@")?"Enter a valid email":""}
+    InputField#email "Email" "you@example.com" @email type=email error={tried&&!contains(email,"@")?"Enter a valid email":""}
     Row gap=10
       ActionButton#back2 "Back" tone="quiet" grow onPressed={step=1}
       ActionButton#next2 "Continue to payment" grow=2 onPressed={tried=true; step=name!=""&&address!=""&&city!=""&&zip!=""&&contains(email,"@")?3:2}

@@ -21,7 +21,7 @@
     "doc": "The name of your text variable."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -35,13 +35,13 @@
      "kind": "enumeration",
      "flutter": "String",
      "values": [
-      "sm",
-      "md",
-      "lg"
+      "small",
+      "medium",
+      "large"
      ]
     },
-    "default": "md",
-    "doc": "sm 32, md 40, lg 48 high."
+    "default": "medium",
+    "doc": "small 32, medium 40, large 48 high."
    }
   ],
   "events": [
@@ -123,7 +123,7 @@
     "radius": 21
    },
    "bind": {
-    "layout.padding": "${= props.size == 'sm' ? [12, 0, 12, 0] : (props.size == 'md' ? [16, 0, 16, 0] : ([20, 0, 20, 0]))}"
+    "layout.padding": "${= props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [16, 0, 16, 0] : ([20, 0, 20, 0]))}"
    }
   },
   "strut": {
@@ -133,7 +133,7 @@
     "height": 40
    },
    "bind": {
-    "layout.height": "${= props.size == 'sm' ? 32 : (props.size == 'md' ? 40 : (48))}"
+    "layout.height": "${= props.size == 'small' ? 32 : (props.size == 'medium' ? 40 : (48))}"
    }
   },
   "glyph": {
@@ -176,8 +176,8 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
-    "props.style.fontSize": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 14 : (16))}"
+    "props.decoration.hintText": "${props.hint}",
+    "props.style.fontSize": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 14 : (16))}"
    },
    "actions": [
     {

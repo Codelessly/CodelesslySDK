@@ -17,12 +17,12 @@
       "neutral",
       "success",
       "warning",
-      "error",
+      "danger",
       "info"
      ]
     },
     "default": "success",
-    "doc": "success (green), error (red), warning and info (blue), neutral (grey)."
+    "doc": "success (green), danger (red), warning and info (blue), neutral (grey)."
    },
    {
     "key": "label",
@@ -39,13 +39,13 @@
      "kind": "enumeration",
      "flutter": "String",
      "values": [
-      "sm",
-      "md",
-      "lg"
+      "small",
+      "medium",
+      "large"
      ]
     },
-    "default": "md",
-    "doc": "The dot: sm 8, md 12, lg 16."
+    "default": "medium",
+    "doc": "The dot: small 8, medium 12, large 16."
    }
   ]
  },
@@ -68,7 +68,7 @@
     20
    ],
    "props": {
-    "status": "error",
+    "status": "danger",
     "label": "Offline"
    }
   }
@@ -100,10 +100,10 @@
     "height": 12
    },
    "bind": {
-    "layout.width": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
-    "layout.height": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
-    "decoration.fills[0].color": "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}",
-    "decoration.effects[0].color": "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
+    "layout.width": "${= props.size == 'small' ? 8 : (props.size == 'medium' ? 12 : (16))}",
+    "layout.height": "${= props.size == 'small' ? 8 : (props.size == 'medium' ? 12 : (16))}",
+    "decoration.fills[0].color": "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'danger' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}",
+    "decoration.effects[0].color": "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'danger' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
    },
    "decoration": {
     "fills": [

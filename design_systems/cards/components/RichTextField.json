@@ -30,7 +30,7 @@
     "doc": "Words over the box (empty: none)."
    },
    {
-    "key": "placeholder",
+    "key": "hint",
     "type": {
      "kind": "string",
      "flutter": "String"
@@ -216,7 +216,7 @@
    },
    "bind": {
     "props.initialValue": "${props.value}",
-    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.hintText": "${props.hint}",
     "props.minLines": "${= max(1, props.minLines)}"
    },
    "actions": [

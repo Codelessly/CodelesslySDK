@@ -2,7 +2,7 @@ state step=1
 state use=""
 state focus=""
 state budget=""
-ChatCard "Find your laptop" "Three quick questions" icon="laptop_mac_rounded" status="{step>3?"Your match":"Question "+step+" of 3"}" tone={step>3?"good":"accent"}
+ChatCard "Find your laptop" "Three quick questions" icon="laptop_mac_rounded" status="{step>3?"Your match":"Question "+step+" of 3"}" tone={step>3?"success":"accent"}
   Steps current={step} steps=["Use","Details","Budget"]
   if step==1
     OptionList#q1 "What will you mostly use it for?" @use options=["School or study","Work and office","Gaming","Creative projects"] details=["Notes, research, video calls","Docs, spreadsheets, meetings","High frame rates, big GPUs","Video, photo, music, 3D"] icons=["school_rounded","work_rounded","sports_esports_rounded","palette_rounded"] onChanged={step=2; focus=""}
