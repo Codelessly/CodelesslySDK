@@ -1,3 +1,27 @@
+## 44.0.0
+
+Cards' blocks take the same words as the core notation and Desk for a tone, a size, a hint and a keyboard. A Cards
+page written with the old words has to be rewritten: each old word is refused with the line to write. Read "Reads
+differently" before upgrading. With codelessly_api 44.0.0, which this needs.
+
+### Reads differently
+
+- **Tones** are `success`, `warning` and `danger`. `good` is now `success` and `warn` is `warning` on `Callout`,
+  `ChatCard`, `Receipt`, `ActionButton`, `BoardColumn`, `FeatureCard` and `TaskCard`; `bad`, `error` and
+  `critical` are `danger` on `Badge`, `StatusBadge`, `StatusDot` (`status`), `ProgressBar`, `PromptBanner`,
+  `FeatureCard` and `TaskCard`. A block's other tones (`accent`, `primary`, `quiet`, `dark`, the picture
+  palettes) are as they were.
+- **Sizes** are `small`, `medium` and `large` on `SearchBar`, `StatusDot`, `TabToggle`, `Toolbar` and
+  `UpgradeButton`; they were `sm`, `md` and `lg`.
+- **A field's empty text is `hint=`**; it was `placeholder=` on `AuthInput`, `Combobox`, `CommandPalette`,
+  `DropdownMultiselect`, `ExtensionChipsInput`, `FilterBar`, `FullWidthSearchInput`, `HeaderSearchInput`,
+  `IconSelect`, `ProjectSelector`, `PromptInput`, `PromptInputWithBanner`, `RichTextField`, `SearchBar`, `Select`,
+  `TextArea` and `TextInput`. A `Combobox`'s `searchPlaceholder=` is `searchHint=`.
+- **`PromptInput`'s muted line under the text is `note=`**; it was `hint=`, which is now the empty text.
+- **A keyboard is `type=`** on `InputField` and `TextInput`, with the values an `Input` takes (`type=email`); it
+  was `keyboard=emailAddress`.
+- **Masked text is `password`** on `InputField` and `TextInput`; it was `obscure`.
+
 ## 43.0.0
 
 With codelessly_api 43.0.0, which this needs: the notation has one form for each thing, and a form that said what
