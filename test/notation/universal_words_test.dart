@@ -98,7 +98,7 @@ void main() {
 
   group('removable', () {
     testWidgets('a chip\'s x and a row\'s x fire onRemove', (tester) async {
-      final s = await run(tester, 'state tags=["red","blue"]\nstate rows=2\nColumn\n  Row\n    each t in tags\n      Chip "{t}" onDelete={tags=without(tags,t)}\n  Row removable onRemove={rows=rows-1}\n    Text "A row"\n');
+      final s = await run(tester, 'state tags=["red","blue"]\nstate rows=2\nColumn\n  Row\n    each t in tags\n      Chip "{t}" onRemove={tags=without(tags,t)}\n  Row removable onRemove={rows=rows-1}\n    Text "A row"\n');
       // The input chip's x: Delete on the focused chip.
       await Keyboard(tester).tab();
       await Keyboard(tester).press(LogicalKeyboardKey.delete);

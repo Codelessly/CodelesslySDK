@@ -97,11 +97,11 @@ Sheet#story "Story" onClose={read=append(read,cur.id)}
     expect(_texts(tester), contains('read 1'));
   });
 
-  testWidgets('onPressStart runs as the press starts, onPressEnd as it ends', (tester) async {
+  testWidgets('onPointerDown runs as the press starts, onPointerUp as it ends', (tester) async {
     await _show(tester, '''
 state paused=false
 Column
-  Stack w=300 h=200 fill=#FFEEEEEE onPressStart={paused=true} onPressEnd={paused=false}
+  Stack w=300 h=200 fill=#FFEEEEEE onPointerDown={paused=true} onPointerUp={paused=false}
     Text "story"
   Text "paused {paused}"
 ''');
@@ -160,7 +160,7 @@ Column pad=16
         rect rect=[0,0,20,20] fill=#FF000000
       each b in bars
         rect rect=[{index*10},0,6,{b.v}] fill=#FF2563EB
-  Box shadow=sm pad=8
+  Box shadow=small pad=8
     Text "Count {0}"
     Text "Use \\{name\\} for the name"
 ''');

@@ -96,7 +96,7 @@ Column scroll gap=14 pad=16
       Text "Left"
       node {"type": "verticalDivider", "layout": {"width": 1, "height": 20}}
       Text "Right"
-    List gap=6
+    Column gap=6
       each it in rows
         Row between
           Text "{it.n}"

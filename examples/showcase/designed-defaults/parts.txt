@@ -97,7 +97,7 @@ Column gap=16 pad=16
     Row between pad=[0,10,0,10]
       Text "Plain row"
       Text.strong "$24"
-  List gap=8
+  Column gap=8
     Box fill=#FFF5F5F5 radius=8 pad=12
       Row between
         Text.muted "Folder"

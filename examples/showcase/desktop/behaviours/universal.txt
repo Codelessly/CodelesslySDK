@@ -38,7 +38,7 @@ Page
         Text.title "Icons and chips"
         Row gap=8 wrap
           each t in tags
-            Chip "{t}" icon="sell" color=#FF2563EB onDelete={tags=without(tags,t)}
+            Chip "{t}" icon="sell" color=#FF2563EB onRemove={tags=without(tags,t)}
         ListTile "Inbox" "4 new" icon="inbox"
         Row gap=8 middle pad=8 border=#FFE5E7EB radius=8 removable onRemove={said="Row removed"}
           Icon "description"
@@ -48,7 +48,7 @@ Page
         Text.title "Fields"
         Input "Name" @name required clearable
         Input "Search" @q icon="search" clearable
-        Input "Code" @code maxlength=6 caps center
+        Input "Code" @code maxLength=6 caps center
         Input "Locked" value="Read only" readonly
       Card grow gap=12 disabled
         Text.title "A disabled card"

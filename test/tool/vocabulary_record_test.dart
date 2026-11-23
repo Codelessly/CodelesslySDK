@@ -68,7 +68,7 @@ void main() {
       'Column gap=8',
       '  Tag label="a"',
       '  Pill "New" tone="info"',
-      '  QRCode "https://example.com"',
+      '  Barcode "https://example.com" symbology=qrCode',
       '  MiniMonth "June" days=[1,2] onPick={n=3}',
       '    Text "under it"',
       '  Badge "3" wobble=2',
@@ -96,7 +96,7 @@ void main() {
     expect((note['resolved'], note['definedBy']), ('definition', 'page'));
     expect((note['definition'] as Map)['file'], 'pages/home.txt');
     expect(_word('type', 'Map')['status'], 'defined, not used');
-    expect((_word('type', 'QRCode')['resolved'], _word('type', 'QRCode')['to']), ('alias', 'Barcode'));
+    expect(_word('type', 'Barcode')['resolved'], 'core');
     final month = _word('type', 'MiniMonth');
     expect(month['resolved'], 'unknown');
     expect(month['files'], {
@@ -188,24 +188,23 @@ void main() {
 
     test('a built-in word wins: a site\'s primitive or component named like one is not used, said at its file, and recorded built-in', () async {
       // A primitive named like a word the notation has would make each such line a labelled box.
-      _write('components/QRCode.txt', '// A code to scan.\nprimitive QRCode "text"\n');
+      _write('components/Barcode.txt', '// A code to scan.\nprimitive Barcode "text"\n');
       _write('components/Rail.txt', 'component Rail\nColumn\n  Text "rail"\n');
       final site = await NotationSite.load(findSiteManifest(site: _root.path)!);
       expect(site.skipped.map((s) => s.message), [
-        allOf(startsWith('components/QRCode.txt: line 2: The notation already has QRCode, read as the notation\'s Barcode'),
-            contains('So this primitive of QRCode is not used')),
+        allOf(startsWith('components/Barcode.txt: line 2: The notation already has Barcode, a word of the notation'),
+            contains('So this primitive of Barcode is not used')),
         startsWith('components/Rail.txt: line 1: The notation already has Rail, a word of the page'),
       ]);
-      expect(site.definedWords.keys, isNot(contains('QRCode')));
+      expect(site.definedWords.keys, isNot(contains('Barcode')));
       final text = File('${_root.path}/pages/home.txt').readAsStringSync();
       final r = NotationExpander(site: site, settings: _settings()).expand(text, path: 'home.txt', screen: 'home');
       expect([for (final u in r.vocabulary) if (u.kind == 'primitive') u.word], isEmpty);
-      expect([for (final u in r.vocabulary) if (u.kind == 'alias') u.word], contains('QRCode'));
       await _expand(time: DateTime.utc(2026, 11, 18, 9));
-      final w = _word('type', 'QRCode');
+      final w = _word('type', 'Barcode');
       expect((w['resolved'], w['status'], w['definedBy']), ('built-in', 'used', 'site'));
-      expect((w['definition'] as Map)['builtIn'], startsWith('QRCode, read as'));
-      expect((w['definition'] as Map)['text'], contains('primitive QRCode "text"'));
+      expect((w['definition'] as Map)['builtIn'], startsWith('Barcode, a word of the notation'));
+      expect((w['definition'] as Map)['text'], contains('primitive Barcode "text"'));
     });
 
     test('a second file of one component, and a component JSON site.json lists that nothing writes, are said', () async {
@@ -258,7 +257,7 @@ void main() {
       'uses': 1,
     });
     final words = {for (final w in (v['words'] as List).cast<Map>()) '${w['kind']} ${w['on'] ?? ''}.${w['word']}': w};
-    expect(words.keys, containsAll(['type .Pill', 'type .Note', 'type .Tag', 'parameter Badge.wobble', 'type .QRCode']));
+    expect(words.keys, containsAll(['type .Pill', 'type .Note', 'type .Tag', 'parameter Badge.wobble']));
     expect(words['type .Pill']!['definedBy'], 'site');
   });
 

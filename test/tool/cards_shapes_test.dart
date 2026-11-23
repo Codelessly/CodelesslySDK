@@ -99,11 +99,6 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     // The names the standalone runs converged on (review 7, D34).
     'StatusBadge "LIVE" status="success"': ['alias status>tone'],
     'StatusDot "Live" color="success"': ['alias color>status'],
-    'StatCard "Users" value="3" description="up 4%"': ['alias description>note'],
-    'StatCard "Users" value="3" detail="up 4%"': ['alias detail>note'],
-    'TimelineItem "Launch" note="On time"': ['definition TimelineItem', 'alias note>detail'],
-    'TimelineItem "Launch" description="On time"': ['definition TimelineItem', 'alias description>detail'],
-    'InputField "Email" hint="you@example.com" @sel': ['alias hint>placeholder'],
     'ReorderableList "Order" items={pins}': ['alias items>value'],
     'ReorderableList "Order" items=@pins': ['alias items>value'],
     'Legend "Free" color=#FFE9F7EF': ['definition Legend#entry'],
@@ -112,11 +107,21 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
     'ConnectionStatus "Server" status="connected"': [],
     'SectionHeader "Files" count="3" action="View all" onAction={toast "all"}': [],
     'ListRow "Milk" removable onRemove={toast "removed"}': [],
-    'ListRow "Milk" onDelete={toast "removed"}': ['alias onDelete>onRemove'],
     'SearchBar "Find" @sel clearable': [],
     'Banner "Syncing" "3 left" live': [],
     'ChoiceChips @filter options=["18:00","18:30"] disabled={placing}': [],
   };
+
+  test('a block\'s parameter has one name: another name for it is said with the one to write', () {
+    for (final (line, said) in [
+      ('StatCard "Users" value="3" description="up 4%"', 'A StatCard\'s description is written note: note="up 4%".'),
+      ('StatCard "Users" value="3" detail="up 4%"', 'A StatCard\'s detail is written note: note="up 4%".'),
+      ('InputField "Email" hint="you@example.com" @sel', 'An InputField\'s hint is written placeholder: placeholder="you@example.com".'),
+      ('ListRow "Milk" onDelete={toast "removed"}', 'The notation has one name for each word and key: write ListRow "Milk" onRemove={toast "removed"}'),
+    ]) {
+      expect(read('${state}Column\n  $line\n').issues.map((i) => i.message), [said], reason: line);
+    }
+  });
 
   for (final e in lines.entries) {
     test(e.key.split('\n').last, () {
@@ -182,7 +187,7 @@ state attach={"name":"plan.pdf","size":"2 MB","progress":0.5}
 state taken=filter(["18:00","18:30"],t=>t=="18:30")
 ${state}Column
   StatusBadge#badge "LIVE" status="success"
-  ListRow#row "Milk" onDelete={toast "removed"}
+  ListRow#row "Milk" onRemove={toast "removed"}
   SectionHeader#head "Files" action="View all" onAction={toast "all"}
   ChoiceChips#chips @filter options=["18:00","18:30"] disabled={placing}
   ChoiceChips#some @filter options=["18:00","18:30"] disabled=["18:30"]

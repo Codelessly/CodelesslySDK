@@ -21,7 +21,7 @@ import '../../tool/notation/vocabulary_words.dart' show CorpusWords, countLine, 
 // another name, and a Cards component called its own way.
 const _page = '''
 state q=""
-state n=2 persist
+state n=2 saved
 state stars=4
 state view=""
 key ctrl+k onPress={open palette}
@@ -44,7 +44,7 @@ App
         Text#count "{n} seats"
         Rating value=4.6 readonly
         Tabs @view items=["Plan","List"]
-      ListTile "Row A" subtitle="Two seats left" onTap={vibrate find}
+      ListTile "Row A" "Two seats left" onTap={vibrate find}
       Progress {n/8}
 QuickSwitcher#palette "Commands"
   CommandItem "Best available" onTap={n=2; close}
@@ -74,7 +74,6 @@ void main() {
   test('Cards has its own aliases, over the built-in ones', () {
     expect(aliases.parameters['Tabs'], {'items': 'tabs'});
     expect(aliases.flags['Rating'], {'readonly': 'readOnly'});
-    expect(aliases.types.keys, containsAll(['RangeSlider', 'QRCode']));
     expect(aliases.parameters['*'], {'disabled': '!enabled', 'readonly': 'readOnly'});
     // Cards' own names for its words (the vocabulary loop's Review 5, D25), and none of the built-in ones.
     final own = loadVocabulary(dir: 'design_systems/cards', builtIn: false).types.keys;
@@ -103,7 +102,7 @@ void main() {
     expect(of('variant'), ['Button.Button.danger']);
     // Cards' Rating no longer needs a label (Review 6, D30).
     expect(of('missing'), isEmpty);
-    expect(of('alias').toSet(), {'state.persist', 'Button.disabled', 'Rating.readonly', 'Tabs.items', 'ListTile.subtitle'});
+    expect(of('alias').toSet(), {'Button.disabled', 'Rating.readonly', 'Tabs.items'});
     final seat = r.vocabulary.firstWhere((u) => u.word == 'SeatMap');
     expect(seat.path, ['App', 'Main', 'Column']);
     expect(seat.children, ['Legend', 'Text']);
